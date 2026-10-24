@@ -1,0 +1,12 @@
+{
+  "parent": "block/cube",
+  "textures": {
+    "up": "biggerreactorsrework:block/reactor/terminal/idle",
+    "down": "biggerreactorsrework:block/reactor/casing/face",
+    "north": "biggerreactorsrework:block/reactor/casing/face",
+    "south": "biggerreactorsrework:block/reactor/casing/face",
+    "east": "biggerreactorsrework:block/reactor/casing/face",
+    "west": "biggerreactorsrework:block/reactor/casing/face",
+    "particle": "biggerreactorsrework:block/reactor/casing/disassembled"
+  }
+}

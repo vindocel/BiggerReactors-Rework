@@ -1,0 +1,26 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "IGI",
+    "QCQ",
+    "IGI"
+  ],
+  "key": {
+    "I": {
+      "item": "minecraft:iron_ingot"
+    },
+    "G": {
+      "tag": "c:ingots/graphite"
+    },
+    "Q": {
+      "item": "minecraft:quartz"
+    },
+    "C": {
+      "tag": "c:ingots/cyanite"
+    }
+  },
+  "result": {
+    "id": "biggerreactorsrework:turbine_casing",
+    "count": 4
+  }
+}

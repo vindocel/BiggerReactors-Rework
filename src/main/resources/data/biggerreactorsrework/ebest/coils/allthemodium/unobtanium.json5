@@ -1,0 +1,7 @@
+{
+    type: "tag",
+    location: "c:storage_blocks/unobtainium",
+    efficiency: 1.5,
+    extractionRate: 0.7,
+    bonus: 1.06,
+}

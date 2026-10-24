@@ -1,0 +1,31 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "neoforge:conditions": [
+    {
+      "modid": "computercraft",
+      "type": "neoforge:mod_loaded"
+    }
+  ],
+  "pattern": [
+    "CDC",
+    "GRG",
+    "CDC"
+  ],
+  "key": {
+    "C": {
+      "item": "biggerreactorsrework:turbine_casing"
+    },
+    "R": {
+      "item": "minecraft:repeater"
+    },
+    "D": {
+      "item": "minecraft:redstone"
+    },
+    "G": {
+      "item": "minecraft:gold_ingot"
+    }
+  },
+  "result": {
+    "id": "biggerreactorsrework:turbine_computer_port"
+  }
+}

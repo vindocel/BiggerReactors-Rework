@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "is_lit=true": {
+      "model": "biggerreactorsrework:block/reactor/redstone_port/lit"
+    },
+    "is_lit=false": {
+      "model": "biggerreactorsrework:block/reactor/redstone_port/unlit"
+    }
+  }
+}

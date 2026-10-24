@@ -1,0 +1,285 @@
+package biggerreactorsrework.multiblocks.heatexchanger.tiles;
+
+import net.minecraft.core.component.DataComponentPatch;
+import net.minecraft.MethodsReturnNonnullByDefault;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.MenuProvider;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.material.Fluid;
+import net.minecraft.world.level.material.Fluids;
+import net.neoforged.neoforge.capabilities.Capabilities;
+import net.neoforged.neoforge.fluids.capability.templates.FluidTank;
+import biggerreactorsrework.multiblocks.heatexchanger.blocks.HeatExchangerFluidPortBlock;
+import biggerreactorsrework.multiblocks.heatexchanger.containers.HeatExchangerFluidPortContainer;
+import biggerreactorsrework.multiblocks.heatexchanger.state.HeatExchangerFluidPortState;
+import biggerreactorsrework.core.client.gui.api.IHasUpdatableState;
+import biggerreactorsrework.core.fluids.FluidHandlerWrapper;
+import biggerreactorsrework.core.fluids.IFluidTankHandler;
+import biggerreactorsrework.core.multiblock.common.IEventMultiblock;
+import biggerreactorsrework.core.multiblock.validated.IValidatedMultiblock;
+import biggerreactorsrework.core.registry.CapabilityRegistration;
+import biggerreactorsrework.core.registry.RegisterCapability;
+import biggerreactorsrework.core.registry.RegisterTile;
+import biggerreactorsrework.core.util.BlockStates;
+
+import javax.annotation.Nullable;
+import javax.annotation.ParametersAreNonnullByDefault;
+
+import static biggerreactorsrework.multiblocks.heatexchanger.blocks.HeatExchangerFluidPortBlock.CONDENSER;
+import static biggerreactorsrework.core.util.BlockStates.PORT_DIRECTION;
+
+
+@MethodsReturnNonnullByDefault
+@ParametersAreNonnullByDefault
+public class HeatExchangerFluidPortTile extends HeatExchangerBaseTile implements IFluidTankHandler, IEventMultiblock.AssemblyStateTransition.OnAssembly, IEventMultiblock.AssemblyStateTransition.OnDisassembly, MenuProvider, IHasUpdatableState<HeatExchangerFluidPortState> {
+    
+    public long lastCheckedTick;
+    
+    @RegisterTile("heat_exchanger_fluid_port")
+    public static final BlockEntityType.BlockEntitySupplier<HeatExchangerFluidPortTile> SUPPLIER = new RegisterTile.Producer<>(HeatExchangerFluidPortTile::new);
+    
+    @RegisterCapability
+    private static final CapabilityRegistration FLUID_HANDLER_CAP_REGISTRATION = CapabilityRegistration.tileCap(Capabilities.FluidHandler.BLOCK, HeatExchangerFluidPortTile.class);
+    
+    public HeatExchangerFluidPortTile(BlockEntityType<?> tileEntityTypeIn, BlockPos pos, BlockState state) {
+        super(tileEntityTypeIn, pos, state);
+    }
+    
+    
+    // TODO: mek gas
+//    private static final Capability<IGasHandler> GAS_HANDLER_CAPABILITY = CapabilityManager.get(new CapabilityToken<>(){});
+//
+//    @Override
+//    public <T> LazyOptional<T> capability(Capability<T> cap, @Nullable Direction side) {
+//        if (cap == ForgeCapabilities.FLUID_HANDLER) {
+//            return fluidHandlerCapability().cast();
+//        }
+//        if (cap == GAS_HANDLER_CAPABILITY) {
+//            return LazyOptional.of(() -> MekanismGasWrappers.wrap(this)).cast();
+//        }
+//        return super.capability(cap, side);
+//    }
+    
+    private IFluidTankHandler HETank;
+    
+    public void setHETank(IFluidTankHandler HETank) {
+        this.HETank = HETank;
+    }
+    
+    private boolean inlet = true;
+    private boolean condenser = true;
+    
+    public void setInlet(boolean inlet) {
+        assert level != null;
+        this.inlet = inlet;
+        level.setBlock(this.getBlockPos(), this.getBlockState().setValue(PORT_DIRECTION, inlet), 3);
+        setChanged();
+    }
+    
+    public void setInletOtherOutlet(boolean inlet) {
+        controller().setInletPort(this, inlet);
+    }
+    
+    public boolean isInlet() {
+        return inlet;
+    }
+    
+    public void setCondenser(boolean condenser) {
+        this.condenser = condenser;
+        assert level != null;
+        level.setBlock(this.getBlockPos(), this.getBlockState().setValue(CONDENSER, condenser), 3);
+    }
+    
+    public boolean isCondenser() {
+        return condenser;
+    }
+    
+    @Override
+    public int tankCount() {
+        if (HETank == null) {
+            return 0;
+        }
+        return HETank.tankCount();
+    }
+    
+    @Override
+    public long tankCapacity(int tank) {
+        if (HETank == null) {
+            return 0;
+        }
+        return HETank.tankCapacity(tank);
+    }
+    
+    
+    @Override
+    public Fluid fluidTypeInTank(int tank) {
+        if (HETank == null) {
+            return Fluids.EMPTY;
+        }
+        return HETank.fluidTypeInTank(tank);
+    }
+    
+    @Nullable
+    @Override
+    public DataComponentPatch fluidComponentsInTank(int tank) {
+        if (HETank == null) {
+            return DataComponentPatch.EMPTY;
+        }
+        return HETank.fluidComponentsInTank(tank);
+    }
+    
+    @Override
+    public long fluidAmountInTank(int tank) {
+        if (HETank == null) {
+            return 0;
+        }
+        return HETank.fluidAmountInTank(tank);
+    }
+    
+    @Override
+    public boolean fluidValidForTank(int tank, Fluid fluid) {
+        if (HETank == null) {
+            return false;
+        }
+        return HETank.fluidValidForTank(tank, fluid);
+    }
+    
+    @Override
+    public long fill(Fluid fluid, DataComponentPatch components, long amount, boolean simulate) {
+        if (HETank == null || !inlet) {
+            return 0;
+        }
+        return HETank.fill(fluid, DataComponentPatch.EMPTY, amount, simulate);
+    }
+    
+    @Override
+    public long drain(Fluid fluid, DataComponentPatch components, long amount, boolean simulate) {
+        if (HETank == null || inlet) {
+            return 0;
+        }
+        return HETank.drain(fluid, DataComponentPatch.EMPTY, amount, simulate);
+    }
+    
+    
+    public long pushFluid() {
+        if (!connected || inlet) {
+            return 0;
+        }
+        if (handler != null) {
+            Fluid fluid = HETank.fluidTypeInTank(1);
+            long amount = HETank.fluidAmountInTank(1);
+            amount = HETank.drain(fluid, DataComponentPatch.EMPTY, amount, true);
+            amount = handler.fill(fluid, DataComponentPatch.EMPTY, amount, false);
+            amount = HETank.drain(fluid, DataComponentPatch.EMPTY, amount, false);
+            return amount;
+        } else {
+            handler = null;
+            connected = false;
+        }
+        return 0;
+    }
+    
+    private boolean connected = false;
+    Direction outputDirection = null;
+    IFluidTankHandler handler = null;
+    FluidTank EMPTY_TANK = new FluidTank(0);
+    
+    @SuppressWarnings("DuplicatedCode")
+    public void neighborChanged() {
+        handler = null;
+        if (outputDirection == null) {
+            connected = false;
+            return;
+        }
+        assert level != null;
+        final var outputCap = level.getCapability(Capabilities.FluidHandler.BLOCK, worldPosition.relative(outputDirection), outputDirection.getOpposite());
+        connected = false;
+        if (outputCap != null) {
+            connected = true;
+            handler = FluidHandlerWrapper.wrap(outputCap);
+//        } else if (GAS_HANDLER_CAPABILITY != null) {
+//            LazyOptional<IGasHandler> gasOptional = te.getCapability(GAS_HANDLER_CAPABILITY, outputDirection.getOpposite());
+//            if (gasOptional.isPresent()) {
+//                IGasHandler gasHandler = gasOptional.orElse(MekanismGasWrappers.EMPTY_TANK);
+//                connected = true;
+//                handlerOptional = gasOptional;
+//                handler = MekanismGasWrappers.wrap(gasHandler);
+//            }
+        }
+    }
+    
+    @Override
+    protected void readNBT(CompoundTag compound) {
+        super.readNBT(compound);
+        inlet = compound.getBoolean("inlet");
+    }
+    
+    
+    @Override
+    protected CompoundTag writeNBT() {
+        CompoundTag nbt = super.writeNBT();
+        nbt.putBoolean("inlet", inlet);
+        return nbt;
+    }
+    
+    @Override
+    public void onAssemblyStateTransition(IValidatedMultiblock.AssemblyState oldState, IValidatedMultiblock.AssemblyState newState) {
+        OnAssembly.super.onAssemblyStateTransition(oldState, newState);
+        OnDisassembly.super.onAssemblyStateTransition(oldState, newState);
+    }
+    
+    @Override
+    public void onAssembly() {
+        outputDirection = getBlockState().getValue(BlockStates.FACING);
+        neighborChanged();
+    }
+    
+    @Override
+    public void onDisassembly() {
+        outputDirection = null;
+        HETank = null;
+        neighborChanged();
+    }
+    
+    private final HeatExchangerFluidPortState state = new HeatExchangerFluidPortState(this);
+    
+    @Override
+    public HeatExchangerFluidPortState getState() {
+        return state;
+    }
+    
+    @Override
+    public void updateState() {
+        state.direction = isInlet();
+        state.condenser = isCondenser();
+    }
+    
+    @Override
+    public Component getDisplayName() {
+        return Component.translatable(HeatExchangerFluidPortBlock.INSTANCE.getDescriptionId());
+    }
+    
+    @Nullable
+    @Override
+    public AbstractContainerMenu createMenu(int windowId, Inventory playerInventory, Player player) {
+        return new HeatExchangerFluidPortContainer(windowId, this.worldPosition, player);
+    }
+
+    @Override
+    public void runRequest(String requestName, Object requestData) {
+        if (requestName.equals("setDirection")) {
+            int direction = (Integer) requestData;
+            setInletOtherOutlet(direction == 0);
+        }
+
+        super.runRequest(requestName, requestData);
+    }
+}

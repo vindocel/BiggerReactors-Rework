@@ -1,0 +1,92 @@
+package biggerreactorsrework.client.deps.jei.classic.reactor;
+
+import mezz.jei.api.gui.builder.IRecipeLayoutBuilder;
+import mezz.jei.api.gui.drawable.IDrawable;
+import mezz.jei.api.gui.ingredient.IRecipeSlotsView;
+import mezz.jei.api.helpers.IGuiHelper;
+import mezz.jei.api.recipe.IFocusGroup;
+import mezz.jei.api.recipe.RecipeIngredientRole;
+import mezz.jei.api.recipe.RecipeType;
+import mezz.jei.api.recipe.category.IRecipeCategory;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.ItemStack;
+import biggerreactorsrework.BiggerReactors;
+import biggerreactorsrework.multiblocks.reactor.blocks.ReactorTerminal;
+import biggerreactorsrework.registries.ReactorModeratorRegistry;
+
+import java.awt.*;
+
+
+public class BlockModeratorCategory implements IRecipeCategory<BlockModeratorCategory.Recipe> {
+    private final IDrawable background;
+    private final IDrawable icon;
+    public static final ResourceLocation UID = ResourceLocation.fromNamespaceAndPath(BiggerReactors.modid, "classic/reactor_moderator_block");
+    public static final RecipeType<Recipe> RECIPE_TYPE = new RecipeType<>(UID, Recipe.class);
+    
+    public BlockModeratorCategory(IGuiHelper guiHelper) {
+        icon = guiHelper.createDrawableItemStack(new ItemStack(ReactorTerminal.INSTANCE));
+        background = guiHelper.createDrawable(ResourceLocation.fromNamespaceAndPath(BiggerReactors.modid, "textures/jei/common.png"), 0, 0, 144, 46);
+    }
+    
+    @Override
+    public RecipeType<Recipe> getRecipeType() {
+        return RECIPE_TYPE;
+    }
+    
+    @Override
+    public Component getTitle() {
+        return Component.translatable("jei.biggerreactorsrework.classic.reactor_moderator_block");
+    }
+
+    @Override
+    public IDrawable getBackground() {
+        return background;
+    }
+
+    @Override
+    public IDrawable getIcon() {
+        return icon;
+    }
+    
+    @Override
+    public void setRecipe(IRecipeLayoutBuilder builder, Recipe recipe, IFocusGroup focuses) {
+        var slot = builder.addSlot(RecipeIngredientRole.INPUT, 1, 15);
+        slot.addItemStack(recipe.getInput());
+    }
+    
+    @Override
+    public void draw(Recipe recipe, IRecipeSlotsView recipeSlotsView, GuiGraphics guiGraphics, double mouseX, double mouseY) {
+        Minecraft mc = Minecraft.getInstance();
+        Component[] info = {
+                Component.translatable("jei.biggerreactorsrework.classic.reactor_moderator_moderation", recipe.getModeratorProperties().moderation()),
+                Component.translatable("jei.biggerreactorsrework.classic.reactor_moderator_absorption", recipe.getModeratorProperties().absorption()),
+                Component.translatable("jei.biggerreactorsrework.classic.reactor_moderator_conductivity", recipe.getModeratorProperties().heatConductivity()),
+                Component.translatable("jei.biggerreactorsrework.classic.reactor_moderator_efficiency", recipe.getModeratorProperties().heatEfficiency())
+        };
+        guiGraphics.drawString(mc.font,  info[0], 80 - mc.font.width(info[0]) / 2, 0, Color.BLACK.getRGB(), false);
+        guiGraphics.drawString(mc.font,  info[1], 80 - mc.font.width(info[1]) / 2, 12, Color.BLACK.getRGB(), false);
+        guiGraphics.drawString(mc.font,  info[2], 80 - mc.font.width(info[2]) / 2, 24, Color.BLACK.getRGB(), false);
+        guiGraphics.drawString(mc.font,  info[3], 80 - mc.font.width(info[3]) / 2, 36, Color.BLACK.getRGB(), false);
+    }
+
+    public static class Recipe {
+        private final ItemStack input;
+        private final ReactorModeratorRegistry.IModeratorProperties moderatorProperties;
+
+        public Recipe(ItemStack input, ReactorModeratorRegistry.IModeratorProperties moderatorProperties) {
+            this.input = input;
+            this.moderatorProperties = moderatorProperties;
+        }
+
+        public ItemStack getInput() {
+            return input;
+        }
+
+        public ReactorModeratorRegistry.IModeratorProperties getModeratorProperties() {
+            return moderatorProperties;
+        }
+    }
+}

@@ -1,0 +1,18 @@
+{
+  "variants": {
+    "assembled=false,turbineshaftrotation=x": {
+      "model": "biggerreactorsrework:block/turbine/rotor_shaft",
+      "y": 90
+    },
+    "assembled=false,turbineshaftrotation=y": {
+      "model": "biggerreactorsrework:block/turbine/rotor_shaft",
+      "x": 90
+    },
+    "assembled=false,turbineshaftrotation=z": {
+      "model": "biggerreactorsrework:block/turbine/rotor_shaft"
+    },
+    "assembled=true": {
+      "model": "biggerreactorsrework:block/invisible"
+    }
+  }
+}

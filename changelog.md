@@ -1,3 +1,36 @@
+# 1.21.1-0.1.0 (BiggerReactors-Rework, unreleased)
+
+Independent fork and rework of BiggerReactors. Mod id `biggerreactorsrework`, meant for new worlds:
+worlds and machines from the original mod are not migrated.
+
+## Port
+ - port to Minecraft 1.21.1 and NeoForge 21.1 (ModDevGradle, Java 21)
+ - mod id, registry namespace, resources and Java package moved to `biggerreactorsrework`
+ - datapack files moved to the 1.21 layout and formats (recipes, loot tables, tags, biome modifiers); common tags use the `c` namespace
+ - no external library mods required: the multiblock, registration, config, data loading, networking and screen code the mod used is now part of the mod
+ - the Phosphophyllite and Quartz submodules were removed from the repository
+ - turbine rotor drawn by a block entity renderer and heat exchanger channels baked into the chunk mesh, keeping the previous models and transforms
+ - OpenCL/Vulkan reactor simulation and the unregistered `reactor2` prototype are left out of the build for now (CPU simulation only)
+
+## Cyanite Reprocessor
+ - restored (it was disabled in the original 1.20.4 code): 2 cyanite ingots + water + energy make 1 blutonium ingot, with the original config values
+ - water in the tank is kept when the world reloads (it was saved and read under different names)
+ - accepts energy from other blocks but does not give it back
+ - side configuration window, opened from a tab on the right of the screen, with Items, Water and Energy tabs: each face (except the front) can be set as cyanite input, blutonium output, both, water input or energy input; all faces accept energy by default
+ - optional auto input (pulls cyanite and water from neighbors) and auto eject (pushes blutonium to neighbors), per tab
+
+## Screens
+ - gauge bars (fuel mix, heat, turbine speed, fluid tanks, control rod and coolant flow) have their own textures under `textures/gui/<bar>/`, separate from the screen backgrounds, with the same look as before
+ - new fuel, waste, heat and turbine speed bars, with an animated fill like the energy bar
+ - new fluid tank and control rod bars: fluids keep their own animated texture and color at 80% opacity, with a transparent reflection moving over them
+ - screens are drawn in code instead of background images (panel, slots, buttons, side tabs, selectors, text boxes, the coolant flow tank), looking the same as before; each icon is its own file under `textures/gui/icons/`
+ - side configuration window drawn the same way; its smaller automation and close buttons use the input, eject and close glyphs with the Big button bevel
+
+## Fixes
+ - menu state sync runs on the server thread instead of a separate thread reading the world
+ - menu and data sync packets are actually serialized, so they work on dedicated servers
+ - client requests are only accepted for the menu the player has open
+ - the disabled cyanite reprocessor no longer breaks the `minecraft:mineable/pickaxe` and `minecraft:needs_iron_tools` tags
 # 1.20.1-0.6.0-beta.10.2
 
 ## Reactor

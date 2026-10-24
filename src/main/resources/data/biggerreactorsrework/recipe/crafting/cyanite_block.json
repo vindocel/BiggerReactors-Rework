@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "III",
+    "III",
+    "III"
+  ],
+  "key": {
+    "I": {
+      "tag": "c:ingots/cyanite"
+    }
+  },
+  "result": {
+    "id": "biggerreactorsrework:cyanite_block"
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "assembled=false": {
+      "model": "biggerreactorsrework:block/turbine/power_tap/disassembled"
+    },
+    "assembled=true,connectionstate=disconnected": {
+      "model": "biggerreactorsrework:block/turbine/power_tap/disconnected"
+    },
+    "assembled=true,connectionstate=connected": {
+      "model": "biggerreactorsrework:block/turbine/power_tap/connected"
+    }
+  }
+}

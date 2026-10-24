@@ -1,0 +1,6 @@
+{
+  "parent": "block/cube_all",
+  "textures": {
+    "all" : "biggerreactorsrework:block/heat_exchanger/computer_port"
+  }
+}
