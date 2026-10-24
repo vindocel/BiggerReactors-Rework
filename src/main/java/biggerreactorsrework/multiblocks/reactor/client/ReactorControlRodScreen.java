@@ -85,7 +85,7 @@ public class ReactorControlRodScreen extends ModScreen<ReactorControlRodContaine
         };
         textBoxEnterButton.onRender = ((mS, mX, mY) -> {
             // Custom rendering.
-            GuiArt.pushButton(mS, textBoxEnterButton.x, textBoxEnterButton.y, textBoxEnterButton.width, textBoxEnterButton.height, textBoxEnterButton.isMouseOver(mX, mY), GuiIcon.ARROW_ENTER);
+            GuiArt.button(mS, textBoxEnterButton.x, textBoxEnterButton.y, textBoxEnterButton.width, textBoxEnterButton.height, textBoxEnterButton.isMouseOver(mX, mY), GuiIcon.ARROW_ENTER);
         });
         //this.addElement(textBoxEnterButton);
 
@@ -121,7 +121,7 @@ public class ReactorControlRodScreen extends ModScreen<ReactorControlRodContaine
         };
         rodRetractButton.onRender = ((mS, mX, mY) -> {
             // Custom rendering.
-            GuiArt.pushButton(mS, rodRetractButton.x, rodRetractButton.y, rodRetractButton.width, rodRetractButton.height, rodRetractButton.isMouseOver(mX, mY), GuiIcon.ARROW_UP);
+            GuiArt.button(mS, rodRetractButton.x, rodRetractButton.y, rodRetractButton.width, rodRetractButton.height, rodRetractButton.isMouseOver(mX, mY), GuiIcon.ARROW_UP);
         });
         this.addScreenElement(rodRetractButton);
 
@@ -148,7 +148,7 @@ public class ReactorControlRodScreen extends ModScreen<ReactorControlRodContaine
         };
         rodInsertButton.onRender = (mS, mX, mY) -> {
             // Custom rendering.
-            GuiArt.pushButton(mS, rodInsertButton.x, rodInsertButton.y, rodInsertButton.width, rodInsertButton.height, rodInsertButton.isMouseOver(mX, mY), GuiIcon.ARROW_DOWN);
+            GuiArt.button(mS, rodInsertButton.x, rodInsertButton.y, rodInsertButton.width, rodInsertButton.height, rodInsertButton.isMouseOver(mX, mY), GuiIcon.ARROW_DOWN);
         };
         this.addScreenElement(rodInsertButton);
     }

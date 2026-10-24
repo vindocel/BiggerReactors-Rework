@@ -55,7 +55,7 @@ public class TurbineFluidPortScreen extends ModScreen<TurbineFluidPortContainer>
     public void initControls() {
         // (Left) Direction toggle:
         Biselector<TurbineFluidPortContainer> directionToggle = new Biselector<>(this, 8, 18, Component.translatable("screen.biggerreactorsrework.turbine_fluid_port.direction_toggle.tooltip"),
-                () -> turbineFluidPortState.direction ? 0 : 1, SelectorColors.RED, SelectorColors.BLUE);
+                () -> turbineFluidPortState.direction ? 0 : 1, SelectorColors.BLUE);
         directionToggle.onMouseReleased = (mX, mY, btn) -> {
             // Click logic.
             this.getMenu().executeRequest("setDirection", directionToggle.getState() == 0 ? 1 : 0);

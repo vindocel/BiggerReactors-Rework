@@ -8,7 +8,7 @@
   "multiblock.error.biggerreactorsrework.unknown": "Ocorreu um erro desconhecido na estrutura multibloco, informe o autor do mod",
   "multiblock.error.biggerreactorsrework.null_controller": "O sistema de multiblocos sofreu um erro interno desconhecido, informe o autor do mod",
   "multiblock.error.biggerreactorsrework.dimensions": "Dimensões não permitidas \nAtual: %d, %d, %d, \nMínimo permitido: %d, %d, %d, \nMáximo permitido: %d, %d, %d,",
-  "item_group.biggerreactorsrework": "Bigger Reactors",
+  "item_group.biggerreactorsrework": "BiggerReactors-Rework",
   "item.biggerreactorsrework.wrench": "Chave de Reator",
   "fluid.biggerreactorsrework.liquid_uranium": "Urânio Líquido",
   "item.biggerreactorsrework.liquid_uranium_bucket": "Balde de Urânio Líquido",
@@ -245,5 +245,14 @@
   "jei.biggerreactorsrework.classic.reactor_moderator_moderation": "Moderação: %s",
   "jei.biggerreactorsrework.classic.reactor_moderator_absorption": "Absorção: %s",
   "jei.biggerreactorsrework.classic.reactor_moderator_conductivity": "Condutividade Térmica: %s",
-  "jei.biggerreactorsrework.classic.reactor_moderator_efficiency": "Eficiência Térmica: %s"
+  "jei.biggerreactorsrework.classic.reactor_moderator_efficiency": "Eficiência Térmica: %s",
+  "screen.biggerreactorsrework.show_recipes": "Clique: mostrar receitas",
+  "jei.biggerreactorsrework.cyanite_reprocessing": "Reprocessamento de Cyanite",
+  "emi.category.biggerreactorsrework.cyanite_reprocessing": "Reprocessamento de Cyanite",
+  "emi.category.biggerreactorsrework.classic.reactor_moderator_block": "Blocos Moderadores do Reator",
+  "emi.category.biggerreactorsrework.classic.reactor_moderator_fluid": "Fluidos Moderadores do Reator",
+  "emi.category.biggerreactorsrework.classic.turbine_coil": "Blocos de Bobina da Turbina",
+  "recipe_viewer.biggerreactorsrework.cyanite_reprocessing.energy": "Energia: %s",
+  "recipe_viewer.biggerreactorsrework.cyanite_reprocessing.water": "Água: %s",
+  "recipe_viewer.biggerreactorsrework.cyanite_reprocessing.time": "Tempo: %s s"
 }

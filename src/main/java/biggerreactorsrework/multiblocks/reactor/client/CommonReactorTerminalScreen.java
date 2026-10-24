@@ -108,7 +108,7 @@ public class CommonReactorTerminalScreen extends ModScreen<ReactorTerminalContai
     public static void initControls(@Nonnull ModScreen<ReactorTerminalContainer> screen, ReactorState reactorState) {
         // (Left) Activity toggle:
         Biselector<ReactorTerminalContainer> activityToggle = new Biselector<>(screen, 8, 98, Component.translatable("screen.biggerreactorsrework.reactor_terminal.activity_toggle.tooltip"),
-                () -> reactorState.reactorActivity.toInt(), SelectorColors.RED, SelectorColors.GREEN);
+                () -> reactorState.reactorActivity.toInt(), SelectorColors.GREEN);
         activityToggle.onMouseReleased = (mX, mY, btn) -> {
             // Click logic.
             screen.getMenu().executeRequest("setActive", activityToggle.getState() == 0 ? 1 : 0);
@@ -118,7 +118,7 @@ public class CommonReactorTerminalScreen extends ModScreen<ReactorTerminalContai
 
         // (Left) Auto-eject toggle:
         Biselector<ReactorTerminalContainer> autoEjectToggle = new Biselector<>(screen, 8, 114, Component.translatable("screen.biggerreactorsrework.reactor_terminal.auto_eject_toggle.tooltip"),
-                () -> reactorState.doAutoEject ? 1 : 0, SelectorColors.RED, SelectorColors.CYAN);
+                () -> reactorState.doAutoEject ? 1 : 0, SelectorColors.CYAN);
         autoEjectToggle.onMouseReleased = (mX, mY, btn) -> {
             // Click logic.
             screen.getMenu().executeRequest("setAutoEject", autoEjectToggle.getState() == 0 ? 1 : 0);
@@ -145,7 +145,7 @@ public class CommonReactorTerminalScreen extends ModScreen<ReactorTerminalContai
         };
         manualEjectButton.onRender = ((mS, mX, mY) -> {
             // Custom rendering.
-            GuiArt.pushButton(mS, manualEjectButton.x, manualEjectButton.y, manualEjectButton.width, manualEjectButton.height, manualEjectButton.isMouseOver(mX, mY), GuiIcon.EJECT);
+            GuiArt.button(mS, manualEjectButton.x, manualEjectButton.y, manualEjectButton.width, manualEjectButton.height, manualEjectButton.isMouseOver(mX, mY), GuiIcon.EJECT);
         });
         // TODO: Remove with reactor manual eject.
         // This element will be removed soon, in favor of having the eject button be in the access ports.

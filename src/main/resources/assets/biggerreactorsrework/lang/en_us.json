@@ -8,7 +8,7 @@
   "multiblock.error.biggerreactorsrework.unknown": "An unknown multiblock error has occurred, report to mod author",
   "multiblock.error.biggerreactorsrework.null_controller": "The multiblock system has experienced an unknown internal error, report to the mod author",
   "multiblock.error.biggerreactorsrework.dimensions": "Dimensions not allowed \nActual: %d, %d, %d, \nMin allowed: %d, %d, %d, \nMax allowed: %d, %d, %d,",
-  "item_group.biggerreactorsrework": "Bigger Reactors",
+  "item_group.biggerreactorsrework": "BiggerReactors-Rework",
 
   "item.biggerreactorsrework.wrench": "Reactor Wrench",
 
@@ -275,5 +275,14 @@
   "jei.biggerreactorsrework.classic.reactor_moderator_moderation": "Moderation: %s",
   "jei.biggerreactorsrework.classic.reactor_moderator_absorption": "Absorption: %s",
   "jei.biggerreactorsrework.classic.reactor_moderator_conductivity": "Heat Conductivity: %s",
-  "jei.biggerreactorsrework.classic.reactor_moderator_efficiency": "Heat Efficiency: %s"
+  "jei.biggerreactorsrework.classic.reactor_moderator_efficiency": "Heat Efficiency: %s",
+  "screen.biggerreactorsrework.show_recipes": "Click: show recipes",
+  "jei.biggerreactorsrework.cyanite_reprocessing": "Cyanite Reprocessing",
+  "emi.category.biggerreactorsrework.cyanite_reprocessing": "Cyanite Reprocessing",
+  "emi.category.biggerreactorsrework.classic.reactor_moderator_block": "Reactor Moderator Blocks",
+  "emi.category.biggerreactorsrework.classic.reactor_moderator_fluid": "Reactor Moderator Fluids",
+  "emi.category.biggerreactorsrework.classic.turbine_coil": "Turbine Coil Blocks",
+  "recipe_viewer.biggerreactorsrework.cyanite_reprocessing.energy": "Energy: %s",
+  "recipe_viewer.biggerreactorsrework.cyanite_reprocessing.water": "Water: %s",
+  "recipe_viewer.biggerreactorsrework.cyanite_reprocessing.time": "Time: %s s"
 }

@@ -16,9 +16,9 @@ import javax.annotation.Nullable;
 public class CommonButton<T extends AbstractContainerMenu> extends InteractiveElement<T> {
 
     /**
-     * Glyph drawn in the normal and hovered looks.
+     * Glyph drawn on the button.
      */
-    private final GuiIcon.Glyph glyph;
+    private final GuiIcon glyph;
 
     /**
      * Glyph drawn while the button is disabled.
@@ -37,7 +37,7 @@ public class CommonButton<T extends AbstractContainerMenu> extends InteractiveEl
      * @param disabledGlyph The glyph to draw while the button is disabled.
      * @param tooltip       The tooltip for this element. If null, a tooltip will not render. If you set a tooltip later, use StringTextComponent.EMPTY.
      */
-    public CommonButton(@Nonnull ModScreen<T> parent, int x, int y, int width, int height, GuiIcon.Glyph glyph, GuiIcon disabledGlyph, @Nullable Component tooltip) {
+    public CommonButton(@Nonnull ModScreen<T> parent, int x, int y, int width, int height, GuiIcon glyph, GuiIcon disabledGlyph, @Nullable Component tooltip) {
         super(parent, x, y, width, height, 0, 0, tooltip);
         this.glyph = glyph;
         this.disabledGlyph = disabledGlyph;
@@ -54,16 +54,9 @@ public class CommonButton<T extends AbstractContainerMenu> extends InteractiveEl
     public void render(@Nonnull GuiGraphics graphics, int mouseX, int mouseY) {
         // Check conditions.
         if (this.renderEnable) {
-            if (!this.actionEnable) {
-                // Draw disabled button.
-                GuiArt.button(graphics, this.x, this.y, this.width, this.height, GuiArt.BUTTON_DISABLED, this.disabledGlyph);
-            } else if (this.isMouseOver(mouseX, mouseY)) {
-                // Draw active/hovered button.
-                GuiArt.button(graphics, this.x, this.y, this.width, this.height, GuiArt.COMMON_BUTTON_HOVER, this.glyph.hover());
-            } else {
-                // Draw inactive/non-hovered button.
-                GuiArt.button(graphics, this.x, this.y, this.width, this.height, GuiArt.BUTTON, this.glyph.normal());
-            }
+            boolean disabled = !this.actionEnable;
+            GuiArt.button(graphics, this.x, this.y, this.width, this.height, this.isMouseOver(mouseX, mouseY), false, disabled,
+                    disabled ? this.disabledGlyph : this.glyph);
             // Trigger user-defined render logic.
             if (this.onRender != null) {
                 this.onRender.trigger(graphics, mouseX, mouseY);

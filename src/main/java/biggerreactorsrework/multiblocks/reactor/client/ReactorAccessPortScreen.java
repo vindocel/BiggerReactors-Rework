@@ -59,7 +59,7 @@ public class ReactorAccessPortScreen extends ModScreen<ReactorAccessPortContaine
     public void initControls() {
         // (Left) Direction toggle:
         Biselector<ReactorAccessPortContainer> directionToggle = new Biselector<>(this, 8, 18, Component.translatable("screen.biggerreactorsrework.reactor_access_port.direction_toggle.tooltip"),
-                () -> reactorAccessPortState.direction ? 0 : 1, SelectorColors.YELLOW, SelectorColors.BLUE);
+                () -> reactorAccessPortState.direction ? 0 : 1, SelectorColors.BLUE);
         directionToggle.onMouseReleased = (mX, mY, btn) -> {
             // Click logic.
             this.getMenu().executeRequest("setDirection", directionToggle.getState() == 0 ? 1 : 0);
@@ -69,7 +69,7 @@ public class ReactorAccessPortScreen extends ModScreen<ReactorAccessPortContaine
 
         // (Left) Fuel mode toggle:
         Biselector<ReactorAccessPortContainer> fuelModeToggle = new Biselector<>(this, 8, 34, Component.translatable("screen.biggerreactorsrework.reactor_access_port.fuel_mode_toggle.tooltip"),
-                () -> reactorAccessPortState.fuelMode ? 1 : 0, SelectorColors.CYAN, SelectorColors.YELLOW);
+                () -> reactorAccessPortState.fuelMode ? 1 : 0, SelectorColors.YELLOW);
         fuelModeToggle.onMouseReleased = (mX, mY, btn) -> {
             // Click logic.
             this.getMenu().executeRequest("setFuelMode", fuelModeToggle.getState() == 0 ? 1 : 0);
@@ -98,7 +98,7 @@ public class ReactorAccessPortScreen extends ModScreen<ReactorAccessPortContaine
         };
         manualEjectButton.onRender = ((mS, mX, mY) -> {
             // Custom rendering.
-            GuiArt.pushButton(mS, manualEjectButton.x, manualEjectButton.y, manualEjectButton.width, manualEjectButton.height, manualEjectButton.isMouseOver(mX, mY), GuiIcon.EJECT);
+            GuiArt.button(mS, manualEjectButton.x, manualEjectButton.y, manualEjectButton.width, manualEjectButton.height, manualEjectButton.isMouseOver(mX, mY), GuiIcon.EJECT);
         });
         this.addScreenElement(manualEjectButton);
     }

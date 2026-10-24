@@ -194,7 +194,7 @@ public class ReactorRedstonePortScreen extends ModScreen<ReactorRedstonePortCont
         };
         this.applyChangesButton.onRender = (mS, mX, mY) -> {
             // Custom rendering.
-            GuiArt.pushButton(mS, this.applyChangesButton.x, this.applyChangesButton.y, this.applyChangesButton.width, this.applyChangesButton.height, this.applyChangesButton.isMouseOver(mX, mY), GuiIcon.CONFIRM);
+            GuiArt.button(mS, this.applyChangesButton.x, this.applyChangesButton.y, this.applyChangesButton.width, this.applyChangesButton.height, this.applyChangesButton.isMouseOver(mX, mY), GuiIcon.CONFIRM);
         };
         this.addScreenElement(this.applyChangesButton);
 
@@ -215,14 +215,14 @@ public class ReactorRedstonePortScreen extends ModScreen<ReactorRedstonePortCont
         };
         this.revertChangesButton.onRender = (mS, mX, mY) -> {
             // Custom rendering.
-            GuiArt.pushButton(mS, this.revertChangesButton.x, this.revertChangesButton.y, this.revertChangesButton.width, this.revertChangesButton.height, this.revertChangesButton.isMouseOver(mX, mY), GuiIcon.REVERT);
+            GuiArt.button(mS, this.revertChangesButton.x, this.revertChangesButton.y, this.revertChangesButton.width, this.revertChangesButton.height, this.revertChangesButton.isMouseOver(mX, mY), GuiIcon.REVERT);
         };
         //this.addElement(this.revertChangesButton);
 
         // (Left) Trigger type toggle:
         this.triggerTypeToggle = new Biselector<>(this, 29, 42, Component.empty(),
                 () -> (this.reactorRedstonePortState.triggerPS.toBool() || this.reactorRedstonePortState.triggerAB.toBool())
-                        ? 1 : 0, SelectorColors.YELLOW, SelectorColors.RED);
+                        ? 1 : 0, SelectorColors.RED);
         this.triggerTypeToggle.onMouseReleased = (mX, mY, btn) -> {
             // Click logic. Check if PS or AB.
             if (this.reactorRedstonePortState.isInput()) {

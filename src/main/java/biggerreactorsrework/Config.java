@@ -69,14 +69,11 @@ public class Config {
         public final boolean allowOffThreadSimulation;
         @ConfigValue(advanced = ConfigValue.BoolOption.True)
         public final boolean allowMultiThreadSimulation;
-        @ConfigValue(advanced = ConfigValue.BoolOption.True)
-        public final boolean allowAcceleratedSimulation;
         
         {
             useFullPassSimulation = false;
             allowOffThreadSimulation = true;
             allowMultiThreadSimulation = true;
-            allowAcceleratedSimulation = true;
         }
         
         @ConfigValue(range = "[1,)", advanced = ConfigValue.BoolOption.True)

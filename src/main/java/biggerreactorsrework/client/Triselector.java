@@ -24,19 +24,14 @@ public class Triselector<T extends AbstractContainerMenu> extends InteractiveEle
     private int state;
 
     /**
-     * The color of the left selector.
+     * The color of each cell, left to right.
      */
-    private final SelectorColors leftColor;
+    private final SelectorColors[] colors;
 
     /**
-     * The color of the center selector.
+     * The state each cell stands for, left to right.
      */
-    private final SelectorColors centerColor;
-
-    /**
-     * The color of the right selector.
-     */
-    private final SelectorColors rightColor;
+    private final int[] cellStates;
 
     /**
      * Default constructor.
@@ -48,12 +43,30 @@ public class Triselector<T extends AbstractContainerMenu> extends InteractiveEle
      * @param initialState The initial switch state to use.
      */
     public Triselector(@Nonnull ModScreen<T> parent, int x, int y, @Nullable Component tooltip, IntSupplier initialState, SelectorColors leftColor, SelectorColors centerColor, SelectorColors rightColor) {
-        super(parent, x, y, 46, 14, 0, 0, tooltip);
+        this(parent, x, y, tooltip, initialState, new int[]{0, 1, 2}, leftColor, centerColor, rightColor);
+    }
+
+    /**
+     * Selector whose cells, left to right, stand for {@code cellStates}.
+     */
+    public Triselector(@Nonnull ModScreen<T> parent, int x, int y, @Nullable Component tooltip, IntSupplier initialState, int[] cellStates, SelectorColors leftColor, SelectorColors centerColor, SelectorColors rightColor) {
+        super(parent, x, y, GuiArt.cellsWidth(3), GuiArt.TOGGLE_HEIGHT, 0, 0, tooltip);
         this.renderState = initialState;
         this.state = initialState.getAsInt();
-        this.leftColor = leftColor;
-        this.centerColor = centerColor;
-        this.rightColor = rightColor;
+        this.cellStates = cellStates;
+        this.colors = new SelectorColors[]{leftColor, centerColor, rightColor};
+    }
+
+    /**
+     * The cell that stands for {@code state}; states no cell stands for show on the right cell.
+     */
+    private int cellOf(int state) {
+        for (int i = 0; i < this.cellStates.length; i++) {
+            if (this.cellStates[i] == state) {
+                return i;
+            }
+        }
+        return this.cellStates.length - 1;
     }
 
     /**
@@ -76,13 +89,7 @@ public class Triselector<T extends AbstractContainerMenu> extends InteractiveEle
     public void render(@Nonnull GuiGraphics graphics, int mouseX, int mouseY) {
         // Check conditions.
         if (this.renderEnable) {
-            int state = this.renderState.getAsInt();
-            int selected = (state == 0 || state == 1) ? state : 2;
-            // Draw the selector frame, then the selected cell.
-            GuiArt.selector(graphics, this.x, this.y, 3, selected);
-            SelectorColors color = !this.actionEnable ? SelectorColors.DISABLED
-                    : (selected == 0 ? this.leftColor : (selected == 1 ? this.centerColor : this.rightColor));
-            GuiArt.bevel(graphics, this.x + 1 + 15 * selected, this.y + 1, 14, 12, this.isMouseOver(mouseX, mouseY) ? color.hovered : color.idle);
+            GuiArt.toggleCells(graphics, this.x, this.y, this.cellOf(this.renderState.getAsInt()), this.actionEnable && this.isMouseOver(mouseX, mouseY), !this.actionEnable, this.colors);
             // Trigger user-defined render logic.
             if (this.onRender != null) {
                 this.onRender.trigger(graphics, mouseX, mouseY);
@@ -109,14 +116,14 @@ public class Triselector<T extends AbstractContainerMenu> extends InteractiveEle
                 // Set side depending on position of click.
                 if (mouseX > relativeX) {
                     if ((mouseX < relativeX + (int) (this.width / 3))) {
-                        // Set to left position (0).
-                        this.state = 0;
+                        // Left cell.
+                        this.state = this.cellStates[0];
                     } else if ((mouseX < relativeX + ((int) (this.width / 3) * 2))) {
-                        // Set to center position (1).
-                        this.state = 1;
+                        // Center cell.
+                        this.state = this.cellStates[1];
                     } else {
-                        // Set to right position (2).
-                        this.state = 2;
+                        // Right cell.
+                        this.state = this.cellStates[2];
                     }
                     // Play the selection sound.
                     this.playSound(SoundEvents.UI_BUTTON_CLICK);

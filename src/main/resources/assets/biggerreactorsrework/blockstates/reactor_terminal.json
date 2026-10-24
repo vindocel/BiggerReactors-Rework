@@ -1,14 +1,53 @@
 {
-
   "variants": {
     "assembled=false": {
       "model": "biggerreactorsrework:block/reactor/terminal/off"
     },
-    "assembled=true,reactoractivity=active": {
-      "model": "biggerreactorsrework:block/reactor/terminal/active"
+    "assembled=true,reactoractivity=active,facing=north": {
+      "model": "biggerreactorsrework:block/reactor/terminal/active_assembled"
     },
-    "assembled=true,reactoractivity=inactive": {
-      "model": "biggerreactorsrework:block/reactor/terminal/idle"
+    "assembled=true,reactoractivity=active,facing=south": {
+      "model": "biggerreactorsrework:block/reactor/terminal/active_assembled",
+      "y": 180
+    },
+    "assembled=true,reactoractivity=active,facing=east": {
+      "model": "biggerreactorsrework:block/reactor/terminal/active_assembled",
+      "y": 90
+    },
+    "assembled=true,reactoractivity=active,facing=west": {
+      "model": "biggerreactorsrework:block/reactor/terminal/active_assembled",
+      "y": 270
+    },
+    "assembled=true,reactoractivity=active,facing=up": {
+      "model": "biggerreactorsrework:block/reactor/terminal/active_assembled",
+      "x": 270
+    },
+    "assembled=true,reactoractivity=active,facing=down": {
+      "model": "biggerreactorsrework:block/reactor/terminal/active_assembled",
+      "x": 90
+    },
+    "assembled=true,reactoractivity=inactive,facing=north": {
+      "model": "biggerreactorsrework:block/reactor/terminal/idle_assembled"
+    },
+    "assembled=true,reactoractivity=inactive,facing=south": {
+      "model": "biggerreactorsrework:block/reactor/terminal/idle_assembled",
+      "y": 180
+    },
+    "assembled=true,reactoractivity=inactive,facing=east": {
+      "model": "biggerreactorsrework:block/reactor/terminal/idle_assembled",
+      "y": 90
+    },
+    "assembled=true,reactoractivity=inactive,facing=west": {
+      "model": "biggerreactorsrework:block/reactor/terminal/idle_assembled",
+      "y": 270
+    },
+    "assembled=true,reactoractivity=inactive,facing=up": {
+      "model": "biggerreactorsrework:block/reactor/terminal/idle_assembled",
+      "x": 270
+    },
+    "assembled=true,reactoractivity=inactive,facing=down": {
+      "model": "biggerreactorsrework:block/reactor/terminal/idle_assembled",
+      "x": 90
     }
   }
 }

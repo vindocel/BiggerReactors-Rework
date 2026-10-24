@@ -58,7 +58,7 @@ public class ReactorCoolantPortScreen extends ModScreen<ReactorCoolantPortContai
     public void initControls() {
         // (Left) Direction toggle:
         Biselector<ReactorCoolantPortContainer> directionToggle = new Biselector<>(this, 8, 18, Component.translatable("screen.biggerreactorsrework.reactor_coolant_port.direction_toggle.tooltip"),
-                () -> reactorCoolantPortState.direction ? 0 : 1, SelectorColors.CYAN, SelectorColors.RED);
+                () -> reactorCoolantPortState.direction ? 0 : 1, SelectorColors.RED);
         directionToggle.onMouseReleased = (mX, mY, btn) -> {
             // Click logic.
             this.getMenu().executeRequest("setDirection", directionToggle.getState() == 0 ? 1 : 0);
@@ -83,7 +83,7 @@ public class ReactorCoolantPortScreen extends ModScreen<ReactorCoolantPortContai
         };
         manualEjectButton.onRender = ((mS, mX, mY) -> {
             // Custom rendering.
-            GuiArt.pushButton(mS, manualEjectButton.x, manualEjectButton.y, manualEjectButton.width, manualEjectButton.height, manualEjectButton.isMouseOver(mX, mY), GuiIcon.EJECT);
+            GuiArt.button(mS, manualEjectButton.x, manualEjectButton.y, manualEjectButton.width, manualEjectButton.height, manualEjectButton.isMouseOver(mX, mY), GuiIcon.EJECT);
         });
         this.addScreenElement(manualEjectButton);
     }

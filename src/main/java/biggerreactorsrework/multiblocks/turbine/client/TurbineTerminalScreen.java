@@ -127,7 +127,7 @@ public class TurbineTerminalScreen extends ModScreen<TurbineTerminalContainer> {
     private void initControls() {
         // (Left) Activity toggle:
         Biselector<TurbineTerminalContainer> activityToggle = new Biselector<>(this, 8, 98, Component.translatable("screen.biggerreactorsrework.turbine_terminal.activity_toggle.tooltip"),
-                () -> turbineState.turbineActivity.toInt(), SelectorColors.RED, SelectorColors.GREEN);
+                () -> turbineState.turbineActivity.toInt(), SelectorColors.GREEN);
         activityToggle.onMouseReleased = (mX, mY, btn) -> {
             // Click logic.
             this.getMenu().executeRequest("setActive", activityToggle.getState() == 0 ? 1 : 0);
@@ -137,7 +137,7 @@ public class TurbineTerminalScreen extends ModScreen<TurbineTerminalContainer> {
 
         // (Left) Coil engage toggle:
         Biselector<TurbineTerminalContainer> coilEngageToggle = new Biselector<>(this, 8, 114, Component.translatable("screen.biggerreactorsrework.turbine_terminal.coil_engage_toggle.tooltip"),
-                () -> turbineState.coilStatus ? 1 : 0, SelectorColors.RED, SelectorColors.GREEN);
+                () -> turbineState.coilStatus ? 1 : 0, SelectorColors.CYAN);
         coilEngageToggle.onMouseReleased = (mX, mY, btn) -> {
             // Click logic.
             this.getMenu().executeRequest("setCoilEngaged", coilEngageToggle.getState() == 0 ? 1 : 0);
@@ -147,7 +147,9 @@ public class TurbineTerminalScreen extends ModScreen<TurbineTerminalContainer> {
 
         // (Left) Vent state toggle:
         Triselector<TurbineTerminalContainer> ventStateToggle = new Triselector<>(this, 8, 130, Component.translatable("screen.biggerreactorsrework.turbine_terminal.vent_state_toggle.tooltip"),
-                () -> turbineState.ventState.toInt(), SelectorColors.YELLOW, SelectorColors.RED, SelectorColors.GREEN);
+                // Cells, left to right: no exhaust, overflow only, all exhaust.
+                () -> turbineState.ventState.toInt(), new int[]{VentState.CLOSED.toInt(), VentState.OVERFLOW.toInt(), VentState.ALL.toInt()},
+                SelectorColors.SILVER, SelectorColors.YELLOW, SelectorColors.BLUE);
         ventStateToggle.onMouseReleased = (mX, mY, btn) -> {
             // Click logic.
             this.getMenu().executeRequest("setVentState", ventStateToggle.getState());
@@ -178,7 +180,7 @@ public class TurbineTerminalScreen extends ModScreen<TurbineTerminalContainer> {
         };
         flowRateIncreaseButton.onRender = ((graphics, mX, mY) -> {
             // Custom rendering.
-            GuiArt.pushButton(graphics, flowRateIncreaseButton.x, flowRateIncreaseButton.y, flowRateIncreaseButton.width, flowRateIncreaseButton.height, flowRateIncreaseButton.isMouseOver(mX, mY), GuiIcon.ARROW_UP);
+            GuiArt.button(graphics, flowRateIncreaseButton.x, flowRateIncreaseButton.y, flowRateIncreaseButton.width, flowRateIncreaseButton.height, flowRateIncreaseButton.isMouseOver(mX, mY), GuiIcon.ARROW_UP);
         });
         this.addScreenElement(flowRateIncreaseButton);
 
@@ -205,7 +207,7 @@ public class TurbineTerminalScreen extends ModScreen<TurbineTerminalContainer> {
         };
         flowRateDecreaseButton.onRender = (graphics, mX, mY) -> {
             // Custom rendering.
-            GuiArt.pushButton(graphics, flowRateDecreaseButton.x, flowRateDecreaseButton.y, flowRateDecreaseButton.width, flowRateDecreaseButton.height, flowRateDecreaseButton.isMouseOver(mX, mY), GuiIcon.ARROW_DOWN);
+            GuiArt.button(graphics, flowRateDecreaseButton.x, flowRateDecreaseButton.y, flowRateDecreaseButton.width, flowRateDecreaseButton.height, flowRateDecreaseButton.isMouseOver(mX, mY), GuiIcon.ARROW_DOWN);
         };
         this.addScreenElement(flowRateDecreaseButton);
     }

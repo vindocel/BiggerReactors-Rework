@@ -26,27 +26,36 @@ public final class GuiArt {
     public static final int TAB_FILL = SLOT_FILL;
     public static final int SEPARATOR = PANEL_SHADOW;
 
-    private static final int SELECTOR_EMPTY = 0xFF565656;
-    private static final int SELECTOR_EMPTY_SEPARATOR = 0xFF444444;
+    public static final int SWITCH_WIDTH = 31;
+    public static final int TOGGLE_HEIGHT = 14;
+    private static final int TOGGLE_OUTLINE = 0xFF303B42;
+    private static final int TOGGLE_OUTLINE_HOVER = 0xFF4AABB9;
+    private static final int TOGGLE_BORDER = 0xFFE8EDEB;
+    private static final int TOGGLE_BORDER_DISABLED = 0xFF879399;
+    private static final int TOGGLE_INSET = 0xFF182229;
+    private static final int TOGGLE_TRACK = 0xFF29363D;
+    private static final int KNOB_EDGE = 0xFF3E4A50;
+    private static final int KNOB_SHINE = 0xFFD3DDE0;
+    private static final int KNOB_TOP = 0xFFF2F5F4;
+    private static final int KNOB_FILL = 0xFFB2BFC5;
+    private static final int KNOB_TOP_DISABLED = 0xFFA3ADB1;
+    private static final int KNOB_FILL_DISABLED = 0xFF829097;
+    private static final int SWITCH_LIT_TOP_DISABLED = 0xFF69777B;
+    private static final int SWITCH_LIT_FILL_DISABLED = 0xFF506066;
+    private static final int BUTTON_OUTLINE = 0xFF1A242B;
+    private static final int BUTTON_FILL = 0xFF69767E;
+    private static final int BUTTON_FILL_ACTIVE = 0xFF26858F;
+    private static final int BUTTON_FILL_DISABLED = 0xFF506066;
+    private static final int CELL_FRAME = 0xFF111B22;
+    private static final int CELL_TOP = 0xFF465259;
+    private static final int CELL_LEFT = 0xFF404C54;
+    private static final int CELL_FILL = 0xFF36434B;
+    private static final int CELL_LIT_TOP_DISABLED = 0xFF889298;
+    private static final int CELL_LIT_LEFT_DISABLED = 0xFF7D888F;
+    private static final int CELL_LIT_FILL_DISABLED = 0xFF627078;
     private static final int TEXT_BOX_LIGHT = 0xFF636363;
     private static final int TEXT_BOX_SHADOW = 0xFF252525;
     private static final int TEXT_BOX_CORNER = 0xFF474747;
-
-    /**
-     * Light, fill and shadow of a beveled surface.
-     */
-    public record Palette(int light, int fill, int shadow) {
-        public static Palette of(int light, int fill, int shadow) {
-            return new Palette(0xFF000000 | light, 0xFF000000 | fill, 0xFF000000 | shadow);
-        }
-    }
-
-    public static final Palette BUTTON = Palette.of(0xA6A6A6, 0x737373, 0x404040);
-    // Hover of the standalone push buttons (eject, arrows, apply/revert).
-    public static final Palette BUTTON_HOVER = Palette.of(0xC9C3E5, 0xA598B3, 0x947A99);
-    // Hover of the common widget buttons (text box enter).
-    public static final Palette COMMON_BUTTON_HOVER = Palette.of(0xC9C3E5, 0xA598B3, 0x7B667F);
-    public static final Palette BUTTON_DISABLED = Palette.of(0x2A2A2A, 0x1D1D1D, 0x101010);
 
     /**
      * Receives the rectangles a shape is made of, so the same shape can be drawn whole or clipped.
@@ -193,37 +202,18 @@ public final class GuiArt {
     }
 
     /**
-     * Flat bevel: light top row and left column, shadow bottom row and right column.
+     * Every button of the screens: dark outline (cyan when hovered), light border (grey when disabled), slate fill
+     * (teal when the button is switched on) and its glyph centered.
      */
-    public static void bevel(@Nonnull GuiGraphics graphics, int x, int y, int width, int height, Palette palette) {
-        graphics.fill(x, y, x + width, y + height, palette.fill());
-        graphics.fill(x, y, x + width - 1, y + 1, palette.light());
-        graphics.fill(x, y, x + 1, y + height - 1, palette.light());
-        graphics.fill(x + 1, y + height - 1, x + width, y + height, palette.shadow());
-        graphics.fill(x + width - 1, y + 1, x + width, y + height, palette.shadow());
+    public static void button(@Nonnull GuiGraphics graphics, int x, int y, int width, int height, boolean hovered, boolean active, boolean disabled, GuiIcon glyph) {
+        graphics.fill(x, y, x + width, y + height, hovered && !disabled ? TOGGLE_OUTLINE_HOVER : BUTTON_OUTLINE);
+        graphics.fill(x + 1, y + 1, x + width - 1, y + height - 1, disabled ? TOGGLE_BORDER_DISABLED : TOGGLE_BORDER);
+        graphics.fill(x + 2, y + 2, x + width - 2, y + height - 2, disabled ? BUTTON_FILL_DISABLED : (active ? BUTTON_FILL_ACTIVE : BUTTON_FILL));
+        glyph.draw(graphics, x + (width - glyph.width()) / 2, y + (height - glyph.height()) / 2);
     }
 
-    /**
-     * Button frame: black border around a bevel.
-     */
-    public static void button(@Nonnull GuiGraphics graphics, int x, int y, int width, int height, Palette palette) {
-        graphics.fill(x, y, x + width, y + height, BLACK);
-        bevel(graphics, x + 1, y + 1, width - 2, height - 2, palette);
-    }
-
-    /**
-     * Button with its glyph. Glyphs sit 4 pixels in, like on the Big buttons.
-     */
-    public static void button(@Nonnull GuiGraphics graphics, int x, int y, int width, int height, Palette palette, GuiIcon glyph) {
-        button(graphics, x, y, width, height, palette);
-        glyph.draw(graphics, x + 4, y + 4);
-    }
-
-    /**
-     * Push button (eject, arrows, apply, revert) in its normal or hovered look.
-     */
-    public static void pushButton(@Nonnull GuiGraphics graphics, int x, int y, int width, int height, boolean hovered, GuiIcon.Glyph glyph) {
-        button(graphics, x, y, width, height, hovered ? BUTTON_HOVER : BUTTON, hovered ? glyph.hover() : glyph.normal());
+    public static void button(@Nonnull GuiGraphics graphics, int x, int y, int width, int height, boolean hovered, GuiIcon glyph) {
+        button(graphics, x, y, width, height, hovered, false, false, glyph);
     }
 
     /**
@@ -262,18 +252,58 @@ public final class GuiArt {
     }
 
     /**
-     * Selector frame with {@code cells} empty 14x12 cells; the selected cell is drawn on top by the caller.
+     * Toggles: dark rounded frame (the outline turns cyan when hovered, the light border greys out when disabled).
      */
-    public static void selector(@Nonnull GuiGraphics graphics, int x, int y, int cells, int selected) {
-        graphics.fill(x, y, x + 1 + 15 * cells, y + 14, BLACK);
-        for (int i = 0; i < cells; i++) {
-            graphics.fill(x + 1 + 15 * i, y + 1, x + 15 + 15 * i, y + 13, SELECTOR_EMPTY);
+    private static void toggleFrame(GuiGraphics graphics, int x, int y, int width, boolean hovered, boolean disabled) {
+        graphics.fill(x, y, x + width, y + TOGGLE_HEIGHT, hovered ? TOGGLE_OUTLINE_HOVER : TOGGLE_OUTLINE);
+        graphics.fill(x + 1, y + 1, x + width - 1, y + TOGGLE_HEIGHT - 1, disabled ? TOGGLE_BORDER_DISABLED : TOGGLE_BORDER);
+        graphics.fill(x + 2, y + 2, x + width - 2, y + TOGGLE_HEIGHT - 2, TOGGLE_INSET);
+        graphics.fill(x + 3, y + 3, x + width - 3, y + TOGGLE_HEIGHT - 3, TOGGLE_TRACK);
+    }
+
+    /**
+     * On/off switch, 31x14: the knob sits on the left when off; when on it sits on the right, after a block in the
+     * switch's color.
+     */
+    public static void toggleSwitch(@Nonnull GuiGraphics graphics, int x, int y, boolean on, boolean hovered, boolean disabled, SelectorColors color) {
+        toggleFrame(graphics, x, y, SWITCH_WIDTH, hovered, disabled);
+        if (on) {
+            graphics.fill(x + 12, y + 3, x + 20, y + 4, disabled ? SWITCH_LIT_TOP_DISABLED : color.switchTop);
+            graphics.fill(x + 12, y + 4, x + 20, y + 10, disabled ? SWITCH_LIT_FILL_DISABLED : color.switchFill);
+            graphics.fill(x + 12, y + 10, x + 20, y + 11, color.switchBottom);
         }
-        for (int i = 1; i < cells; i++) {
-            if (i != selected && i - 1 != selected) {
-                graphics.fill(x + 15 * i, y + 1, x + 15 * i + 1, y + 13, SELECTOR_EMPTY_SEPARATOR);
-            }
+        knob(graphics, x + (on ? 20 : 3), y + 3, disabled);
+    }
+
+    private static void knob(GuiGraphics graphics, int x, int y, boolean disabled) {
+        graphics.fill(x, y, x + 8, y + 8, disabled ? KNOB_FILL_DISABLED : KNOB_FILL);
+        graphics.fill(x + 1, y, x + 7, y + 1, disabled ? KNOB_TOP_DISABLED : KNOB_TOP);
+        graphics.fill(x + 1, y + 1, x + 2, y + 6, KNOB_SHINE);
+        graphics.fill(x + 3, y + 2, x + 6, y + 3, KNOB_SHINE);
+        graphics.fill(x, y, x + 1, y + 8, KNOB_EDGE);
+        graphics.fill(x, y + 7, x + 8, y + 8, KNOB_EDGE);
+    }
+
+    /**
+     * Selector with {@code colors.length} cells of 12x8 split by the track; only the {@code selected} cell is lit.
+     */
+    public static void toggleCells(@Nonnull GuiGraphics graphics, int x, int y, int selected, boolean hovered, boolean disabled, SelectorColors... colors) {
+        toggleFrame(graphics, x, y, cellsWidth(colors.length), hovered, disabled);
+        for (int i = 0; i < colors.length; i++) {
+            int cx = x + 3 + 14 * i;
+            boolean lit = i == selected;
+            graphics.fill(cx, y + 3, cx + 12, y + 11, CELL_FRAME);
+            int top = !lit ? CELL_TOP : (disabled ? CELL_LIT_TOP_DISABLED : colors[i].cellTop);
+            int left = !lit ? CELL_LEFT : (disabled ? CELL_LIT_LEFT_DISABLED : colors[i].cellLeft);
+            int fill = !lit ? CELL_FILL : (disabled ? CELL_LIT_FILL_DISABLED : colors[i].cellFill);
+            graphics.fill(cx + 1, y + 4, cx + 11, y + 10, fill);
+            graphics.fill(cx + 1, y + 4, cx + 11, y + 5, top);
+            graphics.fill(cx + 1, y + 5, cx + 2, y + 9, left);
         }
+    }
+
+    public static int cellsWidth(int cells) {
+        return 6 + 14 * cells - 2;
     }
 
     /**

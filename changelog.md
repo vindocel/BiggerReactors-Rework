@@ -6,11 +6,13 @@ worlds and machines from the original mod are not migrated.
 ## Port
  - port to Minecraft 1.21.1 and NeoForge 21.1 (ModDevGradle, Java 21)
  - mod id, registry namespace, resources and Java package moved to `biggerreactorsrework`
+ - creative tab named BiggerReactors-Rework
  - datapack files moved to the 1.21 layout and formats (recipes, loot tables, tags, biome modifiers); common tags use the `c` namespace
  - no external library mods required: the multiblock, registration, config, data loading, networking and screen code the mod used is now part of the mod
  - the Phosphophyllite and Quartz submodules were removed from the repository
  - turbine rotor drawn by a block entity renderer and heat exchanger channels baked into the chunk mesh, keeping the previous models and transforms
- - OpenCL/Vulkan reactor simulation and the unregistered `reactor2` prototype are left out of the build for now (CPU simulation only)
+ - OpenCL/Vulkan reactor simulation removed, along with its shaders and the `allowAcceleratedSimulation` config option; the reactor uses the CPU simulation
+ - the unregistered `reactor2` prototype is left out of the build for now
 
 ## Cyanite Reprocessor
  - restored (it was disabled in the original 1.20.4 code): 2 cyanite ingots + water + energy make 1 blutonium ingot, with the original config values
@@ -18,15 +20,27 @@ worlds and machines from the original mod are not migrated.
  - accepts energy from other blocks but does not give it back
  - side configuration window, opened from a tab on the right of the screen, with Items, Water and Energy tabs: each face (except the front) can be set as cyanite input, blutonium output, both, water input or energy input; all faces accept energy by default
  - optional auto input (pulls cyanite and water from neighbors) and auto eject (pushes blutonium to neighbors), per tab
+ - its recipe shows in JEI and EMI, drawn like the machine's screen; clicking the progress arrow opens it
+ - Jade shows the Cyanite Reprocessor's energy with the mod's own energy bar instead of Jade's default one; the reactor and turbine power taps show their battery the same way
 
 ## Screens
  - gauge bars (fuel mix, heat, turbine speed, fluid tanks, control rod and coolant flow) have their own textures under `textures/gui/<bar>/`, separate from the screen backgrounds, with the same look as before
  - new fuel, waste, heat and turbine speed bars, with an animated fill like the energy bar
  - new fluid tank and control rod bars: fluids keep their own animated texture and color at 80% opacity, with a transparent reflection moving over them
  - screens are drawn in code instead of background images (panel, slots, buttons, side tabs, selectors, text boxes, the coolant flow tank), looking the same as before; each icon is its own file under `textures/gui/icons/`
- - side configuration window drawn the same way; its smaller automation and close buttons use the input, eject and close glyphs with the Big button bevel
+ - side configuration window drawn the same way, with smaller automation and close buttons and their own small glyphs
+ - new toggle design: on/off switches and lit-cell selectors with a dark frame that turns cyan on hover; the turbine vent selector reads no exhaust, overflow only, all exhaust from left to right
+ - every button (eject, arrows, apply, revert, enter, side configuration) in the same style: slate fill with a light border, cyan outline on hover, teal fill when an automation switch is on
+ - status, gauge, heat exchanger and fluid symbol icons redrawn by hand, same sizes and places
+
+## Blocks
+ - reactor, turbine and heat exchanger terminals: once the multiblock is assembled, only the face pointing out of the structure shows the terminal screen and the other faces show the disassembled casing texture; disassembled terminals look the same as before
+
+## Recipe viewers
+ - EMI support, with the same categories as JEI: cyanite reprocessing, reactor moderator blocks and fluids, turbine coils; the JEI plugin steps aside when EMI is installed
 
 ## Fixes
+ - liquid uranium, liquid obsidian and steam show their names again instead of the `fluid_type` translation key
  - menu state sync runs on the server thread instead of a separate thread reading the world
  - menu and data sync packets are actually serialized, so they work on dedicated servers
  - client requests are only accepted for the menu the player has open

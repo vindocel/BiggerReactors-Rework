@@ -1,0 +1,7 @@
+{
+  "parent": "biggerreactorsrework:block/assembled_terminal",
+  "textures": {
+    "front": "biggerreactorsrework:block/turbine/terminal/active",
+    "side": "biggerreactorsrework:block/turbine/casing/disassembled"
+  }
+}

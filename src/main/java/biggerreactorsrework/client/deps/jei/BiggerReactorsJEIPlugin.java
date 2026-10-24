@@ -6,25 +6,23 @@ import mezz.jei.api.helpers.IGuiHelper;
 import mezz.jei.api.registration.IRecipeCatalystRegistration;
 import mezz.jei.api.registration.IRecipeCategoryRegistration;
 import mezz.jei.api.registration.IRecipeRegistration;
+import mezz.jei.api.runtime.IJeiRuntime;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.block.AirBlock;
-import net.minecraft.world.level.block.LiquidBlock;
 import net.neoforged.neoforge.fluids.FluidStack;
 import biggerreactorsrework.BiggerReactors;
 import biggerreactorsrework.Config;
+import biggerreactorsrework.client.deps.RecipeViewerData;
+import biggerreactorsrework.client.deps.RecipeViewers;
+import biggerreactorsrework.machine.blocks.CyaniteReprocessor;
 import biggerreactorsrework.client.deps.jei.classic.reactor.BlockModeratorCategory;
 import biggerreactorsrework.client.deps.jei.classic.reactor.FluidModeratorCategory;
 import biggerreactorsrework.client.deps.jei.classic.turbine.CoilCategory;
 import biggerreactorsrework.multiblocks.reactor.blocks.ReactorTerminal;
 import biggerreactorsrework.multiblocks.turbine.blocks.TurbineTerminal;
-import biggerreactorsrework.registries.ReactorModeratorRegistry;
-import biggerreactorsrework.registries.TurbineCoilRegistry;
 
 import javax.annotation.Nonnull;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @JeiPlugin
 public class BiggerReactorsJEIPlugin implements IModPlugin {
@@ -34,9 +32,28 @@ public class BiggerReactorsJEIPlugin implements IModPlugin {
         return ResourceLocation.fromNamespaceAndPath(BiggerReactors.modid, "jei_plugin");
     }
 
+    /** Skipped when EMI is installed, which has its own plugin. */
+    private static boolean enabled() {
+        return !RecipeViewers.emi();
+    }
+
+    @Override
+    public void onRuntimeAvailable(IJeiRuntime runtime) {
+        JeiBridge.setRuntime(runtime);
+    }
+
+    @Override
+    public void onRuntimeUnavailable() {
+        JeiBridge.setRuntime(null);
+    }
+
     @Override
     public void registerCategories(IRecipeCategoryRegistration registration) {
+        if (!enabled()) {
+            return;
+        }
         IGuiHelper guiHelper = registration.getJeiHelpers().getGuiHelper();
+        registration.addRecipeCategories(new CyaniteReprocessingCategory(guiHelper));
         registration.addRecipeCategories(new BlockModeratorCategory(guiHelper));
         registration.addRecipeCategories(new FluidModeratorCategory(guiHelper));
         registration.addRecipeCategories(new CoilCategory(guiHelper));
@@ -44,6 +61,10 @@ public class BiggerReactorsJEIPlugin implements IModPlugin {
 
     @Override
     public void registerRecipeCatalysts(IRecipeCatalystRegistration registration) {
+        if (!enabled()) {
+            return;
+        }
+        registration.addRecipeCatalyst(new ItemStack(CyaniteReprocessor.INSTANCE), CyaniteReprocessingCategory.RECIPE_TYPE);
         registration.addRecipeCatalyst(new ItemStack(ReactorTerminal.INSTANCE), BlockModeratorCategory.RECIPE_TYPE);
         registration.addRecipeCatalyst(new ItemStack(ReactorTerminal.INSTANCE), FluidModeratorCategory.RECIPE_TYPE);
         registration.addRecipeCatalyst(new ItemStack(TurbineTerminal.INSTANCE), CoilCategory.RECIPE_TYPE);
@@ -51,32 +72,15 @@ public class BiggerReactorsJEIPlugin implements IModPlugin {
 
     @Override
     public void registerRecipes(IRecipeRegistration registration) {
-        if (!Config.CONFIG.EnableJEIIntegration) {
+        if (!enabled() || !Config.CONFIG.EnableJEIIntegration) {
             return;
         }
-        
-        List<CoilCategory.Recipe> recipes = TurbineCoilRegistry.Client.getImmutableRegistry().entrySet().stream()
-                .map(e -> new CoilCategory.Recipe(new ItemStack(e.getKey().asItem()), e.getValue()))
-                .collect(Collectors.toList());
-        
-        registration.addRecipes(CoilCategory.RECIPE_TYPE, recipes);
-        
-        
-        List<FluidModeratorCategory.Recipe> fluidModeratorRecipes = new ArrayList<>();
-        List<BlockModeratorCategory.Recipe> blockModeratorRecipes = new ArrayList<>();
-
-        ReactorModeratorRegistry.Client.forEach((block, moderatorProperties) -> {
-            if (block instanceof LiquidBlock) {
-                LiquidBlock fluidBlock = (LiquidBlock) block;
-                FluidStack stack = new FluidStack(fluidBlock.fluid, 1000);
-                fluidModeratorRecipes.add(new FluidModeratorCategory.Recipe(stack, moderatorProperties));
-            } else if (!(block instanceof AirBlock)) {
-                ItemStack stack = new ItemStack(block.asItem());
-                blockModeratorRecipes.add(new BlockModeratorCategory.Recipe(stack, moderatorProperties));
-            }
-        });
-
-        registration.addRecipes(FluidModeratorCategory.RECIPE_TYPE, fluidModeratorRecipes);
-        registration.addRecipes(BlockModeratorCategory.RECIPE_TYPE, blockModeratorRecipes);
+        registration.addRecipes(CyaniteReprocessingCategory.RECIPE_TYPE, List.of(new CyaniteReprocessingCategory.Recipe()));
+        registration.addRecipes(CoilCategory.RECIPE_TYPE, RecipeViewerData.coils().stream()
+                .map(c -> new CoilCategory.Recipe(c.block(), c.data())).toList());
+        registration.addRecipes(FluidModeratorCategory.RECIPE_TYPE, RecipeViewerData.moderatorFluids().stream()
+                .map(m -> new FluidModeratorCategory.Recipe(new FluidStack(m.fluid(), 1000), m.properties())).toList());
+        registration.addRecipes(BlockModeratorCategory.RECIPE_TYPE, RecipeViewerData.moderatorBlocks().stream()
+                .map(m -> new BlockModeratorCategory.Recipe(m.block(), m.properties())).toList());
     }
 }

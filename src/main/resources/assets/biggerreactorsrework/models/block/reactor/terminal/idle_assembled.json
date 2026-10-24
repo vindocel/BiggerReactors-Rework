@@ -1,0 +1,7 @@
+{
+  "parent": "biggerreactorsrework:block/assembled_terminal",
+  "textures": {
+    "front": "biggerreactorsrework:block/reactor/terminal/idle",
+    "side": "biggerreactorsrework:block/reactor/casing/disassembled"
+  }
+}

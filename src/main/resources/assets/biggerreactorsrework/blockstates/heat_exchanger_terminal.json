@@ -3,8 +3,28 @@
     "assembled=false": {
       "model": "biggerreactorsrework:block/heat_exchanger/terminal/off"
     },
-    "assembled=true": {
-      "model": "biggerreactorsrework:block/heat_exchanger/terminal/active"
+    "assembled=true,facing=north": {
+      "model": "biggerreactorsrework:block/heat_exchanger/terminal/active_assembled"
+    },
+    "assembled=true,facing=south": {
+      "model": "biggerreactorsrework:block/heat_exchanger/terminal/active_assembled",
+      "y": 180
+    },
+    "assembled=true,facing=east": {
+      "model": "biggerreactorsrework:block/heat_exchanger/terminal/active_assembled",
+      "y": 90
+    },
+    "assembled=true,facing=west": {
+      "model": "biggerreactorsrework:block/heat_exchanger/terminal/active_assembled",
+      "y": 270
+    },
+    "assembled=true,facing=up": {
+      "model": "biggerreactorsrework:block/heat_exchanger/terminal/active_assembled",
+      "x": 270
+    },
+    "assembled=true,facing=down": {
+      "model": "biggerreactorsrework:block/heat_exchanger/terminal/active_assembled",
+      "x": 90
     }
   }
 }

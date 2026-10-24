@@ -34,10 +34,12 @@ import biggerreactorsrework.core.client.gui.screens.ModScreen;
 import biggerreactorsrework.core.client.gui.RenderHelper;
 import biggerreactorsrework.core.client.gui.elements.RenderedElement;
 import biggerreactorsrework.core.client.gui.elements.TooltipElement;
+import biggerreactorsrework.client.deps.RecipeViewers;
 
 import org.lwjgl.glfw.GLFW;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -62,13 +64,11 @@ public class CyaniteReprocessorScreen extends ModScreen<CyaniteReprocessorContai
     private static final int[] COLUMNS = {25, 49, 73};
     private static final int[] ROWS = {20, 44, 68};
     private static final int BUTTON_SIZE = 15;
-    // Automation switches fit the 7x8 input/eject glyphs, the close button the 6x7 cross, both with Big's bevel and
-    // the glyph 2 px in.
-    private static final int SWITCH_WIDTH = 11;
-    private static final int SWITCH_HEIGHT = 12;
+    // Automation switches and the close button share one size, which centers their 4x3 and 4x5 glyphs exactly.
     private static final int CLOSE_WIDTH = 10;
     private static final int CLOSE_HEIGHT = 11;
-    private static final int GLYPH_INSET = 2;
+    private static final int SWITCH_WIDTH = CLOSE_WIDTH;
+    private static final int SWITCH_HEIGHT = CLOSE_HEIGHT;
     private static final int TOP_BAR_Y = 6;
     private static final int TOP_BAR_HEIGHT = 19;
 
@@ -98,6 +98,9 @@ public class CyaniteReprocessorScreen extends ModScreen<CyaniteReprocessorContai
     private boolean draggingWindow = false;
     private double dragX;
     private double dragY;
+
+    @Nullable
+    private RenderedElement<CyaniteReprocessorContainer> progressBar;
 
     public CyaniteReprocessorScreen(CyaniteReprocessorContainer container, Inventory playerInventory, Component title) {
         super(container, playerInventory, title, 176, 175);
@@ -152,7 +155,10 @@ public class CyaniteReprocessorScreen extends ModScreen<CyaniteReprocessorContai
         this.addScreenElement(waterTank);
 
         // (Center) Progress bar:
-        RenderedElement<CyaniteReprocessorContainer> progressBar = new RenderedElement<>(this, 75, 40, 24, 18, 0, 0, null);
+        // With a recipe viewer installed, clicking the arrow shows the reprocessing recipe.
+        RenderedElement<CyaniteReprocessorContainer> progressBar = new RenderedElement<>(this, 75, 40, 24, 18, 0, 0,
+                RecipeViewers.available() ? Component.translatable("screen.biggerreactorsrework.show_recipes") : null);
+        this.progressBar = progressBar;
         progressBar.onRender = (@Nonnull GuiGraphics graphics, int mX, int mY) -> GaugeBar.drawProgressArrow(graphics,
                 progressBar.x, progressBar.y, cyaniteReprocessorState.workTime, cyaniteReprocessorState.workTimeTotal);
         this.addScreenElement(progressBar);
@@ -306,19 +312,14 @@ public class CyaniteReprocessorScreen extends ModScreen<CyaniteReprocessorContai
         List<AutoSwitch> switches = this.autoSwitches();
         for (int i = 0; i < switches.size(); i++) {
             AutoSwitch toggle = switches.get(i);
-            GuiIcon.Glyph glyph = toggle.input() ? GuiIcon.INPUT : GuiIcon.EJECT;
             int x = this.switchX(i, switches.size());
             int y = top + TOP_BAR_Y;
-            // A switch that is on keeps Big's purple look; hovering lightens it.
-            GuiArt.button(graphics, x, y, SWITCH_WIDTH, SWITCH_HEIGHT, toggle.active() ? GuiArt.BUTTON_HOVER : GuiArt.BUTTON);
-            (toggle.active() ? glyph.hover() : glyph.normal()).draw(graphics, x + GLYPH_INSET, y + GLYPH_INSET);
-            if (inside(mouseX, mouseY, x, y, SWITCH_WIDTH, SWITCH_HEIGHT)) {
-                graphics.fill(x + 1, y + 1, x + SWITCH_WIDTH - 1, y + SWITCH_HEIGHT - 1, 0x30FFFFFF);
-            }
+            // A switch that is on keeps the teal fill.
+            GuiArt.button(graphics, x, y, SWITCH_WIDTH, SWITCH_HEIGHT, inside(mouseX, mouseY, x, y, SWITCH_WIDTH, SWITCH_HEIGHT),
+                    toggle.active(), false, toggle.input() ? GuiIcon.AUTO_INPUT : GuiIcon.AUTO_EJECT);
         }
-        boolean closeHovered = inside(mouseX, mouseY, this.closeX(), top + TOP_BAR_Y, CLOSE_WIDTH, CLOSE_HEIGHT);
-        GuiArt.button(graphics, this.closeX(), top + TOP_BAR_Y, CLOSE_WIDTH, CLOSE_HEIGHT, closeHovered ? GuiArt.BUTTON_HOVER : GuiArt.BUTTON);
-        (closeHovered ? GuiIcon.CLOSE.hover() : GuiIcon.CLOSE.normal()).draw(graphics, this.closeX() + GLYPH_INSET, top + TOP_BAR_Y + GLYPH_INSET);
+        GuiArt.button(graphics, this.closeX(), top + TOP_BAR_Y, CLOSE_WIDTH, CLOSE_HEIGHT,
+                inside(mouseX, mouseY, this.closeX(), top + TOP_BAR_Y, CLOSE_WIDTH, CLOSE_HEIGHT), GuiIcon.CLOSE);
 
         // Faces: the block's own textures, with the route color around them.
         final TextureAtlasSprite front = Minecraft.getInstance().getTextureAtlas(InventoryMenu.BLOCK_ATLAS).apply(FRONT_SPRITE);
@@ -340,7 +341,7 @@ public class CyaniteReprocessorScreen extends ModScreen<CyaniteReprocessorContai
 
         // Every face at once.
         boolean resetHovered = inside(mouseX, mouseY, this.resetX(), this.resetY(), BUTTON_SIZE, BUTTON_SIZE);
-        GuiArt.pushButton(graphics, this.resetX(), this.resetY(), BUTTON_SIZE, BUTTON_SIZE, resetHovered, GuiIcon.REVERT);
+        GuiArt.button(graphics, this.resetX(), this.resetY(), BUTTON_SIZE, BUTTON_SIZE, resetHovered, GuiIcon.REVERT);
     }
 
     private List<Component> sideTooltip(int mouseX, int mouseY) {
@@ -411,6 +412,11 @@ public class CyaniteReprocessorScreen extends ModScreen<CyaniteReprocessorContai
             if (button == 0 && this.sideWindowOpen) {
                 this.startDrag(mouseX, mouseY);
             }
+            return true;
+        }
+        if (button == 0 && this.progressBar != null && this.progressBar.isMouseOver(mouseX, mouseY) && RecipeViewers.available()) {
+            Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
+            RecipeViewers.show(RecipeViewers.CYANITE_REPROCESSING);
             return true;
         }
         return super.mouseClicked(mouseX, mouseY, button);

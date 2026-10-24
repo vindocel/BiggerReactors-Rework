@@ -60,7 +60,7 @@ public class HeatExchangerFluidPortScreen extends ModScreen<HeatExchangerFluidPo
     public void initControls() {
         // (Left) Direction toggle:
         Biselector<HeatExchangerFluidPortContainer> directionToggle = new Biselector<>(this, 8, 33, Component.translatable("screen.biggerreactorsrework.heat_exchanger_fluid_port.direction_toggle.tooltip"),
-                () -> heatExchangerFluidPortState.direction ? 0 : 1, SelectorColors.RED, SelectorColors.BLUE);
+                () -> heatExchangerFluidPortState.direction ? 0 : 1, SelectorColors.BLUE);
         directionToggle.onMouseReleased = (mX, mY, btn) -> {
             // Click logic.
             this.getMenu().executeRequest("setDirection", directionToggle.getState() == 0 ? 1 : 0);
@@ -85,7 +85,7 @@ public class HeatExchangerFluidPortScreen extends ModScreen<HeatExchangerFluidPo
         };
         manualEjectButton.onRender = ((mS, mX, mY) -> {
             // Custom rendering.
-            GuiArt.pushButton(mS, manualEjectButton.x, manualEjectButton.y, manualEjectButton.width, manualEjectButton.height, manualEjectButton.isMouseOver(mX, mY), GuiIcon.EJECT);
+            GuiArt.button(mS, manualEjectButton.x, manualEjectButton.y, manualEjectButton.width, manualEjectButton.height, manualEjectButton.isMouseOver(mX, mY), GuiIcon.EJECT);
         });
         this.addScreenElement(manualEjectButton);
     }
