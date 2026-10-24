@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "III",
+    "III",
+    "III"
+  ],
+  "key": {
+    "I": {
+      "tag": "c:raw_materials/uranium"
+    }
+  },
+  "result": {
+    "id": "biggerreactorsrework:raw_uranium_block"
+  }
+}

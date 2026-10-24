@@ -1,0 +1,14 @@
+{
+  "parent": "block/cube",
+  "render_type": "cutout",
+  "textures": {
+    "up" : "biggerreactorsrework:block/transparent",
+    "down" : "biggerreactorsrework:block/transparent",
+    "north" : "biggerreactorsrework:block/transparent",
+    "south" : "biggerreactorsrework:block/transparent",
+    "east" : "biggerreactorsrework:block/reactor/glass/connected_all",
+    "west" : "biggerreactorsrework:block/transparent",
+    "particle": "biggerreactorsrework:block/reactor/glass/connected_none"
+  },
+  "render_type": "cutout"
+}

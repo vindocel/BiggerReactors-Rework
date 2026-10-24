@@ -1,0 +1,14 @@
+{
+
+  "variants": {
+    "assembled=false": {
+      "model": "biggerreactorsrework:block/reactor/terminal/off"
+    },
+    "assembled=true,reactoractivity=active": {
+      "model": "biggerreactorsrework:block/reactor/terminal/active"
+    },
+    "assembled=true,reactoractivity=inactive": {
+      "model": "biggerreactorsrework:block/reactor/terminal/idle"
+    }
+  }
+}

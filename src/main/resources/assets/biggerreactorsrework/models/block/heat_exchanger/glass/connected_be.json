@@ -1,0 +1,13 @@
+{
+  "parent": "block/cube",
+  "render_type": "cutout",
+  "textures": {
+    "up": "biggerreactorsrework:block/heat_exchanger/glass/glass_connected_r",
+    "down": "biggerreactorsrework:block/transparent",
+    "north": "biggerreactorsrework:block/heat_exchanger/glass/glass_connected_bl",
+    "south": "biggerreactorsrework:block/heat_exchanger/glass/glass_connected_br",
+    "east": "biggerreactorsrework:block/transparent",
+    "west": "biggerreactorsrework:block/heat_exchanger/glass/glass_connected_b",
+    "particle": "biggerreactorsrework:block/heat_exchanger/glass/glass_connected_none"
+  }
+}

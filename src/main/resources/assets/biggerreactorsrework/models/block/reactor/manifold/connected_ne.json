@@ -1,0 +1,13 @@
+{
+  "parent": "block/cube",
+  "render_type": "cutout",
+  "textures": {
+    "up" : "biggerreactorsrework:block/reactor/manifold/connected_tr",
+    "down" : "biggerreactorsrework:block/reactor/manifold/connected_br",
+    "north" : "biggerreactorsrework:block/transparent",
+    "south" : "biggerreactorsrework:block/reactor/manifold/connected_r",
+    "east" : "biggerreactorsrework:block/transparent",
+    "west" : "biggerreactorsrework:block/reactor/manifold/connected_l",
+    "particle": "biggerreactorsrework:block/reactor/manifold/connected_none"
+  }
+}

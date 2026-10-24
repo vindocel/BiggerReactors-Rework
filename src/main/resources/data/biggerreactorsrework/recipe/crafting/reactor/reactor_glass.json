@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+      "GCG"
+  ],
+  "key": {
+    "G": {
+      "item": "minecraft:glass"
+    },
+    "C": {
+      "item": "biggerreactorsrework:reactor_casing"
+    }
+  },
+  "result": {
+    "id": "biggerreactorsrework:reactor_glass"
+  }
+}

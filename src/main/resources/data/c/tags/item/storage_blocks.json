@@ -1,0 +1,10 @@
+{
+  "replace": false,
+  "values": [
+    "biggerreactorsrework:cyanite_block",
+    "biggerreactorsrework:graphite_block",
+    "biggerreactorsrework:ludicrite_block",
+    "biggerreactorsrework:uranium_block",
+    "biggerreactorsrework:raw_uranium_block"
+  ]
+}

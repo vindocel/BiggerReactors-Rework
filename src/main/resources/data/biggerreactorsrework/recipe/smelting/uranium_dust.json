@@ -1,0 +1,10 @@
+{
+  "type": "minecraft:smelting",
+  "ingredient": [
+    {
+      "item": "biggerreactorsrework:uranium_dust"
+    }
+  ],
+  "result": {"id": "biggerreactorsrework:uranium_ingot"},
+  "cookingtime": 200
+}

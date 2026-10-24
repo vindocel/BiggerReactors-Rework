@@ -1,0 +1,7 @@
+{
+    "variants": {
+        "": {
+            "model": "biggerreactorsrework:block/heat_exchanger/hot_channel"
+        }
+    }
+}

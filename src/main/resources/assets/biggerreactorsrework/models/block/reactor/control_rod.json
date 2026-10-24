@@ -1,0 +1,12 @@
+{
+  "parent": "block/cube",
+  "textures": {
+    "up": "biggerreactorsrework:block/reactor/control_rod",
+    "down": "biggerreactorsrework:block/reactor/casing/disassembled",
+    "north": "biggerreactorsrework:block/reactor/casing/disassembled",
+    "south": "biggerreactorsrework:block/reactor/casing/disassembled",
+    "east": "biggerreactorsrework:block/reactor/casing/disassembled",
+    "west": "biggerreactorsrework:block/reactor/casing/disassembled",
+    "particle": "biggerreactorsrework:block/reactor/casing/disassembled"
+  }
+}

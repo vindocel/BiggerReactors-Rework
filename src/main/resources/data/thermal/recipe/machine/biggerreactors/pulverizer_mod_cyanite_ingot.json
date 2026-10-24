@@ -1,0 +1,18 @@
+{
+    "type": "thermal:pulverizer",
+    "neoforge:conditions": [
+        {
+            "modid": "thermal_expansion",
+            "type": "neoforge:mod_loaded"
+        }
+    ],
+    "ingredient": {
+        "item": "biggerreactorsrework:cyanite_ingot"
+    },
+    "result": [
+        {
+            "item": "biggerreactorsrework:cyanite_dust",
+            "chance": 1.0
+        }
+    ]
+}

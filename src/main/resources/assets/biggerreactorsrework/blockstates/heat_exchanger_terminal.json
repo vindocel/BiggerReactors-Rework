@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "assembled=false": {
+      "model": "biggerreactorsrework:block/heat_exchanger/terminal/off"
+    },
+    "assembled=true": {
+      "model": "biggerreactorsrework:block/heat_exchanger/terminal/active"
+    }
+  }
+}

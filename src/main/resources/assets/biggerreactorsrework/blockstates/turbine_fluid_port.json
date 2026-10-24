@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "portdirection=inlet": {
+      "model": "biggerreactorsrework:block/turbine/fluid_port/inlet"
+    },
+    "portdirection=outlet": {
+      "model": "biggerreactorsrework:block/turbine/fluid_port/outlet"
+    }
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "type": "neoforge:add_features",
+  "biomes": "#is_overworld",
+  "step": "underground_ores",
+  "features": [
+    "biggerreactorsrework:uranium_ore"
+  ]
+}
