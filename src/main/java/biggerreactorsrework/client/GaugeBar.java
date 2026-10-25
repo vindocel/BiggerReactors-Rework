@@ -114,7 +114,7 @@ public final class GaugeBar {
     }
 
     private static void bar(GuiGraphics g, ResourceLocation empty, ResourceLocation shimmer, int x, int y, double value, double capacity) {
-        g.blit(empty, x, y, 0, 0, WIDTH, HEIGHT, WIDTH, HEIGHT);
+        GuiTheme.blit(g, empty, x, y, 0, 0, WIDTH, HEIGHT, WIDTH, HEIGHT);
         shimmerRows(g, shimmer, x, y, fillTop(HEIGHT - FRAME, value, capacity), HEIGHT - FRAME);
     }
 
@@ -160,7 +160,7 @@ public final class GaugeBar {
      * Fuel mix: waste at the bottom, fuel stacked on top of it.
      */
     public static void drawFuel(GuiGraphics g, int x, int y, double waste, double fuel, double capacity) {
-        g.blit(FUEL_EMPTY, x, y, 0, 0, WIDTH, HEIGHT, WIDTH, HEIGHT);
+        GuiTheme.blit(g, FUEL_EMPTY, x, y, 0, 0, WIDTH, HEIGHT, WIDTH, HEIGHT);
         final int wasteTop = fillTop(HEIGHT - FRAME, waste, capacity);
         shimmerRows(g, WASTE_SHIMMER, x, y, wasteTop, HEIGHT - FRAME);
         shimmerRows(g, FUEL_SHIMMER, x, y, fillTop(wasteTop, fuel, capacity), wasteTop);
@@ -171,7 +171,7 @@ public final class GaugeBar {
      * frame with the level marks goes on top.
      */
     public static void drawFluid(GuiGraphics g, int x, int y, double stored, double capacity, Fluid fluid) {
-        g.blit(FLUID_EMPTY, x, y, 0, 0, WIDTH, HEIGHT, WIDTH, HEIGHT);
+        GuiTheme.blit(g, FLUID_EMPTY, x, y, 0, 0, WIDTH, HEIGHT, WIDTH, HEIGHT);
         final int top = fillTop(HEIGHT - FRAME, stored, capacity);
         if (top < HEIGHT - FRAME && fluid != Fluids.EMPTY) {
             fluidRows(g, x, y, top, fluid);
@@ -181,7 +181,7 @@ public final class GaugeBar {
             shimmerRows(g, FLUID_SHIMMER, x, y, top, HEIGHT - FRAME);
             RenderSystem.disableBlend();
         }
-        g.blit(FLUID_MARKS, x, y, 0, 0, WIDTH, HEIGHT, WIDTH, HEIGHT);
+        GuiTheme.blit(g, FLUID_MARKS, x, y, 0, 0, WIDTH, HEIGHT, WIDTH, HEIGHT);
     }
 
     /**
@@ -192,9 +192,9 @@ public final class GaugeBar {
         // The rod texture starts above the interior, under the frame.
         final int rows = FRAME + filledPixels(INTERIOR_HEIGHT, insertion, 100);
         if (rows > 0) {
-            g.blit(CONTROL_ROD_FILL, x, y, 0, 0, WIDTH, rows, WIDTH, HEIGHT);
+            GuiTheme.blit(g, CONTROL_ROD_FILL, x, y, 0, 0, WIDTH, rows, WIDTH, HEIGHT);
         }
-        g.blit(CONTROL_ROD_FRAME, x, y, 0, 0, WIDTH, HEIGHT, WIDTH, HEIGHT);
+        GuiTheme.blit(g, CONTROL_ROD_FRAME, x, y, 0, 0, WIDTH, HEIGHT, WIDTH, HEIGHT);
     }
 
     /**
@@ -202,11 +202,11 @@ public final class GaugeBar {
      * showing the coolant. Pass {@link Fluids#EMPTY} to leave the tank empty.
      */
     public static void drawCoolantFlow(GuiGraphics g, int x, int y, double progress, Fluid coolant) {
-        g.blit(COOLANT_FLOW_EMPTY, x, y, 0, 0, WIDTH, COOLANT_FLOW_HEIGHT, WIDTH, COOLANT_FLOW_HEIGHT);
+        GuiTheme.blit(g, COOLANT_FLOW_EMPTY, x, y, 0, 0, WIDTH, COOLANT_FLOW_HEIGHT, WIDTH, COOLANT_FLOW_HEIGHT);
         final int rows = filledPixels(COOLANT_FLOW_HEIGHT, progress, 1);
         if (rows > 0) {
             final int top = COOLANT_FLOW_HEIGHT - rows;
-            g.blit(COOLANT_FLOW_FILL, x, y + top, 0, top, WIDTH, rows, WIDTH, COOLANT_FLOW_HEIGHT);
+            GuiTheme.blit(g, COOLANT_FLOW_FILL, x, y + top, 0, top, WIDTH, rows, WIDTH, COOLANT_FLOW_HEIGHT);
         }
         final int tankX = x + 1;
         final int tankY = y + COOLANT_FLOW_HEIGHT;
@@ -222,27 +222,27 @@ public final class GaugeBar {
      */
     private static void coolantTank(GuiGraphics g, int x, int y) {
         final int size = COOLANT_TANK_SIZE;
-        g.fill(x, y, x + 1, y + 1, COOLANT_TANK_COVER);
-        g.fill(x + 1, y, x + size - 1, y + 1, GuiArt.SLOT_SHADOW);
-        g.fill(x + size - 1, y, x + size, y + 1, COOLANT_TANK_COVER);
-        g.fill(x, y + 1, x + 1, y + 2, GuiArt.SLOT_SHADOW);
-        g.fill(x + size - 1, y + 1, x + size, y + 2, GuiArt.SLOT_SHADOW);
-        g.fill(x, y + 4, x + 1, y + 5, GuiArt.WHITE);
-        g.fill(x + size - 1, y + 4, x + size, y + 5, GuiArt.WHITE);
-        g.fill(x, y + 5, x + 1, y + 6, COOLANT_TANK_COVER);
-        g.fill(x + 1, y + 5, x + size - 1, y + 6, GuiArt.WHITE);
-        g.fill(x + size - 1, y + 5, x + size, y + 6, COOLANT_TANK_COVER);
-        g.fill(x, y + 6, x + size, y + size, COOLANT_TANK_COVER);
+        g.fill(x, y, x + 1, y + 1, GuiTheme.panelColor());
+        GuiArt.fill(g, x + 1, y, x + size - 1, y + 1, GuiArt.SLOT_SHADOW);
+        g.fill(x + size - 1, y, x + size, y + 1, GuiTheme.panelColor());
+        GuiArt.fill(g, x, y + 1, x + 1, y + 2, GuiArt.SLOT_SHADOW);
+        GuiArt.fill(g, x + size - 1, y + 1, x + size, y + 2, GuiArt.SLOT_SHADOW);
+        GuiArt.fill(g, x, y + 4, x + 1, y + 5, GuiArt.WHITE);
+        GuiArt.fill(g, x + size - 1, y + 4, x + size, y + 5, GuiArt.WHITE);
+        g.fill(x, y + 5, x + 1, y + 6, GuiTheme.panelColor());
+        GuiArt.fill(g, x + 1, y + 5, x + size - 1, y + 6, GuiArt.WHITE);
+        g.fill(x + size - 1, y + 5, x + size, y + 6, GuiTheme.panelColor());
+        g.fill(x, y + 6, x + size, y + size, GuiTheme.panelColor());
     }
 
     /**
      * Machine progress: an arrow that fills from left to right as {@code progress} reaches {@code total}.
      */
     public static void drawProgressArrow(GuiGraphics g, int x, int y, double progress, double total) {
-        g.blit(PROGRESS_EMPTY, x, y, 0, 0, PROGRESS_WIDTH, PROGRESS_HEIGHT, PROGRESS_WIDTH, PROGRESS_HEIGHT);
+        GuiTheme.blit(g, PROGRESS_EMPTY, x, y, 0, 0, PROGRESS_WIDTH, PROGRESS_HEIGHT, PROGRESS_WIDTH, PROGRESS_HEIGHT);
         final int columns = filledPixels(PROGRESS_WIDTH, progress, total);
         if (columns > 0) {
-            g.blit(PROGRESS_FILL, x, y, 0, 0, columns, PROGRESS_HEIGHT, PROGRESS_WIDTH, PROGRESS_HEIGHT);
+            GuiTheme.blit(g, PROGRESS_FILL, x, y, 0, 0, columns, PROGRESS_HEIGHT, PROGRESS_WIDTH, PROGRESS_HEIGHT);
         }
     }
 }

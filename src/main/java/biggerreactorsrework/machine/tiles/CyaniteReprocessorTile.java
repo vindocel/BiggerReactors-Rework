@@ -91,7 +91,7 @@ public class CyaniteReprocessorTile extends BlockEntity implements MenuProvider,
     /**
      * The water tank.
      */
-    private final FluidTank fluidTank = new FluidTank(Config.CONFIG.CyaniteReprocessor.WaterTankCapacity, fluid -> fluid.getFluid() == Fluids.WATER) {
+    private final FluidTank fluidTank = new FluidTank(Config.CONFIG.CyaniteReprocessor.WaterTankCapacity, this::acceptsFluid) {
         @Override
         protected void onContentsChanged() {
             CyaniteReprocessorTile.this.setChanged();
@@ -493,6 +493,8 @@ public class CyaniteReprocessorTile extends BlockEntity implements MenuProvider,
 
         // Read work.
         this.workHandler = new WorkHandler(Config.CONFIG.CyaniteReprocessor.TotalWorkTime, Math.max(0, childCompound.getInt("workTime")));
+        activeRecipeId = net.minecraft.resources.ResourceLocation.tryParse(childCompound.getString("recipe"));
+        restoredRecipeSignature = childCompound.getString("recipeSignature");
         // Read items.
         this.itemHandler.deserializeNBT(registries, childCompound.getCompound("inventory"));
         if (this.itemHandler.getSlots() != CyaniteReprocessorItemHandler.SLOTS) {
@@ -521,6 +523,8 @@ public class CyaniteReprocessorTile extends BlockEntity implements MenuProvider,
 
         // Write work.
         childCompound.putInt("workTime", this.workHandler.getProgress());
+        if (activeRecipeId != null) childCompound.putString("recipe", activeRecipeId.toString());
+        childCompound.putString("recipeSignature", activeRecipeSignature);
         // Write items.
         childCompound.put("inventory", this.itemHandler.serializeNBT(registries));
         // Write energy.
@@ -540,15 +544,33 @@ public class CyaniteReprocessorTile extends BlockEntity implements MenuProvider,
      * @return Whether or not the machine can perform work.
      * @see CyaniteReprocessorTile#tick()
      */
-    private boolean canWork() {
-        // If the output slot is full, we cannot work.
-        ItemStack outputStack = this.itemHandler.getStackInSlot(CyaniteReprocessorItemHandler.OUTPUT_SLOT_INDEX);
-        if (outputStack.getCount() >= this.itemHandler.getSlotLimit(CyaniteReprocessorItemHandler.OUTPUT_SLOT_INDEX)
-                || outputStack.getCount() >= outputStack.getMaxStackSize()) {
-            return false;
-        }
-        return (this.energyStorage.getEnergyStored() >= Config.CONFIG.CyaniteReprocessor.EnergyConsumptionPerTick
-                && this.fluidTank.getFluidAmount() >= Config.CONFIG.CyaniteReprocessor.WaterConsumptionPerTick);
+    private net.minecraft.resources.ResourceLocation activeRecipeId;
+    private String activeRecipeSignature = "";
+    private String restoredRecipeSignature = "";
+    private biggerreactorsrework.machine.recipe.ReprocessingRecipe fingerprintedRecipe;
+    private String cachedFingerprint;
+
+
+    private String signature(biggerreactorsrework.machine.recipe.ReprocessingRecipe recipe) {
+        if (fingerprintedRecipe == recipe) return cachedFingerprint;
+        fingerprintedRecipe = recipe;
+        return cachedFingerprint = biggerreactorsrework.machine.recipe.ReprocessingRecipe.CODEC.codec().encodeStart(
+                net.minecraft.resources.RegistryOps.create(com.mojang.serialization.JsonOps.INSTANCE, level.registryAccess()), recipe).getOrThrow().toString();
+    }
+
+    private boolean acceptsItem(ItemStack stack) {
+        return biggerreactorsrework.machine.recipe.ReprocessingRecipes.all(level).stream().anyMatch(r -> r.value().ingredient().test(stack));
+    }
+
+    private boolean acceptsFluid(FluidStack stack) {
+        return biggerreactorsrework.machine.recipe.ReprocessingRecipes.all(level).stream().anyMatch(r -> r.value().fluid() == stack.getFluid());
+    }
+
+    private boolean canWork(biggerreactorsrework.machine.recipe.ReprocessingRecipe recipe) {
+        ItemStack product = recipe.result();
+        if (!itemHandler.insertItem(CyaniteReprocessorItemHandler.OUTPUT_SLOT_INDEX, product, true).isEmpty()) return false;
+        return energyStorage.getEnergyStored() >= recipe.energy() && (recipe.water() == 0 ||
+                (fluidTank.getFluid().getFluid() == recipe.fluid() && fluidTank.getFluidAmount() >= recipe.water()));
     }
 
     /**
@@ -559,6 +581,7 @@ public class CyaniteReprocessorTile extends BlockEntity implements MenuProvider,
             return;
         }
 
+        this.itemHandler.inputFilter(this::acceptsItem);
         if (this.autoInput) {
             this.autoInputCycle();
         }
@@ -571,31 +594,39 @@ public class CyaniteReprocessorTile extends BlockEntity implements MenuProvider,
         ItemStack inputStack = this.itemHandler.getStackInSlot(CyaniteReprocessorItemHandler.INPUT_SLOT_INDEX);
 
         // Check to make sure the player doesn't try to pull a fast one.
-        if (!ItemStack.isSameItem(this.itemPresentLastTick, inputStack)) {
+        if (restoredRecipeSignature.isEmpty() && !ItemStack.isSameItemSameComponents(this.itemPresentLastTick, inputStack)) {
             this.workHandler.clear();
         }
         this.itemPresentLastTick = inputStack.copy();
 
-        if (inputStack.getCount() >= CYANITE_PER_INGOT) {
-            // Can we continue?
-            if (canWork()) {
-                isActive = true;
-                doUpdate = true;
-                this.workHandler.increment(1);
-                this.energyStorage.consume(Config.CONFIG.CyaniteReprocessor.EnergyConsumptionPerTick);
-                this.fluidTank.drain(Config.CONFIG.CyaniteReprocessor.WaterConsumptionPerTick, IFluidHandler.FluidAction.EXECUTE);
-            } else if (this.workHandler.getProgress() > 0) {
-                // We've run out of resources, lose progress.
-                this.workHandler.decrement(Math.min(2, this.workHandler.getProgress()));
+        var selected = biggerreactorsrework.machine.recipe.ReprocessingRecipes.all(level).stream()
+                .filter(r -> r.value().matches(new net.minecraft.world.item.crafting.SingleRecipeInput(inputStack), level))
+                .findFirst().orElse(null);
+        if (selected == null) {
+            if (workHandler.getProgress() != 0) doUpdate = true;
+            workHandler.clear(); activeRecipeId = null; activeRecipeSignature = ""; restoredRecipeSignature = "";
+        } else {
+            var recipe = selected.value();
+            String signature = signature(recipe);
+            if (!selected.id().equals(activeRecipeId) || !signature.equals(activeRecipeSignature) || workHandler.getGoal() != recipe.duration()) {
+                int restored = selected.id().equals(activeRecipeId) && signature.equals(restoredRecipeSignature) ? workHandler.getProgress() : 0;
+                workHandler = new WorkHandler(recipe.duration(), Math.min(restored, recipe.duration() - 1));
+                activeRecipeId = selected.id(); activeRecipeSignature = signature; restoredRecipeSignature = "";
                 doUpdate = true;
             }
-
-            // Item is done.
-            if (this.workHandler.isFinished()) {
-                this.itemHandler.extractItem(CyaniteReprocessorItemHandler.INPUT_SLOT_INDEX, CYANITE_PER_INGOT, false);
-                this.itemHandler.insertItem(CyaniteReprocessorItemHandler.OUTPUT_SLOT_INDEX, new ItemStack(BlutoniumIngot.INSTANCE, 1), false);
-                this.workHandler.clear();
-                this.itemPresentLastTick = this.itemHandler.getStackInSlot(CyaniteReprocessorItemHandler.INPUT_SLOT_INDEX).copy();
+            if (canWork(recipe)) {
+                isActive = true; doUpdate = true;
+                workHandler.increment(1);
+                energyStorage.consume(recipe.energy());
+                fluidTank.drain(recipe.water(), IFluidHandler.FluidAction.EXECUTE);
+            } else if (workHandler.getProgress() > 0) {
+                workHandler.decrement(Math.min(2, workHandler.getProgress())); doUpdate = true;
+            }
+            if (workHandler.isFinished()) {
+                itemHandler.extractItem(CyaniteReprocessorItemHandler.INPUT_SLOT_INDEX, recipe.count(), false);
+                itemHandler.insertItem(CyaniteReprocessorItemHandler.OUTPUT_SLOT_INDEX, recipe.result(), false);
+                workHandler.clear();
+                itemPresentLastTick = itemHandler.getStackInSlot(CyaniteReprocessorItemHandler.INPUT_SLOT_INDEX).copy();
             }
         }
 

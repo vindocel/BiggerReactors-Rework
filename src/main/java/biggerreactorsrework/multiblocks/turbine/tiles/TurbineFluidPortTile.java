@@ -49,19 +49,6 @@ public class TurbineFluidPortTile extends TurbineBaseTile implements IFluidTankH
         super(TYPE, pos, state);
     }
 
-    // TODO: mek gas
-//    private static final Capability<IGasHandler> GAS_HANDLER_CAPABILITY = CapabilityManager.get(new CapabilityToken<>(){});
-//
-//    @Override
-//    public <T> LazyOptional<T> capability(Capability<T> cap, @Nullable Direction side) {
-//        if (cap == ForgeCapabilities.FLUID_HANDLER) {
-//            return LazyOptional.of(() -> this).cast();
-//        }
-//        if (cap == GAS_HANDLER_CAPABILITY) {
-//            return LazyOptional.of(() -> MekanismGasWrappers.wrap(this)).cast();
-//        }
-//        return super.capability(cap, side);
-//    }
     
     private ITurbineFluidTank transitionTank;
     
@@ -172,15 +159,6 @@ public class TurbineFluidPortTile extends TurbineBaseTile implements IFluidTankH
         if (outputCap != null) {
             connected = true;
             handler = FluidHandlerWrapper.wrap(outputCap);
-            // todo: mek gas
-//        } else if (GAS_HANDLER_CAPABILITY != null) {
-//            LazyOptional<IGasHandler> gasOptional = te.getCapability(GAS_HANDLER_CAPABILITY, waterOutputDirection.getOpposite());
-//            if (gasOptional.isPresent()) {
-//                IGasHandler gasHandler = gasOptional.orElse(MekanismGasWrappers.EMPTY_TANK);
-//                connected = true;
-//                handlerOptional = gasOptional;
-//                handler = MekanismGasWrappers.wrap(gasHandler);
-//            }
         }
     }
     

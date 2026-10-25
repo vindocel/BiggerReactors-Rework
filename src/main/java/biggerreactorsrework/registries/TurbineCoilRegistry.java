@@ -104,6 +104,7 @@ public class TurbineCoilRegistry {
                 }
             }
         }
+        MaterialDataMaps.coils(registry);
         BiggerReactors.LOGGER.info("Loaded " + registry.size() + " coil entries");
     }
     
@@ -156,6 +157,7 @@ public class TurbineCoilRegistry {
         
         private static void readSync(DataCompound compound, IPayloadContext context) {
             coilBlocks.clear();
+            coilProperties.clear();
             //noinspection unchecked
             final var list = (List<String>) compound.getList("list");
             //noinspection unchecked
@@ -166,7 +168,9 @@ public class TurbineCoilRegistry {
             for (int i = 0; i < list.size(); i++) {
                 var value = list.get(i);
                 var properties = propertiesList.get(i);
-                final var block = BuiltInRegistries.BLOCK.get(ResourceLocation.parse(value));
+                var id=ResourceLocation.tryParse(value);
+                if(id==null||!BuiltInRegistries.BLOCK.containsKey(id))continue;
+                final var block = BuiltInRegistries.BLOCK.get(id);
                 if (block == null) {
                     return;
                 }

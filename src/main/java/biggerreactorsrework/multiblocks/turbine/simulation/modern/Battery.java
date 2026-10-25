@@ -8,15 +8,17 @@ public class Battery implements ITurbineBattery {
     private long capacity;
     private long stored;
     private long generatedLastTick;
+    private boolean capacityConfigured;
     
     @Override
     public long extract(long toExtract) {
-        stored -= toExtract;
-        return toExtract;
+        long amount = Math.max(0, Math.min(stored, toExtract));
+        stored -= amount;
+        return amount;
     }
     
     public long generate(long maxToGenerate){
-        generatedLastTick = Math.min(maxToGenerate, capacity - stored);
+        generatedLastTick = Math.max(0, Math.min(maxToGenerate, Math.max(0, capacity - stored)));
         stored += generatedLastTick;
         return generatedLastTick;
     }
@@ -36,7 +38,9 @@ public class Battery implements ITurbineBattery {
     }
     
     public void setCapacity(long capacity) {
-        this.capacity = capacity;
+        this.capacity = Math.max(0, capacity);
+        this.capacityConfigured = true;
+        stored = Math.min(stored, this.capacity);
     }
     
     @Override
@@ -48,6 +52,7 @@ public class Battery implements ITurbineBattery {
     
     @Override
     public void deserializeNBT(CompoundTag nbt) {
-        stored = nbt.getLong("storedPower");
+        stored = Math.max(0, nbt.getLong("storedPower"));
+        if (capacityConfigured) stored = Math.min(stored, capacity);
     }
 }

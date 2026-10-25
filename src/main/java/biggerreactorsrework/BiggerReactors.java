@@ -30,6 +30,9 @@ public class BiggerReactors {
     public BiggerReactors(IEventBus modBus, ModContainer container) {
         version = container.getModInfo().getVersion().toString();
         new Registry(modid, BiggerReactors.class.getPackageName(), modBus, new ReferenceArrayList<>(), new ReferenceArrayList<>());
+        biggerreactorsrework.machine.recipe.ReprocessingRecipes.register(modBus);
+        modBus.addListener(biggerreactorsrework.registries.MaterialDataMaps::register);
+        modBus.addListener(biggerreactorsrework.data.ModDataGeneration::gather);
         CoreEvents.init();
         NeoForge.EVENT_BUS.addListener(this::onReloadData);
         if (ModList.get().isLoaded("computercraft")) {

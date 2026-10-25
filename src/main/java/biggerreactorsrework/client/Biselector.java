@@ -62,7 +62,7 @@ public class Biselector<T extends AbstractContainerMenu> extends InteractiveElem
     public void render(@Nonnull GuiGraphics graphics, int mouseX, int mouseY) {
         // Check conditions.
         if (this.renderEnable) {
-            GuiArt.toggleSwitch(graphics, this.x, this.y, this.state.getAsInt() != 0, this.actionEnable && this.isMouseOver(mouseX, mouseY), !this.actionEnable, this.onColor);
+            GuiArt.toggleSwitch(graphics, this.x, this.y, this.state.getAsInt() != 0, this.actionEnable && this.isMouseOver(mouseX, mouseY), !this.actionEnable, this.onColor, this.parent.getFrame());
             // Trigger user-defined render logic.
             if (this.onRender != null) {
                 this.onRender.trigger(graphics, mouseX, mouseY);

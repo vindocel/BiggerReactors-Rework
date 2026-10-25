@@ -10,6 +10,7 @@ import net.neoforged.api.distmarker.OnlyIn;
 import biggerreactorsrework.BiggerReactors;
 import biggerreactorsrework.client.CommonRender;
 import biggerreactorsrework.client.GuiArt;
+import biggerreactorsrework.client.GuiFrame;
 import biggerreactorsrework.client.GuiIcon;
 import biggerreactorsrework.multiblocks.reactor.containers.ReactorTerminalContainer;
 import biggerreactorsrework.multiblocks.reactor.state.ReactorState;
@@ -28,7 +29,7 @@ public class PassiveReactorTerminalScreen extends ModScreen<ReactorTerminalConta
     private ReactorState reactorState;
 
     public PassiveReactorTerminalScreen(ReactorTerminalContainer container, Inventory playerInventory, Component title) {
-        super(container, playerInventory, title, 176, 152);
+        super(container, playerInventory, title, 200, 152);
 
         // Initialize reactor state.
         reactorState = (ReactorState) this.getMenu().getGuiPacket();
@@ -64,14 +65,14 @@ public class PassiveReactorTerminalScreen extends ModScreen<ReactorTerminalConta
         this.addScreenElement(new TooltipElement<>(this, 8, 38, 16, 16, Component.translatable("screen.biggerreactorsrework.reactor_terminal.energy_generation_rate.tooltip")));
 
         // (Left) RF generation readout tooltip:
-        TooltipElement<ReactorTerminalContainer> generationRateReadoutTooltip = new TooltipElement<>(this, 26, 38, 53, 16, Component.empty());
+        TooltipElement<ReactorTerminalContainer> generationRateReadoutTooltip = new TooltipElement<>(this, 26, 38, 77, 16, Component.empty());
         generationRateReadoutTooltip.onTick = () -> {
             generationRateReadoutTooltip.tooltip = Component.literal(String.format("%.3f FE/t", this.reactorState.reactorOutputRate));
         };
         this.addScreenElement(generationRateReadoutTooltip);
 
         // (Top) Internal battery tooltip:
-        this.addScreenElement(new TooltipElement<>(this, 152, 6, 16, 16, Component.translatable("screen.biggerreactorsrework.reactor_terminal.internal_battery.tooltip")));
+        this.addScreenElement(new TooltipElement<>(this, 176, 6, 16, 16, Component.translatable("screen.biggerreactorsrework.reactor_terminal.internal_battery.tooltip")));
     }
 
     /**
@@ -79,7 +80,7 @@ public class PassiveReactorTerminalScreen extends ModScreen<ReactorTerminalConta
      */
     private void initGauges() {
         // (Top) Internal battery:
-        RenderedElement<ReactorTerminalContainer> internalBattery = new RenderedElement<>(this, 151, 25, 18, 64, 0, 152, Component.empty());
+        RenderedElement<ReactorTerminalContainer> internalBattery = new RenderedElement<>(this, 175, 25, 18, 64, 0, 152, Component.empty());
         internalBattery.onRender = (@Nonnull GuiGraphics graphics, int mX, int mY) -> CommonRender.renderEnergyGauge(graphics,
                 internalBattery, reactorState.energyStored, reactorState.energyCapacity);
         this.addScreenElement(internalBattery);
@@ -113,10 +114,11 @@ public class PassiveReactorTerminalScreen extends ModScreen<ReactorTerminalConta
 
         // Render the other text:
         CommonReactorTerminalScreen.renderStatusText(graphics, this, reactorState.reactorActivity, reactorState.doAutoEject,
-                reactorState.fuelHeatStored, reactorState.fuelUsageRate, reactorState.reactivityRate);
+                reactorState.fuelHeatStored, reactorState.fuelUsageRate, reactorState.reactivityRate,
+                this.imageWidth - 6);
 
         // Render text for output rate:
-        graphics.drawString(this.getFont(), RenderHelper.formatValue(reactorState.reactorOutputRate, "FE/t"), this.getGuiLeft() + 27, this.getGuiTop() + 42, 4210752, false);
+        CommonReactorTerminalScreen.renderReadout(graphics, this, RenderHelper.formatValue(reactorState.reactorOutputRate, "FE/t"), 42);
     }
 
     /**
@@ -124,18 +126,29 @@ public class PassiveReactorTerminalScreen extends ModScreen<ReactorTerminalConta
      */
     @Override
     protected void drawBackground(@Nonnull GuiGraphics graphics, int x, int y) {
-        GuiArt.panel(graphics, x, y, 176, 152);
-        GuiArt.fill(graphics, x + 6, y + 36, x + 81, y + 37, GuiArt.SEPARATOR);
-        GuiArt.fill(graphics, x + 6, y + 55, x + 81, y + 56, GuiArt.SEPARATOR);
-        GuiArt.fill(graphics, x + 6, y + 74, x + 81, y + 75, GuiArt.SEPARATOR);
-        GuiArt.fill(graphics, x + 6, y + 93, x + 81, y + 94, GuiArt.SEPARATOR);
+        GuiArt.panel(graphics, x, y, 200, 152, this.frame());
+        GuiArt.fill(graphics, x + 6, y + 36, x + 105, y + 37, GuiArt.SEPARATOR);
+        GuiArt.fill(graphics, x + 6, y + 55, x + 105, y + 56, GuiArt.SEPARATOR);
+        GuiArt.fill(graphics, x + 6, y + 74, x + 105, y + 75, GuiArt.SEPARATOR);
+        GuiArt.fill(graphics, x + 6, y + 93, x + 105, y + 94, GuiArt.SEPARATOR);
         GuiIcon.TEMPERATURE.draw(graphics, x + 12, y + 19);
         GuiIcon.ENERGY_GENERATION_RATE.draw(graphics, x + 9, y + 39);
         GuiIcon.FUEL_USAGE_RATE.draw(graphics, x + 8, y + 59);
         GuiIcon.REACTIVITY.draw(graphics, x + 8, y + 76);
-        GuiIcon.FUEL_MIX.draw(graphics, x + 86, y + 6);
-        GuiIcon.CASE_HEAT.draw(graphics, x + 108, y + 6);
-        GuiIcon.FUEL_HEAT.draw(graphics, x + 130, y + 6);
-        GuiIcon.BATTERY.draw(graphics, x + 155, y + 6);
+        GuiIcon.FUEL_MIX.draw(graphics, x + 110, y + 6);
+        GuiIcon.CASE_HEAT.draw(graphics, x + 132, y + 6);
+        GuiIcon.FUEL_HEAT.draw(graphics, x + 154, y + 6);
+        GuiIcon.BATTERY.draw(graphics, x + 179, y + 6);
     }
+
+    @Override
+    protected int titleWidth() {
+        return CommonReactorTerminalScreen.TITLE_WIDTH;
+    }
+
+    @Override
+    protected GuiFrame frame() {
+        return GuiFrame.REACTOR;
+    }
+    @Override public boolean hasAppearanceSettings() { return true; }
 }

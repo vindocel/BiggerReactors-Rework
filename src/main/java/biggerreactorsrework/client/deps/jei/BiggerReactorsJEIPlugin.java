@@ -75,7 +75,7 @@ public class BiggerReactorsJEIPlugin implements IModPlugin {
         if (!enabled() || !Config.CONFIG.EnableJEIIntegration) {
             return;
         }
-        registration.addRecipes(CyaniteReprocessingCategory.RECIPE_TYPE, List.of(new CyaniteReprocessingCategory.Recipe()));
+        registration.addRecipes(CyaniteReprocessingCategory.RECIPE_TYPE, biggerreactorsrework.machine.recipe.ReprocessingRecipes.all(net.minecraft.client.Minecraft.getInstance().level).stream().map(holder -> new CyaniteReprocessingCategory.Recipe(holder.value())).toList());
         registration.addRecipes(CoilCategory.RECIPE_TYPE, RecipeViewerData.coils().stream()
                 .map(c -> new CoilCategory.Recipe(c.block(), c.data())).toList());
         registration.addRecipes(FluidModeratorCategory.RECIPE_TYPE, RecipeViewerData.moderatorFluids().stream()

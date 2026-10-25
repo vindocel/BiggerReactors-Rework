@@ -344,6 +344,34 @@ public class Config {
     @ConfigValue
     public final HeatExchanger HeatExchanger = new HeatExchanger();
     
+    public static final class Battery {
+        @ConfigValue(range = "[3,)", comment = "Every cell is a block entity, so very large batteries make assembly slower")
+        public final int MaxLength;
+        @ConfigValue(range = "[3,)")
+        public final int MaxWidth;
+        @ConfigValue(range = "[3,)")
+        public final int MaxHeight;
+        
+        {
+            MaxLength = 32;
+            MaxWidth = 32;
+            MaxHeight = 32;
+        }
+        
+        @ConfigValue(range = "(0,)", comment = "FE stored by each battery cell")
+        public final long CellCapacity;
+        @ConfigValue(range = "(0,)", comment = "FE/t each battery cell adds to the input limit, and the same again to the output limit")
+        public final long CellTransferRate;
+        
+        {
+            CellCapacity = 3_200_000_000L;
+            CellTransferRate = 300_000;
+        }
+    }
+    
+    @ConfigValue
+    public final Battery Battery = new Battery();
+    
     public static final class CyaniteReprocessor {
         @ConfigValue(range = "(0,)", comment = "Max transfer rate of fluids and energy.")
         public final int TransferRate;

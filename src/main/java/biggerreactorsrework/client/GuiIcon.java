@@ -25,6 +25,8 @@ public record GuiIcon(ResourceLocation texture, int width, int height) {
     public static final GuiIcon CONTROL_ROD_INSERTION = of("control_rod_insertion", 13, 16);
     public static final GuiIcon EJECT_WASTE = of("eject_waste", 16, 16);
     public static final GuiIcon ENERGY_GENERATION_RATE = of("energy_generation_rate", 12, 14);
+    public static final GuiIcon ENERGY_INPUT = of("energy_input", 12, 14);
+    public static final GuiIcon ENERGY_OUTPUT = of("energy_output", 12, 14);
     public static final GuiIcon EVAPORATOR_EXHAUST = of("evaporator_exhaust", 16, 16);
     public static final GuiIcon EVAPORATOR_FLOW_RATE = of("evaporator_flow_rate", 16, 16);
     public static final GuiIcon EVAPORATOR_INTAKE = of("evaporator_intake", 16, 16);
@@ -36,6 +38,7 @@ public record GuiIcon(ResourceLocation texture, int width, int height) {
     public static final GuiIcon FUEL_MIX = of("fuel_mix", 15, 16);
     public static final GuiIcon FUEL_USAGE_RATE = of("fuel_usage_rate", 16, 13);
     public static final GuiIcon HELP = of("help", 16, 16);
+    public static final GuiIcon SETTINGS = of("settings", 16, 16);
     public static final GuiIcon REACTIVITY = of("reactivity", 16, 16);
     public static final GuiIcon REACTOR_ACTIVITY = of("reactor_activity", 16, 12);
     public static final GuiIcon ROTOR_EFFICIENCY = of("rotor_efficiency", 16, 16);

@@ -1,0 +1,5 @@
+CONCEITO — CONEXÃO VERTICAL
+
+Painel de três colunas e duas células de altura, em 48x32 pixels reais. Cada coluna tem fundo escuro contínuo e nove barrinhas: três em cima, três novas na ponte central e três embaixo. preview.png é apenas a ampliação 16x sem suavização. As camadas do corpo e da energia estão separadas.
+
+A textura granulada do usuário foi preservada fora dos retângulos da ponte central. Nenhum arquivo de textura atual foi substituído. Este estudo não altera o atlas CTM, as variantes ou o comportamento no jogo; mostra a direção visual proposta.

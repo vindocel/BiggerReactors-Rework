@@ -34,7 +34,8 @@ public class Battery extends HeatBody implements IReactorSimulation.IBattery, IS
         double rfTransferred = (newTemp - other.temperature()) * other.rfPerKelvin();
         
         generatedLastTick = (long) (-rfTransferred * configuration.outputMultiplier() * configuration.passiveOutputMultiplier());
-        stored += generatedLastTick;
+        generatedLastTick = Math.max(0, generatedLastTick);
+        stored += Math.min(generatedLastTick, Math.max(0, capacity - stored));
         if (stored > capacity) {
             stored = capacity;
         }
@@ -46,8 +47,9 @@ public class Battery extends HeatBody implements IReactorSimulation.IBattery, IS
     
     @Override
     public long extract(long toExtract) {
-        stored -= toExtract;
-        return toExtract;
+        long extracted = Math.max(0, Math.min(stored, toExtract));
+        stored -= extracted;
+        return extracted;
     }
     
     @Override
@@ -75,6 +77,6 @@ public class Battery extends HeatBody implements IReactorSimulation.IBattery, IS
     
     @Override
     public void load(@Nonnull DataCompound compound) {
-        stored = compound.getLong("storedPower");
+        stored = Math.max(0, Math.min(capacity, compound.getLong("storedPower")));
     }
 }

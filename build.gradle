@@ -52,7 +52,19 @@ neoForge {
 
         data {
             data()
+            gameDirectory = project.file('run/datagen')
             programArguments.addAll '--mod', project.mod_id, '--all', '--output', file('src/generated/resources/').getAbsolutePath(), '--existing', file('src/main/resources/').getAbsolutePath()
+        }
+
+        clientVerification {
+            client()
+            gameDirectory = project.file('run/client-verification')
+        }
+
+        serverVerification {
+            server()
+            gameDirectory = project.file('run/server-verification')
+            programArgument '--nogui'
         }
 
         configureEach {
@@ -115,6 +127,7 @@ dependencies {
 
     testImplementation platform('org.junit:junit-bom:5.11.3')
     testImplementation 'org.junit.jupiter:junit-jupiter'
+    testImplementation 'com.google.code.gson:gson:2.10.1'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 

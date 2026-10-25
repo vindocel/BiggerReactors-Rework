@@ -151,7 +151,7 @@ public class ReactorMultiblockController extends MultiblockController<ReactorBas
                 final var tile = blocks.getTile(x, i, z);
                 
                 if (!(tile instanceof ReactorFuelRodTile)) {
-                    throw new ValidationException(Component.translatable("multiblock.error.biggerreactorsrework.fuel_rod_gap", controlRodPos.getX(), controlRodPos.getY() + (-1 - i), controlRodPos.getZ()));
+                    throw new ValidationException(Component.translatable("multiblock.error.biggerreactorsrework.fuel_rod_gap", controlRodPos.getX(), i, controlRodPos.getZ()));
                 }
                 
                 ((ReactorFuelRodTile) tile).lastCheckedTick = tick;
@@ -378,9 +378,13 @@ public class ReactorMultiblockController extends MultiblockController<ReactorBas
                 if (phosCompound != null) {
                     compound.putByteArray("simulationData", phosCompound.toROBN());
                 }
+            } else if (simulationData != null) {
+                compound.putByteArray("simulationData", simulationData.toROBN());
             }
             if (coolantTank != null) {
                 compound.put("coolantTankWrapper", coolantTank.serializeNBT());
+            } else if (coolantTankNBT != null) {
+                compound.put("coolantTankWrapper", coolantTankNBT.copy());
             }
         }
         return compound;
@@ -476,9 +480,13 @@ public class ReactorMultiblockController extends MultiblockController<ReactorBas
     }
     
     @Override
+    protected void onPartBroken(@Nonnull ReactorBaseTile tile) {
+        setActive(ReactorActivity.INACTIVE);
+    }
+
+    @Override
     public void onDisassembled() {
         distributeFuel();
-        setActive(ReactorActivity.INACTIVE);
         if (simulation != null) {
             simulationData = simulation.save();
             simulation = null;
@@ -525,29 +533,9 @@ public class ReactorMultiblockController extends MultiblockController<ReactorBas
         
         var battery = simulation.battery();
         if (battery != null) {
-            long totalPowerRequested = 0;
-            final long startingPower = battery.stored();
-            for (ReactorPowerTapTile powerPort : powerPorts) {
-                final long requested = powerPort.distributePower(startingPower, true);
-                if (requested > startingPower) {
-                    // bugged impl, ignoring
-                    continue;
-                }
-                totalPowerRequested += requested;
-            }
-            
-            float distributionMultiplier = Math.min(1f, (float) startingPower / (float) totalPowerRequested);
-            for (ReactorPowerTapTile powerPort : powerPorts) {
-                long powerRequested = powerPort.distributePower(startingPower, true);
-                if (powerRequested > startingPower) {
-                    // bugged impl, ignoring
-                    continue;
-                }
-                powerRequested *= distributionMultiplier;
-                powerRequested = Math.min(battery.stored(), powerRequested); // just in casei
-                long powerAccepted = powerPort.distributePower(powerRequested, false);
-                battery.extract(powerAccepted);
-            }
+            biggerreactorsrework.core.energy.PowerDistribution.distribute(battery.stored(), powerPorts,
+                    ReactorPowerTapTile::distributePower, battery::extract);
+
         }
         
         // i know this is just a hose out, not sure if it should be changed or not
@@ -659,6 +647,7 @@ public class ReactorMultiblockController extends MultiblockController<ReactorBas
         if (simulation == null) {
             return;
         }
+        simulation.settle();
         if (simulation.fuelTank().totalStored() > 0 && !fuelRods.isEmpty()) {
             long fuelToDistribute = simulation.fuelTank().fuel();
             long fuelLeft = simulation.fuelTank().fuel();

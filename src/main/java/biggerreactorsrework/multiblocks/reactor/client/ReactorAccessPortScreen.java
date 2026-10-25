@@ -1,5 +1,7 @@
 package biggerreactorsrework.multiblocks.reactor.client;
 
+import biggerreactorsrework.client.GuiTheme;
+
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
@@ -12,6 +14,7 @@ import biggerreactorsrework.BiggerReactors;
 import biggerreactorsrework.client.Biselector;
 import biggerreactorsrework.client.SelectorColors;
 import biggerreactorsrework.client.GuiArt;
+import biggerreactorsrework.client.GuiFrame;
 import biggerreactorsrework.client.GuiIcon;
 import biggerreactorsrework.multiblocks.reactor.containers.ReactorAccessPortContainer;
 import biggerreactorsrework.multiblocks.reactor.state.ReactorAccessPortState;
@@ -98,7 +101,7 @@ public class ReactorAccessPortScreen extends ModScreen<ReactorAccessPortContaine
         };
         manualEjectButton.onRender = ((mS, mX, mY) -> {
             // Custom rendering.
-            GuiArt.button(mS, manualEjectButton.x, manualEjectButton.y, manualEjectButton.width, manualEjectButton.height, manualEjectButton.isMouseOver(mX, mY), GuiIcon.EJECT);
+            GuiArt.button(mS, manualEjectButton.x, manualEjectButton.y, manualEjectButton.width, manualEjectButton.height, manualEjectButton.isMouseOver(mX, mY), GuiIcon.EJECT, this.frame());
         });
         this.addScreenElement(manualEjectButton);
     }
@@ -118,11 +121,11 @@ public class ReactorAccessPortScreen extends ModScreen<ReactorAccessPortContaine
         // Render text for input/output direction:
         if (reactorAccessPortState.direction) {
             // Text for an inlet:
-            graphics.drawString(this.getFont(), Component.translatable("screen.biggerreactorsrework.reactor_access_port.direction_toggle.input").getString(), this.getGuiLeft() + 42, this.getGuiTop() + 22, 4210752, false);
+            graphics.drawString(this.getFont(), Component.translatable("screen.biggerreactorsrework.reactor_access_port.direction_toggle.input").getString(), this.getGuiLeft() + 42, this.getGuiTop() + 22, GuiTheme.textColor(), false);
 
         } else {
             // Text for an outlet:
-            graphics.drawString(this.getFont(), Component.translatable("screen.biggerreactorsrework.reactor_access_port.direction_toggle.output").getString(), this.getGuiLeft() + 42, this.getGuiTop() + 22, 4210752, false);
+            graphics.drawString(this.getFont(), Component.translatable("screen.biggerreactorsrework.reactor_access_port.direction_toggle.output").getString(), this.getGuiLeft() + 42, this.getGuiTop() + 22, GuiTheme.textColor(), false);
         }
 
         // Check if we render output type:
@@ -130,18 +133,23 @@ public class ReactorAccessPortScreen extends ModScreen<ReactorAccessPortContaine
             // Render text for fuel/waste mode:
             if (reactorAccessPortState.fuelMode) {
                 // Text for an inlet:
-                graphics.drawString(this.getFont(), Component.translatable("screen.biggerreactorsrework.reactor_access_port.fuel_mode_toggle.fuel").getString(), this.getGuiLeft() + 42, this.getGuiTop() + 38, 4210752, false);
+                graphics.drawString(this.getFont(), Component.translatable("screen.biggerreactorsrework.reactor_access_port.fuel_mode_toggle.fuel").getString(), this.getGuiLeft() + 42, this.getGuiTop() + 38, GuiTheme.textColor(), false);
 
             } else {
                 // Text for an outlet:
-                graphics.drawString(this.getFont(), Component.translatable("screen.biggerreactorsrework.reactor_access_port.fuel_mode_toggle.waste").getString(), this.getGuiLeft() + 42, this.getGuiTop() + 38, 4210752, false);
+                graphics.drawString(this.getFont(), Component.translatable("screen.biggerreactorsrework.reactor_access_port.fuel_mode_toggle.waste").getString(), this.getGuiLeft() + 42, this.getGuiTop() + 38, GuiTheme.textColor(), false);
             }
         } else {
             // Text for no output:
-            graphics.drawString(this.getFont(), Component.translatable("screen.biggerreactorsrework.reactor_access_port.fuel_mode_toggle.nope").getString(), this.getGuiLeft() + 42, this.getGuiTop() + 38, 4210752, false);
+            graphics.drawString(this.getFont(), Component.translatable("screen.biggerreactorsrework.reactor_access_port.fuel_mode_toggle.nope").getString(), this.getGuiLeft() + 42, this.getGuiTop() + 38, GuiTheme.textColor(), false);
         }
 
         // Render text for manual waste eject:
-        graphics.drawString(this.getFont(), Component.translatable("screen.biggerreactorsrework.reactor_access_port.manual_eject").getString(), this.getGuiLeft() + 26, this.getGuiTop() + 54, 4210752, false);
+        graphics.drawString(this.getFont(), Component.translatable("screen.biggerreactorsrework.reactor_access_port.manual_eject").getString(), this.getGuiLeft() + 26, this.getGuiTop() + 54, GuiTheme.textColor(), false);
+    }
+
+    @Override
+    protected GuiFrame frame() {
+        return GuiFrame.REACTOR;
     }
 }

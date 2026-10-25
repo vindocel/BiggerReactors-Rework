@@ -58,7 +58,7 @@ public class BiggerReactorsEmiPlugin implements EmiPlugin {
         if (!Config.CONFIG.EnableJEIIntegration) {
             return;
         }
-        registry.addRecipe(new Reprocessing());
+        for (var holder : registry.getRecipeManager().getAllRecipesFor(biggerreactorsrework.machine.recipe.ReprocessingRecipes.TYPE.get())) registry.addRecipe(new Reprocessing(holder));
         for (RecipeViewerData.ModeratorBlock moderator : RecipeViewerData.moderatorBlocks()) {
             registry.addRecipe(new Info(MODERATOR_BLOCK, "moderator_block", EmiStack.of(moderator.block()),
                     RecipeViewerData.moderatorLines(moderator.properties()), 0, 46));
@@ -79,23 +79,25 @@ public class BiggerReactorsEmiPlugin implements EmiPlugin {
     }
 
     private static final class Reprocessing extends BasicEmiRecipe {
-        Reprocessing() {
-            super(CYANITE_REPROCESSING, ResourceLocation.fromNamespaceAndPath(BiggerReactors.modid, "/cyanite_reprocessing"),
+        private final biggerreactorsrework.machine.recipe.ReprocessingRecipe recipe;
+        Reprocessing(net.minecraft.world.item.crafting.RecipeHolder<biggerreactorsrework.machine.recipe.ReprocessingRecipe> holder) {
+            super(CYANITE_REPROCESSING, holder.id(),
                     Cyanite.WIDTH, Cyanite.HEIGHT);
-            inputs.add(EmiStack.of(new ItemStack(CyaniteIngot.INSTANCE, Cyanite.CYANITE_PER_INGOT)));
+            recipe = holder.value();
+            inputs.add(EmiIngredient.of(recipe.ingredient(), recipe.count()));
             // Water is drawn in the machine's own tank; listing it keeps it in the recipe lookups.
-            inputs.add(EmiStack.of(Fluids.WATER, Cyanite.water()));
-            outputs.add(EmiStack.of(BlutoniumIngot.INSTANCE));
+            if (recipe.water()>0) inputs.add(EmiStack.of(recipe.fluid(), (long)recipe.water()*recipe.duration()));
+            outputs.add(EmiStack.of(recipe.result()));
         }
 
         @Override
         public void addWidgets(WidgetHolder widgets) {
-            widgets.addDrawable(0, 0, Cyanite.WIDTH, Cyanite.HEIGHT, (g, mouseX, mouseY, delta) -> Cyanite.draw(g));
+            widgets.addDrawable(0, 0, Cyanite.WIDTH, Cyanite.HEIGHT, (g, mouseX, mouseY, delta) -> Cyanite.draw(g, recipe));
             widgets.addSlot(inputs.getFirst(), Cyanite.INPUT_X, Cyanite.SLOT_Y).drawBack(false);
             widgets.addSlot(outputs.getFirst(), Cyanite.OUTPUT_X, Cyanite.SLOT_Y).drawBack(false).recipeContext(this);
-            widgets.addTooltipText(Cyanite.energyTooltip(), Cyanite.ENERGY_X, 0, 18, Cyanite.HEIGHT);
-            widgets.addTooltipText(Cyanite.waterTooltip(), Cyanite.WATER_X, 0, 18, Cyanite.HEIGHT);
-            widgets.addTooltipText(Cyanite.timeTooltip(), Cyanite.ARROW_X, Cyanite.ARROW_Y, Cyanite.ARROW_WIDTH, Cyanite.ARROW_HEIGHT);
+            widgets.addTooltipText(Cyanite.energyTooltip(recipe), Cyanite.ENERGY_X, 0, 18, Cyanite.HEIGHT);
+            widgets.addTooltipText(Cyanite.waterTooltip(recipe), Cyanite.WATER_X, 0, 18, Cyanite.HEIGHT);
+            widgets.addTooltipText(Cyanite.timeTooltip(recipe), Cyanite.ARROW_X, Cyanite.ARROW_Y, Cyanite.ARROW_WIDTH, Cyanite.ARROW_HEIGHT);
         }
     }
 

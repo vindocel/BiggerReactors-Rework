@@ -8,7 +8,7 @@ import net.neoforged.fml.ModList;
 
 /**
  * Opens the mod's recipe categories in the installed recipe viewer (the Cyanite Reprocessor's progress arrow is
- * clickable), as in Dimensional Flux Miner. The viewer-specific bridges are only touched when that viewer is loaded.
+ * clickable). The viewer-specific bridges are only touched when that viewer is loaded.
  */
 public final class RecipeViewers {
     public static final ResourceLocation CYANITE_REPROCESSING = ResourceLocation.fromNamespaceAndPath(BiggerReactors.modid, "cyanite_reprocessing");

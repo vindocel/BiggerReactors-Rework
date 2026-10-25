@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "redstone",
+  "pattern": [
+    "GCG"
+  ],
+  "key": {
+    "G": {
+      "item": "minecraft:glass"
+    },
+    "C": {
+      "item": "biggerreactorsrework:battery_casing"
+    }
+  },
+  "result": {
+    "id": "biggerreactorsrework:battery_glass"
+  }
+}

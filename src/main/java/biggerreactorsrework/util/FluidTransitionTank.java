@@ -50,7 +50,7 @@ public class FluidTransitionTank extends HeatBody implements IFluidTankHandler, 
     
     @Override
     public long tankCapacity(int tank) {
-        return Long.min(perSideCapacity, Integer.MAX_VALUE);
+        return Math.max(0, perSideCapacity);
     }
     
     @Nonnull
@@ -97,10 +97,10 @@ public class FluidTransitionTank extends HeatBody implements IFluidTankHandler, 
     @Override
     public boolean fluidValidForTank(int tank, @Nonnull Fluid fluid) {
         if (tank == IN_TANK) {
-            return FluidTransitionRegistry.liquidTransition(fluid) != null;
+            return (condenser ? FluidTransitionRegistry.gasTransition(fluid) : FluidTransitionRegistry.liquidTransition(fluid)) != null;
         }
         if (tank == OUT_TANK) {
-            return FluidTransitionRegistry.gasTransition(fluid) != null;
+            return (condenser ? FluidTransitionRegistry.liquidTransition(fluid) : FluidTransitionRegistry.gasTransition(fluid)) != null;
         }
         return false;
     }
@@ -120,6 +120,7 @@ public class FluidTransitionTank extends HeatBody implements IFluidTankHandler, 
     @Deprecated
     @SuppressWarnings("DeprecatedIsStillUsed")
     public long fill(@Nonnull Fluid fluid, long amount, boolean simulate, @Nullable FluidTransitionRegistry.FluidTransition transition) {
+        if (amount <= 0 || perSideCapacity <= 0) return 0;
         if (transition == null) {
             transition = selectTransition(fluid);
         }
@@ -127,7 +128,7 @@ public class FluidTransitionTank extends HeatBody implements IFluidTankHandler, 
             return 0;
         }
         if (fluid == inFluid || (condenser ? transition.gases.contains(fluid) : transition.liquids.contains(fluid))) {
-            long maxFill = perSideCapacity - inAmount;
+            long maxFill = Math.max(0, perSideCapacity - inAmount);
             long toFill = Math.min(amount, maxFill);
             if (!simulate) {
                 inFluid = fluid;
@@ -147,6 +148,7 @@ public class FluidTransitionTank extends HeatBody implements IFluidTankHandler, 
     
     @Override
     public long drain(@Nonnull Fluid fluid, DataComponentPatch components, long amount, boolean simulate) {
+        if (amount <= 0) return 0;
         if (activeTransition == null || !components.isEmpty()) {
             return 0;
         }
@@ -275,8 +277,8 @@ public class FluidTransitionTank extends HeatBody implements IFluidTankHandler, 
             activeTransition = newTransition;
             inFluid = newInFluid;
             outFluid = newOutFluid;
-            inAmount = nbt.getLong("inAmount");
-            outAmount = nbt.getLong("outAmount");
+            inAmount = Math.max(0, nbt.getLong("inAmount"));
+            outAmount = Math.max(0, nbt.getLong("outAmount"));
             transitionUpdate();
         }
     }

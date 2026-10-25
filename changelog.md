@@ -4,6 +4,21 @@ Independent fork and rework of BiggerReactors. Mod id `biggerreactorsrework`, me
 worlds and machines from the original mod are not migrated.
 
 ## Port
+ - main machine screens (reprocessor and reactor/turbine/heat exchanger terminals) have a Settings side tab with a draggable Light/Dark popup and persistent per-machine or shared appearance; darkening covers slots, buttons and neutral gauge artwork, preserving casing frames, icons, items, fluids and colored fills
+ - optional Dark Mode Everywhere integration excludes this mod's drawing code from its shader and text recoloring
+ - ingot sprites redesigned with a compact Minecraft-style silhouette and each material's color; ingots now use the standard generated item model, and the wrench sprite depicts a steel open-end wrench
+ - lowered both redstone screens' side tabs to match the face configuration window's top inset, keeping icons, tooltips and click areas aligned
+ - turbine redstone configuration now uses the reactor's metal panel, icon tabs, selectors and apply/revert glyphs, with contextual explanations, correct units and validation for thresholds and flow percentages
+ - added the Jade energy-bar option's missing English and Portuguese translation, preventing its development-time assertion from interrupting the initial resource reload
+ - guide cover's raised center seal removed to reveal the updated cover art; page headings, muted labels, highlights and material table headers now use coordinated green inks
+ - reactor, turbine and heat exchanger connected glass now closes inward hazard-stripe corners around terminals, ports and other gaps, using native chunk models and the existing border textures
+ - guide material pages now follow ore smelting, graphite smelting, reactor waste, cyanite reprocessing and ludicrite acquisition instead of storage unpacking; recipe arrows and quantity symbols corrected
+ - guide consolidated into five chapters: Getting started, Materials, Reactor, Turbine and Heat exchanger; cyanite reprocessing stays in Materials, and energy/vapor modes share the Reactor chapter
+ - material property tables group identical air/material variants, resolve readable names, show separate property columns with explanatory hover tooltips and filter unavailable entries; synchronized client material caches are cleared before replacement
+ - material names scroll at their normal font size inside table cells; hover shows the material icon and readable name, and rows sort by increasing efficiency (E) with deterministic ties
+ - multiblock size limits shown in text using current configuration; maximum-size 3D preview removed, keeping small assembly examples, zoom, facing material lists and yellow casing/glass hover outlines
+ - blutonium acquisition explicitly identifies the Cyanite Reprocessor, with its crafting recipe, processing recipe and operating instructions together in Materials
+ - turbine redstone port uses its own lit and unlit textures, with the lit state following command input or sensor output
  - port to Minecraft 1.21.1 and NeoForge 21.1 (ModDevGradle, Java 21)
  - mod id, registry namespace, resources and Java package moved to `biggerreactorsrework`
  - creative tab named BiggerReactors-Rework
@@ -13,6 +28,17 @@ worlds and machines from the original mod are not migrated.
  - turbine rotor drawn by a block entity renderer and heat exchanger channels baked into the chunk mesh, keeping the previous models and transforms
  - OpenCL/Vulkan reactor simulation removed, along with its shaders and the `allowAcceleratedSimulation` config option; the reactor uses the CPU simulation
  - the unregistered `reactor2` prototype is left out of the build for now
+
+## Battery
+ - new battery multiblock: casing, connected glass, terminal, energy ports and cells, from 3x3x3 up to 32x32x32 (configurable)
+ - each cell stores 3.2 GFE and adds 300 kFE/t to the input limit and 300 kFE/t to the output limit; capacity and limits grow linearly with the cell count
+ - an assembled battery needs a terminal, at least two energy ports and at least one cell; if every port points the same way on assembly, one is switched
+ - energy ports switch between input and output with a wrench or from their screen
+ - right-clicking any battery block other than a port opens the terminal: charge gauge, last tick's input and output, transfer limit, discharge and charge item slots, player inventory and an armor/offhand tab
+ - every cell keeps its share of the stored energy: a broken cell keeps it as an item (shown in its tooltip) and brings it into the next battery it joins
+ - connected, animated cell textures; cells light up when the battery is assembled and animate while it holds energy
+ - Jade shows the battery's total energy with the mod's energy bar on any block of an assembled battery
+ - new guide chapter with the battery's blocks, recipes, size limits and a 3D example
 
 ## Cyanite Reprocessor
  - restored (it was disabled in the original 1.20.4 code): 2 cyanite ingots + water + energy make 1 blutonium ingot, with the original config values

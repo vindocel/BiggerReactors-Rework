@@ -54,19 +54,6 @@ public class HeatExchangerFluidPortTile extends HeatExchangerBaseTile implements
     }
     
     
-    // TODO: mek gas
-//    private static final Capability<IGasHandler> GAS_HANDLER_CAPABILITY = CapabilityManager.get(new CapabilityToken<>(){});
-//
-//    @Override
-//    public <T> LazyOptional<T> capability(Capability<T> cap, @Nullable Direction side) {
-//        if (cap == ForgeCapabilities.FLUID_HANDLER) {
-//            return fluidHandlerCapability().cast();
-//        }
-//        if (cap == GAS_HANDLER_CAPABILITY) {
-//            return LazyOptional.of(() -> MekanismGasWrappers.wrap(this)).cast();
-//        }
-//        return super.capability(cap, side);
-//    }
     
     private IFluidTankHandler HETank;
     
@@ -205,14 +192,6 @@ public class HeatExchangerFluidPortTile extends HeatExchangerBaseTile implements
         if (outputCap != null) {
             connected = true;
             handler = FluidHandlerWrapper.wrap(outputCap);
-//        } else if (GAS_HANDLER_CAPABILITY != null) {
-//            LazyOptional<IGasHandler> gasOptional = te.getCapability(GAS_HANDLER_CAPABILITY, outputDirection.getOpposite());
-//            if (gasOptional.isPresent()) {
-//                IGasHandler gasHandler = gasOptional.orElse(MekanismGasWrappers.EMPTY_TANK);
-//                connected = true;
-//                handlerOptional = gasOptional;
-//                handler = MekanismGasWrappers.wrap(gasHandler);
-//            }
         }
     }
     

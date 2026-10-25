@@ -1,5 +1,7 @@
 package biggerreactorsrework.multiblocks.heatexchanger.client;
 
+import biggerreactorsrework.client.GuiTheme;
+
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.core.Registry;
@@ -16,6 +18,7 @@ import biggerreactorsrework.Config;
 import biggerreactorsrework.client.CommonRender;
 import biggerreactorsrework.client.GaugeBar;
 import biggerreactorsrework.client.GuiArt;
+import biggerreactorsrework.client.GuiFrame;
 import biggerreactorsrework.client.GuiIcon;
 import biggerreactorsrework.multiblocks.heatexchanger.containers.HeatExchangerTerminalContainer;
 import biggerreactorsrework.multiblocks.heatexchanger.state.HeatExchangerState;
@@ -39,7 +42,7 @@ public class HeatExchangerTerminalScreen extends ModScreen<HeatExchangerTerminal
     private Fluid evaporatorExhaustFluid = Fluids.EMPTY;
 
     public HeatExchangerTerminalScreen(HeatExchangerTerminalContainer container, Inventory playerInventory, Component title) {
-        super(container, playerInventory, Component.translatable("screen.biggerreactorsrework.heat_exchanger_terminal"), 144, 144);
+        super(container, playerInventory, Component.translatable("screen.biggerreactorsrework.heat_exchanger_terminal"), 168, 144);
 
         // Initialize heat exchanger state.
         this.heatExchangerState = (HeatExchangerState) this.getMenu().getGuiPacket();
@@ -71,34 +74,34 @@ public class HeatExchangerTerminalScreen extends ModScreen<HeatExchangerTerminal
      **/
     private void initTooltips() {
         // (Bottom) Condenser temperature tooltip:
-        this.addScreenElement(new TooltipElement<>(this, 9, 103, 16, 16, Component.translatable("screen.biggerreactorsrework.heat_exchanger_terminal.temperature.condenser.tooltip")));
+        this.addScreenElement(new TooltipElement<>(this, 10, 103, 16, 16, Component.translatable("screen.biggerreactorsrework.heat_exchanger_terminal.temperature.condenser.tooltip")));
 
         // (Bottom) Evaporator temperature tooltip:
-        this.addScreenElement(new TooltipElement<>(this, 9, 122, 16, 16, Component.translatable("screen.biggerreactorsrework.heat_exchanger_terminal.temperature.evaporator.tooltip")));
+        this.addScreenElement(new TooltipElement<>(this, 10, 122, 16, 16, Component.translatable("screen.biggerreactorsrework.heat_exchanger_terminal.temperature.evaporator.tooltip")));
 
         // (Bottom) Condenser flow rate tooltip:
-        this.addScreenElement(new TooltipElement<>(this, 75, 103, 16, 16, Component.translatable("screen.biggerreactorsrework.heat_exchanger_terminal.flow_rate.condenser.tooltip")));
+        this.addScreenElement(new TooltipElement<>(this, 87, 103, 16, 16, Component.translatable("screen.biggerreactorsrework.heat_exchanger_terminal.flow_rate.condenser.tooltip")));
 
         // (Bottom) Evaporator flow rate tooltip:
-        this.addScreenElement(new TooltipElement<>(this, 75, 122, 16, 16, Component.translatable("screen.biggerreactorsrework.heat_exchanger_terminal.flow_rate.evaporator.tooltip")));
+        this.addScreenElement(new TooltipElement<>(this, 87, 122, 16, 16, Component.translatable("screen.biggerreactorsrework.heat_exchanger_terminal.flow_rate.evaporator.tooltip")));
 
         // (Bottom) Condenser intake gauge tooltip:
-        this.addScreenElement(new TooltipElement<>(this, 9, 17, 16, 16, Component.translatable("screen.biggerreactorsrework.heat_exchanger_terminal.intake_gauge.condenser.tooltip")));
+        this.addScreenElement(new TooltipElement<>(this, 11, 17, 16, 16, Component.translatable("screen.biggerreactorsrework.heat_exchanger_terminal.intake_gauge.condenser.tooltip")));
 
         // (Top) Evaporator intake gauge tooltip:
-        this.addScreenElement(new TooltipElement<>(this, 31, 17, 16, 16, Component.translatable("screen.biggerreactorsrework.heat_exchanger_terminal.intake_gauge.evaporator.tooltip")));
+        this.addScreenElement(new TooltipElement<>(this, 37, 17, 16, 16, Component.translatable("screen.biggerreactorsrework.heat_exchanger_terminal.intake_gauge.evaporator.tooltip")));
 
         // (Top) Condenser temperature gauge tooltip:
-        this.addScreenElement(new TooltipElement<>(this, 53, 17, 16, 16, Component.translatable("screen.biggerreactorsrework.heat_exchanger_terminal.temperature.condenser.tooltip")));
+        this.addScreenElement(new TooltipElement<>(this, 63, 17, 16, 16, Component.translatable("screen.biggerreactorsrework.heat_exchanger_terminal.temperature.condenser.tooltip")));
 
         // (Top) Evaporator temperature gauge tooltip:
-        this.addScreenElement(new TooltipElement<>(this, 75, 17, 16, 16, Component.translatable("screen.biggerreactorsrework.heat_exchanger_terminal.temperature.evaporator.tooltip")));
+        this.addScreenElement(new TooltipElement<>(this, 89, 17, 16, 16, Component.translatable("screen.biggerreactorsrework.heat_exchanger_terminal.temperature.evaporator.tooltip")));
 
         // (Top) Condenser exhaust gauge tooltip:
-        this.addScreenElement(new TooltipElement<>(this, 97, 17, 16, 16, Component.translatable("screen.biggerreactorsrework.heat_exchanger_terminal.exhaust_gauge.condenser.tooltip")));
+        this.addScreenElement(new TooltipElement<>(this, 115, 17, 16, 16, Component.translatable("screen.biggerreactorsrework.heat_exchanger_terminal.exhaust_gauge.condenser.tooltip")));
 
         // (Top) Evaporator exhaust gauge tooltip:
-        this.addScreenElement(new TooltipElement<>(this, 119, 17, 16, 16, Component.translatable("screen.biggerreactorsrework.heat_exchanger_terminal.exhaust_gauge.evaporator.tooltip")));
+        this.addScreenElement(new TooltipElement<>(this, 141, 17, 16, 16, Component.translatable("screen.biggerreactorsrework.heat_exchanger_terminal.exhaust_gauge.evaporator.tooltip")));
     }
 
     /**
@@ -106,35 +109,35 @@ public class HeatExchangerTerminalScreen extends ModScreen<HeatExchangerTerminal
      */
     private void initGauges() {
         // (Top) Condenser intake tank:
-        RenderedElement<HeatExchangerTerminalContainer> condenserIntakeTank = new RenderedElement<>(this, 8, 36, 18, 64, 0, 144, Component.empty());
+        RenderedElement<HeatExchangerTerminalContainer> condenserIntakeTank = new RenderedElement<>(this, 10, 36, 18, 64, 0, 144, Component.empty());
         condenserIntakeTank.onRender = (@Nonnull GuiGraphics graphics, int mX, int mY) -> CommonRender.renderFluidGauge(graphics,
                 condenserIntakeTank, heatExchangerState.condenserIntakeFluidAmount, heatExchangerState.condenserTankSize, this.condenserIntakeFluid);
         this.addScreenElement(condenserIntakeTank);
 
         // (Top) Evaporator intake tank:
-        RenderedElement<HeatExchangerTerminalContainer> evaporatorIntakeTank = new RenderedElement<>(this, 30, 36, 18, 64, 0, 144, Component.empty());
+        RenderedElement<HeatExchangerTerminalContainer> evaporatorIntakeTank = new RenderedElement<>(this, 36, 36, 18, 64, 0, 144, Component.empty());
         evaporatorIntakeTank.onRender = (@Nonnull GuiGraphics graphics, int mX, int mY) -> CommonRender.renderFluidGauge(graphics,
                 evaporatorIntakeTank, heatExchangerState.evaporatorIntakeFluidAmount, heatExchangerState.evaporatorTankSize, this.evaporatorIntakeFluid);
         this.addScreenElement(evaporatorIntakeTank);
 
         // (Top) Condenser heat gauge:
-        RenderedElement<HeatExchangerTerminalContainer> condenserHeatGauge = new RenderedElement<>(this, 52, 36, 18, 64, 0, 144, Component.empty());
+        RenderedElement<HeatExchangerTerminalContainer> condenserHeatGauge = new RenderedElement<>(this, 62, 36, 18, 64, 0, 144, Component.empty());
         condenserHeatGauge.onRender = (@Nonnull GuiGraphics graphics, int mX, int mY) -> HeatExchangerTerminalScreen.renderHeatGauge(graphics, condenserHeatGauge, heatExchangerState.condenserChannelTemperature, Config.CONFIG.HeatExchanger.gui.HeatDisplayMax);
         this.addScreenElement(condenserHeatGauge);
 
         // (Top) Evaporator heat gauge:
-        RenderedElement<HeatExchangerTerminalContainer> evaporatorHeatGauge = new RenderedElement<>(this, 74, 36, 18, 64, 0, 144, Component.empty());
+        RenderedElement<HeatExchangerTerminalContainer> evaporatorHeatGauge = new RenderedElement<>(this, 88, 36, 18, 64, 0, 144, Component.empty());
         evaporatorHeatGauge.onRender = (@Nonnull GuiGraphics graphics, int mX, int mY) -> HeatExchangerTerminalScreen.renderHeatGauge(graphics, evaporatorHeatGauge, heatExchangerState.evaporatorChannelTemperature, Config.CONFIG.HeatExchanger.gui.HeatDisplayMax);
         this.addScreenElement(evaporatorHeatGauge);
 
         // (Top) Condenser exhaust tank:
-        RenderedElement<HeatExchangerTerminalContainer> condenserExhaustTank = new RenderedElement<>(this, 96, 36, 18, 64, 0, 144, Component.empty());
+        RenderedElement<HeatExchangerTerminalContainer> condenserExhaustTank = new RenderedElement<>(this, 114, 36, 18, 64, 0, 144, Component.empty());
         condenserExhaustTank.onRender = (@Nonnull GuiGraphics graphics, int mX, int mY) -> CommonRender.renderFluidGauge(graphics,
                 condenserExhaustTank, heatExchangerState.condenserExhaustFluidAmount, heatExchangerState.condenserTankSize, this.condenserExhaustFluid);
         this.addScreenElement(condenserExhaustTank);
 
         // (Top) Evaporator exhaust tank:
-        RenderedElement<HeatExchangerTerminalContainer> evaporatorExhaustTank = new RenderedElement<>(this, 118, 36, 18, 64, 0, 144, Component.empty());
+        RenderedElement<HeatExchangerTerminalContainer> evaporatorExhaustTank = new RenderedElement<>(this, 140, 36, 18, 64, 0, 144, Component.empty());
         evaporatorExhaustTank.onRender = (@Nonnull GuiGraphics graphics, int mX, int mY) -> CommonRender.renderFluidGauge(graphics,
                 evaporatorExhaustTank, heatExchangerState.evaporatorExhaustFluidAmount, heatExchangerState.evaporatorTankSize, this.evaporatorExhaustFluid);
         this.addScreenElement(evaporatorExhaustTank);
@@ -193,16 +196,16 @@ public class HeatExchangerTerminalScreen extends ModScreen<HeatExchangerTerminal
         super.render(graphics, mouseX, mouseY, partialTicks);
 
         // Render text for condenser channel temperature:
-        graphics.drawString(this.getFont(), String.format("%.0f K", this.heatExchangerState.condenserChannelTemperature), this.getGuiLeft() + 27, this.getGuiTop() + 107, 4210752, false);
+        GuiArt.scrollingText(graphics, this.getFont(), String.format("%.0f K", this.heatExchangerState.condenserChannelTemperature), this.getGuiLeft() + 28, this.getGuiTop() + 107, 52, GuiTheme.textColor());
 
         // Render text for evaporator channel temperature:
-        graphics.drawString(this.getFont(), String.format("%.0f K", this.heatExchangerState.evaporatorChannelTemperature), this.getGuiLeft() + 27, this.getGuiTop() + 127, 4210752, false);
+        GuiArt.scrollingText(graphics, this.getFont(), String.format("%.0f K", this.heatExchangerState.evaporatorChannelTemperature), this.getGuiLeft() + 28, this.getGuiTop() + 127, 52, GuiTheme.textColor());
 
         // Render text for condenser channel flow rate:
-        graphics.drawString(this.getFont(), RenderHelper.formatValue((this.heatExchangerState.condenserChannelFlowRate / 1000.0), 1, "B/t", true), this.getGuiLeft() + 93, this.getGuiTop() + 107, 4210752, false);
+        GuiArt.scrollingText(graphics, this.getFont(), RenderHelper.formatValue((this.heatExchangerState.condenserChannelFlowRate / 1000.0), 1, "B/t", true), this.getGuiLeft() + 105, this.getGuiTop() + 107, 53, GuiTheme.textColor());
 
         // Render text for evaporator channel flow rate:
-        graphics.drawString(this.getFont(), RenderHelper.formatValue((this.heatExchangerState.evaporatorChannelFlowRate / 1000.0), 1, "B/t", true), this.getGuiLeft() + 93, this.getGuiTop() + 127, 4210752, false);
+        GuiArt.scrollingText(graphics, this.getFont(), RenderHelper.formatValue((this.heatExchangerState.evaporatorChannelFlowRate / 1000.0), 1, "B/t", true), this.getGuiLeft() + 105, this.getGuiTop() + 127, 53, GuiTheme.textColor());
     }
 
     /**
@@ -210,18 +213,24 @@ public class HeatExchangerTerminalScreen extends ModScreen<HeatExchangerTerminal
      */
     @Override
     protected void drawBackground(@Nonnull GuiGraphics graphics, int x, int y) {
-        GuiArt.panel(graphics, x, y, 144, 144);
-        GuiArt.fill(graphics, x + 9, y + 120, x + 71, y + 121, GuiArt.SEPARATOR);
-        GuiArt.fill(graphics, x + 73, y + 120, x + 136, y + 121, GuiArt.SEPARATOR);
-        GuiIcon.CONDENSER_INTAKE.draw(graphics, x + 9, y + 17);
-        GuiIcon.EVAPORATOR_INTAKE.draw(graphics, x + 31, y + 17);
-        GuiIcon.CONDENSER_TEMPERATURE.draw(graphics, x + 53, y + 17);
-        GuiIcon.EVAPORATOR_TEMPERATURE.draw(graphics, x + 75, y + 17);
-        GuiIcon.CONDENSER_EXHAUST.draw(graphics, x + 97, y + 17);
-        GuiIcon.EVAPORATOR_EXHAUST.draw(graphics, x + 119, y + 17);
-        GuiIcon.CONDENSER_TEMPERATURE.draw(graphics, x + 9, y + 103);
-        GuiIcon.EVAPORATOR_TEMPERATURE.draw(graphics, x + 9, y + 122);
-        GuiIcon.CONDENSER_FLOW_RATE.draw(graphics, x + 75, y + 103);
-        GuiIcon.EVAPORATOR_FLOW_RATE.draw(graphics, x + 75, y + 122);
+        GuiArt.panel(graphics, x, y, 168, 144, this.frame());
+        GuiArt.fill(graphics, x + 10, y + 120, x + 80, y + 121, GuiArt.SEPARATOR);
+        GuiArt.fill(graphics, x + 86, y + 120, x + 158, y + 121, GuiArt.SEPARATOR);
+        GuiIcon.CONDENSER_INTAKE.draw(graphics, x + 11, y + 17);
+        GuiIcon.EVAPORATOR_INTAKE.draw(graphics, x + 37, y + 17);
+        GuiIcon.CONDENSER_TEMPERATURE.draw(graphics, x + 63, y + 17);
+        GuiIcon.EVAPORATOR_TEMPERATURE.draw(graphics, x + 89, y + 17);
+        GuiIcon.CONDENSER_EXHAUST.draw(graphics, x + 115, y + 17);
+        GuiIcon.EVAPORATOR_EXHAUST.draw(graphics, x + 141, y + 17);
+        GuiIcon.CONDENSER_TEMPERATURE.draw(graphics, x + 10, y + 103);
+        GuiIcon.EVAPORATOR_TEMPERATURE.draw(graphics, x + 10, y + 122);
+        GuiIcon.CONDENSER_FLOW_RATE.draw(graphics, x + 87, y + 103);
+        GuiIcon.EVAPORATOR_FLOW_RATE.draw(graphics, x + 87, y + 122);
     }
+
+    @Override
+    protected GuiFrame frame() {
+        return GuiFrame.HEAT_EXCHANGER;
+    }
+    @Override public boolean hasAppearanceSettings() { return true; }
 }

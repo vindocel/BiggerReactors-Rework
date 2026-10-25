@@ -1,0 +1,26 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "redstone",
+  "pattern": [
+    "CPC",
+    "RDR",
+    "CPC"
+  ],
+  "key": {
+    "C": {
+      "item": "biggerreactorsrework:battery_casing"
+    },
+    "P": {
+      "item": "minecraft:glass_pane"
+    },
+    "R": {
+      "item": "minecraft:comparator"
+    },
+    "D": {
+      "item": "minecraft:diamond"
+    }
+  },
+  "result": {
+    "id": "biggerreactorsrework:battery_terminal"
+  }
+}

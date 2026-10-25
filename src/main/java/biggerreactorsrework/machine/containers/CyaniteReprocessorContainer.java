@@ -124,4 +124,8 @@ public class CyaniteReprocessorContainer extends AbstractContainerMenu implement
                     new Slot(player.getInventory(), columnIndex, (8 + columnIndex * 18), (guiOffset + 58)));
         }
     }
+    @Override
+    public BlockPos machinePos() {
+        return this.tileEntity.getBlockPos();
+    }
 }

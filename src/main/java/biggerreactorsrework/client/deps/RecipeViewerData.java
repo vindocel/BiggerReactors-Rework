@@ -108,29 +108,43 @@ public final class RecipeViewerData {
             return (long) Config.CONFIG.CyaniteReprocessor.WaterConsumptionPerTick * ticks();
         }
 
-        public static void draw(GuiGraphics g) {
+        public static void draw(GuiGraphics g) { draw(g, null); }
+
+        public static void draw(GuiGraphics g, biggerreactorsrework.machine.recipe.ReprocessingRecipe recipe) {
+            long energy = recipe == null ? energy() : (long)recipe.energy()*recipe.duration();
+            long water = recipe == null ? water() : (long)recipe.water()*recipe.duration();
+            int ticks = recipe == null ? ticks() : recipe.duration();
             EnergyBar.draw(g, ENERGY_X, 0, GaugeBar.WIDTH, HEIGHT,
-                    EnergyBar.fraction(energy(), Config.CONFIG.CyaniteReprocessor.EnergyTankCapacity));
-            GaugeBar.drawFluid(g, WATER_X, 0, water(), Config.CONFIG.CyaniteReprocessor.WaterTankCapacity, Fluids.WATER);
+                    EnergyBar.fraction(energy, Config.CONFIG.CyaniteReprocessor.EnergyTankCapacity));
+            GaugeBar.drawFluid(g, WATER_X, 0, water, Config.CONFIG.CyaniteReprocessor.WaterTankCapacity, recipe == null ? Fluids.WATER : recipe.fluid());
             GuiArt.slot(g, INPUT_X, SLOT_Y, 18);
             GuiArt.slot(g, OUTPUT_X, SLOT_Y, 18);
-            long cycle = Math.max(1, ticks()) * 50L;
+            long cycle = Math.max(1, ticks) * 50L;
             GaugeBar.drawProgressArrow(g, ARROW_X, ARROW_Y, Util.getMillis() % cycle, cycle);
         }
 
-        public static List<Component> energyTooltip() {
+        public static List<Component> energyTooltip() { return energyTooltip(null); }
+
+        public static List<Component> energyTooltip(biggerreactorsrework.machine.recipe.ReprocessingRecipe recipe) {
+            long energy = recipe == null ? energy() : (long)recipe.energy()*recipe.duration();
             return List.of(Component.translatable("recipe_viewer.biggerreactorsrework.cyanite_reprocessing.energy",
-                    RenderHelper.formatValue(energy(), "FE")));
+                    RenderHelper.formatValue(energy, "FE")));
         }
 
-        public static List<Component> waterTooltip() {
+        public static List<Component> waterTooltip() { return waterTooltip(null); }
+
+        public static List<Component> waterTooltip(biggerreactorsrework.machine.recipe.ReprocessingRecipe recipe) {
+            long water = recipe == null ? water() : (long)recipe.water()*recipe.duration();
             return List.of(Component.translatable("recipe_viewer.biggerreactorsrework.cyanite_reprocessing.water",
-                    RenderHelper.formatValue(water() / 1000.0, "B", true)));
+                    RenderHelper.formatValue(water / 1000.0, "B", true)));
         }
 
-        public static List<Component> timeTooltip() {
+        public static List<Component> timeTooltip() { return timeTooltip(null); }
+
+        public static List<Component> timeTooltip(biggerreactorsrework.machine.recipe.ReprocessingRecipe recipe) {
+            int ticks = recipe == null ? ticks() : recipe.duration();
             return List.of(Component.translatable("recipe_viewer.biggerreactorsrework.cyanite_reprocessing.time",
-                    String.format(java.util.Locale.ROOT, "%.1f", ticks() / 20.0)));
+                    String.format(java.util.Locale.ROOT, "%.1f", ticks / 20.0)));
         }
     }
 }

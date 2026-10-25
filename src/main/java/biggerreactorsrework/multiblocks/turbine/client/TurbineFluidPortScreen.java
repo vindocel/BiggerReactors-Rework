@@ -1,5 +1,7 @@
 package biggerreactorsrework.multiblocks.turbine.client;
 
+import biggerreactorsrework.client.GuiTheme;
+
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
@@ -13,6 +15,7 @@ import biggerreactorsrework.client.SelectorColors;
 import biggerreactorsrework.multiblocks.turbine.containers.TurbineFluidPortContainer;
 import biggerreactorsrework.multiblocks.turbine.state.TurbineFluidPortState;
 import biggerreactorsrework.core.client.gui.screens.ModScreen;
+import biggerreactorsrework.client.GuiFrame;
 
 import javax.annotation.Nonnull;
 
@@ -79,11 +82,16 @@ public class TurbineFluidPortScreen extends ModScreen<TurbineFluidPortContainer>
         // Render text for input/output direction:
         if (turbineFluidPortState.direction) {
             // Text for an inlet:
-            graphics.drawString(this.getFont(), Component.translatable("screen.biggerreactorsrework.turbine_fluid_port.direction_toggle.input").getString(), this.getGuiLeft() + 42, this.getGuiTop() + 22, 4210752, false);
+            graphics.drawString(this.getFont(), Component.translatable("screen.biggerreactorsrework.turbine_fluid_port.direction_toggle.input").getString(), this.getGuiLeft() + 42, this.getGuiTop() + 22, GuiTheme.textColor(), false);
 
         } else {
             // Text for an outlet:
-            graphics.drawString(this.getFont(), Component.translatable("screen.biggerreactorsrework.turbine_fluid_port.direction_toggle.output").getString(), this.getGuiLeft() + 42, this.getGuiTop() + 22, 4210752, false);
+            graphics.drawString(this.getFont(), Component.translatable("screen.biggerreactorsrework.turbine_fluid_port.direction_toggle.output").getString(), this.getGuiLeft() + 42, this.getGuiTop() + 22, GuiTheme.textColor(), false);
         }
+    }
+
+    @Override
+    protected GuiFrame frame() {
+        return GuiFrame.TURBINE;
     }
 }

@@ -3,7 +3,46 @@
 Proposta editorial de 23/10/2026. Destino: Minecraft 1.21.1 / NeoForge.
 Este documento organiza o conteúdo; não implementa o livro e não define novos recursos do mod.
 
+## Tecnologia definida pelo autor — 24/10/2026
+
+- O conteúdo editorial deste arquivo continua sendo a base obrigatória do guia.
+- A implementação usará a tecnologia do guia próprio do Dimensional Flux Miner, adaptada internamente ao Rework, a partir da linha 1.21.1. Não usar Patchouli, GuideME nem depender do DFM instalado.
+- Adaptar tela, paginação, elementos, referências, receitas, animação do livro e visualização 3D; substituir itens, fórmulas, modelos, registros e outros vínculos próprios da mineradora pelos do Rework. O visualizador deve aceitar vários exemplos e quantidades diferentes de camadas.
+- Receitas e tabelas devem refletir os dados efetivos do mundo/servidor. O novo processo de reprocessamento terá representação própria; não tratá-lo como crafting comum.
+- Ideias de apresentação dos guias do Extreme/Revived podem complementar este conteúdo, sem importar sua biblioteca nem prometer recursos ainda não implementados.
+- Validar os exemplos de montagem no jogo e as listas de materiais; testar cliente e servidor dedicado em ambiente sem outros mods.
+- A sequência técnica e os critérios de aceitação estão no lote 5 do [plano de implementação consolidado](C:/Users/victo/Documents/GitHub/BiggerReactors-Rework/docs/plano-implementacao-consolidado.md). Nesta tarefa houve somente planejamento.
+
+
 ## Pesquisa e limites
+
+### Organização aprovada pelo autor — revisão de 24/10/2026
+
+O índice do livro fica com cinco capítulos: **Primeiros passos, Materiais, Reator, Turbina
+e Trocador de calor**. O reprocessador permanece somente em Materiais, sem entrada própria.
+As áreas editoriais detalhadas abaixo são
+subseções desses capítulos; não criar entradas separadas para peças, montagem, operação,
+moderação ou reator ativo. Energia e vapor são modos do mesmo reator.
+
+Os mínimos e máximos de reator, turbina e trocador são informados em texto com os limites
+configurados. Não mostrar modelo 3D máximo. Preservar os exemplos pequenos de montagem,
+as listas de peças e o destaque de posições que aceitam vidro.
+
+Ao apresentar blutônio, identificar explicitamente o Reprocessador de Cianita e mostrar
+sua receita de fabricação antes da receita de processamento, com operação e automação
+no mesmo trecho de Materiais. A máquina tem tamanho fixo de um bloco.
+
+Tabelas: mostrar apenas registros presentes e sincronizados; agrupar variantes do mesmo
+material com propriedades idênticas, incluindo os três tipos de ar. Preservar diferenças
+reais de valores. Resolver nomes traduzidos ou legíveis, nunca exibir chaves técnicas como
+nome. Cada sigla de propriedade tem sua coluna e explicação em tooltip, inclusive
+condutividade, eficiência, extração e bônus de bobinas.
+
+Revisão de apresentação: nomes longos nas tabelas usam texto deslizante dentro da célula,
+sem reduzir a fonte. Hover no nome mostra o nome legível e o ícone do bloco ou do fluido.
+Ar não tem item visível. Ordenar por E crescente: eficiência de absorção nos moderadores
+e eficiência da bobina nas bobinas. Empates têm desempate estável; essa ordenação não
+substitui a comparação dos outros atributos para escolher o material do projeto.
 
 - A página solicitada, https://ftbwiki.org/Big_Reactors, apresentou proteção Anubis. Não foi possível extrair seu conteúdo integral nem verificar todas as páginas vinculadas.
 - A pesquisa foi complementada pelas páginas acessíveis/indexadas da FTB, pelo repositório original e pela documentação do BiggerReactors. Essas fontes cobrem versões diferentes e não devem ser tratadas como documentação automática do rework.
@@ -69,6 +108,13 @@ Cada entrada deve conter ícone, receita e exemplo de posição. Diferenciar com
 
 ## 4. Montando o primeiro reator
 
+Revisão do autor em 24/10/2026: informar em texto o mínimo externo 3×3×3 e o máximo
+configurado (padrão: comprimento 128, altura 192, largura 128). Não exibir o máximo em 3D.
+Os modelos pequenos e suas listas ficam lado a lado. O 5×5×5 é exemplo intermediário
+de moderação, nunca o limite máximo. A lista separa armação de carcaça e posições das faces
+que aceitam carcaça ou vidro da própria máquina; hover destaca somente essas posições em amarelo.
+Portas e componentes funcionais não entram nessa substituição. Aplicar também à turbina.
+
 - Dimensões externas versus espaço interno.
 - Casca fechada, moldura, faces, fundo e teto.
 - Colunas de combustível contínuas e barra de controle no topo de cada uma.
@@ -76,8 +122,9 @@ Cada entrada deve conter ícone, receita e exemplo de posição. Diferenciar com
 - Abastecimento, conexão a um consumidor e primeira ativação.
 - Como consultar o erro quando a estrutura não monta.
 
-Dois modelos planejados: 3×3×3 para demonstrar o mínimo e 5×5×5 para demonstrar espaço para moderadores.
-O controlador atual confirma mínimo externo de 3×3×3; os modelos completos e suas listas de materiais ainda precisam ser validados no jogo.
+Modelos: mínimo 3×3×3 e exemplos intermediários, todos dentro do capítulo Reator.
+Os modelos pequenos foram validados nos GameTests. A roda sobre o modelo ajusta o zoom,
+e a lista conta as quantidades reais do exemplo. O limite máximo é somente textual.
 
 ## 5. Operação e painel do reator
 

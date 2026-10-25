@@ -23,8 +23,8 @@ import net.minecraft.world.level.material.Fluids;
 public class CyaniteReprocessingCategory implements IRecipeCategory<CyaniteReprocessingCategory.Recipe> {
     public static final RecipeType<Recipe> RECIPE_TYPE = new RecipeType<>(RecipeViewers.CYANITE_REPROCESSING, Recipe.class);
 
-    /** The machine has a single fixed recipe. */
-    public record Recipe() {
+    /** One native world recipe. */
+    public record Recipe(biggerreactorsrework.machine.recipe.ReprocessingRecipe value) {
     }
 
     private final IDrawable icon;
@@ -61,26 +61,26 @@ public class CyaniteReprocessingCategory implements IRecipeCategory<CyaniteRepro
     @Override
     public void setRecipe(IRecipeLayoutBuilder builder, Recipe recipe, IFocusGroup focuses) {
         builder.addSlot(RecipeIngredientRole.INPUT, Cyanite.INPUT_X + 1, Cyanite.SLOT_Y + 1)
-                .addItemStack(new ItemStack(CyaniteIngot.INSTANCE, Cyanite.CYANITE_PER_INGOT));
+                .addItemStacks(java.util.Arrays.stream(recipe.value().ingredient().getItems()).map(stack -> stack.copyWithCount(recipe.value().count())).toList());
         builder.addSlot(RecipeIngredientRole.OUTPUT, Cyanite.OUTPUT_X + 1, Cyanite.SLOT_Y + 1)
-                .addItemStack(new ItemStack(BlutoniumIngot.INSTANCE));
+                .addItemStack(recipe.value().result());
         // Water is drawn in the machine's own tank; this keeps it in the recipe lookups.
-        builder.addInvisibleIngredients(RecipeIngredientRole.INPUT).addFluidStack(Fluids.WATER, Cyanite.water());
+        builder.addInvisibleIngredients(RecipeIngredientRole.INPUT).addFluidStack(recipe.value().fluid(), (long)recipe.value().water()*recipe.value().duration());
     }
 
     @Override
     public void draw(Recipe recipe, IRecipeSlotsView view, GuiGraphics g, double mouseX, double mouseY) {
-        Cyanite.draw(g);
+        Cyanite.draw(g, recipe.value());
     }
 
     @Override
     public void getTooltip(ITooltipBuilder tooltip, Recipe recipe, IRecipeSlotsView view, double mouseX, double mouseY) {
         if (inside(mouseX, mouseY, Cyanite.ENERGY_X, 0, 18, Cyanite.HEIGHT)) {
-            tooltip.addAll(Cyanite.energyTooltip());
+            tooltip.addAll(Cyanite.energyTooltip(recipe.value()));
         } else if (inside(mouseX, mouseY, Cyanite.WATER_X, 0, 18, Cyanite.HEIGHT)) {
-            tooltip.addAll(Cyanite.waterTooltip());
+            tooltip.addAll(Cyanite.waterTooltip(recipe.value()));
         } else if (inside(mouseX, mouseY, Cyanite.ARROW_X, Cyanite.ARROW_Y, Cyanite.ARROW_WIDTH, Cyanite.ARROW_HEIGHT)) {
-            tooltip.addAll(Cyanite.timeTooltip());
+            tooltip.addAll(Cyanite.timeTooltip(recipe.value()));
         }
     }
 

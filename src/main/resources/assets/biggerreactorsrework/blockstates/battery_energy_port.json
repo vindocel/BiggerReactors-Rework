@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "portdirection=inlet": {
+      "model": "biggerreactorsrework:block/battery/energy_port/inlet"
+    },
+    "portdirection=outlet": {
+      "model": "biggerreactorsrework:block/battery/energy_port/outlet"
+    }
+  }
+}

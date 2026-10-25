@@ -49,20 +49,6 @@ public class ReactorCoolantPortTile extends ReactorBaseTile implements IFluidTan
         super(TYPE, pos, state);
     }
 
-    // TODO: mek gas cap registration, needs to not be a hard-dep
-//    private static final Capability<IGasHandler> GAS_HANDLER_CAPABILITY = CapabilityManager.get(new CapabilityToken<>() {
-//    });
-//
-//    @Override
-//    public <T> LazyOptional<T> capability(Capability<T> cap, @Nullable Direction side) {
-//        if (cap == ForgeCapabilities.FLUID_HANDLER) {
-//            return LazyOptional.of(() -> this).cast();
-//        }
-//        if (cap == GAS_HANDLER_CAPABILITY) {
-//            return LazyOptional.of(() -> MekanismGasWrappers.wrap(this)).cast();
-//        }
-//        return super.capability(cap, side);
-//    }
     
     @Nullable
     private ReactorTransitionTank transitionTank;
@@ -170,15 +156,6 @@ public class ReactorCoolantPortTile extends ReactorBaseTile implements IFluidTan
         if (capHandler != null) {
             connected = true;
             handler = FluidHandlerWrapper.wrap(capHandler);
-            // TODO: mek gas
-//        } else if (GAS_HANDLER_CAPABILITY != null) {
-//            LazyOptional<IGasHandler> gasOptional = te.getCapability(GAS_HANDLER_CAPABILITY, steamOutputDirection.getOpposite());
-//            if (gasOptional.isPresent()) {
-//                IGasHandler gasHandler = gasOptional.orElse(MekanismGasWrappers.EMPTY_TANK);
-//                connected = true;
-//                handlerOptional = gasOptional;
-//                handler = MekanismGasWrappers.wrap(gasHandler);
-//            }
         }
     }
     

@@ -48,9 +48,9 @@ public final class EnergyBar {
      */
     private static void frameBand(GuiGraphics g, int x, int y, int width, int v, int h) {
         final int middle = width - 2 * BORDER;
-        g.blit(EMPTY, x, y, BORDER, h, 0, v, BORDER, h, TEXTURE_WIDTH, FRAME_HEIGHT);
-        g.blit(EMPTY, x + BORDER, y, middle, h, BORDER, v, FILL_WIDTH, h, TEXTURE_WIDTH, FRAME_HEIGHT);
-        g.blit(EMPTY, x + width - BORDER, y, BORDER, h, TEXTURE_WIDTH - BORDER, v, BORDER, h, TEXTURE_WIDTH, FRAME_HEIGHT);
+        GuiTheme.blit(g, EMPTY, x, y, BORDER, h, 0, v, BORDER, h, TEXTURE_WIDTH, FRAME_HEIGHT);
+        GuiTheme.blit(g, EMPTY, x + BORDER, y, middle, h, BORDER, v, FILL_WIDTH, h, TEXTURE_WIDTH, FRAME_HEIGHT);
+        GuiTheme.blit(g, EMPTY, x + width - BORDER, y, BORDER, h, TEXTURE_WIDTH - BORDER, v, BORDER, h, TEXTURE_WIDTH, FRAME_HEIGHT);
     }
 
     public static void draw(GuiGraphics g, int x, int y, int width, int height, double fraction) {

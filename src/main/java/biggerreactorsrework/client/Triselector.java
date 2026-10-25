@@ -89,7 +89,7 @@ public class Triselector<T extends AbstractContainerMenu> extends InteractiveEle
     public void render(@Nonnull GuiGraphics graphics, int mouseX, int mouseY) {
         // Check conditions.
         if (this.renderEnable) {
-            GuiArt.toggleCells(graphics, this.x, this.y, this.cellOf(this.renderState.getAsInt()), this.actionEnable && this.isMouseOver(mouseX, mouseY), !this.actionEnable, this.colors);
+            GuiArt.toggleCells(graphics, this.x, this.y, this.cellOf(this.renderState.getAsInt()), this.actionEnable && this.isMouseOver(mouseX, mouseY), !this.actionEnable, this.parent.getFrame(), this.colors);
             // Trigger user-defined render logic.
             if (this.onRender != null) {
                 this.onRender.trigger(graphics, mouseX, mouseY);

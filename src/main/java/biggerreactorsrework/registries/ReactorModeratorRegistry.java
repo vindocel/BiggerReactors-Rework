@@ -192,6 +192,7 @@ public class ReactorModeratorRegistry {
                 }
             }
         }
+        MaterialDataMaps.moderators(registry);
         BiggerReactors.LOGGER.info("Loaded " + registry.size() + " moderator entries");
     }
     
@@ -246,6 +247,7 @@ public class ReactorModeratorRegistry {
         
         private static void readSync(DataCompound compound, IPayloadContext context) {
             moderatorBlocks.clear();
+            moderatorProperties.clear();
             //noinspection unchecked
             final var list = (List<String>) compound.getList("list");
             //noinspection unchecked
@@ -256,7 +258,9 @@ public class ReactorModeratorRegistry {
             for (int i = 0; i < list.size(); i++) {
                 var blockLocation = list.get(i);
                 var properties = propertiesList.get(i);
-                final var block = BuiltInRegistries.BLOCK.get(ResourceLocation.parse(blockLocation));
+                var id=ResourceLocation.tryParse(blockLocation);
+                if(id==null||!BuiltInRegistries.BLOCK.containsKey(id))continue;
+                final var block = BuiltInRegistries.BLOCK.get(id);
                 if (block == null) {
                     return;
                 }

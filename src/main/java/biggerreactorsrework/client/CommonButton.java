@@ -56,7 +56,7 @@ public class CommonButton<T extends AbstractContainerMenu> extends InteractiveEl
         if (this.renderEnable) {
             boolean disabled = !this.actionEnable;
             GuiArt.button(graphics, this.x, this.y, this.width, this.height, this.isMouseOver(mouseX, mouseY), false, disabled,
-                    disabled ? this.disabledGlyph : this.glyph);
+                    disabled ? this.disabledGlyph : this.glyph, this.parent.getFrame());
             // Trigger user-defined render logic.
             if (this.onRender != null) {
                 this.onRender.trigger(graphics, mouseX, mouseY);

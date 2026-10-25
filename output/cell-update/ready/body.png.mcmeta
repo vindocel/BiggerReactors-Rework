@@ -1,0 +1,19 @@
+{
+  "ctm": {
+    "ctm_version": 1,
+    "type": "CTM",
+    "layer": "SOLID",
+    "textures": [
+      "biggerreactorsrework:block/battery/cell/ctm/body"
+    ],
+    "extra": {
+      "connect_to": [
+        {
+          "block": "biggerreactorsrework:battery_cell"
+        }
+      ],
+      "connect_inside": true,
+      "ignore_states": true
+    }
+  }
+}

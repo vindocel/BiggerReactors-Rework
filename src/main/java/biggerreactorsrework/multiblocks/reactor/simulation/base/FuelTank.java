@@ -69,7 +69,7 @@ public class FuelTank implements IReactorSimulation.IFuelTank, ISerializable {
             return 0;
         }
         
-        amount = Math.min(amount, capacity - totalStored());
+        amount = Math.max(0, Math.min(amount, capacity - totalStored()));
         
         if (!simulated) {
             fuel += amount;
@@ -85,7 +85,7 @@ public class FuelTank implements IReactorSimulation.IFuelTank, ISerializable {
             return 0;
         }
         
-        amount = Math.min(amount, capacity - totalStored());
+        amount = Math.max(0, Math.min(amount, capacity - totalStored()));
         
         if (!simulated) {
             waste += amount;
@@ -96,7 +96,7 @@ public class FuelTank implements IReactorSimulation.IFuelTank, ISerializable {
     
     @Override
     public long extractFuel(long amount, boolean simulated) {
-        amount = Math.min(fuel, amount);
+        amount = Math.max(0, Math.min(fuel, amount));
         if (!simulated) {
             fuel -= amount;
         }
@@ -105,7 +105,7 @@ public class FuelTank implements IReactorSimulation.IFuelTank, ISerializable {
     
     @Override
     public long extractWaste(long amount, boolean simulated) {
-        amount = Math.min(waste, amount);
+        amount = Math.max(0, Math.min(waste, amount));
         if (!simulated) {
             waste -= amount;
         }

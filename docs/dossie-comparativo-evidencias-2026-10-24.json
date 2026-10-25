@@ -1,0 +1,719 @@
+{
+  "date": "2026-10-24",
+  "local_head": "3542de79897022bafc73d2c527310327724d910f",
+  "local_has_preexisting_changes": true,
+  "reference_commits": {
+    "revived": "d20a6bef5352308638631dbb1bfa6792958ac3b4",
+    "extreme": "f6cc65140a8abbfc87137f5c54fc641085f66048"
+  },
+  "evidence": [
+    {
+      "id": "L01",
+      "path": "gradle.properties",
+      "line": 6,
+      "url": "C:/Users/victo/Documents/GitHub/BiggerReactors-Rework/gradle.properties:6",
+      "sha256": "37156d27bb5e7aea1348a3f15a16eed225fe28fa98db460910d4b1045016b2a3",
+      "pattern_found": true
+    },
+    {
+      "id": "L02",
+      "path": "build.gradle",
+      "line": 66,
+      "url": "C:/Users/victo/Documents/GitHub/BiggerReactors-Rework/build.gradle:66",
+      "sha256": "5b10bcb69094899332cd52776e7b99b76b959b271330f25a15946eaae5fa9977",
+      "pattern_found": true
+    },
+    {
+      "id": "L03",
+      "path": "src/main/java/biggerreactorsrework/BiggerReactors.java",
+      "line": 30,
+      "url": "C:/Users/victo/Documents/GitHub/BiggerReactors-Rework/src/main/java/biggerreactorsrework/BiggerReactors.java:30",
+      "sha256": "a7f978b5e56df7fabb7fdb13191c2ecc233358df91abd77ff793f3ffea602cbc",
+      "pattern_found": true
+    },
+    {
+      "id": "L04",
+      "path": "src/main/java/biggerreactorsrework/core/CoreEvents.java",
+      "line": 54,
+      "url": "C:/Users/victo/Documents/GitHub/BiggerReactors-Rework/src/main/java/biggerreactorsrework/core/CoreEvents.java:54",
+      "sha256": "f0559284f0428eade23a3988f0baadca7c20c475a466a7e5d5055cca9f7851b6",
+      "pattern_found": true
+    },
+    {
+      "id": "L05",
+      "path": "src/main/java/biggerreactorsrework/core/multiblock/validated/IValidatedMultiblock.java",
+      "line": 31,
+      "url": "C:/Users/victo/Documents/GitHub/BiggerReactors-Rework/src/main/java/biggerreactorsrework/core/multiblock/validated/IValidatedMultiblock.java:31",
+      "sha256": "781aced53ac9574f5e11613794123f7f5c9a9b0c87673d76098e311910b22828",
+      "pattern_found": true
+    },
+    {
+      "id": "L06",
+      "path": "src/main/java/biggerreactorsrework/multiblocks/reactor/ReactorMultiblockController.java",
+      "line": 110,
+      "url": "C:/Users/victo/Documents/GitHub/BiggerReactors-Rework/src/main/java/biggerreactorsrework/multiblocks/reactor/ReactorMultiblockController.java:110",
+      "sha256": "141d42c5cec9f1f3ed47a11f4ba7bfccb58b382b1decfbe374d3b971e5b818b7",
+      "pattern_found": true
+    },
+    {
+      "id": "L07",
+      "path": "src/main/java/biggerreactorsrework/core/multiblock/common/IPersistentMultiblock.java",
+      "line": 50,
+      "url": "C:/Users/victo/Documents/GitHub/BiggerReactors-Rework/src/main/java/biggerreactorsrework/core/multiblock/common/IPersistentMultiblock.java:50",
+      "sha256": "d017aca6eee4c104c131713fb516245150cb8fc047d5fac70981ee549c7ff074",
+      "pattern_found": true
+    },
+    {
+      "id": "L08",
+      "path": "src/main/java/biggerreactorsrework/multiblocks/reactor/tiles/ReactorAccessPortTile.java",
+      "line": 140,
+      "url": "C:/Users/victo/Documents/GitHub/BiggerReactors-Rework/src/main/java/biggerreactorsrework/multiblocks/reactor/tiles/ReactorAccessPortTile.java:140",
+      "sha256": "5c591aea8d6173c17fa080a526a27128de1184c486fc64b53529cf738fefd2e9",
+      "pattern_found": true
+    },
+    {
+      "id": "L09",
+      "path": "src/main/java/biggerreactorsrework/multiblocks/reactor/simulation/base/FuelTank.java",
+      "line": 25,
+      "url": "C:/Users/victo/Documents/GitHub/BiggerReactors-Rework/src/main/java/biggerreactorsrework/multiblocks/reactor/simulation/base/FuelTank.java:25",
+      "sha256": "4d833f33184ae1f4376f9c1d635b373a8a68585e72638f42a94fd1a0d7964d92",
+      "pattern_found": true
+    },
+    {
+      "id": "L10",
+      "path": "src/main/java/biggerreactorsrework/multiblocks/reactor/simulation/SimulationDescription.java",
+      "line": 117,
+      "url": "C:/Users/victo/Documents/GitHub/BiggerReactors-Rework/src/main/java/biggerreactorsrework/multiblocks/reactor/simulation/SimulationDescription.java:117",
+      "sha256": "e3446c264c0767e7f8efae608d8498dd9d860353dee2338e399f26395b1eddcd",
+      "pattern_found": true
+    },
+    {
+      "id": "L11",
+      "path": "src/main/java/biggerreactorsrework/multiblocks/reactor/simulation/SimulationConfiguration.java",
+      "line": 7,
+      "url": "C:/Users/victo/Documents/GitHub/BiggerReactors-Rework/src/main/java/biggerreactorsrework/multiblocks/reactor/simulation/SimulationConfiguration.java:7",
+      "sha256": "a6b54f7745c379b85edbf8ecdcedc2af85dca8fc360d13fcfc808d2117e3ddaa",
+      "pattern_found": true
+    },
+    {
+      "id": "L12",
+      "path": "src/main/java/biggerreactorsrework/machine/tiles/CyaniteReprocessorTile.java",
+      "line": 73,
+      "url": "C:/Users/victo/Documents/GitHub/BiggerReactors-Rework/src/main/java/biggerreactorsrework/machine/tiles/CyaniteReprocessorTile.java:73",
+      "sha256": "c3bff5125dc3ee0cd1129d7415733adf46100fe163bbbfa71aa77605a847924d",
+      "pattern_found": true
+    },
+    {
+      "id": "L13",
+      "path": "src/main/java/biggerreactorsrework/multiblocks/reactor/simulation/base/BaseReactorSimulation.java",
+      "line": 46,
+      "url": "C:/Users/victo/Documents/GitHub/BiggerReactors-Rework/src/main/java/biggerreactorsrework/multiblocks/reactor/simulation/base/BaseReactorSimulation.java:46",
+      "sha256": "d76808be1a78f1116b0f28738d9fe13d59fb3c5b70ba09dad8ba656a3d4bcb6b",
+      "pattern_found": true
+    },
+    {
+      "id": "L14",
+      "path": "src/main/java/biggerreactorsrework/multiblocks/reactor/simulation/cpu/TimeSlicedReactorSimulation.java",
+      "line": 36,
+      "url": "C:/Users/victo/Documents/GitHub/BiggerReactors-Rework/src/main/java/biggerreactorsrework/multiblocks/reactor/simulation/cpu/TimeSlicedReactorSimulation.java:36",
+      "sha256": "e6cf8198fbdb800b2a97a4366cca0f0376e5882a8f58b9f36d807dcf9a81c0da",
+      "pattern_found": true
+    },
+    {
+      "id": "L15",
+      "path": "src/main/java/biggerreactorsrework/multiblocks/reactor/simulation/cpu/FullPassReactorSimulation.java",
+      "line": 377,
+      "url": "C:/Users/victo/Documents/GitHub/BiggerReactors-Rework/src/main/java/biggerreactorsrework/multiblocks/reactor/simulation/cpu/FullPassReactorSimulation.java:377",
+      "sha256": "3a717123ae22112d27cff2b85e8b0ea6930da842fa8d632ce8cefbf98d5681b2",
+      "pattern_found": true
+    },
+    {
+      "id": "L16",
+      "path": "src/main/java/biggerreactorsrework/multiblocks/turbine/TurbineMultiblockController.java",
+      "line": 476,
+      "url": "C:/Users/victo/Documents/GitHub/BiggerReactors-Rework/src/main/java/biggerreactorsrework/multiblocks/turbine/TurbineMultiblockController.java:476",
+      "sha256": "d163bfe774ae2536694b8f1ceefb79fe29e36c7aba296be2b9ebcd0a551b89aa",
+      "pattern_found": true
+    },
+    {
+      "id": "L17",
+      "path": "src/main/java/biggerreactorsrework/multiblocks/turbine/simulation/modern/ModernTurbineSimulation.java",
+      "line": 14,
+      "url": "C:/Users/victo/Documents/GitHub/BiggerReactors-Rework/src/main/java/biggerreactorsrework/multiblocks/turbine/simulation/modern/ModernTurbineSimulation.java:14",
+      "sha256": "cde806797d027d56bf7a5168e6054fc3c5798193ba8112de1d39c11d0fc539ad",
+      "pattern_found": true
+    },
+    {
+      "id": "L18",
+      "path": "src/main/java/biggerreactorsrework/multiblocks/turbine/client/TurbineRotorRenderer.java",
+      "line": 28,
+      "url": "C:/Users/victo/Documents/GitHub/BiggerReactors-Rework/src/main/java/biggerreactorsrework/multiblocks/turbine/client/TurbineRotorRenderer.java:28",
+      "sha256": "03d81125b4b6f3ef2b6e6948f6a6ad4db74e0a3dc1a21e5412788689ed5ba583",
+      "pattern_found": true
+    },
+    {
+      "id": "L19",
+      "path": "src/main/java/biggerreactorsrework/multiblocks/heatexchanger/HeatExchangerMultiblockController.java",
+      "line": 76,
+      "url": "C:/Users/victo/Documents/GitHub/BiggerReactors-Rework/src/main/java/biggerreactorsrework/multiblocks/heatexchanger/HeatExchangerMultiblockController.java:76",
+      "sha256": "f9842a5d3dc496eb2bdee6b38b3d33d7b3979b7dd4369e85993024599dd3e2d0",
+      "pattern_found": true
+    },
+    {
+      "id": "L20",
+      "path": "src/main/java/biggerreactorsrework/util/FluidTransitionTank.java",
+      "line": 22,
+      "url": "C:/Users/victo/Documents/GitHub/BiggerReactors-Rework/src/main/java/biggerreactorsrework/util/FluidTransitionTank.java:22",
+      "sha256": "9477d92df80b7cc0ed0e3302bb5118d2038931ad8525fd678bdbd286f7e97cfc",
+      "pattern_found": true
+    },
+    {
+      "id": "L21",
+      "path": "src/main/java/biggerreactorsrework/Config.java",
+      "line": 347,
+      "url": "C:/Users/victo/Documents/GitHub/BiggerReactors-Rework/src/main/java/biggerreactorsrework/Config.java:347",
+      "sha256": "a3be696f8d6f8c9f79cd5312bba383c046e80d30040fee504225207ee7aa0c83",
+      "pattern_found": true
+    },
+    {
+      "id": "L22",
+      "path": "src/main/java/biggerreactorsrework/registries/ReactorModeratorRegistry.java",
+      "line": 147,
+      "url": "C:/Users/victo/Documents/GitHub/BiggerReactors-Rework/src/main/java/biggerreactorsrework/registries/ReactorModeratorRegistry.java:147",
+      "sha256": "c1be7cf8eefbbf28bebf649506595a4c016ca694e3839ca9b3027f7a4b509b32",
+      "pattern_found": true
+    },
+    {
+      "id": "L23",
+      "path": "src/main/java/biggerreactorsrework/registries/FluidTransitionRegistry.java",
+      "line": 156,
+      "url": "C:/Users/victo/Documents/GitHub/BiggerReactors-Rework/src/main/java/biggerreactorsrework/registries/FluidTransitionRegistry.java:156",
+      "sha256": "b28e85dfad0e51116e355225d2adbe0c558535ffa9a531bec7ad04b7ce5f4e8e",
+      "pattern_found": true
+    },
+    {
+      "id": "L24",
+      "path": "src/main/java/biggerreactorsrework/core/client/gui/GuiSync.java",
+      "line": 113,
+      "url": "C:/Users/victo/Documents/GitHub/BiggerReactors-Rework/src/main/java/biggerreactorsrework/core/client/gui/GuiSync.java:113",
+      "sha256": "55addfc0067cef13f4cb66d3ebd5b4210cf32aa1637cd0601bea4949edd838e3",
+      "pattern_found": true
+    },
+    {
+      "id": "L25",
+      "path": "src/main/java/biggerreactorsrework/core/networking/SimpleChannel.java",
+      "line": 31,
+      "url": "C:/Users/victo/Documents/GitHub/BiggerReactors-Rework/src/main/java/biggerreactorsrework/core/networking/SimpleChannel.java:31",
+      "sha256": "33aa00ae1db5c33313c45d2fd9ec73fa35183ea9f129457d453434e7a39e8353",
+      "pattern_found": true
+    },
+    {
+      "id": "L26",
+      "path": "src/main/java/biggerreactorsrework/multiblocks/reactor/tiles/ReactorRedstonePortTile.java",
+      "line": 255,
+      "url": "C:/Users/victo/Documents/GitHub/BiggerReactors-Rework/src/main/java/biggerreactorsrework/multiblocks/reactor/tiles/ReactorRedstonePortTile.java:255",
+      "sha256": "38fba1a73801f61dcab717d58283f013d682f64df926759ce26388cd98cf5fc8",
+      "pattern_found": true
+    },
+    {
+      "id": "L27",
+      "path": "src/main/resources/data/biggerreactorsrework/recipe/compat/appliedenergistics/grindstone_uranium_ingot.json",
+      "line": 2,
+      "url": "C:/Users/victo/Documents/GitHub/BiggerReactors-Rework/src/main/resources/data/biggerreactorsrework/recipe/compat/appliedenergistics/grindstone_uranium_ingot.json:2",
+      "sha256": "6797b83bdd8fcb2b89200f42710227faa2dfb2c25890132d8330e649d634c946",
+      "pattern_found": true
+    },
+    {
+      "id": "L28",
+      "path": "src/main/java/biggerreactorsrework/multiblocks/reactor/containers/ReactorRedstonePortContainer.java",
+      "line": 52,
+      "url": "C:/Users/victo/Documents/GitHub/BiggerReactors-Rework/src/main/java/biggerreactorsrework/multiblocks/reactor/containers/ReactorRedstonePortContainer.java:52",
+      "sha256": "464b79ec931b045435c2fbb9c0fc3e6f09c9c3387f8a4b1bf1d2b38b1ac4e50a",
+      "pattern_found": true
+    },
+    {
+      "id": "L29",
+      "path": "src/main/java/biggerreactorsrework/core/energy/EnergyHandlerWrappers.java",
+      "line": 109,
+      "url": "C:/Users/victo/Documents/GitHub/BiggerReactors-Rework/src/main/java/biggerreactorsrework/core/energy/EnergyHandlerWrappers.java:109",
+      "sha256": "42c42015cda7a7af8ddde14017861a5b02b8c115cbb30e495416f7fe3f838ff7",
+      "pattern_found": true
+    },
+    {
+      "id": "L30",
+      "path": "docs/planejamento-guia.md",
+      "line": 1,
+      "url": "C:/Users/victo/Documents/GitHub/BiggerReactors-Rework/docs/planejamento-guia.md:1",
+      "sha256": "c30dfc03839224ca40d68391cb2a07c9ccfbb87d2481084583a3f06186e69f4b",
+      "pattern_found": true
+    },
+    {
+      "id": "L31",
+      "path": "readme.md",
+      "line": 1,
+      "url": "C:/Users/victo/Documents/GitHub/BiggerReactors-Rework/readme.md:1",
+      "sha256": "81260c5502cb31bee944d6a7f8e8364bf38fbc9d50f84a27c5e3cc2bcb3d4145",
+      "pattern_found": true
+    },
+    {
+      "id": "L32",
+      "path": ".github/workflows/ci.yml",
+      "line": 1,
+      "url": "C:/Users/victo/Documents/GitHub/BiggerReactors-Rework/.github/workflows/ci.yml:1",
+      "sha256": "b6658de95b07ff372c82f7123a94d1f82aefc3bb5269ff8f32911056a3fd988f",
+      "pattern_found": true
+    },
+    {
+      "id": "L33",
+      "path": ".github/workflows/release.yml",
+      "line": 1,
+      "url": "C:/Users/victo/Documents/GitHub/BiggerReactors-Rework/.github/workflows/release.yml:1",
+      "sha256": "db53472016926423e0b526f9f4a1710b170441035ac7c1eb009e559cee84d87d",
+      "pattern_found": true
+    },
+    {
+      "id": "L34",
+      "path": "src/main/java/biggerreactorsrework/multiblocks/reactor2/package-info.java",
+      "line": 1,
+      "url": "C:/Users/victo/Documents/GitHub/BiggerReactors-Rework/src/main/java/biggerreactorsrework/multiblocks/reactor2/package-info.java:1",
+      "sha256": "fa6579f970e9e9d0da350841d5b86c1aa3904d230d73bdf16d4fa9e58598a58a",
+      "pattern_found": true
+    },
+    {
+      "id": "L35",
+      "path": "src/main/java/biggerreactorsrework/gametest/ContentGameTests.java",
+      "line": 22,
+      "url": "C:/Users/victo/Documents/GitHub/BiggerReactors-Rework/src/main/java/biggerreactorsrework/gametest/ContentGameTests.java:22",
+      "sha256": "1d6d61258aa8c1bdf2a5e514f943cce8c16346e502f593f8a9f9450e1cb6c05c",
+      "pattern_found": true
+    },
+    {
+      "id": "L36",
+      "path": "src/main/java/biggerreactorsrework/gametest/MultiblockGameTests.java",
+      "line": 22,
+      "url": "C:/Users/victo/Documents/GitHub/BiggerReactors-Rework/src/main/java/biggerreactorsrework/gametest/MultiblockGameTests.java:22",
+      "sha256": "9188af6a964c7bd5d6ea09a793734df11b659500ecd54932e2d253e13268c55b",
+      "pattern_found": true
+    },
+    {
+      "id": "L37",
+      "path": "src/main/java/biggerreactorsrework/multiblocks/reactor/deps/ReactorPeripheral.java",
+      "line": 42,
+      "url": "C:/Users/victo/Documents/GitHub/BiggerReactors-Rework/src/main/java/biggerreactorsrework/multiblocks/reactor/deps/ReactorPeripheral.java:42",
+      "sha256": "c2276db82d126d6963422df3ac5b7330970a60d5b4599120ea45b83cb0d74ac0",
+      "pattern_found": true
+    },
+    {
+      "id": "L38",
+      "path": "src/main/java/biggerreactorsrework/multiblocks/reactor/client/ReactorRedstonePortScreen.java",
+      "line": 224,
+      "url": "C:/Users/victo/Documents/GitHub/BiggerReactors-Rework/src/main/java/biggerreactorsrework/multiblocks/reactor/client/ReactorRedstonePortScreen.java:224",
+      "sha256": "7b6daf990e41ce1f5e371c8ba8cf1cb53e84061c25e1de6b6e1547f883324bc8",
+      "pattern_found": true
+    },
+    {
+      "id": "V01",
+      "path": "build.gradle",
+      "line": 181,
+      "url": "https://github.com/Modern-Mods/Bigger-Reactors-Revived/blob/d20a6bef5352308638631dbb1bfa6792958ac3b4/build.gradle#L181",
+      "sha256": "96a456289547f3e4a8254aa89ef39ea2c60a21c80962ee667735c421fd061c94",
+      "pattern_found": true
+    },
+    {
+      "id": "V02",
+      "path": "src/main/java/modernmods/biggerreactorsrevived/datagen/BiggerReactorsDatagen.java",
+      "line": 21,
+      "url": "https://github.com/Modern-Mods/Bigger-Reactors-Revived/blob/d20a6bef5352308638631dbb1bfa6792958ac3b4/src/main/java/modernmods/biggerreactorsrevived/datagen/BiggerReactorsDatagen.java#L21",
+      "sha256": "e0269390d593cade399e8cda50447c5bc804508cbedc2aec8f1527af32bdd1ba",
+      "pattern_found": true
+    },
+    {
+      "id": "V03",
+      "path": "src/main/java/modernmods/biggerreactorsrevived/registries/BiggerReactorsDataMaps.java",
+      "line": 13,
+      "url": "https://github.com/Modern-Mods/Bigger-Reactors-Revived/blob/d20a6bef5352308638631dbb1bfa6792958ac3b4/src/main/java/modernmods/biggerreactorsrevived/registries/BiggerReactorsDataMaps.java#L13",
+      "sha256": "530fcec01a14c4ea5800e531c0739df52bf5201c3bf078518a455b3b1fea8ecb",
+      "pattern_found": true
+    },
+    {
+      "id": "V04",
+      "path": "src/main/java/modernmods/biggerreactorsrevived/registries/ReactorModeratorRegistry.java",
+      "line": 159,
+      "url": "https://github.com/Modern-Mods/Bigger-Reactors-Revived/blob/d20a6bef5352308638631dbb1bfa6792958ac3b4/src/main/java/modernmods/biggerreactorsrevived/registries/ReactorModeratorRegistry.java#L159",
+      "sha256": "61e1ffeadc56569cd3bad83a49bde7e449f6b7fe3ee06399a7db5cfe0831ca1f",
+      "pattern_found": true
+    },
+    {
+      "id": "V05",
+      "path": "src/main/java/modernmods/biggerreactorsrevived/deps/kubejs/KubeJSDeps.java",
+      "line": 12,
+      "url": "https://github.com/Modern-Mods/Bigger-Reactors-Revived/blob/d20a6bef5352308638631dbb1bfa6792958ac3b4/src/main/java/modernmods/biggerreactorsrevived/deps/kubejs/KubeJSDeps.java#L12",
+      "sha256": "724696f5c69973ae6b97f4cf52de17beb59ff9ada93e95b4d585e6ecb8aede78",
+      "pattern_found": true
+    },
+    {
+      "id": "V06",
+      "path": "src/main/resources/assets/biggerreactors/patchouli_books/guide/en_us/entries/reactors/basic_reactor.json",
+      "line": 12,
+      "url": "https://github.com/Modern-Mods/Bigger-Reactors-Revived/blob/d20a6bef5352308638631dbb1bfa6792958ac3b4/src/main/resources/assets/biggerreactors/patchouli_books/guide/en_us/entries/reactors/basic_reactor.json#L12",
+      "sha256": "59e09d9978d9873ca2851698ab0516b6ff236d34548333ca5abeb20a60ec81d7",
+      "pattern_found": true
+    },
+    {
+      "id": "V07",
+      "path": "src/main/java/modernmods/biggerreactorsrevived/commands/MultiblockBuildCommand.java",
+      "line": 430,
+      "url": "https://github.com/Modern-Mods/Bigger-Reactors-Revived/blob/d20a6bef5352308638631dbb1bfa6792958ac3b4/src/main/java/modernmods/biggerreactorsrevived/commands/MultiblockBuildCommand.java#L430",
+      "sha256": "b70cec025a821b4ecdc60055618f44ba26d0e55efca83ec2f62b415853bb7c2e",
+      "pattern_found": true
+    },
+    {
+      "id": "V08",
+      "path": "src/main/java/modernmods/biggerreactorsrevived/machine/tiles/CyaniteReprocessorTile.java",
+      "line": 339,
+      "url": "https://github.com/Modern-Mods/Bigger-Reactors-Revived/blob/d20a6bef5352308638631dbb1bfa6792958ac3b4/src/main/java/modernmods/biggerreactorsrevived/machine/tiles/CyaniteReprocessorTile.java#L339",
+      "sha256": "b96902a13fd0f0f431f15ee92ada12e7169b694af41a13d3e9a191f0eac7811f",
+      "pattern_found": true
+    },
+    {
+      "id": "V09",
+      "path": "src/main/java/modernmods/biggerreactorsrevived/multiblocks/reactor/ReactorMultiblockController.java",
+      "line": 153,
+      "url": "https://github.com/Modern-Mods/Bigger-Reactors-Revived/blob/d20a6bef5352308638631dbb1bfa6792958ac3b4/src/main/java/modernmods/biggerreactorsrevived/multiblocks/reactor/ReactorMultiblockController.java#L153",
+      "sha256": "653a40b96414b5656cd04eb6595302462e2225963e3e90d9368e9496c356585a",
+      "pattern_found": true
+    },
+    {
+      "id": "V10",
+      "path": "src/main/java/modernmods/biggerreactorsrevived/datagen/providers/BiggerReactorsCompatRecipeProvider.java",
+      "line": 14,
+      "url": "https://github.com/Modern-Mods/Bigger-Reactors-Revived/blob/d20a6bef5352308638631dbb1bfa6792958ac3b4/src/main/java/modernmods/biggerreactorsrevived/datagen/providers/BiggerReactorsCompatRecipeProvider.java#L14",
+      "sha256": "fb323c96664fc59784d9ffed49cd47cdc558fac300c0e11d43483cf7cdef75b3",
+      "pattern_found": true
+    },
+    {
+      "id": "V11",
+      "path": "src/main/java/modernmods/biggerreactorsrevived/datagen/providers/BiggerReactorsDataMapProvider.java",
+      "line": 112,
+      "url": "https://github.com/Modern-Mods/Bigger-Reactors-Revived/blob/d20a6bef5352308638631dbb1bfa6792958ac3b4/src/main/java/modernmods/biggerreactorsrevived/datagen/providers/BiggerReactorsDataMapProvider.java#L112",
+      "sha256": "e1dab86e82de94d2732a6d31d7322eb3da305f4bc993463c2edcd03e5192cfa8",
+      "pattern_found": true
+    },
+    {
+      "id": "V12",
+      "path": "src/main/java/modernmods/biggerreactorsrevived/multiblocks/reactor/simulation/cpu/TimeSlicedReactorSimulation.java",
+      "line": 32,
+      "url": "https://github.com/Modern-Mods/Bigger-Reactors-Revived/blob/d20a6bef5352308638631dbb1bfa6792958ac3b4/src/main/java/modernmods/biggerreactorsrevived/multiblocks/reactor/simulation/cpu/TimeSlicedReactorSimulation.java#L32",
+      "sha256": "218fa262332b5ea26e3dbaeb3737a07e3c7227265203852eafdba8869e0fdea9",
+      "pattern_found": true
+    },
+    {
+      "id": "V13",
+      "path": "src/main/java/modernmods/biggerreactorsrevived/multiblocks/reactor/tiles/ReactorAccessPortTile.java",
+      "line": 62,
+      "url": "https://github.com/Modern-Mods/Bigger-Reactors-Revived/blob/d20a6bef5352308638631dbb1bfa6792958ac3b4/src/main/java/modernmods/biggerreactorsrevived/multiblocks/reactor/tiles/ReactorAccessPortTile.java#L62",
+      "sha256": "b097cd0f79a33427ccea0b572f344f4be39425f8ed5f6e236bccdf25ac93a45d",
+      "pattern_found": true
+    },
+    {
+      "id": "V14",
+      "path": "src/main/resources/META-INF/neoforge.mods.toml",
+      "line": 47,
+      "url": "https://github.com/Modern-Mods/Bigger-Reactors-Revived/blob/d20a6bef5352308638631dbb1bfa6792958ac3b4/src/main/resources/META-INF/neoforge.mods.toml#L47",
+      "sha256": "b564ddc225664476a54456a728ab63eca57e088c9d9302a0915b1e5b5fc4c2ae",
+      "pattern_found": true
+    },
+    {
+      "id": "V15",
+      "path": "src/main/java/modernmods/biggerreactorsrevived/multiblocks/reactor/simulation/accellerated/ocl/SingleQueueOpenCL12Simulation.java",
+      "line": 19,
+      "url": "https://github.com/Modern-Mods/Bigger-Reactors-Revived/blob/d20a6bef5352308638631dbb1bfa6792958ac3b4/src/main/java/modernmods/biggerreactorsrevived/multiblocks/reactor/simulation/accellerated/ocl/SingleQueueOpenCL12Simulation.java#L19",
+      "sha256": "547012cb04b2f52af290ffc0e66c79f1e934df3ae88537acc02d3eaa0c7a8eaa",
+      "pattern_found": true
+    },
+    {
+      "id": "V16",
+      "path": ".github/workflows/build.yml",
+      "line": 1,
+      "url": "https://github.com/Modern-Mods/Bigger-Reactors-Revived/blob/d20a6bef5352308638631dbb1bfa6792958ac3b4/.github/workflows/build.yml#L1",
+      "sha256": "f9797033688c44b034d116140a1fda244073869a1f7da2a800967cf6d452ad91",
+      "pattern_found": true
+    },
+    {
+      "id": "V17",
+      "path": "LICENSE",
+      "line": 1,
+      "url": "https://github.com/Modern-Mods/Bigger-Reactors-Revived/blob/d20a6bef5352308638631dbb1bfa6792958ac3b4/LICENSE#L1",
+      "sha256": "7ffe1954587c77dfba1cf8eb9b2ea743671fa6e63f9e7a2f258119d42e14eefe",
+      "pattern_found": true
+    },
+    {
+      "id": "E01",
+      "path": "gradle.properties",
+      "line": 14,
+      "url": "https://github.com/ZeroNoRyouki/ExtremeReactors2/blob/f6cc65140a8abbfc87137f5c54fc641085f66048/gradle.properties#L14",
+      "sha256": "3be7153fe0d63f8145bbcf9f05e8592c7a7403a27ec3e16ef188b45a60b104ab",
+      "pattern_found": true
+    },
+    {
+      "id": "E02",
+      "path": "src/main/java/it/zerono/mods/extremereactors/gamecontent/multiblock/reactor/MultiblockReactor.java",
+      "line": 78,
+      "url": "https://github.com/ZeroNoRyouki/ExtremeReactors2/blob/f6cc65140a8abbfc87137f5c54fc641085f66048/src/main/java/it/zerono/mods/extremereactors/gamecontent/multiblock/reactor/MultiblockReactor.java#L78",
+      "sha256": "24c03033382b261b358a0368e4f569915fee0821a78907b0acc66da355bb4a31",
+      "pattern_found": true
+    },
+    {
+      "id": "E03",
+      "path": "src/main/java/it/zerono/mods/extremereactors/gamecontent/multiblock/reactor/ReactorLogic.java",
+      "line": 57,
+      "url": "https://github.com/ZeroNoRyouki/ExtremeReactors2/blob/f6cc65140a8abbfc87137f5c54fc641085f66048/src/main/java/it/zerono/mods/extremereactors/gamecontent/multiblock/reactor/ReactorLogic.java#L57",
+      "sha256": "3cc8a33fcaa6656985b37aa7f3ecf7412b26e6859e8610ce01f4b4400af04de3",
+      "pattern_found": true
+    },
+    {
+      "id": "E04",
+      "path": "src/main/java/it/zerono/mods/extremereactors/api/reactor/FuelProperties.java",
+      "line": 33,
+      "url": "https://github.com/ZeroNoRyouki/ExtremeReactors2/blob/f6cc65140a8abbfc87137f5c54fc641085f66048/src/main/java/it/zerono/mods/extremereactors/api/reactor/FuelProperties.java#L33",
+      "sha256": "49286c01a7ab4bcb444f7c9e5e5617613550af9a4e3d8e41173edd47c2987e02",
+      "pattern_found": true
+    },
+    {
+      "id": "E05",
+      "path": "src/main/java/it/zerono/mods/extremereactors/api/reactor/ReactantsRegistry.java",
+      "line": 38,
+      "url": "https://github.com/ZeroNoRyouki/ExtremeReactors2/blob/f6cc65140a8abbfc87137f5c54fc641085f66048/src/main/java/it/zerono/mods/extremereactors/api/reactor/ReactantsRegistry.java#L38",
+      "sha256": "2b98a0b852342db73de1e3b6c59b819206f64056ceb6cc9b2e3a76fd8e769979",
+      "pattern_found": true
+    },
+    {
+      "id": "E06",
+      "path": "src/main/java/it/zerono/mods/extremereactors/api/reactor/ReactionsRegistry.java",
+      "line": 41,
+      "url": "https://github.com/ZeroNoRyouki/ExtremeReactors2/blob/f6cc65140a8abbfc87137f5c54fc641085f66048/src/main/java/it/zerono/mods/extremereactors/api/reactor/ReactionsRegistry.java#L41",
+      "sha256": "1b99699258d60d3deb5de01b49808c96b796d36aa132ea0da97ccaaee77e3444",
+      "pattern_found": true
+    },
+    {
+      "id": "E07",
+      "path": "src/main/java/it/zerono/mods/extremereactors/gamecontent/multiblock/turbine/sensor/TurbineSensorType.java",
+      "line": 34,
+      "url": "https://github.com/ZeroNoRyouki/ExtremeReactors2/blob/f6cc65140a8abbfc87137f5c54fc641085f66048/src/main/java/it/zerono/mods/extremereactors/gamecontent/multiblock/turbine/sensor/TurbineSensorType.java#L34",
+      "sha256": "263eb05151f18905676e4be10cf4c1e18edf0dde4ad35fca361add204663d63c",
+      "pattern_found": true
+    },
+    {
+      "id": "E08",
+      "path": "src/main/java/it/zerono/mods/extremereactors/gamecontent/multiblock/common/container/ChargingPortContainer.java",
+      "line": 41,
+      "url": "https://github.com/ZeroNoRyouki/ExtremeReactors2/blob/f6cc65140a8abbfc87137f5c54fc641085f66048/src/main/java/it/zerono/mods/extremereactors/gamecontent/multiblock/common/container/ChargingPortContainer.java#L41",
+      "sha256": "ac2f92d0bde25ee5fbae4f1bd64aee8373f422ae50d8a5b0b088e23e8a2b0d00",
+      "pattern_found": true
+    },
+    {
+      "id": "E09",
+      "path": "src/main/java/it/zerono/mods/extremereactors/gamecontent/multiblock/turbine/RpmUpdateTracker.java",
+      "line": 44,
+      "url": "https://github.com/ZeroNoRyouki/ExtremeReactors2/blob/f6cc65140a8abbfc87137f5c54fc641085f66048/src/main/java/it/zerono/mods/extremereactors/gamecontent/multiblock/turbine/RpmUpdateTracker.java#L44",
+      "sha256": "790b60277f1e566db8ad8f75199d33274d014a5b2476451bdb437137f64a4201",
+      "pattern_found": true
+    },
+    {
+      "id": "E10",
+      "path": "src/main/java/it/zerono/mods/extremereactors/gamecontent/multiblock/reprocessor/recipe/ReprocessorRecipe.java",
+      "line": 33,
+      "url": "https://github.com/ZeroNoRyouki/ExtremeReactors2/blob/f6cc65140a8abbfc87137f5c54fc641085f66048/src/main/java/it/zerono/mods/extremereactors/gamecontent/multiblock/reprocessor/recipe/ReprocessorRecipe.java#L33",
+      "sha256": "6ce907cfc369f6a9fc19d6cf82cb65a3b52c5273a7f2a6f5835f93688de9dc7f",
+      "pattern_found": true
+    },
+    {
+      "id": "E11",
+      "path": "src/main/java/it/zerono/mods/extremereactors/gamecontent/multiblock/common/part/fluidport/FluidPortHandlerMekanism.java",
+      "line": 75,
+      "url": "https://github.com/ZeroNoRyouki/ExtremeReactors2/blob/f6cc65140a8abbfc87137f5c54fc641085f66048/src/main/java/it/zerono/mods/extremereactors/gamecontent/multiblock/common/part/fluidport/FluidPortHandlerMekanism.java#L75",
+      "sha256": "905df7fa49d9eafc9188bc36caed7d287abb61252e5250d00379d8a4471d2443",
+      "pattern_found": true
+    },
+    {
+      "id": "E12",
+      "path": "src/main/resources/assets/bigreactors/patchouli_books/erguide/en_us/templates/zcmultiblock.json",
+      "line": 1,
+      "url": "https://github.com/ZeroNoRyouki/ExtremeReactors2/blob/f6cc65140a8abbfc87137f5c54fc641085f66048/src/main/resources/assets/bigreactors/patchouli_books/erguide/en_us/templates/zcmultiblock.json#L1",
+      "sha256": "9c2f517ecfe369d9ced68783400b683ee12bf7e16438bb6716664e939dd96d45",
+      "pattern_found": true
+    },
+    {
+      "id": "E13",
+      "path": "src/main/java/it/zerono/mods/extremereactors/gamecontent/multiblock/reactor/FuelRodsMap.java",
+      "line": 92,
+      "url": "https://github.com/ZeroNoRyouki/ExtremeReactors2/blob/f6cc65140a8abbfc87137f5c54fc641085f66048/src/main/java/it/zerono/mods/extremereactors/gamecontent/multiblock/reactor/FuelRodsMap.java#L92",
+      "sha256": "0012ceb61a1b2b82e4ded21d00d6c6290d3a9154b482ce4760c6e68e98492373",
+      "pattern_found": true
+    },
+    {
+      "id": "E14",
+      "path": "src/main/java/it/zerono/mods/extremereactors/gamecontent/multiblock/reactor/variant/ReactorVariant.java",
+      "line": 33,
+      "url": "https://github.com/ZeroNoRyouki/ExtremeReactors2/blob/f6cc65140a8abbfc87137f5c54fc641085f66048/src/main/java/it/zerono/mods/extremereactors/gamecontent/multiblock/reactor/variant/ReactorVariant.java#L33",
+      "sha256": "ca7c07f4ca28f85a765b89d61e482c46895ad568619c277c24eb4f51a86e8ecd",
+      "pattern_found": true
+    },
+    {
+      "id": "E15",
+      "path": "src/main/resources/META-INF/neoforge.mods.toml",
+      "line": 8,
+      "url": "https://github.com/ZeroNoRyouki/ExtremeReactors2/blob/f6cc65140a8abbfc87137f5c54fc641085f66048/src/main/resources/META-INF/neoforge.mods.toml#L8",
+      "sha256": "e0581729ac55218af61b725f4a26e5d1e802416931cfa9299f893bffddd56fae",
+      "pattern_found": true
+    },
+    {
+      "id": "C01",
+      "path": "Persistência da intenção de funcionamento",
+      "url": "https://github.com/ZeroNoRyouki/ExtremeReactors2/commit/7ccf6f8b42cc861e120140a390f7277e2efb45af"
+    },
+    {
+      "id": "C02",
+      "path": "Fonte de irradiação vazia",
+      "url": "https://github.com/ZeroNoRyouki/ExtremeReactors2/commit/f99d31f27d81c3b1926d55d1f2da124f1fb56cea"
+    },
+    {
+      "id": "C03",
+      "path": "Capacidade de energia na interface",
+      "url": "https://github.com/ZeroNoRyouki/ExtremeReactors2/commit/1211008698ffb04c891b59d0acc0b01a4048a43e"
+    },
+    {
+      "id": "C04",
+      "path": "Localização da barra via computador",
+      "url": "https://github.com/ZeroNoRyouki/ExtremeReactors2/commit/fa6dfde667c652b2032348e10c9718279f2d7c3b"
+    },
+    {
+      "id": "C05",
+      "path": "Baldes e atualização ZeroCore",
+      "url": "https://github.com/ZeroNoRyouki/ExtremeReactors2/commit/44721b760eea987bcbad0ffa47f77efaacaed7eb"
+    },
+    {
+      "id": "C06",
+      "path": "Sodium beta e rotor",
+      "url": "https://github.com/ZeroNoRyouki/ExtremeReactors2/commit/2a34860685d7dd96a3167021d8e3d8394fd4ef0e"
+    }
+  ],
+  "verification": {
+    "build": "PASS (offline; incremental)",
+    "junit": "NO-SOURCE",
+    "gametest": "5 required tests passed",
+    "reference_mods_executed": false,
+    "performance_benchmark": false
+  },
+  "counter_model_kind": "arithmetic transcription of source counters; not Minecraft simulation",
+  "counter_model": [
+    {
+      "columns": 1,
+      "height": 6,
+      "ticks": 60,
+      "local_visited_source_heights": [
+        0
+      ],
+      "revived": {
+        "visited_source_heights": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5
+        ],
+        "visited_column_height_pairs": 6
+      }
+    },
+    {
+      "columns": 2,
+      "height": 6,
+      "ticks": 60,
+      "local_visited_source_heights": [
+        0,
+        1
+      ],
+      "revived": {
+        "visited_source_heights": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5
+        ],
+        "visited_column_height_pairs": 12
+      }
+    },
+    {
+      "columns": 3,
+      "height": 6,
+      "ticks": 60,
+      "local_visited_source_heights": [
+        0,
+        1,
+        2
+      ],
+      "revived": {
+        "visited_source_heights": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5
+        ],
+        "visited_column_height_pairs": 18
+      }
+    },
+    {
+      "columns": 6,
+      "height": 6,
+      "ticks": 60,
+      "local_visited_source_heights": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "revived": {
+        "visited_source_heights": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5
+        ],
+        "visited_column_height_pairs": 36
+      }
+    },
+    {
+      "columns": 8,
+      "height": 6,
+      "ticks": 60,
+      "local_visited_source_heights": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "revived": {
+        "visited_source_heights": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5
+        ],
+        "visited_column_height_pairs": 48
+      }
+    }
+  ]
+}

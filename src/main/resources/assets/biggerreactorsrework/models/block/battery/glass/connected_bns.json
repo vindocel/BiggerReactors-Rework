@@ -1,0 +1,13 @@
+{
+  "parent": "block/cube",
+  "render_type": "cutout",
+  "textures": {
+    "up" : "biggerreactorsrework:block/battery/glass/connected_tb",
+    "down" : "biggerreactorsrework:block/transparent",
+    "north" : "biggerreactorsrework:block/transparent",
+    "south" : "biggerreactorsrework:block/transparent",
+    "east" : "biggerreactorsrework:block/battery/glass/connected_blr",
+    "west" : "biggerreactorsrework:block/battery/glass/connected_blr",
+    "particle": "biggerreactorsrework:block/battery/glass/connected_none"
+  }
+}
