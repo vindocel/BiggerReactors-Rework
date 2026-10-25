@@ -1,0 +1,210 @@
+{
+  "version": 1,
+  "texture_size": [
+    16,
+    16
+  ],
+  "block": "biggerreactorsrework:battery_cell",
+  "scope": "same cell block, all assembly/charge states",
+  "bits": {
+    "left": 1,
+    "right": 2,
+    "top": 4,
+    "bottom": 8,
+    "top_left": 16,
+    "top_right": 32,
+    "bottom_left": 64,
+    "bottom_right": 128
+  },
+  "rule": "Diagonal bits count only when both adjacent cardinal neighbors are present. UV directions are relative to each rendered face.",
+  "variants": [
+    {
+      "mask": 0,
+      "file": "body_00.png"
+    },
+    {
+      "mask": 1,
+      "file": "body_01.png"
+    },
+    {
+      "mask": 2,
+      "file": "body_02.png"
+    },
+    {
+      "mask": 3,
+      "file": "body_03.png"
+    },
+    {
+      "mask": 4,
+      "file": "body_04.png"
+    },
+    {
+      "mask": 5,
+      "file": "body_05.png"
+    },
+    {
+      "mask": 6,
+      "file": "body_06.png"
+    },
+    {
+      "mask": 7,
+      "file": "body_07.png"
+    },
+    {
+      "mask": 8,
+      "file": "body_08.png"
+    },
+    {
+      "mask": 9,
+      "file": "body_09.png"
+    },
+    {
+      "mask": 10,
+      "file": "body_0a.png"
+    },
+    {
+      "mask": 11,
+      "file": "body_0b.png"
+    },
+    {
+      "mask": 12,
+      "file": "body_0c.png"
+    },
+    {
+      "mask": 13,
+      "file": "body_0d.png"
+    },
+    {
+      "mask": 14,
+      "file": "body_0e.png"
+    },
+    {
+      "mask": 15,
+      "file": "body_0f.png"
+    },
+    {
+      "mask": 21,
+      "file": "body_15.png"
+    },
+    {
+      "mask": 23,
+      "file": "body_17.png"
+    },
+    {
+      "mask": 29,
+      "file": "body_1d.png"
+    },
+    {
+      "mask": 31,
+      "file": "body_1f.png"
+    },
+    {
+      "mask": 38,
+      "file": "body_26.png"
+    },
+    {
+      "mask": 39,
+      "file": "body_27.png"
+    },
+    {
+      "mask": 46,
+      "file": "body_2e.png"
+    },
+    {
+      "mask": 47,
+      "file": "body_2f.png"
+    },
+    {
+      "mask": 55,
+      "file": "body_37.png"
+    },
+    {
+      "mask": 63,
+      "file": "body_3f.png"
+    },
+    {
+      "mask": 73,
+      "file": "body_49.png"
+    },
+    {
+      "mask": 75,
+      "file": "body_4b.png"
+    },
+    {
+      "mask": 77,
+      "file": "body_4d.png"
+    },
+    {
+      "mask": 79,
+      "file": "body_4f.png"
+    },
+    {
+      "mask": 93,
+      "file": "body_5d.png"
+    },
+    {
+      "mask": 95,
+      "file": "body_5f.png"
+    },
+    {
+      "mask": 111,
+      "file": "body_6f.png"
+    },
+    {
+      "mask": 127,
+      "file": "body_7f.png"
+    },
+    {
+      "mask": 138,
+      "file": "body_8a.png"
+    },
+    {
+      "mask": 139,
+      "file": "body_8b.png"
+    },
+    {
+      "mask": 142,
+      "file": "body_8e.png"
+    },
+    {
+      "mask": 143,
+      "file": "body_8f.png"
+    },
+    {
+      "mask": 159,
+      "file": "body_9f.png"
+    },
+    {
+      "mask": 174,
+      "file": "body_ae.png"
+    },
+    {
+      "mask": 175,
+      "file": "body_af.png"
+    },
+    {
+      "mask": 191,
+      "file": "body_bf.png"
+    },
+    {
+      "mask": 203,
+      "file": "body_cb.png"
+    },
+    {
+      "mask": 207,
+      "file": "body_cf.png"
+    },
+    {
+      "mask": 223,
+      "file": "body_df.png"
+    },
+    {
+      "mask": 239,
+      "file": "body_ef.png"
+    },
+    {
+      "mask": 255,
+      "file": "body_ff.png"
+    }
+  ]
+}

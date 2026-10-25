@@ -30,7 +30,7 @@ public class CommonRender {
      * @param energyCapacity The max energy capacity that can be displayed.
      */
     public static <T extends AbstractContainerMenu> void renderEnergyGauge(@Nonnull GuiGraphics graphics, @Nonnull RenderedElement<T> symbol, long energyStored, long energyCapacity) {
-        // DFM-style bar, filling the whole gauge slot.
+        // Bar filling the whole gauge slot.
         EnergyBar.draw(graphics, symbol.x, symbol.y, symbol.width, symbol.height, EnergyBar.fraction(energyStored, energyCapacity));
         // Update tooltip.
         symbol.tooltip = Component.literal(String.format("%s/%s",

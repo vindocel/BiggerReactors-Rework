@@ -38,13 +38,21 @@ public class ReactorRedstonePortScreen extends ModScreen<ReactorRedstonePortCont
             "screen.biggerreactorsrework.reactor_redstone_port.output_output_stored"
     };
 
-    // Tab icons, in the same order as the translations, and where they sit inside their tab.
+    // Tab icons, in the same order as the translations; each is centered on its tab's button.
     private static final GuiIcon[] INPUT_ICONS = new GuiIcon[]{GuiIcon.REACTOR_ACTIVITY, GuiIcon.CONTROL_ROD_INSERTION, GuiIcon.EJECT_WASTE};
-    private static final int[] INPUT_ICON_X = new int[]{4, 5, 4};
-    private static final int[] INPUT_ICON_Y = new int[]{7, 4, 4};
     private static final GuiIcon[] OUTPUT_ICONS = new GuiIcon[]{GuiIcon.FUEL_HEAT, GuiIcon.CASE_HEAT, GuiIcon.FUEL_ENRICHMENT,
             GuiIcon.FUEL_AMOUNT, GuiIcon.WASTE_AMOUNT, GuiIcon.BATTERY};
-    private static final int[] OUTPUT_ICON_X = new int[]{5, 5, 5, 5, 5, 8};
+
+    // The panel sits between the two tab columns; each column of tabs grows out of the frame as one metal ear.
+    private static final int PANEL_X = 21;
+    private static final int PANEL_WIDTH = 158;
+    private static final int TAB_PITCH = 25;
+    private static final int LEFT_EAR_X = PANEL_X - GuiFrame.TAB_SIZE;
+    private static final int RIGHT_EAR_X = PANEL_X + PANEL_WIDTH;
+    // Match the face configuration's 4 px top inset.
+    // The button sits 3 px into its 24 px tall hit area; the ear starts one pixel above it.
+    private static final int EAR_Y = 4;
+    private static final int TAB_Y = EAR_Y + 1;
 
     private ReactorRedstonePortState reactorRedstonePortState;
 
@@ -105,7 +113,7 @@ public class ReactorRedstonePortScreen extends ModScreen<ReactorRedstonePortCont
         // (Left) Add input tab buttons:
         for (int i = 0; i < 3; i++) {
             final int cI = i;
-            final InteractiveElement<ReactorRedstonePortContainer> inputTab = new InteractiveElement<>(this, 0, (cI * 25), 25, 24, 0, 0, Component.translatable(INPUT_TRANSLATIONS[cI] + ".tooltip"));
+            final InteractiveElement<ReactorRedstonePortContainer> inputTab = new InteractiveElement<>(this, 0, TAB_Y + (cI * TAB_PITCH), 25, 24, 0, 0, Component.translatable(INPUT_TRANSLATIONS[cI] + ".tooltip"));
             inputTab.onMouseReleased = (mX, mY, btn) -> {
                 // Click logic. Extra check necessary since this is an "in-class" button.
                 if (inputTab.isMouseOver(mX, mY)) {
@@ -122,8 +130,7 @@ public class ReactorRedstonePortScreen extends ModScreen<ReactorRedstonePortCont
             };
             inputTab.onRender = ((mS, mX, mY) -> {
                 // Custom rendering.
-                GuiArt.panelTab(mS, inputTab.x, inputTab.y, false, inputTab.stateEnable, cI == 0);
-                INPUT_ICONS[cI].draw(mS, inputTab.x + INPUT_ICON_X[cI], inputTab.y + INPUT_ICON_Y[cI]);
+                tabButton(mS, LEFT_EAR_X, inputTab, true, INPUT_ICONS[cI], mX, mY);
             });
             inputTab.onTick = () -> {
                 // Check if this tab is selected.
@@ -135,7 +142,7 @@ public class ReactorRedstonePortScreen extends ModScreen<ReactorRedstonePortCont
         // (Right) Add output tab buttons:
         for (int i = 0; i < 6; i++) {
             final int cI = i;
-            InteractiveElement<ReactorRedstonePortContainer> outputTab = new InteractiveElement<>(this, 175, (cI * 25), 25, 24, 0, 0, Component.translatable(OUTPUT_TRANSLATIONS[cI] + ".tooltip"));
+            InteractiveElement<ReactorRedstonePortContainer> outputTab = new InteractiveElement<>(this, 175, TAB_Y + (cI * TAB_PITCH), 25, 24, 0, 0, Component.translatable(OUTPUT_TRANSLATIONS[cI] + ".tooltip"));
             outputTab.onMouseReleased = (mX, mY, btn) -> {
                 // Click logic. Extra check necessary since this is an "in-class" button.
                 if (outputTab.isMouseOver(mX, mY)) {
@@ -152,8 +159,7 @@ public class ReactorRedstonePortScreen extends ModScreen<ReactorRedstonePortCont
             };
             outputTab.onRender = (mS, mX, mY) -> {
                 // Custom rendering.
-                GuiArt.panelTab(mS, outputTab.x, outputTab.y, true, outputTab.stateEnable, cI == 0);
-                OUTPUT_ICONS[cI].draw(mS, outputTab.x + OUTPUT_ICON_X[cI], outputTab.y + 4);
+                tabButton(mS, RIGHT_EAR_X, outputTab, false, OUTPUT_ICONS[cI], mX, mY);
             };
             outputTab.onTick = () -> {
                 // Check if this tab is selected.
@@ -194,7 +200,7 @@ public class ReactorRedstonePortScreen extends ModScreen<ReactorRedstonePortCont
         };
         this.applyChangesButton.onRender = (mS, mX, mY) -> {
             // Custom rendering.
-            GuiArt.pushButton(mS, this.applyChangesButton.x, this.applyChangesButton.y, this.applyChangesButton.width, this.applyChangesButton.height, this.applyChangesButton.isMouseOver(mX, mY), GuiIcon.CONFIRM);
+            GuiArt.button(mS, this.applyChangesButton.x, this.applyChangesButton.y, this.applyChangesButton.width, this.applyChangesButton.height, this.applyChangesButton.isMouseOver(mX, mY), GuiIcon.CONFIRM, this.frame());
         };
         this.addScreenElement(this.applyChangesButton);
 
@@ -215,14 +221,14 @@ public class ReactorRedstonePortScreen extends ModScreen<ReactorRedstonePortCont
         };
         this.revertChangesButton.onRender = (mS, mX, mY) -> {
             // Custom rendering.
-            GuiArt.pushButton(mS, this.revertChangesButton.x, this.revertChangesButton.y, this.revertChangesButton.width, this.revertChangesButton.height, this.revertChangesButton.isMouseOver(mX, mY), GuiIcon.REVERT);
+            GuiArt.button(mS, this.revertChangesButton.x, this.revertChangesButton.y, this.revertChangesButton.width, this.revertChangesButton.height, this.revertChangesButton.isMouseOver(mX, mY), GuiIcon.REVERT, this.frame());
         };
-        //this.addElement(this.revertChangesButton);
+        this.addScreenElement(this.revertChangesButton);
 
         // (Left) Trigger type toggle:
         this.triggerTypeToggle = new Biselector<>(this, 29, 42, Component.empty(),
                 () -> (this.reactorRedstonePortState.triggerPS.toBool() || this.reactorRedstonePortState.triggerAB.toBool())
-                        ? 1 : 0, SelectorColors.YELLOW, SelectorColors.RED);
+                        ? 1 : 0, SelectorColors.RED);
         this.triggerTypeToggle.onMouseReleased = (mX, mY, btn) -> {
             // Click logic. Check if PS or AB.
             if (this.reactorRedstonePortState.isInput()) {
@@ -373,19 +379,19 @@ public class ReactorRedstonePortScreen extends ModScreen<ReactorRedstonePortCont
             // Check what type of trigger is used (pulse or signal):
             if (this.reactorRedstonePortState.triggerPS == ReactorRedstonePortTriggers.PULSE_OR_ABOVE) {
                 // Text for on pulse:
-                graphics.drawString(this.getFont(), Component.translatable("screen.biggerreactorsrework.reactor_redstone_port.trigger_type_toggle.ps.on_pulse").getString(), this.getGuiLeft() + 63, this.getGuiTop() + 45, 4210752, false);
+                graphics.drawString(this.getFont(), Component.translatable("screen.biggerreactorsrework.reactor_redstone_port.trigger_type_toggle.ps.on_pulse").getString(), this.getGuiLeft() + 63, this.getGuiTop() + 45, GuiTheme.textColor(), false);
             } else {
                 // Text for on signal:
-                graphics.drawString(this.getFont(), Component.translatable("screen.biggerreactorsrework.reactor_redstone_port.trigger_type_toggle.ps.on_signal").getString(), this.getGuiLeft() + 63, this.getGuiTop() + 45, 4210752, false);
+                graphics.drawString(this.getFont(), Component.translatable("screen.biggerreactorsrework.reactor_redstone_port.trigger_type_toggle.ps.on_signal").getString(), this.getGuiLeft() + 63, this.getGuiTop() + 45, GuiTheme.textColor(), false);
             }
         } else {
             // Check what type of trigger is used (above or below):
             if (this.reactorRedstonePortState.triggerAB == ReactorRedstonePortTriggers.PULSE_OR_ABOVE) {
                 // Text for on above:
-                graphics.drawString(this.getFont(), Component.translatable("screen.biggerreactorsrework.reactor_redstone_port.trigger_type_toggle.ab.while_above").getString(), this.getGuiLeft() + 63, this.getGuiTop() + 45, 4210752, false);
+                graphics.drawString(this.getFont(), Component.translatable("screen.biggerreactorsrework.reactor_redstone_port.trigger_type_toggle.ab.while_above").getString(), this.getGuiLeft() + 63, this.getGuiTop() + 45, GuiTheme.textColor(), false);
             } else {
                 // Text for on below:
-                graphics.drawString(this.getFont(), Component.translatable("screen.biggerreactorsrework.reactor_redstone_port.trigger_type_toggle.ab.while_below").getString(), this.getGuiLeft() + 63, this.getGuiTop() + 45, 4210752, false);
+                graphics.drawString(this.getFont(), Component.translatable("screen.biggerreactorsrework.reactor_redstone_port.trigger_type_toggle.ab.while_below").getString(), this.getGuiLeft() + 63, this.getGuiTop() + 45, GuiTheme.textColor(), false);
             }
         }
 
@@ -398,40 +404,40 @@ public class ReactorRedstonePortScreen extends ModScreen<ReactorRedstonePortCont
                     // When set to pulse:
                     if (this.reactorRedstonePortState.triggerMode == 0) {
                         // Insert by (mode A/0):
-                        graphics.drawString(this.getFont(), Component.translatable("screen.biggerreactorsrework.reactor_redstone_port.trigger_mode_toggle.mode_a").getString(), this.getGuiLeft() + 80, this.getGuiTop() + 62, 4210752, false);
-                        graphics.drawString(this.getFont(), Component.translatable("screen.biggerreactorsrework.reactor_redstone_port.text_buffer_a.mode_a").getString(), this.getGuiLeft() + 29, this.getGuiTop() + 82, 4210752, false);
+                        graphics.drawString(this.getFont(), Component.translatable("screen.biggerreactorsrework.reactor_redstone_port.trigger_mode_toggle.mode_a").getString(), this.getGuiLeft() + 80, this.getGuiTop() + 62, GuiTheme.textColor(), false);
+                        graphics.drawString(this.getFont(), Component.translatable("screen.biggerreactorsrework.reactor_redstone_port.text_buffer_a.mode_a").getString(), this.getGuiLeft() + 29, this.getGuiTop() + 82, GuiTheme.textColor(), false);
                     } else if (this.reactorRedstonePortState.triggerMode == 1) {
                         // Retract by (mode B/1):
-                        graphics.drawString(this.getFont(), Component.translatable("screen.biggerreactorsrework.reactor_redstone_port.trigger_mode_toggle.mode_b").getString(), this.getGuiLeft() + 80, this.getGuiTop() + 62, 4210752, false);
-                        graphics.drawString(this.getFont(), Component.translatable("screen.biggerreactorsrework.reactor_redstone_port.text_buffer_a.mode_b").getString(), this.getGuiLeft() + 29, this.getGuiTop() + 82, 4210752, false);
+                        graphics.drawString(this.getFont(), Component.translatable("screen.biggerreactorsrework.reactor_redstone_port.trigger_mode_toggle.mode_b").getString(), this.getGuiLeft() + 80, this.getGuiTop() + 62, GuiTheme.textColor(), false);
+                        graphics.drawString(this.getFont(), Component.translatable("screen.biggerreactorsrework.reactor_redstone_port.text_buffer_a.mode_b").getString(), this.getGuiLeft() + 29, this.getGuiTop() + 82, GuiTheme.textColor(), false);
                     } else {
                         // Set to (mode C/2):
-                        graphics.drawString(this.getFont(), Component.translatable("screen.biggerreactorsrework.reactor_redstone_port.trigger_mode_toggle.mode_c").getString(), this.getGuiLeft() + 80, this.getGuiTop() + 62, 4210752, false);
-                        graphics.drawString(this.getFont(), Component.translatable("screen.biggerreactorsrework.reactor_redstone_port.text_buffer_a.mode_c").getString(), this.getGuiLeft() + 29, this.getGuiTop() + 82, 4210752, false);
+                        graphics.drawString(this.getFont(), Component.translatable("screen.biggerreactorsrework.reactor_redstone_port.trigger_mode_toggle.mode_c").getString(), this.getGuiLeft() + 80, this.getGuiTop() + 62, GuiTheme.textColor(), false);
+                        graphics.drawString(this.getFont(), Component.translatable("screen.biggerreactorsrework.reactor_redstone_port.text_buffer_a.mode_c").getString(), this.getGuiLeft() + 29, this.getGuiTop() + 82, GuiTheme.textColor(), false);
                     }
                 } else {
                     // When set to signal:
-                    graphics.drawString(this.getFont(), Component.translatable("screen.biggerreactorsrework.reactor_redstone_port.input_control_rod_insertion.while_on").getString(), this.getGuiLeft() + 29, this.getGuiTop() + 82, 4210752, false);
-                    graphics.drawString(this.getFont(), Component.translatable("screen.biggerreactorsrework.reactor_redstone_port.input_control_rod_insertion.while_off").getString(), this.getGuiLeft() + 29, this.getGuiTop() + 113, 4210752, false);
+                    graphics.drawString(this.getFont(), Component.translatable("screen.biggerreactorsrework.reactor_redstone_port.input_control_rod_insertion.while_on").getString(), this.getGuiLeft() + 29, this.getGuiTop() + 82, GuiTheme.textColor(), false);
+                    graphics.drawString(this.getFont(), Component.translatable("screen.biggerreactorsrework.reactor_redstone_port.input_control_rod_insertion.while_off").getString(), this.getGuiLeft() + 29, this.getGuiTop() + 113, GuiTheme.textColor(), false);
                 }
                 break;
             }
             case OUTPUT_FUEL_TEMP:
             case OUTPUT_CASING_TEMP: {
-                graphics.drawString(this.getFont(), Component.translatable("screen.biggerreactorsrework.reactor_redstone_port.text_buffer_a.trigger_at").getString(), this.getGuiLeft() + 29, this.getGuiTop() + 82, 4210752, false);
-                graphics.drawString(this.getFont(), "\u00B0C", this.getGuiLeft() + 155, this.getGuiTop() + 96, 4210752, false);
+                graphics.drawString(this.getFont(), Component.translatable("screen.biggerreactorsrework.reactor_redstone_port.text_buffer_a.trigger_at").getString(), this.getGuiLeft() + 29, this.getGuiTop() + 82, GuiTheme.textColor(), false);
+                graphics.drawString(this.getFont(), "\u00B0C", this.getGuiLeft() + 155, this.getGuiTop() + 96, GuiTheme.textColor(), false);
                 break;
             }
             case OUTPUT_FUEL_ENRICHMENT:
             case OUTPUT_ENERGY_AMOUNT: {
-                graphics.drawString(this.getFont(), Component.translatable("screen.biggerreactorsrework.reactor_redstone_port.text_buffer_a.trigger_at").getString(), this.getGuiLeft() + 29, this.getGuiTop() + 82, 4210752, false);
-                graphics.drawString(this.getFont(), "%", this.getGuiLeft() + 155, this.getGuiTop() + 96, 4210752, false);
+                graphics.drawString(this.getFont(), Component.translatable("screen.biggerreactorsrework.reactor_redstone_port.text_buffer_a.trigger_at").getString(), this.getGuiLeft() + 29, this.getGuiTop() + 82, GuiTheme.textColor(), false);
+                graphics.drawString(this.getFont(), "%", this.getGuiLeft() + 155, this.getGuiTop() + 96, GuiTheme.textColor(), false);
                 break;
             }
             case OUTPUT_FUEL_AMOUNT:
             case OUTPUT_WASTE_AMOUNT: {
-                graphics.drawString(this.getFont(), Component.translatable("screen.biggerreactorsrework.reactor_redstone_port.text_buffer_a.trigger_at").getString(), this.getGuiLeft() + 29, this.getGuiTop() + 82, 4210752, false);
-                graphics.drawString(this.getFont(), "mB", this.getGuiLeft() + 155, this.getGuiTop() + 96, 4210752, false);
+                graphics.drawString(this.getFont(), Component.translatable("screen.biggerreactorsrework.reactor_redstone_port.text_buffer_a.trigger_at").getString(), this.getGuiLeft() + 29, this.getGuiTop() + 82, GuiTheme.textColor(), false);
+                graphics.drawString(this.getFont(), "mB", this.getGuiLeft() + 155, this.getGuiTop() + 96, GuiTheme.textColor(), false);
                 break;
             }
         }
@@ -442,6 +448,27 @@ public class ReactorRedstonePortScreen extends ModScreen<ReactorRedstonePortCont
      */
     @Override
     protected void drawBackground(@Nonnull GuiGraphics graphics, int x, int y) {
-        GuiArt.panel(graphics, x + 21, y, 158, 178);
+        GuiArt.panel(graphics, x + PANEL_X, y, PANEL_WIDTH, 178, this.frame());
+        this.frame().ear(graphics, x + LEFT_EAR_X, y + EAR_Y, earHeight(INPUT_ICONS.length), true);
+        this.frame().ear(graphics, x + RIGHT_EAR_X, y + EAR_Y, earHeight(OUTPUT_ICONS.length), false);
+    }
+
+    private static int earHeight(int tabs) {
+        return TAB_PITCH * tabs + 2;
+    }
+
+    /**
+     * Button of a tab on its ear, switched on while the tab is selected, with the tab's icon centered on it.
+     */
+    private void tabButton(GuiGraphics graphics, int earX, InteractiveElement<ReactorRedstonePortContainer> tab, boolean leftSide,
+                                  GuiIcon icon, int mouseX, int mouseY) {
+        int earY = tab.y + 3 - GuiFrame.TAB_BUTTON_TOP;
+        GuiArt.tabButton(graphics, earX, earY, leftSide, tab.isMouseOver(mouseX, mouseY), tab.stateEnable, this.frame());
+        GuiArt.tabIcon(graphics, earX, earY, leftSide, icon.width(), icon.height(), () -> icon.draw(graphics, 0, 0));
+    }
+
+    @Override
+    protected GuiFrame frame() {
+        return GuiFrame.REACTOR;
     }
 }

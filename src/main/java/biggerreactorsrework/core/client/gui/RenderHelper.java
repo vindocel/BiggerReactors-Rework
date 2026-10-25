@@ -29,9 +29,10 @@ public class RenderHelper {
     private static ResourceLocation currentResource;
 
     /**
-     * Size prefixes (milli-, base, kilo-, mega-, giga-, tera-, peta-, exa-, zetta-, yotta-, hogi-).
+     * SI size prefixes, each a factor of 1000 from the previous one: milli-, base, kilo-, mega-, giga-,
+     * tera-, peta-, exa-, zetta-, yotta-, ronna-, quetta-.
      */
-    public static String[] unitPrefixes = {"m", "", "Ki", "Me", "Gi", "Te", "Pe", "Ex", "Ze", "Yo", "Ho"};
+    public static String[] unitPrefixes = {"m", "", "k", "M", "G", "T", "P", "E", "Z", "Y", "R", "Q"};
 
     /**
      * Get a blank resource location texture.

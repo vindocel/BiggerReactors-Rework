@@ -1,5 +1,7 @@
 package biggerreactorsrework.core.client.gui.screens;
 
+import biggerreactorsrework.client.GuiTheme;
+
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.gui.Font;
@@ -14,6 +16,10 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import biggerreactorsrework.client.GuiArt;
+import biggerreactorsrework.client.GuiFrame;
+import biggerreactorsrework.client.GuiSettingsWindow;
+import biggerreactorsrework.core.client.gui.GuiSync;
+import net.minecraft.core.BlockPos;
 import biggerreactorsrework.core.client.gui.RenderHelper;
 import biggerreactorsrework.core.client.gui.api.IRender;
 import biggerreactorsrework.core.client.gui.api.ITooltip;
@@ -31,12 +37,35 @@ import java.util.List;
  */
 @OnlyIn(Dist.CLIENT)
 @SuppressWarnings("rawtypes")
-public class ModScreen<T extends AbstractContainerMenu> extends AbstractContainerScreen<T> implements MenuAccess<T> {
+public abstract class ModScreen<T extends AbstractContainerMenu> extends AbstractContainerScreen<T> implements MenuAccess<T> {
 
     /**
      * The list of elements that are a part of this screen.
      */
     private final List<AbstractElement> screenElements;
+
+    private final GuiSettingsWindow settingsWindow = new GuiSettingsWindow(this);
+
+    public GuiSettingsWindow settingsWindow() { return settingsWindow; }
+
+    /** Appearance is configured from machine terminals, not their ports and auxiliary controls. */
+    public boolean hasAppearanceSettings() { return false; }
+
+    /** Whether an auxiliary window covers the Settings tab, including its click target and tooltip. */
+    public boolean isSettingsTabCovered(double mouseX, double mouseY) { return false; }
+
+    public BlockPos machinePos() {
+        return ((GuiSync.IGUIPacketProvider) this.menu).machinePos();
+    }
+
+    /** Left side, away from the reprocessor's existing right-side routing tab. */
+    public int settingsTabX() { return this.leftPos - GuiFrame.TAB_SIZE; }
+    public int settingsTabY() { return this.topPos + 4; }
+
+    /**
+     * Space kept between the title and the edges of the panel.
+     */
+    protected static final int TITLE_MARGIN = 8;
 
     /**
      * The texture map this screen accesses.
@@ -159,8 +188,21 @@ public class ModScreen<T extends AbstractContainerMenu> extends AbstractContaine
             }
         }
 
-        // Draw title.
-        guiGraphics.drawString(this.font, this.title.getString(), this.titleLabelX, this.titleLabelY, 4210752, false);
+        // Draw title; one too long for its room slides inside it.
+        String title = this.title.getString();
+        if (this.font.width(title) <= this.titleWidth()) {
+            guiGraphics.drawString(this.font, title, this.titleLabelX, this.titleLabelY, GuiTheme.textColor(), false);
+        } else {
+            GuiArt.scrollingText(guiGraphics, this.font, title, TITLE_MARGIN, this.titleLabelY, this.titleWidth(), GuiTheme.textColor());
+        }
+    }
+
+    /**
+     * Room for the title, starting {@link #TITLE_MARGIN} from the left edge. By default the whole width of the panel;
+     * screens with something next to the title end it earlier.
+     */
+    protected int titleWidth() {
+        return this.imageWidth - 2 * TITLE_MARGIN;
     }
 
     /**
@@ -175,6 +217,7 @@ public class ModScreen<T extends AbstractContainerMenu> extends AbstractContaine
     protected void renderBg(GuiGraphics guiGraphics, float partialTicks, int mouseX, int mouseY) {
         RenderHelper.setRenderColor(1.0F, 1.0F, 1.0F, 1.0F);
         this.drawBackground(guiGraphics, this.getGuiLeft(), this.getGuiTop());
+        this.settingsWindow.renderTab(guiGraphics, mouseX, mouseY);
     }
 
     /**
@@ -185,7 +228,26 @@ public class ModScreen<T extends AbstractContainerMenu> extends AbstractContaine
      * @param y        The top of the screen.
      */
     protected void drawBackground(GuiGraphics graphics, int x, int y) {
-        GuiArt.panel(graphics, x, y, this.getXSize(), this.getYSize());
+        GuiArt.panel(graphics, x, y, this.getXSize(), this.getYSize(), this.frame());
+    }
+
+    /**
+     * Metal frame of this screen, matching the casing of the block it belongs to.
+     */
+    protected abstract GuiFrame frame();
+
+    public GuiFrame getFrame() {
+        return this.frame();
+    }
+
+    /**
+     * The frame around the panel belongs to the screen: clicking it must not drop the carried item.
+     */
+    @Override
+    protected boolean hasClickedOutside(double mouseX, double mouseY, int guiLeft, int guiTop, int button) {
+        if (settingsWindow.contains(mouseX, mouseY)) return false;
+        return mouseX < guiLeft - GuiFrame.BAND || mouseY < guiTop - GuiFrame.BAND
+                || mouseX >= guiLeft + this.imageWidth + GuiFrame.BAND || mouseY >= guiTop + this.imageHeight + GuiFrame.BAND;
     }
 
     /**

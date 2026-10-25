@@ -1,0 +1,23 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "redstone",
+  "pattern": [
+    "BRB",
+    "RDR",
+    "BRB"
+  ],
+  "key": {
+    "B": {
+      "item": "biggerreactorsrework:blutonium_ingot"
+    },
+    "R": {
+      "item": "minecraft:redstone_block"
+    },
+    "D": {
+      "item": "minecraft:diamond_block"
+    }
+  },
+  "result": {
+    "id": "biggerreactorsrework:battery_cell"
+  }
+}

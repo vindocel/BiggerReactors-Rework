@@ -31,10 +31,28 @@ public final class BiggerReactorsClient {
     }
 
     static void init(IEventBus modBus) {
+        biggerreactorsrework.client.GuiSettingsEvents.register();
+        modBus.addListener((net.neoforged.neoforge.client.event.RegisterShadersEvent event) -> {
+            try {
+                event.registerShader(new net.minecraft.client.renderer.ShaderInstance(event.getResourceProvider(),
+                        ResourceLocation.fromNamespaceAndPath(BiggerReactors.modid, "dark_gui"),
+                        com.mojang.blaze3d.vertex.DefaultVertexFormat.POSITION_TEX), biggerreactorsrework.client.GuiTheme::setShader);
+            } catch (java.io.IOException e) {
+                throw new java.io.UncheckedIOException("Could not load the machine GUI theme shader", e);
+            }
+        });
+        modBus.addListener(biggerreactorsrework.compat.DarkModeCompat::onInterModEnqueue);
         modBus.addListener(BiggerReactorsClient::registerScreens);
         modBus.addListener(BiggerReactorsClient::registerRenderers);
         modBus.addListener(BiggerReactorsClient::registerClientExtensions);
         HeatExchangerChannelModels.init(modBus);
+        biggerreactorsrework.client.ConnectedGlassModels.init(modBus);
+        modBus.addListener((net.neoforged.fml.event.lifecycle.FMLClientSetupEvent event) -> event.enqueueWork(() ->
+                biggerreactorsrework.items.tools.GuideBookItem.open = biggerreactorsrework.client.guide.GuideBookAnimation::requestOpen));
+        net.neoforged.neoforge.common.NeoForge.EVENT_BUS.addListener(biggerreactorsrework.client.guide.GuideBookAnimation::onClientTick);
+        modBus.addListener((net.neoforged.neoforge.client.event.ModelEvent.RegisterAdditional event) -> {
+            biggerreactorsrework.client.guide.GuideBookRenderer.models().forEach(id -> event.register(net.minecraft.client.resources.model.ModelResourceLocation.standalone(id)));
+        });
     }
 
     private static void registerRenderers(EntityRenderersEvent.RegisterRenderers event) {
@@ -43,6 +61,10 @@ public final class BiggerReactorsClient {
     }
     
     private static void registerClientExtensions(RegisterClientExtensionsEvent event) {
+        event.registerItem(new net.neoforged.neoforge.client.extensions.common.IClientItemExtensions() {
+            private final biggerreactorsrework.client.guide.GuideBookRenderer renderer = new biggerreactorsrework.client.guide.GuideBookRenderer();
+            @Override public net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer getCustomRenderer() { return renderer; }
+        }, biggerreactorsrework.items.tools.GuideBookItem.INSTANCE);
         for (var info : Registry.FLUID_CLIENT_INFO) {
             event.registerFluidType(new IClientFluidTypeExtensions() {
                 @Override
@@ -75,9 +97,15 @@ public final class BiggerReactorsClient {
         event.register(ReactorControlRodContainer.INSTANCE, ReactorControlRodScreen::new);
         event.register(ReactorRedstonePortContainer.INSTANCE, ReactorRedstonePortScreen::new);
         event.register(TurbineTerminalContainer.INSTANCE, TurbineTerminalScreen::new);
+        event.register(biggerreactorsrework.multiblocks.turbine.containers.TurbineRedstonePortContainer.INSTANCE,
+                biggerreactorsrework.multiblocks.turbine.client.TurbineRedstonePortScreen::new);
         event.register(TurbineFluidPortContainer.INSTANCE, TurbineFluidPortScreen::new);
         event.register(HeatExchangerTerminalContainer.INSTANCE, HeatExchangerTerminalScreen::new);
         event.register(HeatExchangerFluidPortContainer.INSTANCE, HeatExchangerFluidPortScreen::new);
         event.register(CyaniteReprocessorContainer.INSTANCE, CyaniteReprocessorScreen::new);
+        event.register(biggerreactorsrework.multiblocks.battery.containers.BatteryTerminalContainer.INSTANCE,
+                biggerreactorsrework.multiblocks.battery.client.BatteryTerminalScreen::new);
+        event.register(biggerreactorsrework.multiblocks.battery.containers.BatteryEnergyPortContainer.INSTANCE,
+                biggerreactorsrework.multiblocks.battery.client.BatteryEnergyPortScreen::new);
     }
 }

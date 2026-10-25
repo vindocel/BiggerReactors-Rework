@@ -1,5 +1,7 @@
 package biggerreactorsrework.multiblocks.reactor.client;
 
+import biggerreactorsrework.client.GuiTheme;
+
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.core.Registry;
@@ -15,6 +17,7 @@ import biggerreactorsrework.BiggerReactors;
 import biggerreactorsrework.client.CommonRender;
 import biggerreactorsrework.client.GaugeBar;
 import biggerreactorsrework.client.GuiArt;
+import biggerreactorsrework.client.GuiFrame;
 import biggerreactorsrework.client.GuiIcon;
 import biggerreactorsrework.multiblocks.reactor.containers.ReactorTerminalContainer;
 import biggerreactorsrework.multiblocks.reactor.state.ReactorActivity;
@@ -37,11 +40,16 @@ public class ActiveReactorTerminalScreen extends ModScreen<ReactorTerminalContai
     private final int screenWorkTimeTotal = 400;
     private int screenWorkTime = 0;
 
+    /**
+     * The status lines end before the coolant pipe.
+     */
+    private static final int STATUS_RIGHT = 185;
+
     private Fluid coolantFluid = Fluids.EMPTY;
     private Fluid exhaustFluid = Fluids.EMPTY;
 
     public ActiveReactorTerminalScreen(ReactorTerminalContainer container, Inventory playerInventory, Component title) {
-        super(container, playerInventory, title, 198, 152);
+        super(container, playerInventory, title, 222, 152);
 
         // Initialize reactor state.
         reactorState = (ReactorState) this.getMenu().getGuiPacket();
@@ -77,7 +85,7 @@ public class ActiveReactorTerminalScreen extends ModScreen<ReactorTerminalContai
      */
     private void initTooltips() {
         // (Left) Exhaust generation readout tooltip:
-        TooltipElement<ReactorTerminalContainer> generationRateReadoutTooltip = new TooltipElement<>(this, 26, 38, 53, 16, Component.empty());
+        TooltipElement<ReactorTerminalContainer> generationRateReadoutTooltip = new TooltipElement<>(this, 26, 38, 77, 16, Component.empty());
         generationRateReadoutTooltip.onTick = () -> {
             generationRateReadoutTooltip.tooltip = Component.literal(String.format("%.3f mB/t", this.reactorState.reactorOutputRate));
         };
@@ -89,19 +97,19 @@ public class ActiveReactorTerminalScreen extends ModScreen<ReactorTerminalContai
      */
     private void initGauges() {
         // (Top) Coolant intake tank:
-        RenderedElement<ReactorTerminalContainer> coolantIntakeTank = new RenderedElement<>(this, 151, 25, 18, 64, 0, 152, Component.empty());
+        RenderedElement<ReactorTerminalContainer> coolantIntakeTank = new RenderedElement<>(this, 175, 25, 18, 64, 0, 152, Component.empty());
         coolantIntakeTank.onRender = (@Nonnull GuiGraphics graphics, int mX, int mY) -> CommonRender.renderFluidGauge(graphics,
                 coolantIntakeTank, reactorState.coolantStored, reactorState.coolantCapacity, coolantFluid);
         this.addScreenElement(coolantIntakeTank);
 
         // (Top) Hot exhaust tank:
-        RenderedElement<ReactorTerminalContainer> hotExhaustTank = new RenderedElement<>(this, 173, 25, 18, 64, 0, 152, Component.empty());
+        RenderedElement<ReactorTerminalContainer> hotExhaustTank = new RenderedElement<>(this, 197, 25, 18, 64, 0, 152, Component.empty());
         hotExhaustTank.onRender = (@Nonnull GuiGraphics graphics, int mX, int mY) -> CommonRender.renderFluidGauge(graphics,
                 hotExhaustTank, reactorState.exhaustStored, reactorState.exhaustCapacity, exhaustFluid);
         this.addScreenElement(hotExhaustTank);
 
         // (Bottom) Progress bar:
-        RenderedElement<ReactorTerminalContainer> progressBar = new RenderedElement<>(this, 173, 90, 18, 26, 90, 152, null);
+        RenderedElement<ReactorTerminalContainer> progressBar = new RenderedElement<>(this, 197, 90, 18, 26, 90, 152, null);
         progressBar.onRender = (@Nonnull GuiGraphics graphics, int mX, int mY) -> {
             // Custom rendering. Without coolant, the bar and its tank are drawn empty.
             if (reactorState.coolantStored > 0) {
@@ -121,21 +129,21 @@ public class ActiveReactorTerminalScreen extends ModScreen<ReactorTerminalContai
      */
     private void initSymbols() {
         // (Top) Coolant intake tank symbol:
-        RenderedElement<ReactorTerminalContainer> coolantIntakeTankSymbol = new RenderedElement<>(this, 152, 6, 16, 16, 0, 0, Component.translatable("screen.biggerreactorsrework.reactor_terminal.coolant_intake_tank.tooltip"));
+        RenderedElement<ReactorTerminalContainer> coolantIntakeTankSymbol = new RenderedElement<>(this, 176, 6, 16, 16, 0, 0, Component.translatable("screen.biggerreactorsrework.reactor_terminal.coolant_intake_tank.tooltip"));
         coolantIntakeTankSymbol.onRender = (@Nonnull GuiGraphics graphics, int mX, int mY) -> GuiArt.fluidSymbol(graphics,
-                coolantIntakeTankSymbol.x, coolantIntakeTankSymbol.y, coolantFluid, GuiIcon.DROP_INPUT_MASK, GuiIcon.DROP_INPUT, GuiArt.PANEL_FILL, true);
+                coolantIntakeTankSymbol.x, coolantIntakeTankSymbol.y, coolantFluid, GuiIcon.DROP_INPUT_MASK, GuiIcon.DROP_INPUT, GuiTheme.panelColor(), true);
         this.addScreenElement(coolantIntakeTankSymbol);
 
         // (Top) Hot exhaust tank symbol:
-        RenderedElement<ReactorTerminalContainer> hotExhaustTankSymbol = new RenderedElement<>(this, 174, 6, 16, 16, 0, 0, Component.translatable("screen.biggerreactorsrework.reactor_terminal.exhaust_tank.tooltip"));
+        RenderedElement<ReactorTerminalContainer> hotExhaustTankSymbol = new RenderedElement<>(this, 198, 6, 16, 16, 0, 0, Component.translatable("screen.biggerreactorsrework.reactor_terminal.exhaust_tank.tooltip"));
         hotExhaustTankSymbol.onRender = (@Nonnull GuiGraphics graphics, int mX, int mY) -> GuiArt.fluidSymbol(graphics,
-                hotExhaustTankSymbol.x, hotExhaustTankSymbol.y, exhaustFluid, GuiIcon.DROP_OUTPUT_MASK, GuiIcon.DROP_OUTPUT, GuiArt.PANEL_FILL, true);
+                hotExhaustTankSymbol.x, hotExhaustTankSymbol.y, exhaustFluid, GuiIcon.DROP_OUTPUT_MASK, GuiIcon.DROP_OUTPUT, GuiTheme.panelColor(), true);
         this.addScreenElement(hotExhaustTankSymbol);
 
         // (Left) Exhaust generation rate symbol:
         RenderedElement<ReactorTerminalContainer> exhaustGenerationRateSymbol = new RenderedElement<>(this, 8, 38, 16, 16, 0, 0, Component.translatable("screen.biggerreactorsrework.reactor_terminal.exhaust_generation_rate.tooltip"));
         exhaustGenerationRateSymbol.onRender = (@Nonnull GuiGraphics graphics, int mX, int mY) -> GuiArt.fluidSymbol(graphics,
-                exhaustGenerationRateSymbol.x, exhaustGenerationRateSymbol.y, exhaustFluid, GuiIcon.DROP_RATE_MASK, GuiIcon.DROP_RATE, GuiArt.PANEL_FILL, true);
+                exhaustGenerationRateSymbol.x, exhaustGenerationRateSymbol.y, exhaustFluid, GuiIcon.DROP_RATE_MASK, GuiIcon.DROP_RATE, GuiTheme.panelColor(), true);
         this.addScreenElement(exhaustGenerationRateSymbol);
     }
 
@@ -175,10 +183,10 @@ public class ActiveReactorTerminalScreen extends ModScreen<ReactorTerminalContai
 
         // Render the other text:
         CommonReactorTerminalScreen.renderStatusText(graphics, this, reactorState.reactorActivity, reactorState.doAutoEject,
-                reactorState.fuelHeatStored, reactorState.fuelUsageRate, reactorState.reactivityRate);
+                reactorState.fuelHeatStored, reactorState.fuelUsageRate, reactorState.reactivityRate, STATUS_RIGHT);
 
         // Render text for output rate:
-        graphics.drawString(this.getFont(), RenderHelper.formatValue((reactorState.reactorOutputRate / 1000.0), "B/t"), this.getGuiLeft() + 27, this.getGuiTop() + 42, 4210752, false);
+        CommonReactorTerminalScreen.renderReadout(graphics, this, String.format("%,.1f mB/t", reactorState.reactorOutputRate), 42);
     }
 
     /**
@@ -205,26 +213,37 @@ public class ActiveReactorTerminalScreen extends ModScreen<ReactorTerminalContai
      */
     @Override
     protected void drawBackground(@Nonnull GuiGraphics graphics, int x, int y) {
-        GuiArt.panel(graphics, x, y, 198, 152);
-        GuiArt.fill(graphics, x + 6, y + 36, x + 81, y + 37, GuiArt.SEPARATOR);
-        GuiArt.fill(graphics, x + 6, y + 55, x + 81, y + 56, GuiArt.SEPARATOR);
-        GuiArt.fill(graphics, x + 6, y + 74, x + 81, y + 75, GuiArt.SEPARATOR);
-        GuiArt.fill(graphics, x + 6, y + 93, x + 81, y + 94, GuiArt.SEPARATOR);
+        GuiArt.panel(graphics, x, y, 222, 152, this.frame());
+        GuiArt.fill(graphics, x + 6, y + 36, x + 105, y + 37, GuiArt.SEPARATOR);
+        GuiArt.fill(graphics, x + 6, y + 55, x + 105, y + 56, GuiArt.SEPARATOR);
+        GuiArt.fill(graphics, x + 6, y + 74, x + 105, y + 75, GuiArt.SEPARATOR);
+        GuiArt.fill(graphics, x + 6, y + 93, x + 105, y + 94, GuiArt.SEPARATOR);
         GuiIcon.TEMPERATURE.draw(graphics, x + 12, y + 19);
         GuiIcon.FUEL_USAGE_RATE.draw(graphics, x + 8, y + 59);
         GuiIcon.REACTIVITY.draw(graphics, x + 8, y + 76);
-        GuiIcon.FUEL_MIX.draw(graphics, x + 86, y + 6);
-        GuiIcon.CASE_HEAT.draw(graphics, x + 108, y + 6);
-        GuiIcon.FUEL_HEAT.draw(graphics, x + 130, y + 6);
-        GuiArt.fill(graphics, x + 164, y + 89, x + 165, y + 119, GuiArt.SLOT_SHADOW);
-        GuiArt.fill(graphics, x + 165, y + 118, x + 166, y + 119, GuiArt.SLOT_SHADOW);
-        GuiArt.fill(graphics, x + 165, y + 119, x + 174, y + 120, GuiArt.SLOT_SHADOW);
-        GuiArt.fill(graphics, x + 165, y + 89, x + 166, y + 118, GuiArt.WHITE);
-        GuiArt.fill(graphics, x + 166, y + 117, x + 167, y + 118, GuiArt.WHITE);
-        GuiArt.fill(graphics, x + 166, y + 118, x + 174, y + 119, GuiArt.WHITE);
-        GuiArt.fill(graphics, x + 175, y + 117, x + 189, y + 118, GuiArt.SLOT_FILL);
-        GuiArt.fill(graphics, x + 174, y + 118, x + 190, y + 120, GuiArt.SLOT_FILL);
-        GuiArt.fill(graphics, x + 175, y + 120, x + 189, y + 121, GuiArt.SLOT_FILL);
-        GuiArt.fill(graphics, x + 190, y + 118, x + 191, y + 120, GuiArt.WHITE);
+        GuiIcon.FUEL_MIX.draw(graphics, x + 110, y + 6);
+        GuiIcon.CASE_HEAT.draw(graphics, x + 132, y + 6);
+        GuiIcon.FUEL_HEAT.draw(graphics, x + 154, y + 6);
+        GuiArt.fill(graphics, x + 188, y + 89, x + 189, y + 119, GuiArt.SLOT_SHADOW);
+        GuiArt.fill(graphics, x + 189, y + 118, x + 190, y + 119, GuiArt.SLOT_SHADOW);
+        GuiArt.fill(graphics, x + 189, y + 119, x + 198, y + 120, GuiArt.SLOT_SHADOW);
+        GuiArt.fill(graphics, x + 189, y + 89, x + 190, y + 118, GuiArt.WHITE);
+        GuiArt.fill(graphics, x + 190, y + 117, x + 191, y + 118, GuiArt.WHITE);
+        GuiArt.fill(graphics, x + 190, y + 118, x + 198, y + 119, GuiArt.WHITE);
+        GuiArt.fill(graphics, x + 199, y + 117, x + 213, y + 118, GuiArt.SLOT_FILL);
+        GuiArt.fill(graphics, x + 198, y + 118, x + 214, y + 120, GuiArt.SLOT_FILL);
+        GuiArt.fill(graphics, x + 199, y + 120, x + 213, y + 121, GuiArt.SLOT_FILL);
+        GuiArt.fill(graphics, x + 214, y + 118, x + 215, y + 120, GuiArt.WHITE);
     }
+
+    @Override
+    protected int titleWidth() {
+        return CommonReactorTerminalScreen.TITLE_WIDTH;
+    }
+
+    @Override
+    protected GuiFrame frame() {
+        return GuiFrame.REACTOR;
+    }
+    @Override public boolean hasAppearanceSettings() { return true; }
 }

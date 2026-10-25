@@ -13,7 +13,8 @@ import java.util.Random;
 
 public class TimeSlicedReactorSimulation extends BaseReactorSimulation {
     
-    private int currentRod = 0;
+    private int activeYLevel = -1;
+    private int currentRod = -1;
     private int rodOffset = 0;
     
     public TimeSlicedReactorSimulation(SimulationDescription simulationDescription, SimulationConfiguration configuration) {
@@ -28,12 +29,14 @@ public class TimeSlicedReactorSimulation extends BaseReactorSimulation {
         }
         
         // along with a shuffled array of control rods, this should be close enough to random, yet still cyclical
-        currentRod++;
-        if (currentRod >= controlRods.length) {
-            currentRod = 0;
-            rodOffset++;
+        activeYLevel++;
+        if (activeYLevel >= y) {
+            rodOffset = (rodOffset + 1) % controlRods.length;
+            currentRod = -1;
         }
-        int yLevel = currentRod % y;
+        activeYLevel %= y;
+        currentRod = (currentRod + 1) % controlRods.length;
+        int yLevel = activeYLevel;
         int currentRod = this.currentRod + rodOffset;
         currentRod %= controlRods.length;
         

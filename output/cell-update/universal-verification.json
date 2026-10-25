@@ -1,0 +1,22 @@
+{
+  "bodyHash": "87848be6470384a32f9d79d35f3ba3948c8765e2549e692a991b915e855ad809",
+  "masks": 47,
+  "animationFrames": 8,
+  "phaseHeights": [
+    2,
+    3,
+    16,
+    37
+  ],
+  "atlasReconstruction": "all masks and all frames passed",
+  "finalFiles": [
+    "body.png",
+    "body.png.mcmeta",
+    "body_ctm.png",
+    "energy.png",
+    "energy.png.mcmeta",
+    "energy_ctm.png",
+    "energy_ctm.png.mcmeta",
+    "LEIA-ME.txt"
+  ]
+}

@@ -14,6 +14,8 @@ public class CyaniteReprocessorItemHandler extends ItemStackHandler {
     public static final int OUTPUT_SLOT_INDEX = 1;
     public static final int SLOTS = 2;
     
+    private java.util.function.Predicate<ItemStack> inputFilter = stack -> stack.getItem() == CyaniteIngot.INSTANCE;
+    public void inputFilter(java.util.function.Predicate<ItemStack> filter) { inputFilter = filter; }
     private final Runnable onChanged;
     private final IItemHandler pipeHandler = this.createPipeHandler(true, true);
     private final IItemHandler inputHandler = this.createPipeHandler(true, false);
@@ -33,9 +35,9 @@ public class CyaniteReprocessorItemHandler extends ItemStackHandler {
     public boolean isItemValid(int slot, @Nonnull ItemStack stack) {
         switch (slot) {
             case INPUT_SLOT_INDEX:
-                return stack.getItem() == CyaniteIngot.INSTANCE;
+                return inputFilter.test(stack);
             case OUTPUT_SLOT_INDEX:
-                return stack.getItem() == BlutoniumIngot.INSTANCE;
+                return !stack.isEmpty();
         }
         throw new IndexOutOfBoundsException();
     }

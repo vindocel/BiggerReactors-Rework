@@ -68,7 +68,8 @@ public class FluidHandlerWrapper implements IFluidTankHandler {
         if (fluid == Fluids.EMPTY || amount <= 0) {
             return 0;
         }
-        return handler.fill(stackOf(fluid, components, amount), simulate ? FluidAction.SIMULATE : FluidAction.EXECUTE);
+        long offered = Math.min(Integer.MAX_VALUE, amount);
+        return biggerreactorsrework.core.energy.PowerDistribution.bounded(offered, handler.fill(stackOf(fluid, components, offered), simulate ? FluidAction.SIMULATE : FluidAction.EXECUTE));
     }
 
     @Override
@@ -77,6 +78,7 @@ public class FluidHandlerWrapper implements IFluidTankHandler {
             return 0;
         }
         FluidStack drained = handler.drain(stackOf(fluid, components, amount), simulate ? FluidAction.SIMULATE : FluidAction.EXECUTE);
-        return drained.getAmount();
+        if (drained.isEmpty() || drained.getFluid() != fluid || !drained.getComponentsPatch().equals(components)) return 0;
+        return biggerreactorsrework.core.energy.PowerDistribution.bounded(Math.min(Integer.MAX_VALUE, amount), drained.getAmount());
     }
 }

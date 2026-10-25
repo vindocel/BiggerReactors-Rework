@@ -223,6 +223,7 @@ public class FluidTransitionRegistry {
             
         }
         
+        MaterialDataMaps.transitions(liquidTransitions, gasTransitions);
         BiggerReactors.LOGGER.info("Loaded " + liquidTransitions.size() + " liquid transition entries");
         BiggerReactors.LOGGER.info("Loaded " + gasTransitions.size() + " gas transition entries");
     }

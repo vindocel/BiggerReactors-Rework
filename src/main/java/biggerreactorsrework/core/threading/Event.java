@@ -20,10 +20,12 @@ public class Event {
             if (wasTriggered) {
                 return;
             }
-            try {
-                wait();
-            } catch (InterruptedException ignored) {
+            boolean interrupted = false;
+            while (!wasTriggered) {
+                try { wait(); }
+                catch (InterruptedException exception) { interrupted = true; }
             }
+            if (interrupted) Thread.currentThread().interrupt();
         }
     }
     

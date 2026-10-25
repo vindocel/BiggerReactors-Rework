@@ -22,14 +22,9 @@ public class Biselector<T extends AbstractContainerMenu> extends InteractiveElem
     private IntSupplier state;
 
     /**
-     * The color of the left selector.
+     * The color of the block beside the knob when the switch is on (state 1).
      */
-    private final SelectorColors leftColor;
-
-    /**
-     * The color of the right selector.
-     */
-    private final SelectorColors rightColor;
+    private final SelectorColors onColor;
 
     /**
      * Default constructor.
@@ -39,12 +34,12 @@ public class Biselector<T extends AbstractContainerMenu> extends InteractiveElem
      * @param y            The y position of this element.
      * @param tooltip      The tooltip for this element. If null, a tooltip will not render. If you set a tooltip later, use StringTextComponent.EMPTY.
      * @param initialState The initial switch state to use.
+     * @param onColor      The color shown when the switch is on (state 1).
      */
-    public Biselector(@Nonnull ModScreen<T> parent, int x, int y, @Nullable Component tooltip, IntSupplier initialState, SelectorColors leftColor, SelectorColors rightColor) {
-        super(parent, x, y, 31, 14, 0, 0, tooltip);
+    public Biselector(@Nonnull ModScreen<T> parent, int x, int y, @Nullable Component tooltip, IntSupplier initialState, SelectorColors onColor) {
+        super(parent, x, y, GuiArt.SWITCH_WIDTH, GuiArt.TOGGLE_HEIGHT, 0, 0, tooltip);
         this.state = initialState;
-        this.leftColor = leftColor;
-        this.rightColor = rightColor;
+        this.onColor = onColor;
     }
 
     /**
@@ -67,11 +62,7 @@ public class Biselector<T extends AbstractContainerMenu> extends InteractiveElem
     public void render(@Nonnull GuiGraphics graphics, int mouseX, int mouseY) {
         // Check conditions.
         if (this.renderEnable) {
-            int selected = this.state.getAsInt() == 0 ? 0 : 1;
-            // Draw the selector frame, then the selected cell.
-            GuiArt.selector(graphics, this.x, this.y, 2, selected);
-            SelectorColors color = this.actionEnable ? (selected == 0 ? this.leftColor : this.rightColor) : SelectorColors.DISABLED;
-            GuiArt.bevel(graphics, this.x + 1 + 15 * selected, this.y + 1, 14, 12, this.isMouseOver(mouseX, mouseY) ? color.hovered : color.idle);
+            GuiArt.toggleSwitch(graphics, this.x, this.y, this.state.getAsInt() != 0, this.actionEnable && this.isMouseOver(mouseX, mouseY), !this.actionEnable, this.onColor, this.parent.getFrame());
             // Trigger user-defined render logic.
             if (this.onRender != null) {
                 this.onRender.trigger(graphics, mouseX, mouseY);

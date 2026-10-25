@@ -1,14 +1,53 @@
 {
-
   "variants": {
     "assembled=false": {
       "model": "biggerreactorsrework:block/turbine/terminal/off"
     },
-    "assembled=true,turbinestate=active": {
-      "model": "biggerreactorsrework:block/turbine/terminal/active"
+    "assembled=true,turbinestate=active,facing=north": {
+      "model": "biggerreactorsrework:block/turbine/terminal/active_assembled"
     },
-    "assembled=true,turbinestate=inactive": {
-      "model": "biggerreactorsrework:block/turbine/terminal/idle"
+    "assembled=true,turbinestate=active,facing=south": {
+      "model": "biggerreactorsrework:block/turbine/terminal/active_assembled",
+      "y": 180
+    },
+    "assembled=true,turbinestate=active,facing=east": {
+      "model": "biggerreactorsrework:block/turbine/terminal/active_assembled",
+      "y": 90
+    },
+    "assembled=true,turbinestate=active,facing=west": {
+      "model": "biggerreactorsrework:block/turbine/terminal/active_assembled",
+      "y": 270
+    },
+    "assembled=true,turbinestate=active,facing=up": {
+      "model": "biggerreactorsrework:block/turbine/terminal/active_assembled",
+      "x": 270
+    },
+    "assembled=true,turbinestate=active,facing=down": {
+      "model": "biggerreactorsrework:block/turbine/terminal/active_assembled",
+      "x": 90
+    },
+    "assembled=true,turbinestate=inactive,facing=north": {
+      "model": "biggerreactorsrework:block/turbine/terminal/idle_assembled"
+    },
+    "assembled=true,turbinestate=inactive,facing=south": {
+      "model": "biggerreactorsrework:block/turbine/terminal/idle_assembled",
+      "y": 180
+    },
+    "assembled=true,turbinestate=inactive,facing=east": {
+      "model": "biggerreactorsrework:block/turbine/terminal/idle_assembled",
+      "y": 90
+    },
+    "assembled=true,turbinestate=inactive,facing=west": {
+      "model": "biggerreactorsrework:block/turbine/terminal/idle_assembled",
+      "y": 270
+    },
+    "assembled=true,turbinestate=inactive,facing=up": {
+      "model": "biggerreactorsrework:block/turbine/terminal/idle_assembled",
+      "x": 270
+    },
+    "assembled=true,turbinestate=inactive,facing=down": {
+      "model": "biggerreactorsrework:block/turbine/terminal/idle_assembled",
+      "x": 90
     }
   }
 }

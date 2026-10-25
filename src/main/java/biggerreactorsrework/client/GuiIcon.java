@@ -15,12 +15,6 @@ import javax.annotation.Nonnull;
 @OnlyIn(Dist.CLIENT)
 public record GuiIcon(ResourceLocation texture, int width, int height) {
 
-    /**
-     * Glyph of a button, in the normal and hovered looks (the hovered one only recolors the glyph's shadow).
-     */
-    public record Glyph(GuiIcon normal, GuiIcon hover) {
-    }
-
     // Status icons.
     public static final GuiIcon BATTERY = of("battery", 10, 16);
     public static final GuiIcon CASE_HEAT = of("case_heat", 16, 16);
@@ -31,6 +25,8 @@ public record GuiIcon(ResourceLocation texture, int width, int height) {
     public static final GuiIcon CONTROL_ROD_INSERTION = of("control_rod_insertion", 13, 16);
     public static final GuiIcon EJECT_WASTE = of("eject_waste", 16, 16);
     public static final GuiIcon ENERGY_GENERATION_RATE = of("energy_generation_rate", 12, 14);
+    public static final GuiIcon ENERGY_INPUT = of("energy_input", 12, 14);
+    public static final GuiIcon ENERGY_OUTPUT = of("energy_output", 12, 14);
     public static final GuiIcon EVAPORATOR_EXHAUST = of("evaporator_exhaust", 16, 16);
     public static final GuiIcon EVAPORATOR_FLOW_RATE = of("evaporator_flow_rate", 16, 16);
     public static final GuiIcon EVAPORATOR_INTAKE = of("evaporator_intake", 16, 16);
@@ -42,6 +38,7 @@ public record GuiIcon(ResourceLocation texture, int width, int height) {
     public static final GuiIcon FUEL_MIX = of("fuel_mix", 15, 16);
     public static final GuiIcon FUEL_USAGE_RATE = of("fuel_usage_rate", 16, 13);
     public static final GuiIcon HELP = of("help", 16, 16);
+    public static final GuiIcon SETTINGS = of("settings", 16, 16);
     public static final GuiIcon REACTIVITY = of("reactivity", 16, 16);
     public static final GuiIcon REACTOR_ACTIVITY = of("reactor_activity", 16, 12);
     public static final GuiIcon ROTOR_EFFICIENCY = of("rotor_efficiency", 16, 16);
@@ -63,22 +60,19 @@ public record GuiIcon(ResourceLocation texture, int width, int height) {
     // Button glyphs.
     public static final GuiIcon ARROW_LEFT = of("arrow_left", 7, 6);
     public static final GuiIcon ARROW_RIGHT = of("arrow_right", 7, 6);
+    public static final GuiIcon ARROW_UP = of("arrow_up", 6, 8);
+    public static final GuiIcon ARROW_DOWN = of("arrow_down", 6, 8);
     public static final GuiIcon ARROW_ENTER_DISABLED = of("arrow_enter_disabled", 9, 7);
-    public static final Glyph ARROW_ENTER = glyph("arrow_enter", 9, 7);
-    public static final Glyph ARROW_UP = glyph("arrow_up", 6, 8);
-    public static final Glyph ARROW_DOWN = glyph("arrow_down", 6, 8);
-    public static final Glyph CLOSE = glyph("close", 6, 7);
-    public static final Glyph CONFIRM = glyph("confirm", 7, 8);
-    public static final Glyph EJECT = glyph("eject", 7, 8);
-    public static final Glyph INPUT = glyph("input", 7, 8);
-    public static final Glyph REVERT = glyph("revert", 7, 8);
+    public static final GuiIcon ARROW_ENTER = of("arrow_enter", 9, 7);
+    public static final GuiIcon CLOSE = of("close", 4, 5);
+    public static final GuiIcon CONFIRM = of("confirm", 7, 8);
+    public static final GuiIcon EJECT = of("eject", 7, 8);
+    public static final GuiIcon AUTO_INPUT = of("auto_input", 4, 3);
+    public static final GuiIcon AUTO_EJECT = of("auto_eject", 4, 3);
+    public static final GuiIcon REVERT = of("revert", 7, 8);
 
     private static GuiIcon of(String name, int width, int height) {
         return new GuiIcon(ResourceLocation.fromNamespaceAndPath(BiggerReactors.modid, "textures/gui/icons/" + name + ".png"), width, height);
-    }
-
-    private static Glyph glyph(String name, int width, int height) {
-        return new Glyph(of(name, width, height), of(name + "_hover", width, height));
     }
 
     public void draw(@Nonnull GuiGraphics graphics, int x, int y) {

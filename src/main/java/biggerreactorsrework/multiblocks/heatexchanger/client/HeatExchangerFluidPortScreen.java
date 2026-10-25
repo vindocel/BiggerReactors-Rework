@@ -1,5 +1,7 @@
 package biggerreactorsrework.multiblocks.heatexchanger.client;
 
+import biggerreactorsrework.client.GuiTheme;
+
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
@@ -12,6 +14,7 @@ import biggerreactorsrework.BiggerReactors;
 import biggerreactorsrework.client.Biselector;
 import biggerreactorsrework.client.SelectorColors;
 import biggerreactorsrework.client.GuiArt;
+import biggerreactorsrework.client.GuiFrame;
 import biggerreactorsrework.client.GuiIcon;
 import biggerreactorsrework.multiblocks.heatexchanger.containers.HeatExchangerFluidPortContainer;
 import biggerreactorsrework.multiblocks.heatexchanger.state.HeatExchangerFluidPortState;
@@ -60,7 +63,7 @@ public class HeatExchangerFluidPortScreen extends ModScreen<HeatExchangerFluidPo
     public void initControls() {
         // (Left) Direction toggle:
         Biselector<HeatExchangerFluidPortContainer> directionToggle = new Biselector<>(this, 8, 33, Component.translatable("screen.biggerreactorsrework.heat_exchanger_fluid_port.direction_toggle.tooltip"),
-                () -> heatExchangerFluidPortState.direction ? 0 : 1, SelectorColors.RED, SelectorColors.BLUE);
+                () -> heatExchangerFluidPortState.direction ? 0 : 1, SelectorColors.BLUE);
         directionToggle.onMouseReleased = (mX, mY, btn) -> {
             // Click logic.
             this.getMenu().executeRequest("setDirection", directionToggle.getState() == 0 ? 1 : 0);
@@ -85,7 +88,7 @@ public class HeatExchangerFluidPortScreen extends ModScreen<HeatExchangerFluidPo
         };
         manualEjectButton.onRender = ((mS, mX, mY) -> {
             // Custom rendering.
-            GuiArt.pushButton(mS, manualEjectButton.x, manualEjectButton.y, manualEjectButton.width, manualEjectButton.height, manualEjectButton.isMouseOver(mX, mY), GuiIcon.EJECT);
+            GuiArt.button(mS, manualEjectButton.x, manualEjectButton.y, manualEjectButton.width, manualEjectButton.height, manualEjectButton.isMouseOver(mX, mY), GuiIcon.EJECT, this.frame());
         });
         this.addScreenElement(manualEjectButton);
     }
@@ -105,22 +108,27 @@ public class HeatExchangerFluidPortScreen extends ModScreen<HeatExchangerFluidPo
         // Render text to show what channel this is connected to.
         if (heatExchangerFluidPortState.condenser) {
             // Text for when connected to a condenser:
-            graphics.drawString(this.getFont(), Component.translatable("screen.biggerreactorsrework.heat_exchanger_fluid_port.channel_type.condenser").getString(), this.getGuiLeft() + 8, this.getGuiTop() + 22, 4210752, false);
+            graphics.drawString(this.getFont(), Component.translatable("screen.biggerreactorsrework.heat_exchanger_fluid_port.channel_type.condenser").getString(), this.getGuiLeft() + 8, this.getGuiTop() + 22, GuiTheme.textColor(), false);
         } else {
             // Text for when connected to an evaporator.
-            graphics.drawString(this.getFont(), Component.translatable("screen.biggerreactorsrework.heat_exchanger_fluid_port.channel_type.evaporator").getString(), this.getGuiLeft() + 8, this.getGuiTop() + 22, 4210752, false);
+            graphics.drawString(this.getFont(), Component.translatable("screen.biggerreactorsrework.heat_exchanger_fluid_port.channel_type.evaporator").getString(), this.getGuiLeft() + 8, this.getGuiTop() + 22, GuiTheme.textColor(), false);
         }
 
         // Render text for input/output direction:
         if (heatExchangerFluidPortState.direction) {
             // Text for an inlet:
-            graphics.drawString(this.getFont(), Component.translatable("screen.biggerreactorsrework.heat_exchanger_fluid_port.direction_toggle.input").getString(), this.getGuiLeft() + 42, this.getGuiTop() + 37, 4210752, false);
+            graphics.drawString(this.getFont(), Component.translatable("screen.biggerreactorsrework.heat_exchanger_fluid_port.direction_toggle.input").getString(), this.getGuiLeft() + 42, this.getGuiTop() + 37, GuiTheme.textColor(), false);
         } else {
             // Text for an outlet:
-            graphics.drawString(this.getFont(), Component.translatable("screen.biggerreactorsrework.heat_exchanger_fluid_port.direction_toggle.output").getString(), this.getGuiLeft() + 42, this.getGuiTop() + 37, 4210752, false);
+            graphics.drawString(this.getFont(), Component.translatable("screen.biggerreactorsrework.heat_exchanger_fluid_port.direction_toggle.output").getString(), this.getGuiLeft() + 42, this.getGuiTop() + 37, GuiTheme.textColor(), false);
         }
 
         // Render text for manual tank eject:
-        graphics.drawString(this.getFont(), Component.translatable("screen.biggerreactorsrework.heat_exchanger_fluid_port.manual_dump").getString(), this.getGuiLeft() + 26, this.getGuiTop() + 53, 4210752, false);
+        graphics.drawString(this.getFont(), Component.translatable("screen.biggerreactorsrework.heat_exchanger_fluid_port.manual_dump").getString(), this.getGuiLeft() + 26, this.getGuiTop() + 53, GuiTheme.textColor(), false);
+    }
+
+    @Override
+    protected GuiFrame frame() {
+        return GuiFrame.HEAT_EXCHANGER;
     }
 }

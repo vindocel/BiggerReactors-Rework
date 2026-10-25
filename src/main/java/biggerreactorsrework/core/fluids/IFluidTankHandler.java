@@ -72,6 +72,7 @@ public interface IFluidTankHandler extends IFluidHandler {
     @Nonnull
     @Override
     default FluidStack drain(int maxDrain, FluidAction action) {
+        if (maxDrain <= 0) return FluidStack.EMPTY;
         for (int i = 0; i < tankCount(); i++) {
             final var fluid = fluidTypeInTank(i);
             if (fluid == Fluids.EMPTY) {

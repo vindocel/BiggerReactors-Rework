@@ -114,14 +114,11 @@ public class SimulationDescription implements ISerializable {
         manifoldLocations[x][y][z] = manifold;
     }
     
-    public record Builder(boolean experimental, boolean fullPass, boolean allowOffThread, boolean allowMultiThread, boolean allowAccelerated) {
+    public record Builder(boolean fullPass, boolean allowOffThread, boolean allowMultiThread) {
         
         public IReactorSimulation build(SimulationDescription description, SimulationConfiguration configuration) {
             description.ensureValid();
 
-            // GPU backends (OpenCL/Vulkan) are not part of the current port; the "experimental" and
-            // "allowAccelerated" flags therefore fall back to the CPU simulations, exactly as before
-            // when no compatible device was available.
             if (!fullPass) {
                 return new TimeSlicedReactorSimulation(description, configuration);
             }

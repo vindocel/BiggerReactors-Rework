@@ -47,7 +47,11 @@ public class TurbineMultiblockController extends MultiblockController<TurbineBas
         IRectangularMultiblock<TurbineBaseTile, TurbineBaseBlock, TurbineMultiblockController>,
         IPersistentMultiblock<TurbineBaseTile, TurbineBaseBlock, TurbineMultiblockController>,
         ITouchingMultiblock<TurbineBaseTile, TurbineBaseBlock, TurbineMultiblockController>,
-        IEventMultiblock<TurbineBaseTile, TurbineBaseBlock, TurbineMultiblockController> {
+        IEventMultiblock<TurbineBaseTile, TurbineBaseBlock, TurbineMultiblockController>,
+        biggerreactorsrework.core.multiblock.common.ITickablePartsMultiblock<TurbineBaseTile, TurbineBaseBlock, TurbineMultiblockController> {
+    @Override
+    protected void onPartBroken(@Nonnull TurbineBaseTile tile) { setActive(false); }
+
     public TurbineMultiblockController(Level world) {
         super(world, TurbineBaseTile.class, TurbineBaseBlock.class);
     }
@@ -345,6 +349,7 @@ public class TurbineMultiblockController extends MultiblockController<TurbineBas
     public Vec3i rotationAxis = new Vec3i(0, 0, 0);
     
     private final ITurbineSimulation simulation = createSimulation();
+    private final biggerreactorsrework.core.networking.RpmSyncTracker rpmSync = new biggerreactorsrework.core.networking.RpmSyncTracker();
     
     private static ITurbineSimulation createSimulation() {
         return new ModernTurbineSimulation();
@@ -356,6 +361,7 @@ public class TurbineMultiblockController extends MultiblockController<TurbineBas
     
     @Override
     public void onDisassembled() {
+        rpmSync.reset();
         simulation.reset();
         for (TurbineRotorBearingTile rotorBearing : rotorBearings) {
             level.sendBlockUpdated(rotorBearing.getBlockPos(), rotorBearing.getBlockState(), rotorBearing.getBlockState(), 0);
@@ -371,6 +377,7 @@ public class TurbineMultiblockController extends MultiblockController<TurbineBas
     }
     
     protected void onValidationPassed() {
+        rpmSync.reset();
         Vector3i internalVolume = new Vector3i().add(max()).sub(min()).sub(1, 1, 1);
         
         
@@ -482,30 +489,9 @@ public class TurbineMultiblockController extends MultiblockController<TurbineBas
         
         simulation.tick();
         
-        long totalPowerRequested = 0;
-        long stored = simulation.battery().stored();
-        for (TurbinePowerTapTile powerPort : powerTaps) {
-            long requested = powerPort.distributePower(stored, true);
-            if(requested > stored){
-                // bugged impl, ignoring
-                continue;
-            }
-            totalPowerRequested += requested;
-        }
-        long startingPower = simulation.battery().stored();
-        
-        double distributionMultiplier = Math.min(1f, (double) startingPower / (double) totalPowerRequested);
-        for (TurbinePowerTapTile powerPort : powerTaps) {
-            long powerRequested = powerPort.distributePower(startingPower, true);
-            if(powerRequested > startingPower){
-                // bugged impl, ignoring
-                continue;
-            }
-            powerRequested *= distributionMultiplier;
-            powerRequested = Math.min(simulation.battery().stored(), powerRequested); // just in case
-            simulation.battery().extract(powerPort.distributePower(powerRequested, false));
-        }
-        
+        biggerreactorsrework.core.energy.PowerDistribution.distribute(simulation.battery().stored(), powerTaps,
+                TurbinePowerTapTile::distributePower, simulation.battery()::extract);
+
         for (TurbineFluidPortTile coolantPort : fluidPorts) {
             if (simulation.fluidTank().liquidAmount() < 0) {
                 break;
@@ -513,7 +499,7 @@ public class TurbineMultiblockController extends MultiblockController<TurbineBas
             coolantPort.pushFluid();
         }
         
-        if (CoreEvents.tickNumber() % 10 == 0) {
+        if (rpmSync.sample(CoreEvents.tickNumber(), simulation.RPM())) {
             for (TurbineRotorBearingTile rotorBearing : rotorBearings) {
                 level.sendBlockUpdated(rotorBearing.getBlockPos(), rotorBearing.getBlockState(), rotorBearing.getBlockState(), 0);
             }
@@ -600,7 +586,7 @@ public class TurbineMultiblockController extends MultiblockController<TurbineBas
         simulation.setNominalFlowRate(flowRate);
     }
     
-    private void setCoilEngaged(boolean engaged) {
+    public void setCoilEngaged(boolean engaged) {
         simulation.setCoilEngaged(engaged);
     }
     

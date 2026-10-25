@@ -1,29 +1,30 @@
 package biggerreactorsrework.client;
 
 /**
- * Colors of a selector cell, idle and hovered.
+ * Colors of a lit toggle: the block beside a switch's knob (top row, fill, bottom row) and the lit cell of a
+ * selector (top row, left column, fill).
  */
 public enum SelectorColors {
-    DISABLED(GuiArt.Palette.of(0x242424, 0x181818, 0x0E0E0E), GuiArt.Palette.of(0x2A2A2A, 0x1D1D1D, 0x101010)),
-    RED(GuiArt.Palette.of(0xDA7F6D, 0xC46A62, 0xAE5757), GuiArt.Palette.of(0xFF9580, 0xE57C73, 0xCC6666)),
-    CYAN(GuiArt.Palette.of(0x67C6CF, 0x5CAAB9, 0x528FA3), GuiArt.Palette.of(0x79E8F2, 0x6CC7D9, 0x60A7BF)),
-    GREEN(GuiArt.Palette.of(0x449944, 0x3B8341, 0x316D3B), GuiArt.Palette.of(0x50B350, 0x45994C, 0x398045)),
-    YELLOW(GuiArt.Palette.of(0xDACF57, 0xC4C44F, 0xA6AE46), GuiArt.Palette.of(0xFFF266, 0xE5E55C, 0xC2CC52)),
-    BLUE(GuiArt.Palette.of(0x5762DA, 0x4F4FC4, 0x4F46AE), GuiArt.Palette.of(0x6673FF, 0x5C5CE5, 0x5C52CC)),
-    BLACK(GuiArt.Palette.of(0x8E8E8E, 0x626262, 0x373737), GuiArt.Palette.of(0xA6A6A6, 0x737373, 0x404040));
+    RED(0xC4675C, 0xA33D36, 0x7A2E28, 0xC4675C, 0xBA5A51, 0xA33D36),
+    CYAN(0x4D9BA3, 0x26858F, 0x1E6069, 0x4D9BA3, 0x41949D, 0x26858F),
+    GREEN(0x5D9566, 0x397E45, 0x2B5B39, 0x5D9566, 0x528E5C, 0x397E45),
+    YELLOW(0xCDAB60, 0xBD902E, 0x8E6C22, 0xCDAB60, 0xC8A352, 0xBD902E),
+    BLUE(0x699CBC, 0x397DA7, 0x2B5E7D, 0x699CBC, 0x5B93B6, 0x397DA7),
+    SILVER(0xB5C1C7, 0x9EADB5, 0x768288, 0xB5C1C7, 0xAEBBC2, 0x9EADB5);
 
-    /**
-     * The colors of the idle/non-hovered cell.
-     */
-    public final GuiArt.Palette idle;
+    public final int switchTop;
+    public final int switchFill;
+    public final int switchBottom;
+    public final int cellTop;
+    public final int cellLeft;
+    public final int cellFill;
 
-    /**
-     * The colors of the hovered cell.
-     */
-    public final GuiArt.Palette hovered;
-
-    SelectorColors(GuiArt.Palette idle, GuiArt.Palette hovered) {
-        this.idle = idle;
-        this.hovered = hovered;
+    SelectorColors(int switchTop, int switchFill, int switchBottom, int cellTop, int cellLeft, int cellFill) {
+        this.switchTop = 0xFF000000 | switchTop;
+        this.switchFill = 0xFF000000 | switchFill;
+        this.switchBottom = 0xFF000000 | switchBottom;
+        this.cellTop = 0xFF000000 | cellTop;
+        this.cellLeft = 0xFF000000 | cellLeft;
+        this.cellFill = 0xFF000000 | cellFill;
     }
 }

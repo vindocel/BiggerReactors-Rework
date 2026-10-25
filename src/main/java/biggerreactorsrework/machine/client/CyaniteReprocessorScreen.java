@@ -1,5 +1,7 @@
 package biggerreactorsrework.machine.client;
 
+import biggerreactorsrework.client.GuiTheme;
+
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -20,6 +22,7 @@ import biggerreactorsrework.BiggerReactors;
 import biggerreactorsrework.client.CommonRender;
 import biggerreactorsrework.client.GaugeBar;
 import biggerreactorsrework.client.GuiArt;
+import biggerreactorsrework.client.GuiFrame;
 import biggerreactorsrework.client.GuiIcon;
 import biggerreactorsrework.items.ingots.CyaniteIngot;
 import biggerreactorsrework.machine.blocks.CyaniteReprocessor;
@@ -34,10 +37,12 @@ import biggerreactorsrework.core.client.gui.screens.ModScreen;
 import biggerreactorsrework.core.client.gui.RenderHelper;
 import biggerreactorsrework.core.client.gui.elements.RenderedElement;
 import biggerreactorsrework.core.client.gui.elements.TooltipElement;
+import biggerreactorsrework.client.deps.RecipeViewers;
 
 import org.lwjgl.glfw.GLFW;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -51,9 +56,9 @@ public class CyaniteReprocessorScreen extends ModScreen<CyaniteReprocessorContai
     private static final ResourceLocation FRONT_SPRITE = ResourceLocation.fromNamespaceAndPath(BiggerReactors.modid, "block/cyanite_reprocessor");
     private static final ResourceLocation CASING_SPRITE = ResourceLocation.fromNamespaceAndPath(BiggerReactors.modid, "block/reactor/casing/disassembled");
 
-    private static final int TAB_WIDTH = 21;
-    private static final int TAB_HEIGHT = 24;
-    private static final int TAB_PITCH = 25;
+    // Tabs are ears of the metal frame; stacked tabs share one ear with their buttons 2 px apart.
+    private static final int TAB_SIZE = GuiFrame.TAB_SIZE;
+    private static final int TAB_PITCH = GuiFrame.TAB_BUTTON + 2;
     private static final int SIDE_TAB_Y = 4;
     private static final int WINDOW_WIDTH = 120;
     private static final int WINDOW_HEIGHT = 96;
@@ -62,18 +67,16 @@ public class CyaniteReprocessorScreen extends ModScreen<CyaniteReprocessorContai
     private static final int[] COLUMNS = {25, 49, 73};
     private static final int[] ROWS = {20, 44, 68};
     private static final int BUTTON_SIZE = 15;
-    // Automation switches fit the 7x8 input/eject glyphs, the close button the 6x7 cross, both with Big's bevel and
-    // the glyph 2 px in.
-    private static final int SWITCH_WIDTH = 11;
-    private static final int SWITCH_HEIGHT = 12;
+    // Automation switches and the close button share one size, which centers their 4x3 and 4x5 glyphs exactly.
     private static final int CLOSE_WIDTH = 10;
     private static final int CLOSE_HEIGHT = 11;
-    private static final int GLYPH_INSET = 2;
+    private static final int SWITCH_WIDTH = CLOSE_WIDTH;
+    private static final int SWITCH_HEIGHT = CLOSE_HEIGHT;
     private static final int TOP_BAR_Y = 6;
     private static final int TOP_BAR_HEIGHT = 19;
 
     /**
-     * Where the window was dragged to, relative to its default place; kept while the game runs, like on the DFM.
+     * Where the window was dragged to, relative to its default place; kept while the game runs.
      */
     private static int windowOffsetX = 0;
     private static int windowOffsetY = 0;
@@ -98,6 +101,9 @@ public class CyaniteReprocessorScreen extends ModScreen<CyaniteReprocessorContai
     private boolean draggingWindow = false;
     private double dragX;
     private double dragY;
+
+    @Nullable
+    private RenderedElement<CyaniteReprocessorContainer> progressBar;
 
     public CyaniteReprocessorScreen(CyaniteReprocessorContainer container, Inventory playerInventory, Component title) {
         super(container, playerInventory, title, 176, 175);
@@ -152,7 +158,10 @@ public class CyaniteReprocessorScreen extends ModScreen<CyaniteReprocessorContai
         this.addScreenElement(waterTank);
 
         // (Center) Progress bar:
-        RenderedElement<CyaniteReprocessorContainer> progressBar = new RenderedElement<>(this, 75, 40, 24, 18, 0, 0, null);
+        // With a recipe viewer installed, clicking the arrow shows the reprocessing recipe.
+        RenderedElement<CyaniteReprocessorContainer> progressBar = new RenderedElement<>(this, 75, 40, 24, 18, 0, 0,
+                RecipeViewers.available() ? Component.translatable("screen.biggerreactorsrework.show_recipes") : null);
+        this.progressBar = progressBar;
         progressBar.onRender = (@Nonnull GuiGraphics graphics, int mX, int mY) -> GaugeBar.drawProgressArrow(graphics,
                 progressBar.x, progressBar.y, cyaniteReprocessorState.workTime, cyaniteReprocessorState.workTimeTotal);
         this.addScreenElement(progressBar);
@@ -165,7 +174,7 @@ public class CyaniteReprocessorScreen extends ModScreen<CyaniteReprocessorContai
         // (Right) Water tank symbol:
         RenderedElement<CyaniteReprocessorContainer> waterTankSymbol = new RenderedElement<>(this, 152, 6, 16, 16, 0, 0, Component.translatable("screen.biggerreactorsrework.cyanite_reprocessor.water_tank.tooltip"));
         waterTankSymbol.onRender = (@Nonnull GuiGraphics graphics, int mX, int mY) -> GuiArt.fluidSymbol(graphics,
-                waterTankSymbol.x, waterTankSymbol.y, Fluids.WATER.getSource(), GuiIcon.WATER_DROP_MASK, GuiIcon.WATER_DROP, GuiArt.PANEL_FILL, true);
+                waterTankSymbol.x, waterTankSymbol.y, Fluids.WATER.getSource(), GuiIcon.WATER_DROP_MASK, GuiIcon.WATER_DROP, GuiTheme.panelColor(), true);
         this.addScreenElement(waterTankSymbol);
     }
 
@@ -190,12 +199,12 @@ public class CyaniteReprocessorScreen extends ModScreen<CyaniteReprocessorContai
 
     private int windowX() {
         int x = this.defaultWindowX() + windowOffsetX;
-        return Mth.clamp(x, TAB_WIDTH, Math.max(TAB_WIDTH, this.width - WINDOW_WIDTH));
+        return Mth.clamp(x, TAB_SIZE, Math.max(TAB_SIZE, this.width - WINDOW_WIDTH - GuiFrame.BAND));
     }
 
     private int windowY() {
         int y = this.defaultWindowY() + windowOffsetY;
-        return Mth.clamp(y, 0, Math.max(0, this.height - WINDOW_HEIGHT));
+        return Mth.clamp(y, GuiFrame.BAND, Math.max(GuiFrame.BAND, this.height - WINDOW_HEIGHT - GuiFrame.BAND));
     }
 
     private int closeX() {
@@ -228,8 +237,26 @@ public class CyaniteReprocessorScreen extends ModScreen<CyaniteReprocessorContai
     }
 
     private boolean insideWindow(double mouseX, double mouseY) {
-        return this.sideWindowOpen && (inside(mouseX, mouseY, this.windowX(), this.windowY(), WINDOW_WIDTH, WINDOW_HEIGHT)
-                || inside(mouseX, mouseY, this.windowX() - TAB_WIDTH, this.windowY(), TAB_WIDTH, TAB_PITCH * Transmission.VALUES.length));
+        return this.sideWindowOpen && (inside(mouseX, mouseY, this.windowX() - GuiFrame.BAND, this.windowY() - GuiFrame.BAND,
+                WINDOW_WIDTH + 2 * GuiFrame.BAND, WINDOW_HEIGHT + 2 * GuiFrame.BAND)
+                || inside(mouseX, mouseY, this.windowX() - TAB_SIZE, this.windowTabY(0), TAB_SIZE, windowEarHeight()));
+    }
+
+    private static int windowEarHeight() {
+        return TAB_PITCH * (Transmission.VALUES.length - 1) + TAB_SIZE;
+    }
+
+    private int windowTabY(int index) {
+        return this.windowY() + 4 + TAB_PITCH * index;
+    }
+
+    private boolean onSideTab(double mouseX, double mouseY) {
+        return inside(mouseX, mouseY, this.sideTabX(), this.sideTabY(), TAB_SIZE, TAB_SIZE);
+    }
+
+    private boolean onWindowTab(double mouseX, double mouseY, Transmission transmission) {
+        return inside(mouseX, mouseY, GuiFrame.tabButtonX(this.windowX() - TAB_SIZE, true),
+                this.windowTabY(transmission.ordinal()) + GuiFrame.TAB_BUTTON_TOP, GuiFrame.TAB_BUTTON, GuiFrame.TAB_BUTTON);
     }
 
     /**
@@ -260,8 +287,9 @@ public class CyaniteReprocessorScreen extends ModScreen<CyaniteReprocessorContai
     protected void renderBg(@Nonnull GuiGraphics graphics, float partialTicks, int mouseX, int mouseY) {
         super.renderBg(graphics, partialTicks, mouseX, mouseY);
         // Tab that opens the side configuration, with the machine itself as its icon.
-        GuiArt.sideTab(graphics, this.sideTabX(), this.sideTabY(), true, this.sideWindowOpen);
-        graphics.renderItem(this.machineIcon, this.sideTabX() + 1, this.sideTabY() + 4);
+        this.frame().ear(graphics, this.sideTabX(), this.sideTabY(), TAB_SIZE, false);
+        GuiArt.tabButton(graphics, this.sideTabX(), this.sideTabY(), false, this.onSideTab(mouseX, mouseY), this.sideWindowOpen, this.frame());
+        GuiArt.tabIcon(graphics, this.sideTabX(), this.sideTabY(), false, 16, 16, () -> graphics.renderItem(this.machineIcon, 0, 0));
     }
 
     @Override
@@ -270,14 +298,20 @@ public class CyaniteReprocessorScreen extends ModScreen<CyaniteReprocessorContai
         if (this.sideWindowOpen) {
             this.syncSides();
             graphics.pose().pushPose();
-            // Above the slot items.
-            graphics.pose().translate(0, 0, 300);
+            // Item counts render above item models (z=400); the whole window must cover both.
+            graphics.flush();
+            graphics.pose().translate(0, 0, 500);
             this.renderSideWindow(graphics, mouseX, mouseY);
+            graphics.flush();
             graphics.pose().popPose();
         }
         List<Component> tooltip = this.sideTooltip(mouseX, mouseY);
         if (!tooltip.isEmpty()) {
+            graphics.pose().pushPose();
+            graphics.pose().translate(0, 0, 500);
             graphics.renderComponentTooltip(this.getFont(), tooltip, mouseX, mouseY);
+            graphics.flush();
+            graphics.pose().popPose();
         }
     }
 
@@ -285,40 +319,39 @@ public class CyaniteReprocessorScreen extends ModScreen<CyaniteReprocessorContai
         final int left = this.windowX();
         final int top = this.windowY();
 
-        // One tab per material on the left edge.
+        GuiArt.panel(graphics, left, top, WINDOW_WIDTH, WINDOW_HEIGHT, this.frame());
+
+        // One tab per material on the left edge, all on one ear.
+        int earX = left - TAB_SIZE;
+        this.frame().ear(graphics, earX, this.windowTabY(0), windowEarHeight(), true);
         for (Transmission transmission : Transmission.VALUES) {
             boolean selected = transmission == this.tab;
-            int x = left - TAB_WIDTH;
-            int y = top + 4 + TAB_PITCH * transmission.ordinal();
-            GuiArt.sideTab(graphics, x, y, false, selected);
+            boolean hovered = this.onWindowTab(mouseX, mouseY, transmission);
+            int y = this.windowTabY(transmission.ordinal());
+            GuiArt.tabButton(graphics, earX, y, true, hovered, selected, this.frame());
             switch (transmission) {
-                case ITEM -> graphics.renderItem(this.cyaniteIcon, x + 4, y + 4);
-                case FLUID -> GuiArt.fluidSymbol(graphics, x + 4, y + 4, Fluids.WATER.getSource(), GuiIcon.WATER_DROP_MASK, GuiIcon.WATER_DROP,
-                        selected ? GuiArt.PANEL_FILL : GuiArt.TAB_FILL, false);
-                case ENERGY -> GuiIcon.BATTERY.draw(graphics, x + 7, y + 4);
+                case ITEM -> GuiArt.tabIcon(graphics, earX, y, true, 16, 16, () -> graphics.renderItem(this.cyaniteIcon, 0, 0));
+                case FLUID -> GuiArt.tabIcon(graphics, earX, y, true, 16, 16, () -> GuiArt.fluidSymbol(graphics, 0, 0,
+                        Fluids.WATER.getSource(), GuiIcon.WATER_DROP_MASK, GuiIcon.WATER_DROP, GuiArt.buttonFill(selected, false, this.frame()), false));
+                case ENERGY -> GuiArt.tabIcon(graphics, earX, y, true, GuiIcon.BATTERY.width(), GuiIcon.BATTERY.height(),
+                        () -> GuiIcon.BATTERY.draw(graphics, 0, 0));
             }
         }
 
-        GuiArt.panel(graphics, left, top, WINDOW_WIDTH, WINDOW_HEIGHT);
-        graphics.drawString(this.getFont(), Component.translatable(this.tab.translationKey()), left + 7, top + 8, 4210752, false);
+        graphics.drawString(this.getFont(), Component.translatable(this.tab.translationKey()), left + 7, top + 8, GuiTheme.textColor(), false);
 
         // Top bar: automation switches and the close button.
         List<AutoSwitch> switches = this.autoSwitches();
         for (int i = 0; i < switches.size(); i++) {
             AutoSwitch toggle = switches.get(i);
-            GuiIcon.Glyph glyph = toggle.input() ? GuiIcon.INPUT : GuiIcon.EJECT;
             int x = this.switchX(i, switches.size());
             int y = top + TOP_BAR_Y;
-            // A switch that is on keeps Big's purple look; hovering lightens it.
-            GuiArt.button(graphics, x, y, SWITCH_WIDTH, SWITCH_HEIGHT, toggle.active() ? GuiArt.BUTTON_HOVER : GuiArt.BUTTON);
-            (toggle.active() ? glyph.hover() : glyph.normal()).draw(graphics, x + GLYPH_INSET, y + GLYPH_INSET);
-            if (inside(mouseX, mouseY, x, y, SWITCH_WIDTH, SWITCH_HEIGHT)) {
-                graphics.fill(x + 1, y + 1, x + SWITCH_WIDTH - 1, y + SWITCH_HEIGHT - 1, 0x30FFFFFF);
-            }
+            // A switch that is on keeps the teal fill.
+            GuiArt.button(graphics, x, y, SWITCH_WIDTH, SWITCH_HEIGHT, inside(mouseX, mouseY, x, y, SWITCH_WIDTH, SWITCH_HEIGHT),
+                    toggle.active(), false, toggle.input() ? GuiIcon.AUTO_INPUT : GuiIcon.AUTO_EJECT, this.frame());
         }
-        boolean closeHovered = inside(mouseX, mouseY, this.closeX(), top + TOP_BAR_Y, CLOSE_WIDTH, CLOSE_HEIGHT);
-        GuiArt.button(graphics, this.closeX(), top + TOP_BAR_Y, CLOSE_WIDTH, CLOSE_HEIGHT, closeHovered ? GuiArt.BUTTON_HOVER : GuiArt.BUTTON);
-        (closeHovered ? GuiIcon.CLOSE.hover() : GuiIcon.CLOSE.normal()).draw(graphics, this.closeX() + GLYPH_INSET, top + TOP_BAR_Y + GLYPH_INSET);
+        GuiArt.button(graphics, this.closeX(), top + TOP_BAR_Y, CLOSE_WIDTH, CLOSE_HEIGHT,
+                inside(mouseX, mouseY, this.closeX(), top + TOP_BAR_Y, CLOSE_WIDTH, CLOSE_HEIGHT), GuiIcon.CLOSE, this.frame());
 
         // Faces: the block's own textures, with the route color around them.
         final TextureAtlasSprite front = Minecraft.getInstance().getTextureAtlas(InventoryMenu.BLOCK_ATLAS).apply(FRONT_SPRITE);
@@ -340,12 +373,17 @@ public class CyaniteReprocessorScreen extends ModScreen<CyaniteReprocessorContai
 
         // Every face at once.
         boolean resetHovered = inside(mouseX, mouseY, this.resetX(), this.resetY(), BUTTON_SIZE, BUTTON_SIZE);
-        GuiArt.pushButton(graphics, this.resetX(), this.resetY(), BUTTON_SIZE, BUTTON_SIZE, resetHovered, GuiIcon.REVERT);
+        GuiArt.button(graphics, this.resetX(), this.resetY(), BUTTON_SIZE, BUTTON_SIZE, resetHovered, GuiIcon.REVERT, this.frame());
+    }
+
+    @Override
+    public boolean isSettingsTabCovered(double mouseX, double mouseY) {
+        return this.insideWindow(mouseX, mouseY);
     }
 
     private List<Component> sideTooltip(int mouseX, int mouseY) {
         List<Component> lines = new ArrayList<>();
-        if (inside(mouseX, mouseY, this.sideTabX(), this.sideTabY(), TAB_WIDTH, TAB_HEIGHT)) {
+        if (this.onSideTab(mouseX, mouseY)) {
             lines.add(Component.translatable("screen.biggerreactorsrework.side_config"));
             return lines;
         }
@@ -355,7 +393,7 @@ public class CyaniteReprocessorScreen extends ModScreen<CyaniteReprocessorContai
         final int left = this.windowX();
         final int top = this.windowY();
         for (Transmission transmission : Transmission.VALUES) {
-            if (inside(mouseX, mouseY, left - TAB_WIDTH, top + 4 + TAB_PITCH * transmission.ordinal(), TAB_WIDTH, TAB_HEIGHT)) {
+            if (this.onWindowTab(mouseX, mouseY, transmission)) {
                 lines.add(Component.translatable(transmission.translationKey()));
                 return lines;
             }
@@ -413,6 +451,11 @@ public class CyaniteReprocessorScreen extends ModScreen<CyaniteReprocessorContai
             }
             return true;
         }
+        if (button == 0 && this.progressBar != null && this.progressBar.isMouseOver(mouseX, mouseY) && RecipeViewers.available()) {
+            Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
+            RecipeViewers.show(RecipeViewers.CYANITE_REPROCESSING);
+            return true;
+        }
         return super.mouseClicked(mouseX, mouseY, button);
     }
 
@@ -420,7 +463,7 @@ public class CyaniteReprocessorScreen extends ModScreen<CyaniteReprocessorContai
      * Handles a click on the side configuration tab or window; left goes forward, right goes back.
      */
     private boolean sideClicked(double mouseX, double mouseY, boolean forward) {
-        if (inside(mouseX, mouseY, this.sideTabX(), this.sideTabY(), TAB_WIDTH, TAB_HEIGHT)) {
+        if (this.onSideTab(mouseX, mouseY)) {
             this.sideWindowOpen = !this.sideWindowOpen;
             return true;
         }
@@ -430,7 +473,7 @@ public class CyaniteReprocessorScreen extends ModScreen<CyaniteReprocessorContai
         final int left = this.windowX();
         final int top = this.windowY();
         for (Transmission transmission : Transmission.VALUES) {
-            if (inside(mouseX, mouseY, left - TAB_WIDTH, top + 4 + TAB_PITCH * transmission.ordinal(), TAB_WIDTH, TAB_HEIGHT)) {
+            if (this.onWindowTab(mouseX, mouseY, transmission)) {
                 this.tab = transmission;
                 return true;
             }
@@ -518,7 +561,7 @@ public class CyaniteReprocessorScreen extends ModScreen<CyaniteReprocessorContai
     @Override
     protected boolean hasClickedOutside(double mouseX, double mouseY, int guiLeft, int guiTop, int button) {
         return super.hasClickedOutside(mouseX, mouseY, guiLeft, guiTop, button)
-                && !inside(mouseX, mouseY, this.sideTabX(), this.sideTabY(), TAB_WIDTH, TAB_HEIGHT)
+                && !this.onSideTab(mouseX, mouseY)
                 && !this.insideWindow(mouseX, mouseY);
     }
 
@@ -527,7 +570,7 @@ public class CyaniteReprocessorScreen extends ModScreen<CyaniteReprocessorContai
      */
     @Override
     protected void drawBackground(@Nonnull GuiGraphics graphics, int x, int y) {
-        GuiArt.panel(graphics, x, y, 176, 175);
+        GuiArt.panel(graphics, x, y, 176, 175, this.frame());
         GuiIcon.BATTERY.draw(graphics, x + 11, y + 6);
         GuiArt.ring(graphics, x + 41, y + 38, 22, 0xFF3DAAFF);
         GuiArt.slot(graphics, x + 43, y + 40, 18);
@@ -535,4 +578,10 @@ public class CyaniteReprocessorScreen extends ModScreen<CyaniteReprocessorContai
         GuiArt.slot(graphics, x + 115, y + 40, 18);
         GuiArt.playerInventory(graphics, x + 7, y + 92);
     }
+
+    @Override
+    protected GuiFrame frame() {
+        return GuiFrame.CYANITE_REPROCESSOR;
+    }
+    @Override public boolean hasAppearanceSettings() { return true; }
 }

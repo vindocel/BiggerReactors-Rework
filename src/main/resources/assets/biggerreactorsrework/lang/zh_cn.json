@@ -7,7 +7,7 @@
   "multiblock.error.biggerreactorsrework.invalid_block.generic": "无效方块 (%s)，位于%s",
   "multiblock.error.biggerreactorsrework.unknown": "出现了未知的多方块结构错误，请联系作者",
   "multiblock.error.biggerreactorsrework.dimensions": "无法在该维度使用 \n实际：%d, %d, %d, \n允许最小值：%d, %d, %d, \n允许最大值：%d, %d, %d,",
-  "item_group.biggerreactorsrework": "大型反应堆",
+  "item_group.biggerreactorsrework": "BiggerReactors-Rework",
 
   "item.biggerreactorsrework.wrench": "反应堆扳手",
 

@@ -1,5 +1,7 @@
 package biggerreactorsrework.multiblocks.reactor.client;
 
+import biggerreactorsrework.client.GuiTheme;
+
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.datafixers.util.Pair;
 import net.minecraft.client.gui.GuiGraphics;
@@ -15,6 +17,7 @@ import biggerreactorsrework.client.CommonButton;
 import biggerreactorsrework.client.GaugeBar;
 import biggerreactorsrework.client.TextBox;
 import biggerreactorsrework.client.GuiArt;
+import biggerreactorsrework.client.GuiFrame;
 import biggerreactorsrework.client.GuiIcon;
 import biggerreactorsrework.fluids.LiquidUranium;
 import biggerreactorsrework.multiblocks.reactor.containers.ReactorControlRodContainer;
@@ -85,7 +88,7 @@ public class ReactorControlRodScreen extends ModScreen<ReactorControlRodContaine
         };
         textBoxEnterButton.onRender = ((mS, mX, mY) -> {
             // Custom rendering.
-            GuiArt.pushButton(mS, textBoxEnterButton.x, textBoxEnterButton.y, textBoxEnterButton.width, textBoxEnterButton.height, textBoxEnterButton.isMouseOver(mX, mY), GuiIcon.ARROW_ENTER);
+            GuiArt.button(mS, textBoxEnterButton.x, textBoxEnterButton.y, textBoxEnterButton.width, textBoxEnterButton.height, textBoxEnterButton.isMouseOver(mX, mY), GuiIcon.ARROW_ENTER, this.frame());
         });
         //this.addElement(textBoxEnterButton);
 
@@ -121,7 +124,7 @@ public class ReactorControlRodScreen extends ModScreen<ReactorControlRodContaine
         };
         rodRetractButton.onRender = ((mS, mX, mY) -> {
             // Custom rendering.
-            GuiArt.pushButton(mS, rodRetractButton.x, rodRetractButton.y, rodRetractButton.width, rodRetractButton.height, rodRetractButton.isMouseOver(mX, mY), GuiIcon.ARROW_UP);
+            GuiArt.button(mS, rodRetractButton.x, rodRetractButton.y, rodRetractButton.width, rodRetractButton.height, rodRetractButton.isMouseOver(mX, mY), GuiIcon.ARROW_UP, this.frame());
         });
         this.addScreenElement(rodRetractButton);
 
@@ -148,7 +151,7 @@ public class ReactorControlRodScreen extends ModScreen<ReactorControlRodContaine
         };
         rodInsertButton.onRender = (mS, mX, mY) -> {
             // Custom rendering.
-            GuiArt.pushButton(mS, rodInsertButton.x, rodInsertButton.y, rodInsertButton.width, rodInsertButton.height, rodInsertButton.isMouseOver(mX, mY), GuiIcon.ARROW_DOWN);
+            GuiArt.button(mS, rodInsertButton.x, rodInsertButton.y, rodInsertButton.width, rodInsertButton.height, rodInsertButton.isMouseOver(mX, mY), GuiIcon.ARROW_DOWN, this.frame());
         };
         this.addScreenElement(rodInsertButton);
     }
@@ -176,10 +179,10 @@ public class ReactorControlRodScreen extends ModScreen<ReactorControlRodContaine
         super.render(graphics, mouseX, mouseY, partialTicks);
 
         // Render text for text box:
-        graphics.drawString(this.getFont(), Component.translatable("screen.biggerreactorsrework.reactor_control_rod.name").getString(), this.getGuiLeft() + 8, this.getGuiTop() + 17, 4210752, false);
+        graphics.drawString(this.getFont(), Component.translatable("screen.biggerreactorsrework.reactor_control_rod.name").getString(), this.getGuiLeft() + 8, this.getGuiTop() + 17, GuiTheme.textColor(), false);
 
         // Render text for insertion level:
-        graphics.drawString(this.getFont(), String.format("%.1f%%", reactorControlRodState.insertionLevel), this.getGuiLeft() + 76, this.getGuiTop() + 77, 4210752, false);
+        graphics.drawString(this.getFont(), String.format("%.1f%%", reactorControlRodState.insertionLevel), this.getGuiLeft() + 76, this.getGuiTop() + 77, GuiTheme.textColor(), false);
     }
 
     /**
@@ -194,5 +197,10 @@ public class ReactorControlRodScreen extends ModScreen<ReactorControlRodContaine
         GaugeBar.drawControlRod(graphics, symbol.x, symbol.y, insertionLevel, LiquidUranium.INSTANCE.getSource());
         // Update tooltip.
         symbol.tooltip = Component.literal(String.format("%.1f%%", insertionLevel));
+    }
+
+    @Override
+    protected GuiFrame frame() {
+        return GuiFrame.REACTOR;
     }
 }

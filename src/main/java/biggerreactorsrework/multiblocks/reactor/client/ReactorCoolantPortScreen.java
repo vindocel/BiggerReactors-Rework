@@ -1,5 +1,7 @@
 package biggerreactorsrework.multiblocks.reactor.client;
 
+import biggerreactorsrework.client.GuiTheme;
+
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -11,6 +13,7 @@ import biggerreactorsrework.BiggerReactors;
 import biggerreactorsrework.client.Biselector;
 import biggerreactorsrework.client.SelectorColors;
 import biggerreactorsrework.client.GuiArt;
+import biggerreactorsrework.client.GuiFrame;
 import biggerreactorsrework.client.GuiIcon;
 import biggerreactorsrework.multiblocks.reactor.containers.ReactorCoolantPortContainer;
 import biggerreactorsrework.multiblocks.reactor.state.ReactorCoolantPortState;
@@ -58,7 +61,7 @@ public class ReactorCoolantPortScreen extends ModScreen<ReactorCoolantPortContai
     public void initControls() {
         // (Left) Direction toggle:
         Biselector<ReactorCoolantPortContainer> directionToggle = new Biselector<>(this, 8, 18, Component.translatable("screen.biggerreactorsrework.reactor_coolant_port.direction_toggle.tooltip"),
-                () -> reactorCoolantPortState.direction ? 0 : 1, SelectorColors.CYAN, SelectorColors.RED);
+                () -> reactorCoolantPortState.direction ? 0 : 1, SelectorColors.RED);
         directionToggle.onMouseReleased = (mX, mY, btn) -> {
             // Click logic.
             this.getMenu().executeRequest("setDirection", directionToggle.getState() == 0 ? 1 : 0);
@@ -83,7 +86,7 @@ public class ReactorCoolantPortScreen extends ModScreen<ReactorCoolantPortContai
         };
         manualEjectButton.onRender = ((mS, mX, mY) -> {
             // Custom rendering.
-            GuiArt.pushButton(mS, manualEjectButton.x, manualEjectButton.y, manualEjectButton.width, manualEjectButton.height, manualEjectButton.isMouseOver(mX, mY), GuiIcon.EJECT);
+            GuiArt.button(mS, manualEjectButton.x, manualEjectButton.y, manualEjectButton.width, manualEjectButton.height, manualEjectButton.isMouseOver(mX, mY), GuiIcon.EJECT, this.frame());
         });
         this.addScreenElement(manualEjectButton);
     }
@@ -103,14 +106,19 @@ public class ReactorCoolantPortScreen extends ModScreen<ReactorCoolantPortContai
         // Render text for input/output direction:
         if (reactorCoolantPortState.direction) {
             // Text for an inlet:
-            graphics.drawString(this.getFont(), Component.translatable("screen.biggerreactorsrework.reactor_coolant_port.direction_toggle.input").getString(), this.getGuiLeft() + 42, this.getGuiTop() + 22, 4210752, false);
+            graphics.drawString(this.getFont(), Component.translatable("screen.biggerreactorsrework.reactor_coolant_port.direction_toggle.input").getString(), this.getGuiLeft() + 42, this.getGuiTop() + 22, GuiTheme.textColor(), false);
 
         } else {
             // Text for an outlet:
-            graphics.drawString(this.getFont(), Component.translatable("screen.biggerreactorsrework.reactor_coolant_port.direction_toggle.output").getString(), this.getGuiLeft() + 42, this.getGuiTop() + 22, 4210752, false);
+            graphics.drawString(this.getFont(), Component.translatable("screen.biggerreactorsrework.reactor_coolant_port.direction_toggle.output").getString(), this.getGuiLeft() + 42, this.getGuiTop() + 22, GuiTheme.textColor(), false);
         }
 
         // Render text for manual tank eject:
-        graphics.drawString(this.getFont(), Component.translatable("screen.biggerreactorsrework.reactor_coolant_port.manual_dump").getString(), this.getGuiLeft() + 26, this.getGuiTop() + 38, 4210752, false);
+        graphics.drawString(this.getFont(), Component.translatable("screen.biggerreactorsrework.reactor_coolant_port.manual_dump").getString(), this.getGuiLeft() + 26, this.getGuiTop() + 38, GuiTheme.textColor(), false);
+    }
+
+    @Override
+    protected GuiFrame frame() {
+        return GuiFrame.REACTOR;
     }
 }

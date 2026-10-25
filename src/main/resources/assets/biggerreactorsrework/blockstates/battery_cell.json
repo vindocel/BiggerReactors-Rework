@@ -1,0 +1,772 @@
+{
+  "variants": {
+    "assembled=false,charged=false,top_connected=false,bottom_connected=false,north_connected=false,south_connected=false,east_connected=false,west_connected=false": {
+      "model": "biggerreactorsrework:block/battery/cell/body"
+    },
+    "assembled=false,charged=true,top_connected=false,bottom_connected=false,north_connected=false,south_connected=false,east_connected=false,west_connected=false": {
+      "model": "biggerreactorsrework:block/battery/cell/body"
+    },
+    "assembled=true,charged=false,top_connected=false,bottom_connected=false,north_connected=false,south_connected=false,east_connected=false,west_connected=false": {
+      "model": "biggerreactorsrework:block/battery/cell/idle"
+    },
+    "assembled=true,charged=true,top_connected=false,bottom_connected=false,north_connected=false,south_connected=false,east_connected=false,west_connected=false": {
+      "model": "biggerreactorsrework:block/battery/cell/charged"
+    },
+    "assembled=false,charged=false,top_connected=false,bottom_connected=false,north_connected=false,south_connected=false,east_connected=false,west_connected=true": {
+      "model": "biggerreactorsrework:block/battery/cell/body_w"
+    },
+    "assembled=false,charged=true,top_connected=false,bottom_connected=false,north_connected=false,south_connected=false,east_connected=false,west_connected=true": {
+      "model": "biggerreactorsrework:block/battery/cell/body_w"
+    },
+    "assembled=true,charged=false,top_connected=false,bottom_connected=false,north_connected=false,south_connected=false,east_connected=false,west_connected=true": {
+      "model": "biggerreactorsrework:block/battery/cell/idle_w"
+    },
+    "assembled=true,charged=true,top_connected=false,bottom_connected=false,north_connected=false,south_connected=false,east_connected=false,west_connected=true": {
+      "model": "biggerreactorsrework:block/battery/cell/charged_w"
+    },
+    "assembled=false,charged=false,top_connected=false,bottom_connected=false,north_connected=false,south_connected=false,east_connected=true,west_connected=false": {
+      "model": "biggerreactorsrework:block/battery/cell/body_e"
+    },
+    "assembled=false,charged=true,top_connected=false,bottom_connected=false,north_connected=false,south_connected=false,east_connected=true,west_connected=false": {
+      "model": "biggerreactorsrework:block/battery/cell/body_e"
+    },
+    "assembled=true,charged=false,top_connected=false,bottom_connected=false,north_connected=false,south_connected=false,east_connected=true,west_connected=false": {
+      "model": "biggerreactorsrework:block/battery/cell/idle_e"
+    },
+    "assembled=true,charged=true,top_connected=false,bottom_connected=false,north_connected=false,south_connected=false,east_connected=true,west_connected=false": {
+      "model": "biggerreactorsrework:block/battery/cell/charged_e"
+    },
+    "assembled=false,charged=false,top_connected=false,bottom_connected=false,north_connected=false,south_connected=false,east_connected=true,west_connected=true": {
+      "model": "biggerreactorsrework:block/battery/cell/body_ew"
+    },
+    "assembled=false,charged=true,top_connected=false,bottom_connected=false,north_connected=false,south_connected=false,east_connected=true,west_connected=true": {
+      "model": "biggerreactorsrework:block/battery/cell/body_ew"
+    },
+    "assembled=true,charged=false,top_connected=false,bottom_connected=false,north_connected=false,south_connected=false,east_connected=true,west_connected=true": {
+      "model": "biggerreactorsrework:block/battery/cell/idle_ew"
+    },
+    "assembled=true,charged=true,top_connected=false,bottom_connected=false,north_connected=false,south_connected=false,east_connected=true,west_connected=true": {
+      "model": "biggerreactorsrework:block/battery/cell/charged_ew"
+    },
+    "assembled=false,charged=false,top_connected=false,bottom_connected=false,north_connected=false,south_connected=true,east_connected=false,west_connected=false": {
+      "model": "biggerreactorsrework:block/battery/cell/body_s"
+    },
+    "assembled=false,charged=true,top_connected=false,bottom_connected=false,north_connected=false,south_connected=true,east_connected=false,west_connected=false": {
+      "model": "biggerreactorsrework:block/battery/cell/body_s"
+    },
+    "assembled=true,charged=false,top_connected=false,bottom_connected=false,north_connected=false,south_connected=true,east_connected=false,west_connected=false": {
+      "model": "biggerreactorsrework:block/battery/cell/idle_s"
+    },
+    "assembled=true,charged=true,top_connected=false,bottom_connected=false,north_connected=false,south_connected=true,east_connected=false,west_connected=false": {
+      "model": "biggerreactorsrework:block/battery/cell/charged_s"
+    },
+    "assembled=false,charged=false,top_connected=false,bottom_connected=false,north_connected=false,south_connected=true,east_connected=false,west_connected=true": {
+      "model": "biggerreactorsrework:block/battery/cell/body_sw"
+    },
+    "assembled=false,charged=true,top_connected=false,bottom_connected=false,north_connected=false,south_connected=true,east_connected=false,west_connected=true": {
+      "model": "biggerreactorsrework:block/battery/cell/body_sw"
+    },
+    "assembled=true,charged=false,top_connected=false,bottom_connected=false,north_connected=false,south_connected=true,east_connected=false,west_connected=true": {
+      "model": "biggerreactorsrework:block/battery/cell/idle_sw"
+    },
+    "assembled=true,charged=true,top_connected=false,bottom_connected=false,north_connected=false,south_connected=true,east_connected=false,west_connected=true": {
+      "model": "biggerreactorsrework:block/battery/cell/charged_sw"
+    },
+    "assembled=false,charged=false,top_connected=false,bottom_connected=false,north_connected=false,south_connected=true,east_connected=true,west_connected=false": {
+      "model": "biggerreactorsrework:block/battery/cell/body_se"
+    },
+    "assembled=false,charged=true,top_connected=false,bottom_connected=false,north_connected=false,south_connected=true,east_connected=true,west_connected=false": {
+      "model": "biggerreactorsrework:block/battery/cell/body_se"
+    },
+    "assembled=true,charged=false,top_connected=false,bottom_connected=false,north_connected=false,south_connected=true,east_connected=true,west_connected=false": {
+      "model": "biggerreactorsrework:block/battery/cell/idle_se"
+    },
+    "assembled=true,charged=true,top_connected=false,bottom_connected=false,north_connected=false,south_connected=true,east_connected=true,west_connected=false": {
+      "model": "biggerreactorsrework:block/battery/cell/charged_se"
+    },
+    "assembled=false,charged=false,top_connected=false,bottom_connected=false,north_connected=false,south_connected=true,east_connected=true,west_connected=true": {
+      "model": "biggerreactorsrework:block/battery/cell/body_sew"
+    },
+    "assembled=false,charged=true,top_connected=false,bottom_connected=false,north_connected=false,south_connected=true,east_connected=true,west_connected=true": {
+      "model": "biggerreactorsrework:block/battery/cell/body_sew"
+    },
+    "assembled=true,charged=false,top_connected=false,bottom_connected=false,north_connected=false,south_connected=true,east_connected=true,west_connected=true": {
+      "model": "biggerreactorsrework:block/battery/cell/idle_sew"
+    },
+    "assembled=true,charged=true,top_connected=false,bottom_connected=false,north_connected=false,south_connected=true,east_connected=true,west_connected=true": {
+      "model": "biggerreactorsrework:block/battery/cell/charged_sew"
+    },
+    "assembled=false,charged=false,top_connected=false,bottom_connected=false,north_connected=true,south_connected=false,east_connected=false,west_connected=false": {
+      "model": "biggerreactorsrework:block/battery/cell/body_n"
+    },
+    "assembled=false,charged=true,top_connected=false,bottom_connected=false,north_connected=true,south_connected=false,east_connected=false,west_connected=false": {
+      "model": "biggerreactorsrework:block/battery/cell/body_n"
+    },
+    "assembled=true,charged=false,top_connected=false,bottom_connected=false,north_connected=true,south_connected=false,east_connected=false,west_connected=false": {
+      "model": "biggerreactorsrework:block/battery/cell/idle_n"
+    },
+    "assembled=true,charged=true,top_connected=false,bottom_connected=false,north_connected=true,south_connected=false,east_connected=false,west_connected=false": {
+      "model": "biggerreactorsrework:block/battery/cell/charged_n"
+    },
+    "assembled=false,charged=false,top_connected=false,bottom_connected=false,north_connected=true,south_connected=false,east_connected=false,west_connected=true": {
+      "model": "biggerreactorsrework:block/battery/cell/body_nw"
+    },
+    "assembled=false,charged=true,top_connected=false,bottom_connected=false,north_connected=true,south_connected=false,east_connected=false,west_connected=true": {
+      "model": "biggerreactorsrework:block/battery/cell/body_nw"
+    },
+    "assembled=true,charged=false,top_connected=false,bottom_connected=false,north_connected=true,south_connected=false,east_connected=false,west_connected=true": {
+      "model": "biggerreactorsrework:block/battery/cell/idle_nw"
+    },
+    "assembled=true,charged=true,top_connected=false,bottom_connected=false,north_connected=true,south_connected=false,east_connected=false,west_connected=true": {
+      "model": "biggerreactorsrework:block/battery/cell/charged_nw"
+    },
+    "assembled=false,charged=false,top_connected=false,bottom_connected=false,north_connected=true,south_connected=false,east_connected=true,west_connected=false": {
+      "model": "biggerreactorsrework:block/battery/cell/body_ne"
+    },
+    "assembled=false,charged=true,top_connected=false,bottom_connected=false,north_connected=true,south_connected=false,east_connected=true,west_connected=false": {
+      "model": "biggerreactorsrework:block/battery/cell/body_ne"
+    },
+    "assembled=true,charged=false,top_connected=false,bottom_connected=false,north_connected=true,south_connected=false,east_connected=true,west_connected=false": {
+      "model": "biggerreactorsrework:block/battery/cell/idle_ne"
+    },
+    "assembled=true,charged=true,top_connected=false,bottom_connected=false,north_connected=true,south_connected=false,east_connected=true,west_connected=false": {
+      "model": "biggerreactorsrework:block/battery/cell/charged_ne"
+    },
+    "assembled=false,charged=false,top_connected=false,bottom_connected=false,north_connected=true,south_connected=false,east_connected=true,west_connected=true": {
+      "model": "biggerreactorsrework:block/battery/cell/body_new"
+    },
+    "assembled=false,charged=true,top_connected=false,bottom_connected=false,north_connected=true,south_connected=false,east_connected=true,west_connected=true": {
+      "model": "biggerreactorsrework:block/battery/cell/body_new"
+    },
+    "assembled=true,charged=false,top_connected=false,bottom_connected=false,north_connected=true,south_connected=false,east_connected=true,west_connected=true": {
+      "model": "biggerreactorsrework:block/battery/cell/idle_new"
+    },
+    "assembled=true,charged=true,top_connected=false,bottom_connected=false,north_connected=true,south_connected=false,east_connected=true,west_connected=true": {
+      "model": "biggerreactorsrework:block/battery/cell/charged_new"
+    },
+    "assembled=false,charged=false,top_connected=false,bottom_connected=false,north_connected=true,south_connected=true,east_connected=false,west_connected=false": {
+      "model": "biggerreactorsrework:block/battery/cell/body_ns"
+    },
+    "assembled=false,charged=true,top_connected=false,bottom_connected=false,north_connected=true,south_connected=true,east_connected=false,west_connected=false": {
+      "model": "biggerreactorsrework:block/battery/cell/body_ns"
+    },
+    "assembled=true,charged=false,top_connected=false,bottom_connected=false,north_connected=true,south_connected=true,east_connected=false,west_connected=false": {
+      "model": "biggerreactorsrework:block/battery/cell/idle_ns"
+    },
+    "assembled=true,charged=true,top_connected=false,bottom_connected=false,north_connected=true,south_connected=true,east_connected=false,west_connected=false": {
+      "model": "biggerreactorsrework:block/battery/cell/charged_ns"
+    },
+    "assembled=false,charged=false,top_connected=false,bottom_connected=false,north_connected=true,south_connected=true,east_connected=false,west_connected=true": {
+      "model": "biggerreactorsrework:block/battery/cell/body_nsw"
+    },
+    "assembled=false,charged=true,top_connected=false,bottom_connected=false,north_connected=true,south_connected=true,east_connected=false,west_connected=true": {
+      "model": "biggerreactorsrework:block/battery/cell/body_nsw"
+    },
+    "assembled=true,charged=false,top_connected=false,bottom_connected=false,north_connected=true,south_connected=true,east_connected=false,west_connected=true": {
+      "model": "biggerreactorsrework:block/battery/cell/idle_nsw"
+    },
+    "assembled=true,charged=true,top_connected=false,bottom_connected=false,north_connected=true,south_connected=true,east_connected=false,west_connected=true": {
+      "model": "biggerreactorsrework:block/battery/cell/charged_nsw"
+    },
+    "assembled=false,charged=false,top_connected=false,bottom_connected=false,north_connected=true,south_connected=true,east_connected=true,west_connected=false": {
+      "model": "biggerreactorsrework:block/battery/cell/body_nse"
+    },
+    "assembled=false,charged=true,top_connected=false,bottom_connected=false,north_connected=true,south_connected=true,east_connected=true,west_connected=false": {
+      "model": "biggerreactorsrework:block/battery/cell/body_nse"
+    },
+    "assembled=true,charged=false,top_connected=false,bottom_connected=false,north_connected=true,south_connected=true,east_connected=true,west_connected=false": {
+      "model": "biggerreactorsrework:block/battery/cell/idle_nse"
+    },
+    "assembled=true,charged=true,top_connected=false,bottom_connected=false,north_connected=true,south_connected=true,east_connected=true,west_connected=false": {
+      "model": "biggerreactorsrework:block/battery/cell/charged_nse"
+    },
+    "assembled=false,charged=false,top_connected=false,bottom_connected=false,north_connected=true,south_connected=true,east_connected=true,west_connected=true": {
+      "model": "biggerreactorsrework:block/battery/cell/body_nsew"
+    },
+    "assembled=false,charged=true,top_connected=false,bottom_connected=false,north_connected=true,south_connected=true,east_connected=true,west_connected=true": {
+      "model": "biggerreactorsrework:block/battery/cell/body_nsew"
+    },
+    "assembled=true,charged=false,top_connected=false,bottom_connected=false,north_connected=true,south_connected=true,east_connected=true,west_connected=true": {
+      "model": "biggerreactorsrework:block/battery/cell/idle_nsew"
+    },
+    "assembled=true,charged=true,top_connected=false,bottom_connected=false,north_connected=true,south_connected=true,east_connected=true,west_connected=true": {
+      "model": "biggerreactorsrework:block/battery/cell/charged_nsew"
+    },
+    "assembled=false,charged=false,top_connected=false,bottom_connected=true,north_connected=false,south_connected=false,east_connected=false,west_connected=false": {
+      "model": "biggerreactorsrework:block/battery/cell/body_d"
+    },
+    "assembled=false,charged=true,top_connected=false,bottom_connected=true,north_connected=false,south_connected=false,east_connected=false,west_connected=false": {
+      "model": "biggerreactorsrework:block/battery/cell/body_d"
+    },
+    "assembled=true,charged=false,top_connected=false,bottom_connected=true,north_connected=false,south_connected=false,east_connected=false,west_connected=false": {
+      "model": "biggerreactorsrework:block/battery/cell/idle_d"
+    },
+    "assembled=true,charged=true,top_connected=false,bottom_connected=true,north_connected=false,south_connected=false,east_connected=false,west_connected=false": {
+      "model": "biggerreactorsrework:block/battery/cell/charged_d"
+    },
+    "assembled=false,charged=false,top_connected=false,bottom_connected=true,north_connected=false,south_connected=false,east_connected=false,west_connected=true": {
+      "model": "biggerreactorsrework:block/battery/cell/body_dw"
+    },
+    "assembled=false,charged=true,top_connected=false,bottom_connected=true,north_connected=false,south_connected=false,east_connected=false,west_connected=true": {
+      "model": "biggerreactorsrework:block/battery/cell/body_dw"
+    },
+    "assembled=true,charged=false,top_connected=false,bottom_connected=true,north_connected=false,south_connected=false,east_connected=false,west_connected=true": {
+      "model": "biggerreactorsrework:block/battery/cell/idle_dw"
+    },
+    "assembled=true,charged=true,top_connected=false,bottom_connected=true,north_connected=false,south_connected=false,east_connected=false,west_connected=true": {
+      "model": "biggerreactorsrework:block/battery/cell/charged_dw"
+    },
+    "assembled=false,charged=false,top_connected=false,bottom_connected=true,north_connected=false,south_connected=false,east_connected=true,west_connected=false": {
+      "model": "biggerreactorsrework:block/battery/cell/body_de"
+    },
+    "assembled=false,charged=true,top_connected=false,bottom_connected=true,north_connected=false,south_connected=false,east_connected=true,west_connected=false": {
+      "model": "biggerreactorsrework:block/battery/cell/body_de"
+    },
+    "assembled=true,charged=false,top_connected=false,bottom_connected=true,north_connected=false,south_connected=false,east_connected=true,west_connected=false": {
+      "model": "biggerreactorsrework:block/battery/cell/idle_de"
+    },
+    "assembled=true,charged=true,top_connected=false,bottom_connected=true,north_connected=false,south_connected=false,east_connected=true,west_connected=false": {
+      "model": "biggerreactorsrework:block/battery/cell/charged_de"
+    },
+    "assembled=false,charged=false,top_connected=false,bottom_connected=true,north_connected=false,south_connected=false,east_connected=true,west_connected=true": {
+      "model": "biggerreactorsrework:block/battery/cell/body_dew"
+    },
+    "assembled=false,charged=true,top_connected=false,bottom_connected=true,north_connected=false,south_connected=false,east_connected=true,west_connected=true": {
+      "model": "biggerreactorsrework:block/battery/cell/body_dew"
+    },
+    "assembled=true,charged=false,top_connected=false,bottom_connected=true,north_connected=false,south_connected=false,east_connected=true,west_connected=true": {
+      "model": "biggerreactorsrework:block/battery/cell/idle_dew"
+    },
+    "assembled=true,charged=true,top_connected=false,bottom_connected=true,north_connected=false,south_connected=false,east_connected=true,west_connected=true": {
+      "model": "biggerreactorsrework:block/battery/cell/charged_dew"
+    },
+    "assembled=false,charged=false,top_connected=false,bottom_connected=true,north_connected=false,south_connected=true,east_connected=false,west_connected=false": {
+      "model": "biggerreactorsrework:block/battery/cell/body_ds"
+    },
+    "assembled=false,charged=true,top_connected=false,bottom_connected=true,north_connected=false,south_connected=true,east_connected=false,west_connected=false": {
+      "model": "biggerreactorsrework:block/battery/cell/body_ds"
+    },
+    "assembled=true,charged=false,top_connected=false,bottom_connected=true,north_connected=false,south_connected=true,east_connected=false,west_connected=false": {
+      "model": "biggerreactorsrework:block/battery/cell/idle_ds"
+    },
+    "assembled=true,charged=true,top_connected=false,bottom_connected=true,north_connected=false,south_connected=true,east_connected=false,west_connected=false": {
+      "model": "biggerreactorsrework:block/battery/cell/charged_ds"
+    },
+    "assembled=false,charged=false,top_connected=false,bottom_connected=true,north_connected=false,south_connected=true,east_connected=false,west_connected=true": {
+      "model": "biggerreactorsrework:block/battery/cell/body_dsw"
+    },
+    "assembled=false,charged=true,top_connected=false,bottom_connected=true,north_connected=false,south_connected=true,east_connected=false,west_connected=true": {
+      "model": "biggerreactorsrework:block/battery/cell/body_dsw"
+    },
+    "assembled=true,charged=false,top_connected=false,bottom_connected=true,north_connected=false,south_connected=true,east_connected=false,west_connected=true": {
+      "model": "biggerreactorsrework:block/battery/cell/idle_dsw"
+    },
+    "assembled=true,charged=true,top_connected=false,bottom_connected=true,north_connected=false,south_connected=true,east_connected=false,west_connected=true": {
+      "model": "biggerreactorsrework:block/battery/cell/charged_dsw"
+    },
+    "assembled=false,charged=false,top_connected=false,bottom_connected=true,north_connected=false,south_connected=true,east_connected=true,west_connected=false": {
+      "model": "biggerreactorsrework:block/battery/cell/body_dse"
+    },
+    "assembled=false,charged=true,top_connected=false,bottom_connected=true,north_connected=false,south_connected=true,east_connected=true,west_connected=false": {
+      "model": "biggerreactorsrework:block/battery/cell/body_dse"
+    },
+    "assembled=true,charged=false,top_connected=false,bottom_connected=true,north_connected=false,south_connected=true,east_connected=true,west_connected=false": {
+      "model": "biggerreactorsrework:block/battery/cell/idle_dse"
+    },
+    "assembled=true,charged=true,top_connected=false,bottom_connected=true,north_connected=false,south_connected=true,east_connected=true,west_connected=false": {
+      "model": "biggerreactorsrework:block/battery/cell/charged_dse"
+    },
+    "assembled=false,charged=false,top_connected=false,bottom_connected=true,north_connected=false,south_connected=true,east_connected=true,west_connected=true": {
+      "model": "biggerreactorsrework:block/battery/cell/body_dsew"
+    },
+    "assembled=false,charged=true,top_connected=false,bottom_connected=true,north_connected=false,south_connected=true,east_connected=true,west_connected=true": {
+      "model": "biggerreactorsrework:block/battery/cell/body_dsew"
+    },
+    "assembled=true,charged=false,top_connected=false,bottom_connected=true,north_connected=false,south_connected=true,east_connected=true,west_connected=true": {
+      "model": "biggerreactorsrework:block/battery/cell/idle_dsew"
+    },
+    "assembled=true,charged=true,top_connected=false,bottom_connected=true,north_connected=false,south_connected=true,east_connected=true,west_connected=true": {
+      "model": "biggerreactorsrework:block/battery/cell/charged_dsew"
+    },
+    "assembled=false,charged=false,top_connected=false,bottom_connected=true,north_connected=true,south_connected=false,east_connected=false,west_connected=false": {
+      "model": "biggerreactorsrework:block/battery/cell/body_dn"
+    },
+    "assembled=false,charged=true,top_connected=false,bottom_connected=true,north_connected=true,south_connected=false,east_connected=false,west_connected=false": {
+      "model": "biggerreactorsrework:block/battery/cell/body_dn"
+    },
+    "assembled=true,charged=false,top_connected=false,bottom_connected=true,north_connected=true,south_connected=false,east_connected=false,west_connected=false": {
+      "model": "biggerreactorsrework:block/battery/cell/idle_dn"
+    },
+    "assembled=true,charged=true,top_connected=false,bottom_connected=true,north_connected=true,south_connected=false,east_connected=false,west_connected=false": {
+      "model": "biggerreactorsrework:block/battery/cell/charged_dn"
+    },
+    "assembled=false,charged=false,top_connected=false,bottom_connected=true,north_connected=true,south_connected=false,east_connected=false,west_connected=true": {
+      "model": "biggerreactorsrework:block/battery/cell/body_dnw"
+    },
+    "assembled=false,charged=true,top_connected=false,bottom_connected=true,north_connected=true,south_connected=false,east_connected=false,west_connected=true": {
+      "model": "biggerreactorsrework:block/battery/cell/body_dnw"
+    },
+    "assembled=true,charged=false,top_connected=false,bottom_connected=true,north_connected=true,south_connected=false,east_connected=false,west_connected=true": {
+      "model": "biggerreactorsrework:block/battery/cell/idle_dnw"
+    },
+    "assembled=true,charged=true,top_connected=false,bottom_connected=true,north_connected=true,south_connected=false,east_connected=false,west_connected=true": {
+      "model": "biggerreactorsrework:block/battery/cell/charged_dnw"
+    },
+    "assembled=false,charged=false,top_connected=false,bottom_connected=true,north_connected=true,south_connected=false,east_connected=true,west_connected=false": {
+      "model": "biggerreactorsrework:block/battery/cell/body_dne"
+    },
+    "assembled=false,charged=true,top_connected=false,bottom_connected=true,north_connected=true,south_connected=false,east_connected=true,west_connected=false": {
+      "model": "biggerreactorsrework:block/battery/cell/body_dne"
+    },
+    "assembled=true,charged=false,top_connected=false,bottom_connected=true,north_connected=true,south_connected=false,east_connected=true,west_connected=false": {
+      "model": "biggerreactorsrework:block/battery/cell/idle_dne"
+    },
+    "assembled=true,charged=true,top_connected=false,bottom_connected=true,north_connected=true,south_connected=false,east_connected=true,west_connected=false": {
+      "model": "biggerreactorsrework:block/battery/cell/charged_dne"
+    },
+    "assembled=false,charged=false,top_connected=false,bottom_connected=true,north_connected=true,south_connected=false,east_connected=true,west_connected=true": {
+      "model": "biggerreactorsrework:block/battery/cell/body_dnew"
+    },
+    "assembled=false,charged=true,top_connected=false,bottom_connected=true,north_connected=true,south_connected=false,east_connected=true,west_connected=true": {
+      "model": "biggerreactorsrework:block/battery/cell/body_dnew"
+    },
+    "assembled=true,charged=false,top_connected=false,bottom_connected=true,north_connected=true,south_connected=false,east_connected=true,west_connected=true": {
+      "model": "biggerreactorsrework:block/battery/cell/idle_dnew"
+    },
+    "assembled=true,charged=true,top_connected=false,bottom_connected=true,north_connected=true,south_connected=false,east_connected=true,west_connected=true": {
+      "model": "biggerreactorsrework:block/battery/cell/charged_dnew"
+    },
+    "assembled=false,charged=false,top_connected=false,bottom_connected=true,north_connected=true,south_connected=true,east_connected=false,west_connected=false": {
+      "model": "biggerreactorsrework:block/battery/cell/body_dns"
+    },
+    "assembled=false,charged=true,top_connected=false,bottom_connected=true,north_connected=true,south_connected=true,east_connected=false,west_connected=false": {
+      "model": "biggerreactorsrework:block/battery/cell/body_dns"
+    },
+    "assembled=true,charged=false,top_connected=false,bottom_connected=true,north_connected=true,south_connected=true,east_connected=false,west_connected=false": {
+      "model": "biggerreactorsrework:block/battery/cell/idle_dns"
+    },
+    "assembled=true,charged=true,top_connected=false,bottom_connected=true,north_connected=true,south_connected=true,east_connected=false,west_connected=false": {
+      "model": "biggerreactorsrework:block/battery/cell/charged_dns"
+    },
+    "assembled=false,charged=false,top_connected=false,bottom_connected=true,north_connected=true,south_connected=true,east_connected=false,west_connected=true": {
+      "model": "biggerreactorsrework:block/battery/cell/body_dnsw"
+    },
+    "assembled=false,charged=true,top_connected=false,bottom_connected=true,north_connected=true,south_connected=true,east_connected=false,west_connected=true": {
+      "model": "biggerreactorsrework:block/battery/cell/body_dnsw"
+    },
+    "assembled=true,charged=false,top_connected=false,bottom_connected=true,north_connected=true,south_connected=true,east_connected=false,west_connected=true": {
+      "model": "biggerreactorsrework:block/battery/cell/idle_dnsw"
+    },
+    "assembled=true,charged=true,top_connected=false,bottom_connected=true,north_connected=true,south_connected=true,east_connected=false,west_connected=true": {
+      "model": "biggerreactorsrework:block/battery/cell/charged_dnsw"
+    },
+    "assembled=false,charged=false,top_connected=false,bottom_connected=true,north_connected=true,south_connected=true,east_connected=true,west_connected=false": {
+      "model": "biggerreactorsrework:block/battery/cell/body_dnse"
+    },
+    "assembled=false,charged=true,top_connected=false,bottom_connected=true,north_connected=true,south_connected=true,east_connected=true,west_connected=false": {
+      "model": "biggerreactorsrework:block/battery/cell/body_dnse"
+    },
+    "assembled=true,charged=false,top_connected=false,bottom_connected=true,north_connected=true,south_connected=true,east_connected=true,west_connected=false": {
+      "model": "biggerreactorsrework:block/battery/cell/idle_dnse"
+    },
+    "assembled=true,charged=true,top_connected=false,bottom_connected=true,north_connected=true,south_connected=true,east_connected=true,west_connected=false": {
+      "model": "biggerreactorsrework:block/battery/cell/charged_dnse"
+    },
+    "assembled=false,charged=false,top_connected=false,bottom_connected=true,north_connected=true,south_connected=true,east_connected=true,west_connected=true": {
+      "model": "biggerreactorsrework:block/battery/cell/body_dnsew"
+    },
+    "assembled=false,charged=true,top_connected=false,bottom_connected=true,north_connected=true,south_connected=true,east_connected=true,west_connected=true": {
+      "model": "biggerreactorsrework:block/battery/cell/body_dnsew"
+    },
+    "assembled=true,charged=false,top_connected=false,bottom_connected=true,north_connected=true,south_connected=true,east_connected=true,west_connected=true": {
+      "model": "biggerreactorsrework:block/battery/cell/idle_dnsew"
+    },
+    "assembled=true,charged=true,top_connected=false,bottom_connected=true,north_connected=true,south_connected=true,east_connected=true,west_connected=true": {
+      "model": "biggerreactorsrework:block/battery/cell/charged_dnsew"
+    },
+    "assembled=false,charged=false,top_connected=true,bottom_connected=false,north_connected=false,south_connected=false,east_connected=false,west_connected=false": {
+      "model": "biggerreactorsrework:block/battery/cell/body_u"
+    },
+    "assembled=false,charged=true,top_connected=true,bottom_connected=false,north_connected=false,south_connected=false,east_connected=false,west_connected=false": {
+      "model": "biggerreactorsrework:block/battery/cell/body_u"
+    },
+    "assembled=true,charged=false,top_connected=true,bottom_connected=false,north_connected=false,south_connected=false,east_connected=false,west_connected=false": {
+      "model": "biggerreactorsrework:block/battery/cell/idle_u"
+    },
+    "assembled=true,charged=true,top_connected=true,bottom_connected=false,north_connected=false,south_connected=false,east_connected=false,west_connected=false": {
+      "model": "biggerreactorsrework:block/battery/cell/charged_u"
+    },
+    "assembled=false,charged=false,top_connected=true,bottom_connected=false,north_connected=false,south_connected=false,east_connected=false,west_connected=true": {
+      "model": "biggerreactorsrework:block/battery/cell/body_uw"
+    },
+    "assembled=false,charged=true,top_connected=true,bottom_connected=false,north_connected=false,south_connected=false,east_connected=false,west_connected=true": {
+      "model": "biggerreactorsrework:block/battery/cell/body_uw"
+    },
+    "assembled=true,charged=false,top_connected=true,bottom_connected=false,north_connected=false,south_connected=false,east_connected=false,west_connected=true": {
+      "model": "biggerreactorsrework:block/battery/cell/idle_uw"
+    },
+    "assembled=true,charged=true,top_connected=true,bottom_connected=false,north_connected=false,south_connected=false,east_connected=false,west_connected=true": {
+      "model": "biggerreactorsrework:block/battery/cell/charged_uw"
+    },
+    "assembled=false,charged=false,top_connected=true,bottom_connected=false,north_connected=false,south_connected=false,east_connected=true,west_connected=false": {
+      "model": "biggerreactorsrework:block/battery/cell/body_ue"
+    },
+    "assembled=false,charged=true,top_connected=true,bottom_connected=false,north_connected=false,south_connected=false,east_connected=true,west_connected=false": {
+      "model": "biggerreactorsrework:block/battery/cell/body_ue"
+    },
+    "assembled=true,charged=false,top_connected=true,bottom_connected=false,north_connected=false,south_connected=false,east_connected=true,west_connected=false": {
+      "model": "biggerreactorsrework:block/battery/cell/idle_ue"
+    },
+    "assembled=true,charged=true,top_connected=true,bottom_connected=false,north_connected=false,south_connected=false,east_connected=true,west_connected=false": {
+      "model": "biggerreactorsrework:block/battery/cell/charged_ue"
+    },
+    "assembled=false,charged=false,top_connected=true,bottom_connected=false,north_connected=false,south_connected=false,east_connected=true,west_connected=true": {
+      "model": "biggerreactorsrework:block/battery/cell/body_uew"
+    },
+    "assembled=false,charged=true,top_connected=true,bottom_connected=false,north_connected=false,south_connected=false,east_connected=true,west_connected=true": {
+      "model": "biggerreactorsrework:block/battery/cell/body_uew"
+    },
+    "assembled=true,charged=false,top_connected=true,bottom_connected=false,north_connected=false,south_connected=false,east_connected=true,west_connected=true": {
+      "model": "biggerreactorsrework:block/battery/cell/idle_uew"
+    },
+    "assembled=true,charged=true,top_connected=true,bottom_connected=false,north_connected=false,south_connected=false,east_connected=true,west_connected=true": {
+      "model": "biggerreactorsrework:block/battery/cell/charged_uew"
+    },
+    "assembled=false,charged=false,top_connected=true,bottom_connected=false,north_connected=false,south_connected=true,east_connected=false,west_connected=false": {
+      "model": "biggerreactorsrework:block/battery/cell/body_us"
+    },
+    "assembled=false,charged=true,top_connected=true,bottom_connected=false,north_connected=false,south_connected=true,east_connected=false,west_connected=false": {
+      "model": "biggerreactorsrework:block/battery/cell/body_us"
+    },
+    "assembled=true,charged=false,top_connected=true,bottom_connected=false,north_connected=false,south_connected=true,east_connected=false,west_connected=false": {
+      "model": "biggerreactorsrework:block/battery/cell/idle_us"
+    },
+    "assembled=true,charged=true,top_connected=true,bottom_connected=false,north_connected=false,south_connected=true,east_connected=false,west_connected=false": {
+      "model": "biggerreactorsrework:block/battery/cell/charged_us"
+    },
+    "assembled=false,charged=false,top_connected=true,bottom_connected=false,north_connected=false,south_connected=true,east_connected=false,west_connected=true": {
+      "model": "biggerreactorsrework:block/battery/cell/body_usw"
+    },
+    "assembled=false,charged=true,top_connected=true,bottom_connected=false,north_connected=false,south_connected=true,east_connected=false,west_connected=true": {
+      "model": "biggerreactorsrework:block/battery/cell/body_usw"
+    },
+    "assembled=true,charged=false,top_connected=true,bottom_connected=false,north_connected=false,south_connected=true,east_connected=false,west_connected=true": {
+      "model": "biggerreactorsrework:block/battery/cell/idle_usw"
+    },
+    "assembled=true,charged=true,top_connected=true,bottom_connected=false,north_connected=false,south_connected=true,east_connected=false,west_connected=true": {
+      "model": "biggerreactorsrework:block/battery/cell/charged_usw"
+    },
+    "assembled=false,charged=false,top_connected=true,bottom_connected=false,north_connected=false,south_connected=true,east_connected=true,west_connected=false": {
+      "model": "biggerreactorsrework:block/battery/cell/body_use"
+    },
+    "assembled=false,charged=true,top_connected=true,bottom_connected=false,north_connected=false,south_connected=true,east_connected=true,west_connected=false": {
+      "model": "biggerreactorsrework:block/battery/cell/body_use"
+    },
+    "assembled=true,charged=false,top_connected=true,bottom_connected=false,north_connected=false,south_connected=true,east_connected=true,west_connected=false": {
+      "model": "biggerreactorsrework:block/battery/cell/idle_use"
+    },
+    "assembled=true,charged=true,top_connected=true,bottom_connected=false,north_connected=false,south_connected=true,east_connected=true,west_connected=false": {
+      "model": "biggerreactorsrework:block/battery/cell/charged_use"
+    },
+    "assembled=false,charged=false,top_connected=true,bottom_connected=false,north_connected=false,south_connected=true,east_connected=true,west_connected=true": {
+      "model": "biggerreactorsrework:block/battery/cell/body_usew"
+    },
+    "assembled=false,charged=true,top_connected=true,bottom_connected=false,north_connected=false,south_connected=true,east_connected=true,west_connected=true": {
+      "model": "biggerreactorsrework:block/battery/cell/body_usew"
+    },
+    "assembled=true,charged=false,top_connected=true,bottom_connected=false,north_connected=false,south_connected=true,east_connected=true,west_connected=true": {
+      "model": "biggerreactorsrework:block/battery/cell/idle_usew"
+    },
+    "assembled=true,charged=true,top_connected=true,bottom_connected=false,north_connected=false,south_connected=true,east_connected=true,west_connected=true": {
+      "model": "biggerreactorsrework:block/battery/cell/charged_usew"
+    },
+    "assembled=false,charged=false,top_connected=true,bottom_connected=false,north_connected=true,south_connected=false,east_connected=false,west_connected=false": {
+      "model": "biggerreactorsrework:block/battery/cell/body_un"
+    },
+    "assembled=false,charged=true,top_connected=true,bottom_connected=false,north_connected=true,south_connected=false,east_connected=false,west_connected=false": {
+      "model": "biggerreactorsrework:block/battery/cell/body_un"
+    },
+    "assembled=true,charged=false,top_connected=true,bottom_connected=false,north_connected=true,south_connected=false,east_connected=false,west_connected=false": {
+      "model": "biggerreactorsrework:block/battery/cell/idle_un"
+    },
+    "assembled=true,charged=true,top_connected=true,bottom_connected=false,north_connected=true,south_connected=false,east_connected=false,west_connected=false": {
+      "model": "biggerreactorsrework:block/battery/cell/charged_un"
+    },
+    "assembled=false,charged=false,top_connected=true,bottom_connected=false,north_connected=true,south_connected=false,east_connected=false,west_connected=true": {
+      "model": "biggerreactorsrework:block/battery/cell/body_unw"
+    },
+    "assembled=false,charged=true,top_connected=true,bottom_connected=false,north_connected=true,south_connected=false,east_connected=false,west_connected=true": {
+      "model": "biggerreactorsrework:block/battery/cell/body_unw"
+    },
+    "assembled=true,charged=false,top_connected=true,bottom_connected=false,north_connected=true,south_connected=false,east_connected=false,west_connected=true": {
+      "model": "biggerreactorsrework:block/battery/cell/idle_unw"
+    },
+    "assembled=true,charged=true,top_connected=true,bottom_connected=false,north_connected=true,south_connected=false,east_connected=false,west_connected=true": {
+      "model": "biggerreactorsrework:block/battery/cell/charged_unw"
+    },
+    "assembled=false,charged=false,top_connected=true,bottom_connected=false,north_connected=true,south_connected=false,east_connected=true,west_connected=false": {
+      "model": "biggerreactorsrework:block/battery/cell/body_une"
+    },
+    "assembled=false,charged=true,top_connected=true,bottom_connected=false,north_connected=true,south_connected=false,east_connected=true,west_connected=false": {
+      "model": "biggerreactorsrework:block/battery/cell/body_une"
+    },
+    "assembled=true,charged=false,top_connected=true,bottom_connected=false,north_connected=true,south_connected=false,east_connected=true,west_connected=false": {
+      "model": "biggerreactorsrework:block/battery/cell/idle_une"
+    },
+    "assembled=true,charged=true,top_connected=true,bottom_connected=false,north_connected=true,south_connected=false,east_connected=true,west_connected=false": {
+      "model": "biggerreactorsrework:block/battery/cell/charged_une"
+    },
+    "assembled=false,charged=false,top_connected=true,bottom_connected=false,north_connected=true,south_connected=false,east_connected=true,west_connected=true": {
+      "model": "biggerreactorsrework:block/battery/cell/body_unew"
+    },
+    "assembled=false,charged=true,top_connected=true,bottom_connected=false,north_connected=true,south_connected=false,east_connected=true,west_connected=true": {
+      "model": "biggerreactorsrework:block/battery/cell/body_unew"
+    },
+    "assembled=true,charged=false,top_connected=true,bottom_connected=false,north_connected=true,south_connected=false,east_connected=true,west_connected=true": {
+      "model": "biggerreactorsrework:block/battery/cell/idle_unew"
+    },
+    "assembled=true,charged=true,top_connected=true,bottom_connected=false,north_connected=true,south_connected=false,east_connected=true,west_connected=true": {
+      "model": "biggerreactorsrework:block/battery/cell/charged_unew"
+    },
+    "assembled=false,charged=false,top_connected=true,bottom_connected=false,north_connected=true,south_connected=true,east_connected=false,west_connected=false": {
+      "model": "biggerreactorsrework:block/battery/cell/body_uns"
+    },
+    "assembled=false,charged=true,top_connected=true,bottom_connected=false,north_connected=true,south_connected=true,east_connected=false,west_connected=false": {
+      "model": "biggerreactorsrework:block/battery/cell/body_uns"
+    },
+    "assembled=true,charged=false,top_connected=true,bottom_connected=false,north_connected=true,south_connected=true,east_connected=false,west_connected=false": {
+      "model": "biggerreactorsrework:block/battery/cell/idle_uns"
+    },
+    "assembled=true,charged=true,top_connected=true,bottom_connected=false,north_connected=true,south_connected=true,east_connected=false,west_connected=false": {
+      "model": "biggerreactorsrework:block/battery/cell/charged_uns"
+    },
+    "assembled=false,charged=false,top_connected=true,bottom_connected=false,north_connected=true,south_connected=true,east_connected=false,west_connected=true": {
+      "model": "biggerreactorsrework:block/battery/cell/body_unsw"
+    },
+    "assembled=false,charged=true,top_connected=true,bottom_connected=false,north_connected=true,south_connected=true,east_connected=false,west_connected=true": {
+      "model": "biggerreactorsrework:block/battery/cell/body_unsw"
+    },
+    "assembled=true,charged=false,top_connected=true,bottom_connected=false,north_connected=true,south_connected=true,east_connected=false,west_connected=true": {
+      "model": "biggerreactorsrework:block/battery/cell/idle_unsw"
+    },
+    "assembled=true,charged=true,top_connected=true,bottom_connected=false,north_connected=true,south_connected=true,east_connected=false,west_connected=true": {
+      "model": "biggerreactorsrework:block/battery/cell/charged_unsw"
+    },
+    "assembled=false,charged=false,top_connected=true,bottom_connected=false,north_connected=true,south_connected=true,east_connected=true,west_connected=false": {
+      "model": "biggerreactorsrework:block/battery/cell/body_unse"
+    },
+    "assembled=false,charged=true,top_connected=true,bottom_connected=false,north_connected=true,south_connected=true,east_connected=true,west_connected=false": {
+      "model": "biggerreactorsrework:block/battery/cell/body_unse"
+    },
+    "assembled=true,charged=false,top_connected=true,bottom_connected=false,north_connected=true,south_connected=true,east_connected=true,west_connected=false": {
+      "model": "biggerreactorsrework:block/battery/cell/idle_unse"
+    },
+    "assembled=true,charged=true,top_connected=true,bottom_connected=false,north_connected=true,south_connected=true,east_connected=true,west_connected=false": {
+      "model": "biggerreactorsrework:block/battery/cell/charged_unse"
+    },
+    "assembled=false,charged=false,top_connected=true,bottom_connected=false,north_connected=true,south_connected=true,east_connected=true,west_connected=true": {
+      "model": "biggerreactorsrework:block/battery/cell/body_unsew"
+    },
+    "assembled=false,charged=true,top_connected=true,bottom_connected=false,north_connected=true,south_connected=true,east_connected=true,west_connected=true": {
+      "model": "biggerreactorsrework:block/battery/cell/body_unsew"
+    },
+    "assembled=true,charged=false,top_connected=true,bottom_connected=false,north_connected=true,south_connected=true,east_connected=true,west_connected=true": {
+      "model": "biggerreactorsrework:block/battery/cell/idle_unsew"
+    },
+    "assembled=true,charged=true,top_connected=true,bottom_connected=false,north_connected=true,south_connected=true,east_connected=true,west_connected=true": {
+      "model": "biggerreactorsrework:block/battery/cell/charged_unsew"
+    },
+    "assembled=false,charged=false,top_connected=true,bottom_connected=true,north_connected=false,south_connected=false,east_connected=false,west_connected=false": {
+      "model": "biggerreactorsrework:block/battery/cell/body_ud"
+    },
+    "assembled=false,charged=true,top_connected=true,bottom_connected=true,north_connected=false,south_connected=false,east_connected=false,west_connected=false": {
+      "model": "biggerreactorsrework:block/battery/cell/body_ud"
+    },
+    "assembled=true,charged=false,top_connected=true,bottom_connected=true,north_connected=false,south_connected=false,east_connected=false,west_connected=false": {
+      "model": "biggerreactorsrework:block/battery/cell/idle_ud"
+    },
+    "assembled=true,charged=true,top_connected=true,bottom_connected=true,north_connected=false,south_connected=false,east_connected=false,west_connected=false": {
+      "model": "biggerreactorsrework:block/battery/cell/charged_ud"
+    },
+    "assembled=false,charged=false,top_connected=true,bottom_connected=true,north_connected=false,south_connected=false,east_connected=false,west_connected=true": {
+      "model": "biggerreactorsrework:block/battery/cell/body_udw"
+    },
+    "assembled=false,charged=true,top_connected=true,bottom_connected=true,north_connected=false,south_connected=false,east_connected=false,west_connected=true": {
+      "model": "biggerreactorsrework:block/battery/cell/body_udw"
+    },
+    "assembled=true,charged=false,top_connected=true,bottom_connected=true,north_connected=false,south_connected=false,east_connected=false,west_connected=true": {
+      "model": "biggerreactorsrework:block/battery/cell/idle_udw"
+    },
+    "assembled=true,charged=true,top_connected=true,bottom_connected=true,north_connected=false,south_connected=false,east_connected=false,west_connected=true": {
+      "model": "biggerreactorsrework:block/battery/cell/charged_udw"
+    },
+    "assembled=false,charged=false,top_connected=true,bottom_connected=true,north_connected=false,south_connected=false,east_connected=true,west_connected=false": {
+      "model": "biggerreactorsrework:block/battery/cell/body_ude"
+    },
+    "assembled=false,charged=true,top_connected=true,bottom_connected=true,north_connected=false,south_connected=false,east_connected=true,west_connected=false": {
+      "model": "biggerreactorsrework:block/battery/cell/body_ude"
+    },
+    "assembled=true,charged=false,top_connected=true,bottom_connected=true,north_connected=false,south_connected=false,east_connected=true,west_connected=false": {
+      "model": "biggerreactorsrework:block/battery/cell/idle_ude"
+    },
+    "assembled=true,charged=true,top_connected=true,bottom_connected=true,north_connected=false,south_connected=false,east_connected=true,west_connected=false": {
+      "model": "biggerreactorsrework:block/battery/cell/charged_ude"
+    },
+    "assembled=false,charged=false,top_connected=true,bottom_connected=true,north_connected=false,south_connected=false,east_connected=true,west_connected=true": {
+      "model": "biggerreactorsrework:block/battery/cell/body_udew"
+    },
+    "assembled=false,charged=true,top_connected=true,bottom_connected=true,north_connected=false,south_connected=false,east_connected=true,west_connected=true": {
+      "model": "biggerreactorsrework:block/battery/cell/body_udew"
+    },
+    "assembled=true,charged=false,top_connected=true,bottom_connected=true,north_connected=false,south_connected=false,east_connected=true,west_connected=true": {
+      "model": "biggerreactorsrework:block/battery/cell/idle_udew"
+    },
+    "assembled=true,charged=true,top_connected=true,bottom_connected=true,north_connected=false,south_connected=false,east_connected=true,west_connected=true": {
+      "model": "biggerreactorsrework:block/battery/cell/charged_udew"
+    },
+    "assembled=false,charged=false,top_connected=true,bottom_connected=true,north_connected=false,south_connected=true,east_connected=false,west_connected=false": {
+      "model": "biggerreactorsrework:block/battery/cell/body_uds"
+    },
+    "assembled=false,charged=true,top_connected=true,bottom_connected=true,north_connected=false,south_connected=true,east_connected=false,west_connected=false": {
+      "model": "biggerreactorsrework:block/battery/cell/body_uds"
+    },
+    "assembled=true,charged=false,top_connected=true,bottom_connected=true,north_connected=false,south_connected=true,east_connected=false,west_connected=false": {
+      "model": "biggerreactorsrework:block/battery/cell/idle_uds"
+    },
+    "assembled=true,charged=true,top_connected=true,bottom_connected=true,north_connected=false,south_connected=true,east_connected=false,west_connected=false": {
+      "model": "biggerreactorsrework:block/battery/cell/charged_uds"
+    },
+    "assembled=false,charged=false,top_connected=true,bottom_connected=true,north_connected=false,south_connected=true,east_connected=false,west_connected=true": {
+      "model": "biggerreactorsrework:block/battery/cell/body_udsw"
+    },
+    "assembled=false,charged=true,top_connected=true,bottom_connected=true,north_connected=false,south_connected=true,east_connected=false,west_connected=true": {
+      "model": "biggerreactorsrework:block/battery/cell/body_udsw"
+    },
+    "assembled=true,charged=false,top_connected=true,bottom_connected=true,north_connected=false,south_connected=true,east_connected=false,west_connected=true": {
+      "model": "biggerreactorsrework:block/battery/cell/idle_udsw"
+    },
+    "assembled=true,charged=true,top_connected=true,bottom_connected=true,north_connected=false,south_connected=true,east_connected=false,west_connected=true": {
+      "model": "biggerreactorsrework:block/battery/cell/charged_udsw"
+    },
+    "assembled=false,charged=false,top_connected=true,bottom_connected=true,north_connected=false,south_connected=true,east_connected=true,west_connected=false": {
+      "model": "biggerreactorsrework:block/battery/cell/body_udse"
+    },
+    "assembled=false,charged=true,top_connected=true,bottom_connected=true,north_connected=false,south_connected=true,east_connected=true,west_connected=false": {
+      "model": "biggerreactorsrework:block/battery/cell/body_udse"
+    },
+    "assembled=true,charged=false,top_connected=true,bottom_connected=true,north_connected=false,south_connected=true,east_connected=true,west_connected=false": {
+      "model": "biggerreactorsrework:block/battery/cell/idle_udse"
+    },
+    "assembled=true,charged=true,top_connected=true,bottom_connected=true,north_connected=false,south_connected=true,east_connected=true,west_connected=false": {
+      "model": "biggerreactorsrework:block/battery/cell/charged_udse"
+    },
+    "assembled=false,charged=false,top_connected=true,bottom_connected=true,north_connected=false,south_connected=true,east_connected=true,west_connected=true": {
+      "model": "biggerreactorsrework:block/battery/cell/body_udsew"
+    },
+    "assembled=false,charged=true,top_connected=true,bottom_connected=true,north_connected=false,south_connected=true,east_connected=true,west_connected=true": {
+      "model": "biggerreactorsrework:block/battery/cell/body_udsew"
+    },
+    "assembled=true,charged=false,top_connected=true,bottom_connected=true,north_connected=false,south_connected=true,east_connected=true,west_connected=true": {
+      "model": "biggerreactorsrework:block/battery/cell/idle_udsew"
+    },
+    "assembled=true,charged=true,top_connected=true,bottom_connected=true,north_connected=false,south_connected=true,east_connected=true,west_connected=true": {
+      "model": "biggerreactorsrework:block/battery/cell/charged_udsew"
+    },
+    "assembled=false,charged=false,top_connected=true,bottom_connected=true,north_connected=true,south_connected=false,east_connected=false,west_connected=false": {
+      "model": "biggerreactorsrework:block/battery/cell/body_udn"
+    },
+    "assembled=false,charged=true,top_connected=true,bottom_connected=true,north_connected=true,south_connected=false,east_connected=false,west_connected=false": {
+      "model": "biggerreactorsrework:block/battery/cell/body_udn"
+    },
+    "assembled=true,charged=false,top_connected=true,bottom_connected=true,north_connected=true,south_connected=false,east_connected=false,west_connected=false": {
+      "model": "biggerreactorsrework:block/battery/cell/idle_udn"
+    },
+    "assembled=true,charged=true,top_connected=true,bottom_connected=true,north_connected=true,south_connected=false,east_connected=false,west_connected=false": {
+      "model": "biggerreactorsrework:block/battery/cell/charged_udn"
+    },
+    "assembled=false,charged=false,top_connected=true,bottom_connected=true,north_connected=true,south_connected=false,east_connected=false,west_connected=true": {
+      "model": "biggerreactorsrework:block/battery/cell/body_udnw"
+    },
+    "assembled=false,charged=true,top_connected=true,bottom_connected=true,north_connected=true,south_connected=false,east_connected=false,west_connected=true": {
+      "model": "biggerreactorsrework:block/battery/cell/body_udnw"
+    },
+    "assembled=true,charged=false,top_connected=true,bottom_connected=true,north_connected=true,south_connected=false,east_connected=false,west_connected=true": {
+      "model": "biggerreactorsrework:block/battery/cell/idle_udnw"
+    },
+    "assembled=true,charged=true,top_connected=true,bottom_connected=true,north_connected=true,south_connected=false,east_connected=false,west_connected=true": {
+      "model": "biggerreactorsrework:block/battery/cell/charged_udnw"
+    },
+    "assembled=false,charged=false,top_connected=true,bottom_connected=true,north_connected=true,south_connected=false,east_connected=true,west_connected=false": {
+      "model": "biggerreactorsrework:block/battery/cell/body_udne"
+    },
+    "assembled=false,charged=true,top_connected=true,bottom_connected=true,north_connected=true,south_connected=false,east_connected=true,west_connected=false": {
+      "model": "biggerreactorsrework:block/battery/cell/body_udne"
+    },
+    "assembled=true,charged=false,top_connected=true,bottom_connected=true,north_connected=true,south_connected=false,east_connected=true,west_connected=false": {
+      "model": "biggerreactorsrework:block/battery/cell/idle_udne"
+    },
+    "assembled=true,charged=true,top_connected=true,bottom_connected=true,north_connected=true,south_connected=false,east_connected=true,west_connected=false": {
+      "model": "biggerreactorsrework:block/battery/cell/charged_udne"
+    },
+    "assembled=false,charged=false,top_connected=true,bottom_connected=true,north_connected=true,south_connected=false,east_connected=true,west_connected=true": {
+      "model": "biggerreactorsrework:block/battery/cell/body_udnew"
+    },
+    "assembled=false,charged=true,top_connected=true,bottom_connected=true,north_connected=true,south_connected=false,east_connected=true,west_connected=true": {
+      "model": "biggerreactorsrework:block/battery/cell/body_udnew"
+    },
+    "assembled=true,charged=false,top_connected=true,bottom_connected=true,north_connected=true,south_connected=false,east_connected=true,west_connected=true": {
+      "model": "biggerreactorsrework:block/battery/cell/idle_udnew"
+    },
+    "assembled=true,charged=true,top_connected=true,bottom_connected=true,north_connected=true,south_connected=false,east_connected=true,west_connected=true": {
+      "model": "biggerreactorsrework:block/battery/cell/charged_udnew"
+    },
+    "assembled=false,charged=false,top_connected=true,bottom_connected=true,north_connected=true,south_connected=true,east_connected=false,west_connected=false": {
+      "model": "biggerreactorsrework:block/battery/cell/body_udns"
+    },
+    "assembled=false,charged=true,top_connected=true,bottom_connected=true,north_connected=true,south_connected=true,east_connected=false,west_connected=false": {
+      "model": "biggerreactorsrework:block/battery/cell/body_udns"
+    },
+    "assembled=true,charged=false,top_connected=true,bottom_connected=true,north_connected=true,south_connected=true,east_connected=false,west_connected=false": {
+      "model": "biggerreactorsrework:block/battery/cell/idle_udns"
+    },
+    "assembled=true,charged=true,top_connected=true,bottom_connected=true,north_connected=true,south_connected=true,east_connected=false,west_connected=false": {
+      "model": "biggerreactorsrework:block/battery/cell/charged_udns"
+    },
+    "assembled=false,charged=false,top_connected=true,bottom_connected=true,north_connected=true,south_connected=true,east_connected=false,west_connected=true": {
+      "model": "biggerreactorsrework:block/battery/cell/body_udnsw"
+    },
+    "assembled=false,charged=true,top_connected=true,bottom_connected=true,north_connected=true,south_connected=true,east_connected=false,west_connected=true": {
+      "model": "biggerreactorsrework:block/battery/cell/body_udnsw"
+    },
+    "assembled=true,charged=false,top_connected=true,bottom_connected=true,north_connected=true,south_connected=true,east_connected=false,west_connected=true": {
+      "model": "biggerreactorsrework:block/battery/cell/idle_udnsw"
+    },
+    "assembled=true,charged=true,top_connected=true,bottom_connected=true,north_connected=true,south_connected=true,east_connected=false,west_connected=true": {
+      "model": "biggerreactorsrework:block/battery/cell/charged_udnsw"
+    },
+    "assembled=false,charged=false,top_connected=true,bottom_connected=true,north_connected=true,south_connected=true,east_connected=true,west_connected=false": {
+      "model": "biggerreactorsrework:block/battery/cell/body_udnse"
+    },
+    "assembled=false,charged=true,top_connected=true,bottom_connected=true,north_connected=true,south_connected=true,east_connected=true,west_connected=false": {
+      "model": "biggerreactorsrework:block/battery/cell/body_udnse"
+    },
+    "assembled=true,charged=false,top_connected=true,bottom_connected=true,north_connected=true,south_connected=true,east_connected=true,west_connected=false": {
+      "model": "biggerreactorsrework:block/battery/cell/idle_udnse"
+    },
+    "assembled=true,charged=true,top_connected=true,bottom_connected=true,north_connected=true,south_connected=true,east_connected=true,west_connected=false": {
+      "model": "biggerreactorsrework:block/battery/cell/charged_udnse"
+    },
+    "assembled=false,charged=false,top_connected=true,bottom_connected=true,north_connected=true,south_connected=true,east_connected=true,west_connected=true": {
+      "model": "biggerreactorsrework:block/battery/cell/body_udnsew"
+    },
+    "assembled=false,charged=true,top_connected=true,bottom_connected=true,north_connected=true,south_connected=true,east_connected=true,west_connected=true": {
+      "model": "biggerreactorsrework:block/battery/cell/body_udnsew"
+    },
+    "assembled=true,charged=false,top_connected=true,bottom_connected=true,north_connected=true,south_connected=true,east_connected=true,west_connected=true": {
+      "model": "biggerreactorsrework:block/battery/cell/idle_udnsew"
+    },
+    "assembled=true,charged=true,top_connected=true,bottom_connected=true,north_connected=true,south_connected=true,east_connected=true,west_connected=true": {
+      "model": "biggerreactorsrework:block/battery/cell/charged_udnsew"
+    }
+  }
+}

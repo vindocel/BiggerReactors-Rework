@@ -1,0 +1,32 @@
+{
+  "panel": [
+    48,
+    32
+  ],
+  "tile": [
+    16,
+    16
+  ],
+  "frames": 14,
+  "ticks_per_frame": 4,
+  "bars_per_column": 11,
+  "direction": "bottom_to_top",
+  "body_pixels_unchanged": true,
+  "pause_frames": 3,
+  "levels": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    11,
+    11
+  ]
+}

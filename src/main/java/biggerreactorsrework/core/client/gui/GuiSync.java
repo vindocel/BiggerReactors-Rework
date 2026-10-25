@@ -33,6 +33,9 @@ public class GuiSync {
 
     public interface IGUIPacketProvider {
 
+        /** Position used to distinguish this machine's local appearance preferences. */
+        net.minecraft.core.BlockPos machinePos();
+
         @Nullable
         IGUIPacket getGuiPacket();
 

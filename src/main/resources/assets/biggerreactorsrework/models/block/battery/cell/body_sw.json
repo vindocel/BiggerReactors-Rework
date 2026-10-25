@@ -1,0 +1,53 @@
+{
+  "parent": "block/block",
+  "render_type": "cutout",
+  "textures": {
+    "particle": "biggerreactorsrework:block/battery/cell/body",
+    "b_up": "biggerreactorsrework:block/battery/cell/body/connected_bl",
+    "b_down": "biggerreactorsrework:block/battery/cell/body/connected_tl",
+    "b_north": "biggerreactorsrework:block/battery/cell/body/connected_r",
+    "b_south": "biggerreactorsrework:block/battery/cell/body/connected_l",
+    "b_east": "biggerreactorsrework:block/battery/cell/body/connected_l",
+    "b_west": "biggerreactorsrework:block/battery/cell/body/connected_r"
+  },
+  "elements": [
+    {
+      "from": [
+        0,
+        0,
+        0
+      ],
+      "to": [
+        16,
+        16,
+        16
+      ],
+      "faces": {
+        "up": {
+          "texture": "#b_up",
+          "cullface": "up"
+        },
+        "down": {
+          "texture": "#b_down",
+          "cullface": "down"
+        },
+        "north": {
+          "texture": "#b_north",
+          "cullface": "north"
+        },
+        "south": {
+          "texture": "#b_south",
+          "cullface": "south"
+        },
+        "east": {
+          "texture": "#b_east",
+          "cullface": "east"
+        },
+        "west": {
+          "texture": "#b_west",
+          "cullface": "west"
+        }
+      }
+    }
+  ]
+}

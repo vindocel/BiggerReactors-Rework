@@ -253,26 +253,30 @@ public class ReactorRedstonePortTile extends ReactorBaseTile implements MenuProv
     }
     
     public void applyChanges() {
-        this.reactorRedstonePortState.selectedTab = this.currentChanges.selectedTab;
-        this.reactorRedstonePortState.triggerPS = this.currentChanges.triggerPS;
-        this.reactorRedstonePortState.triggerAB = this.currentChanges.triggerAB;
-        this.reactorRedstonePortState.triggerMode = this.currentChanges.triggerMode;
-        this.reactorRedstonePortState.textBufferA = this.currentChanges.textBufferA;
-        this.reactorRedstonePortState.textBufferB = this.currentChanges.textBufferB;
-        
-        this.mainVal = (!this.reactorRedstonePortState.textBufferA.isEmpty()) ? Double.parseDouble(this.reactorRedstonePortState.textBufferA) : 0D;
-        this.secondaryVal = (!this.reactorRedstonePortState.textBufferB.isEmpty()) ? Double.parseDouble(this.reactorRedstonePortState.textBufferB) : 0D;
-        
-        //if (!activeMainBuffer.isEmpty()) {
-        //    mainVal = Double.parseDouble(activeMainBuffer);
-        //} else {
-        //    mainVal = 0;
-        //}
-        //if (!activeSecondBuffer.isEmpty()) {
-        //    secondaryVal = Double.parseDouble(activeSecondBuffer);
-        //} else {
-        //    secondaryVal = 0;
-        //}
+        final double nextMain;
+        final double nextSecondary;
+        try {
+            nextMain = parseSetting(currentChanges.textBufferA);
+            nextSecondary = parseSetting(currentChanges.textBufferB);
+        } catch (IllegalArgumentException invalid) {
+            return;
+        }
+        this.reactorRedstonePortState.selectedTab = currentChanges.selectedTab;
+        this.reactorRedstonePortState.triggerPS = currentChanges.triggerPS;
+        this.reactorRedstonePortState.triggerAB = currentChanges.triggerAB;
+        this.reactorRedstonePortState.triggerMode = currentChanges.triggerMode;
+        this.reactorRedstonePortState.textBufferA = currentChanges.textBufferA;
+        this.reactorRedstonePortState.textBufferB = currentChanges.textBufferB;
+        mainVal = nextMain;
+        secondaryVal = nextSecondary;
+        setChanged();
+    }
+
+    private static double parseSetting(String value) {
+        if (value.length() > 64) throw new IllegalArgumentException("Setting too long");
+        double number = value.isBlank() ? 0 : Double.parseDouble(value);
+        if (!Double.isFinite(number) || number < 0) throw new IllegalArgumentException("Invalid setting");
+        return number;
     }
     
     public void revertChanges() {
@@ -286,41 +290,19 @@ public class ReactorRedstonePortTile extends ReactorBaseTile implements MenuProv
     
     @Override
     public void runRequest(String requestName, Object requestData) {
-        // We save changes to an uncommitted changes temp state. When apply is pressed, then we send the run requests forward.
         switch (requestName) {
-            case "setSelectedTab":
-                this.currentChanges.selectedTab = ReactorRedstonePortSelection.fromInt((Integer) requestData);
-                break;
-            case "setTriggerPS":
-                this.currentChanges.triggerPS = ReactorRedstonePortTriggers.fromBool((Boolean) requestData);
-                break;
-            case "setTriggerAB":
-                this.currentChanges.triggerAB = ReactorRedstonePortTriggers.fromBool((Boolean) requestData);
-                break;
-            case "setTriggerMode":
-                int triggerMode = (Integer) requestData;
-                if (triggerMode >= 0 && triggerMode <= 2) {
-                    this.currentChanges.triggerMode = triggerMode;
-                } else {
-                    this.currentChanges.triggerMode = 2;
-                }
-                break;
-            case "setTextBufferA":
-                this.currentChanges.textBufferA = (String) requestData;
-                break;
-            case "setTextBufferB":
-                this.currentChanges.textBufferB = (String) requestData;
-                break;
-            case "revertChanges":
-                System.out.println("No longer implemented!");
-                //revertChanges();
-                break;
-            case "applyChanges":
-                this.applyChanges();
-                break;
-            default:
-                super.runRequest(requestName, requestData);
-                break;
+            case "setSelectedTab" -> {
+                if (requestData instanceof Integer value && value >= 0 && value < ReactorRedstonePortSelection.values().length)
+                    currentChanges.selectedTab = ReactorRedstonePortSelection.fromInt(value);
+            }
+            case "setTriggerPS" -> { if (requestData instanceof Boolean value) currentChanges.triggerPS = ReactorRedstonePortTriggers.fromBool(value); }
+            case "setTriggerAB" -> { if (requestData instanceof Boolean value) currentChanges.triggerAB = ReactorRedstonePortTriggers.fromBool(value); }
+            case "setTriggerMode" -> { if (requestData instanceof Integer value && value >= 0 && value <= 2) currentChanges.triggerMode = value; }
+            case "setTextBufferA" -> { if (requestData instanceof String value && value.length() <= 64) currentChanges.textBufferA = value; }
+            case "setTextBufferB" -> { if (requestData instanceof String value && value.length() <= 64) currentChanges.textBufferB = value; }
+            case "revertChanges" -> revertChanges();
+            case "applyChanges" -> applyChanges();
+            default -> super.runRequest(requestName, requestData);
         }
     }
     

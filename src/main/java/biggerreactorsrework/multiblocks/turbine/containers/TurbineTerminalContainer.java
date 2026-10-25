@@ -62,4 +62,8 @@ public class TurbineTerminalContainer extends AbstractContainerMenu implements G
     public ItemStack quickMoveStack(Player p_38941_, int p_38942_) {
         return ItemStack.EMPTY;
     }
+    @Override
+    public BlockPos machinePos() {
+        return this.tileEntity.getBlockPos();
+    }
 }

@@ -1,0 +1,98 @@
+{
+  "parent": "block/block",
+  "render_type": "cutout",
+  "textures": {
+    "particle": "biggerreactorsrework:block/battery/cell/body",
+    "b_up": "biggerreactorsrework:block/battery/cell/body/connected_r",
+    "c_up": "biggerreactorsrework:block/battery/cell/energy",
+    "b_down": "biggerreactorsrework:block/battery/cell/body/connected_r",
+    "c_down": "biggerreactorsrework:block/battery/cell/energy",
+    "b_north": "biggerreactorsrework:block/battery/cell/body/connected_tl",
+    "c_north": "biggerreactorsrework:block/battery/cell/energy/connected_t",
+    "b_south": "biggerreactorsrework:block/battery/cell/body/connected_tr",
+    "c_south": "biggerreactorsrework:block/battery/cell/energy/connected_t",
+    "b_east": "biggerreactorsrework:block/battery/cell/body/connected_t",
+    "c_east": "biggerreactorsrework:block/battery/cell/energy/connected_t",
+    "b_west": "biggerreactorsrework:block/battery/cell/body/connected_t",
+    "c_west": "biggerreactorsrework:block/battery/cell/energy/connected_t"
+  },
+  "elements": [
+    {
+      "from": [
+        0,
+        0,
+        0
+      ],
+      "to": [
+        16,
+        16,
+        16
+      ],
+      "faces": {
+        "up": {
+          "texture": "#b_up",
+          "cullface": "up"
+        },
+        "down": {
+          "texture": "#b_down",
+          "cullface": "down"
+        },
+        "north": {
+          "texture": "#b_north",
+          "cullface": "north"
+        },
+        "south": {
+          "texture": "#b_south",
+          "cullface": "south"
+        },
+        "east": {
+          "texture": "#b_east",
+          "cullface": "east"
+        },
+        "west": {
+          "texture": "#b_west",
+          "cullface": "west"
+        }
+      }
+    },
+    {
+      "from": [
+        0,
+        0,
+        0
+      ],
+      "to": [
+        16,
+        16,
+        16
+      ],
+      "shade": false,
+      "faces": {
+        "up": {
+          "texture": "#c_up",
+          "cullface": "up"
+        },
+        "down": {
+          "texture": "#c_down",
+          "cullface": "down"
+        },
+        "north": {
+          "texture": "#c_north",
+          "cullface": "north"
+        },
+        "south": {
+          "texture": "#c_south",
+          "cullface": "south"
+        },
+        "east": {
+          "texture": "#c_east",
+          "cullface": "east"
+        },
+        "west": {
+          "texture": "#c_west",
+          "cullface": "west"
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,53 @@
+{
+  "variants": {
+    "assembled=false": {
+      "model": "biggerreactorsrework:block/battery/terminal/off"
+    },
+    "assembled=true,batterystate=active,facing=north": {
+      "model": "biggerreactorsrework:block/battery/terminal/active_assembled"
+    },
+    "assembled=true,batterystate=active,facing=south": {
+      "model": "biggerreactorsrework:block/battery/terminal/active_assembled",
+      "y": 180
+    },
+    "assembled=true,batterystate=active,facing=east": {
+      "model": "biggerreactorsrework:block/battery/terminal/active_assembled",
+      "y": 90
+    },
+    "assembled=true,batterystate=active,facing=west": {
+      "model": "biggerreactorsrework:block/battery/terminal/active_assembled",
+      "y": 270
+    },
+    "assembled=true,batterystate=active,facing=up": {
+      "model": "biggerreactorsrework:block/battery/terminal/active_assembled",
+      "x": 270
+    },
+    "assembled=true,batterystate=active,facing=down": {
+      "model": "biggerreactorsrework:block/battery/terminal/active_assembled",
+      "x": 90
+    },
+    "assembled=true,batterystate=idle,facing=north": {
+      "model": "biggerreactorsrework:block/battery/terminal/idle_assembled"
+    },
+    "assembled=true,batterystate=idle,facing=south": {
+      "model": "biggerreactorsrework:block/battery/terminal/idle_assembled",
+      "y": 180
+    },
+    "assembled=true,batterystate=idle,facing=east": {
+      "model": "biggerreactorsrework:block/battery/terminal/idle_assembled",
+      "y": 90
+    },
+    "assembled=true,batterystate=idle,facing=west": {
+      "model": "biggerreactorsrework:block/battery/terminal/idle_assembled",
+      "y": 270
+    },
+    "assembled=true,batterystate=idle,facing=up": {
+      "model": "biggerreactorsrework:block/battery/terminal/idle_assembled",
+      "x": 270
+    },
+    "assembled=true,batterystate=idle,facing=down": {
+      "model": "biggerreactorsrework:block/battery/terminal/idle_assembled",
+      "x": 90
+    }
+  }
+}

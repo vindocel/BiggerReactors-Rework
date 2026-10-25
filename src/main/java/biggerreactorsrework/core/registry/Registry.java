@@ -552,7 +552,7 @@ public class Registry {
             
             Supplier<? extends ModFluid> stillSupplier = () -> fluids[0];
             Supplier<? extends ModFluid> flowingSupplier = () -> fluids[1];
-            final var fluidType = new FluidType(FluidType.Properties.create());
+            final var fluidType = new FluidType(FluidType.Properties.create().descriptionId("fluid." + modid + "." + name));
             FLUID_CLIENT_INFO.add(new FluidClientInfo(fluidType,
                     ResourceLocation.fromNamespaceAndPath(modid, "block/fluid/" + name + "_still"),
                     ResourceLocation.fromNamespaceAndPath(modid, "block/fluid/" + name + "_flowing"),
