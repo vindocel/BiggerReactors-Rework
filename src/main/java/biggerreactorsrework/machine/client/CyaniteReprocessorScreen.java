@@ -178,6 +178,17 @@ public class CyaniteReprocessorScreen extends ModScreen<CyaniteReprocessorContai
         this.addScreenElement(waterTankSymbol);
     }
 
+    @Override
+    public List<net.minecraft.client.renderer.Rect2i> extraAreas() {
+        var areas = super.extraAreas();
+        areas.add(new net.minecraft.client.renderer.Rect2i(this.sideTabX(), this.sideTabY(), TAB_SIZE, TAB_SIZE));
+        if (this.sideWindowOpen) {
+            areas.add(new net.minecraft.client.renderer.Rect2i(this.windowX() - TAB_SIZE, Math.min(this.windowTabY(0), this.windowY() - GuiFrame.BAND),
+                    WINDOW_WIDTH + TAB_SIZE + GuiFrame.BAND, Math.max(WINDOW_HEIGHT + 2 * GuiFrame.BAND, windowEarHeight())));
+        }
+        return areas;
+    }
+
     private int sideTabX() {
         return this.getGuiLeft() + this.getXSize();
     }
@@ -312,6 +323,11 @@ public class CyaniteReprocessorScreen extends ModScreen<CyaniteReprocessorContai
             graphics.renderComponentTooltip(this.getFont(), tooltip, mouseX, mouseY);
             graphics.flush();
             graphics.pose().popPose();
+        }
+        if (this.sideWindowOpen) {
+            // Overlays drawn after the screen (recipe viewer tooltips) must stay above the window.
+            graphics.flush();
+            com.mojang.blaze3d.systems.RenderSystem.clear(com.mojang.blaze3d.platform.GlConst.GL_DEPTH_BUFFER_BIT, Minecraft.ON_OSX);
         }
     }
 

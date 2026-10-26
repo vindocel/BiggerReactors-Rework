@@ -1,6 +1,11 @@
 package biggerreactorsrework.client.deps.jei.classic.reactor;
 
+import biggerreactorsrework.BiggerReactors;
+import biggerreactorsrework.client.deps.RecipeViewerData;
+import biggerreactorsrework.client.deps.RecipeViewerData.FluidCard;
+import biggerreactorsrework.multiblocks.reactor.blocks.ReactorTerminal;
 import mezz.jei.api.gui.builder.IRecipeLayoutBuilder;
+import mezz.jei.api.gui.builder.ITooltipBuilder;
 import mezz.jei.api.gui.drawable.IDrawable;
 import mezz.jei.api.gui.ingredient.IRecipeSlotsView;
 import mezz.jei.api.helpers.IGuiHelper;
@@ -8,87 +13,72 @@ import mezz.jei.api.recipe.IFocusGroup;
 import mezz.jei.api.recipe.RecipeIngredientRole;
 import mezz.jei.api.recipe.RecipeType;
 import mezz.jei.api.recipe.category.IRecipeCategory;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.fluids.FluidStack;
-import biggerreactorsrework.BiggerReactors;
-import biggerreactorsrework.multiblocks.reactor.blocks.ReactorTerminal;
-import biggerreactorsrework.registries.ReactorModeratorRegistry;
 
-import java.awt.*;
-
-
+/** Reworked 2026-10-25: selected coolant conversions replace world-fluid moderation. Modified 2026-10-26: drawn like the moderator pages. */
 public class FluidModeratorCategory implements IRecipeCategory<FluidModeratorCategory.Recipe> {
-    private final IDrawable background;
-    private final IDrawable icon;
-    public static final ResourceLocation UID = ResourceLocation.fromNamespaceAndPath(BiggerReactors.modid, "classic/reactor_moderator_fluid");
+    public static final ResourceLocation UID = ResourceLocation.fromNamespaceAndPath(BiggerReactors.modid, "classic/reactor_coolant");
     public static final RecipeType<Recipe> RECIPE_TYPE = new RecipeType<>(UID, Recipe.class);
+    private final IDrawable icon;
 
-    
-    public FluidModeratorCategory(IGuiHelper guiHelper) {
-        icon = guiHelper.createDrawableItemStack(new ItemStack(ReactorTerminal.INSTANCE));
-        background = guiHelper.createDrawable(ResourceLocation.fromNamespaceAndPath(BiggerReactors.modid, "textures/jei/common.png"), 0, 0, 144, 46);
+    public FluidModeratorCategory(IGuiHelper helper) {
+        icon = helper.createDrawableItemStack(new ItemStack(ReactorTerminal.INSTANCE));
     }
-    
+
     @Override
     public RecipeType<Recipe> getRecipeType() {
         return RECIPE_TYPE;
     }
-    
+
     @Override
     public Component getTitle() {
         return Component.translatable("jei.biggerreactorsrework.classic.reactor_moderator_fluid");
     }
 
     @Override
-    public IDrawable getBackground() {
-        return background;
-    }
-
-    @Override
     public IDrawable getIcon() {
         return icon;
     }
-    
+
+    @Override
+    public int getWidth() {
+        return FluidCard.WIDTH;
+    }
+
+    @Override
+    public int getHeight() {
+        return 6 * RecipeViewerData.Stats.ROW;
+    }
+
     @Override
     public void setRecipe(IRecipeLayoutBuilder builder, Recipe recipe, IFocusGroup focuses) {
-        var slot = builder.addSlot(RecipeIngredientRole.INPUT, 1, 15);
-        slot.addFluidStack(recipe.getInput().getFluid(), 1000);
+        var card = recipe.card();
+        builder.addSlot(RecipeIngredientRole.INPUT, 1, FluidCard.inputY() + 1)
+                .addFluidStack(card.input().getFluid(), 1000, card.input().getComponentsPatch()).setFluidRenderer(1000, false, 16, 16);
+        builder.addSlot(RecipeIngredientRole.OUTPUT, 1, card.outputY() + 1)
+                .addFluidStack(card.output().getFluid(), 1000, card.output().getComponentsPatch()).setFluidRenderer(1000, false, 16, 16);
     }
-    
+
     @Override
-    public void draw(Recipe recipe, IRecipeSlotsView recipeSlotsView, GuiGraphics guiGraphics, double mouseX, double mouseY) {
-        Minecraft mc = Minecraft.getInstance();
-        Component[] info = {
-                Component.translatable("jei.biggerreactorsrework.classic.reactor_moderator_moderation", recipe.getModeratorProperties().moderation()),
-                Component.translatable("jei.biggerreactorsrework.classic.reactor_moderator_absorption", recipe.getModeratorProperties().absorption()),
-                Component.translatable("jei.biggerreactorsrework.classic.reactor_moderator_conductivity", recipe.getModeratorProperties().heatConductivity()),
-                Component.translatable("jei.biggerreactorsrework.classic.reactor_moderator_efficiency", recipe.getModeratorProperties().heatEfficiency())
-        };
-        guiGraphics.drawString(mc.font,  info[0], 80 - mc.font.width(info[0]) / 2, 0, Color.BLACK.getRGB(), false);
-        guiGraphics.drawString(mc.font,  info[1], 80 - mc.font.width(info[1]) / 2, 12, Color.BLACK.getRGB(), false);
-        guiGraphics.drawString(mc.font,  info[2], 80 - mc.font.width(info[2]) / 2, 24, Color.BLACK.getRGB(), false);
-        guiGraphics.drawString(mc.font,  info[3], 80 - mc.font.width(info[3]) / 2, 36, Color.BLACK.getRGB(), false);
+    public void draw(Recipe recipe, IRecipeSlotsView slots, GuiGraphics g, double mouseX, double mouseY) {
+        recipe.card().draw(g);
     }
-    
-    public static class Recipe {
-        private final FluidStack input;
-        private final ReactorModeratorRegistry.IModeratorProperties moderatorProperties;
 
-        public Recipe(FluidStack input, ReactorModeratorRegistry.IModeratorProperties moderatorProperties) {
-            this.input = input;
-            this.moderatorProperties = moderatorProperties;
+    @Override
+    public void getTooltip(ITooltipBuilder tooltip, Recipe recipe, IRecipeSlotsView slots, double mouseX, double mouseY) {
+        var card = recipe.card();
+        int row = card.row(mouseX, mouseY);
+        if (row >= 0) {
+            tooltip.addAll(RecipeViewerData.Stats.tooltip(card.stats().get(row)));
         }
+    }
 
-        public FluidStack getInput() {
-            return input;
-        }
-
-        public ReactorModeratorRegistry.IModeratorProperties getModeratorProperties() {
-            return moderatorProperties;
+    public record Recipe(RecipeViewerData.Coolant coolant, FluidCard card) {
+        public Recipe(RecipeViewerData.Coolant coolant) {
+            this(coolant, coolant.card());
         }
     }
 }

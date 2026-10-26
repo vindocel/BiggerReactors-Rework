@@ -389,6 +389,8 @@ final class GuideElements {
         private final float[] columns;
         private final List<List<Component>> headerTips;
         private final java.util.function.Function<List<String>,GuideReferences.Target> rowReference;
+        /** When set, every cell keeps its size and slides inside its column, and may point to what it names. */
+        private final java.util.function.BiFunction<List<String>,Integer,GuideReferences.Target> cellReference;
 
         /** {@code columns}: relative width of each column. */
         Table(List<Component> headers, float[] columns, Supplier<List<List<String>>> rows) {
@@ -399,11 +401,23 @@ final class GuideElements {
         }
         Table(List<Component> headers,float[] columns,Supplier<List<List<String>>> rows,List<List<Component>> headerTips,
               java.util.function.Function<List<String>,GuideReferences.Target> rowReference) {
+            this(headers,columns,rows,headerTips,rowReference,null);
+        }
+        private Table(List<Component> headers,float[] columns,Supplier<List<List<String>>> rows,List<List<Component>> headerTips,
+              java.util.function.Function<List<String>,GuideReferences.Target> rowReference,
+              java.util.function.BiFunction<List<String>,Integer,GuideReferences.Target> cellReference) {
             this.headers = headers;
             this.columns = columns;
             this.rows = rows;
             this.headerTips = headerTips;
             this.rowReference = rowReference;
+            this.cellReference = cellReference;
+        }
+
+        /** Names in every column slide instead of shrinking; hovering one shows what {@code reference} finds for it. */
+        static Table named(List<Component> headers,float[] columns,Supplier<List<List<String>>> rows,
+                           java.util.function.BiFunction<List<String>,Integer,GuideReferences.Target> reference) {
+            return new Table(headers,columns,rows,java.util.Collections.nCopies(headers.size(),List.of()),row->null,reference);
         }
 
         int rowCount() {
@@ -415,7 +429,7 @@ final class GuideElements {
             return new Table(headers, columns, () -> {
                 List<List<String>> all = rows.get();
                 return all.subList(Math.min(from, all.size()), Math.min(to, all.size()));
-            },headerTips,rowReference);
+            },headerTips,rowReference,cellReference);
         }
 
         @Override
@@ -450,9 +464,10 @@ final class GuideElements {
                 List<String> cells = list.get(r);
                 for (int c = 0; c < cells.size() && c < columns.length; c++) {
                     if(c==0)screen.fittedText(g,Component.literal(cells.get(c)),starts[c]+2,ry+2,starts[c+1]-starts[c]-3,HEADING);
+                    else if(cellReference!=null)screen.fittedText(g,Component.literal(cells.get(c)),starts[c]+2,ry+2,starts[c+1]-starts[c]-3,BODY);
                     else screen.fixedText(g,Component.literal(cells.get(c)),starts[c]+2,ry+2,starts[c+1]-starts[c]-3,BODY);
                     if(mouseX>=starts[c]&&mouseX<starts[c+1]&&mouseY>=ry&&mouseY<ry+ROW){
-                        var target=c==0?rowReference.apply(cells):null;
+                        var target=cellReference!=null?cellReference.apply(cells,c):c==0?rowReference.apply(cells):null;
                         if(target!=null)screen.materialTooltip(target);
                         else screen.textTooltip(List.of(Component.literal(cells.get(c))));
                     }

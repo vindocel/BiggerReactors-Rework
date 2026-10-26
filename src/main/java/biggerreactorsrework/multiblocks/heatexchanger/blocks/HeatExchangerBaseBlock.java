@@ -33,6 +33,15 @@ public abstract class HeatExchangerBaseBlock extends ModularBlock implements IRe
     public HeatExchangerBaseBlock(Properties properties) {
         super(properties.requiresCorrectToolForDrops());
     }
+
+    // Modified 2026-10-25: explain useful placement before the player builds the circuits.
+    @Override
+    public void appendHoverText(net.minecraft.world.item.ItemStack stack,net.minecraft.world.item.Item.TooltipContext context,
+                                java.util.List<net.minecraft.network.chat.Component> tooltip,net.minecraft.world.item.TooltipFlag flag) {
+        super.appendHoverText(stack,context,tooltip,flag);
+        if(this instanceof HeatExchangerCondenserChannelBlock || this instanceof HeatExchangerEvaporatorChannelBlock)
+            for(int i=1;i<=3;i++)tooltip.add(net.minecraft.network.chat.Component.translatable("tooltip.biggerreactorsrework.channel_contact."+i).withStyle(net.minecraft.ChatFormatting.GRAY));
+    }
     
     @Override
     public boolean isGoodForInterior() {

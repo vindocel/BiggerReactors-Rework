@@ -31,6 +31,7 @@ public final class BiggerReactorsClient {
     }
 
     static void init(IEventBus modBus) {
+        modBus.addListener(biggerreactorsrework.client.HeatedFluidSprites::register);
         biggerreactorsrework.client.GuiSettingsEvents.register();
         modBus.addListener((net.neoforged.neoforge.client.event.RegisterShadersEvent event) -> {
             try {
@@ -58,6 +59,8 @@ public final class BiggerReactorsClient {
     private static void registerRenderers(EntityRenderersEvent.RegisterRenderers event) {
         assert TurbineRotorBearingTile.SUPPLIER.TYPE != null;
         event.registerBlockEntityRenderer(TurbineRotorBearingTile.SUPPLIER.TYPE, TurbineRotorRenderer::new);
+        event.registerBlockEntityRenderer(biggerreactorsrework.multiblocks.reactor.tiles.ReactorManifoldTile.SUPPLIER.TYPE,ReactorManifoldRenderer::new);
+        event.registerBlockEntityRenderer(biggerreactorsrework.multiblocks.heatexchanger.tiles.HeatExchangerChannelTile.SUPPLIER.TYPE,biggerreactorsrework.multiblocks.heatexchanger.client.HeatExchangerFluidRenderer::new);
     }
     
     private static void registerClientExtensions(RegisterClientExtensionsEvent event) {
@@ -69,7 +72,13 @@ public final class BiggerReactorsClient {
             event.registerFluidType(new IClientFluidTypeExtensions() {
                 @Override
                 public ResourceLocation getStillTexture() {
-                    return info.stillTexture();
+                    return info.type()==biggerreactorsrework.fluids.HeatedCoolant.INSTANCE.getFluidType()?ResourceLocation.fromNamespaceAndPath(BiggerReactors.modid,"block/fluid/liquid_obsidian_still"):info.stillTexture();
+                }
+                @Override public ResourceLocation getStillTexture(net.neoforged.neoforge.fluids.FluidStack stack) {
+                    return stack.getFluid()==biggerreactorsrework.fluids.HeatedCoolant.INSTANCE?biggerreactorsrework.client.HeatedFluidSprites.texture(stack,false):getStillTexture();
+                }
+                @Override public ResourceLocation getFlowingTexture(net.neoforged.neoforge.fluids.FluidStack stack) {
+                    return stack.getFluid()==biggerreactorsrework.fluids.HeatedCoolant.INSTANCE?biggerreactorsrework.client.HeatedFluidSprites.texture(stack,true):getFlowingTexture();
                 }
                 
                 @Override

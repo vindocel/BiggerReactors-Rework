@@ -138,13 +138,14 @@ public class HeatExchangerFluidPortTile extends HeatExchangerBaseTile implements
         }
         return HETank.fluidValidForTank(tank, fluid);
     }
+    @Override public boolean fluidValidForTank(int tank,Fluid fluid,DataComponentPatch components){return HETank!=null && HETank.fluidValidForTank(tank,fluid,components);}
     
     @Override
     public long fill(Fluid fluid, DataComponentPatch components, long amount, boolean simulate) {
         if (HETank == null || !inlet) {
             return 0;
         }
-        return HETank.fill(fluid, DataComponentPatch.EMPTY, amount, simulate);
+        return HETank.fill(fluid, components, amount, simulate);
     }
     
     @Override
@@ -152,7 +153,7 @@ public class HeatExchangerFluidPortTile extends HeatExchangerBaseTile implements
         if (HETank == null || inlet) {
             return 0;
         }
-        return HETank.drain(fluid, DataComponentPatch.EMPTY, amount, simulate);
+        return HETank.drain(fluid, components, amount, simulate);
     }
     
     
@@ -162,10 +163,11 @@ public class HeatExchangerFluidPortTile extends HeatExchangerBaseTile implements
         }
         if (handler != null) {
             Fluid fluid = HETank.fluidTypeInTank(1);
+            var components = HETank.fluidComponentsInTank(1);
             long amount = HETank.fluidAmountInTank(1);
-            amount = HETank.drain(fluid, DataComponentPatch.EMPTY, amount, true);
-            amount = handler.fill(fluid, DataComponentPatch.EMPTY, amount, false);
-            amount = HETank.drain(fluid, DataComponentPatch.EMPTY, amount, false);
+            amount = HETank.drain(fluid, components, amount, true);
+            amount = handler.fill(fluid, components, amount, false);
+            amount = HETank.drain(fluid, components, amount, false);
             return amount;
         } else {
             handler = null;

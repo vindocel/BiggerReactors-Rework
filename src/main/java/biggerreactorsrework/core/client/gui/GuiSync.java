@@ -32,6 +32,7 @@ public class GuiSync {
     private static final int MAX_REQUEST_NAME_LENGTH = 128;
 
     public interface IGUIPacketProvider {
+        default java.util.List<java.util.Map<String,Object>> statistics() { return java.util.List.of(); }
 
         /** Position used to distinguish this machine's local appearance preferences. */
         net.minecraft.core.BlockPos machinePos();
@@ -76,6 +77,8 @@ public class GuiSync {
     );
 
     private static int ticksUntilSync = 0;
+    private static final java.util.Map<IGUIPacketProvider,java.util.List<java.util.Map<String,Object>>> CLIENT_STATISTICS = new java.util.WeakHashMap<>();
+    public static java.util.List<java.util.Map<String,Object>> statistics(IGUIPacketProvider provider) { return CLIENT_STATISTICS.getOrDefault(provider,java.util.List.of()); }
 
     @OnModLoad
     public static void onModLoad() {
@@ -100,12 +103,20 @@ public class GuiSync {
                 continue;
             }
             //noinspection unchecked
-            INSTANCE.sendToPlayer(player, new DataCompound((Map<String, Object>) packetMap));
+            var snapshot=new java.util.HashMap<String,Object>((Map<String,Object>)packetMap);
+            snapshot.put("statistics",provider.statistics());
+            INSTANCE.sendToPlayer(player, new DataCompound(snapshot));
         }
     }
 
     private static void clientHandler(DataCompound compound, IPayloadContext ctx) {
         if (ctx.player().containerMenu instanceof IGUIPacketProvider provider) {
+            if(compound.get("statistics") instanceof java.util.List<?> list) {
+                var rows=new java.util.ArrayList<java.util.Map<String,Object>>();
+                for(var row:list)if(row instanceof java.util.Map<?,?> map && map.get("key") instanceof String key && map.get("value") instanceof String value)
+                    rows.add(java.util.Map.of("key",key,"value",value));
+                CLIENT_STATISTICS.put(provider,java.util.List.copyOf(rows));
+            }
             IGUIPacket guiPacket = provider.getGuiPacket();
             if (guiPacket != null) {
                 guiPacket.read(compound.toROBNMap());

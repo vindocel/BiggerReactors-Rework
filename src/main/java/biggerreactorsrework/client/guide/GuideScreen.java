@@ -17,6 +17,7 @@ import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.material.Fluid;
 import net.neoforged.neoforge.client.extensions.common.IClientFluidTypeExtensions;
+import net.neoforged.neoforge.fluids.FluidStack;
 import org.lwjgl.glfw.GLFW;
 
 /**
@@ -441,7 +442,7 @@ public class GuideScreen extends Screen {
         if (!reference.stack().isEmpty()) {
             g.renderItem(reference.stack(), 0, 0);
         } else if(reference.fluid()!=null) {
-            fluidIcon(g, reference.fluid(), 0, 0);
+            fluidIcon(g, reference.fluidStack().isEmpty() ? new FluidStack(reference.fluid(), 1) : reference.fluidStack(), 0, 0);
         }
         g.pose().popPose();
         g.pose().translate(0, 0, 200);
@@ -450,10 +451,10 @@ public class GuideScreen extends Screen {
     }
 
     /** The still texture of a fluid, 16 × 16, tinted. */
-    private void fluidIcon(GuiGraphics g, Fluid fluid, int x, int y) {
-        IClientFluidTypeExtensions ext = IClientFluidTypeExtensions.of(fluid);
-        TextureAtlasSprite sprite = minecraft.getTextureAtlas(InventoryMenu.BLOCK_ATLAS).apply(ext.getStillTexture());
-        int tint = ext.getTintColor();
+    private void fluidIcon(GuiGraphics g, FluidStack stack, int x, int y) {
+        IClientFluidTypeExtensions ext = IClientFluidTypeExtensions.of(stack.getFluid());
+        TextureAtlasSprite sprite = minecraft.getTextureAtlas(InventoryMenu.BLOCK_ATLAS).apply(ext.getStillTexture(stack));
+        int tint = ext.getTintColor(stack);
         RenderSystem.enableBlend();
         g.setColor(((tint >> 16) & 0xFF) / 255.0F, ((tint >> 8) & 0xFF) / 255.0F, (tint & 0xFF) / 255.0F, ((tint >>> 24) & 0xFF) / 255.0F);
         g.blit(x, y, 0, 16, 16, sprite);
@@ -463,7 +464,7 @@ public class GuideScreen extends Screen {
     /** Slot frame with the still texture of a fluid; hovering it shows the fluid's name. */
     void fluidSlot(GuiGraphics g, Fluid fluid, int x, int y, int mouseX, int mouseY) {
         biggerreactorsrework.client.GuiArt.slot(g, x, y, 18);
-        fluidIcon(g, fluid, x + 1, y + 1);
+        fluidIcon(g, new FluidStack(fluid, 1), x + 1, y + 1);
         if (mouseX >= x + 1 && mouseX < x + 17 && mouseY >= y + 1 && mouseY < y + 17) {
             g.fill(x + 1, y + 1, x + 17, y + 17, 0x80FFFFFF);
             hoveredText = List.of(fluid.getFluidType().getDescription());

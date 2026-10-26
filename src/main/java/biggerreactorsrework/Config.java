@@ -98,6 +98,8 @@ public class Config {
         public final double PassiveCoolingTransferEfficiency;
         @ConfigValue(range = "(0,)", advanced = ConfigValue.BoolOption.True)
         public final long CoolantTankAmountPerFuelRod;
+        @ConfigValue(range = "(1273.15,)", comment = "Fuel temperature ceiling in kelvin for automatic liquid cooling control")
+        public final double MaxFuelTemperature = 3273.15;
         @ConfigValue(range = "(0,)", advanced = ConfigValue.BoolOption.True)
         public final double CaseFEPerUnitVolumeKelvin;
         @ConfigValue(range = "(0,)", advanced = ConfigValue.BoolOption.True)

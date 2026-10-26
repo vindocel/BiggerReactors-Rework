@@ -36,7 +36,7 @@ public final class MaterialDataMaps {
         public static final Codec<Transition> CODEC=RecordCodecBuilder.create(i->i.group(
             ExtraCodecs.TAG_OR_ELEMENT_ID.fieldOf("gas").forGetter(Transition::gas),POSITIVE.fieldOf("latentHeat").forGetter(Transition::latentHeat),
             POSITIVE.fieldOf("boilingPoint").forGetter(Transition::boilingPoint),NONNEGATIVE.fieldOf("liquidThermalConductivity").forGetter(Transition::liquidThermalConductivity),
-            NONNEGATIVE.fieldOf("gasThermalConductivity").forGetter(Transition::gasThermalConductivity),POSITIVE.fieldOf("turbineMultiplier").forGetter(Transition::turbineMultiplier)).apply(i,Transition::new));
+            NONNEGATIVE.fieldOf("gasThermalConductivity").forGetter(Transition::gasThermalConductivity),NONNEGATIVE.fieldOf("turbineMultiplier").forGetter(Transition::turbineMultiplier)).apply(i,Transition::new));
     }
     private static ResourceLocation id(String path){return ResourceLocation.fromNamespaceAndPath(BiggerReactors.modid,path);}
     public static final DataMapType<Block,Moderator> MODERATOR=DataMapType.builder(id("reactor_moderator"),Registries.BLOCK,Moderator.CODEC).build();

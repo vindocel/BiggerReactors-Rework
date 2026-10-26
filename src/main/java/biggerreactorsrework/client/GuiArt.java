@@ -278,6 +278,10 @@ public final class GuiArt {
      * (and back) inside that width, so all of it can be read without shrinking or cutting it.
      */
     public static void scrollingText(@Nonnull GuiGraphics graphics, @Nonnull Font font, String text, int x, int y, int width, int color) {
+        scrollingText(graphics, font, net.minecraft.network.chat.Component.literal(text), x, y, width, color);
+    }
+
+    public static void scrollingText(@Nonnull GuiGraphics graphics, @Nonnull Font font, net.minecraft.network.chat.Component text, int x, int y, int width, int color) {
         int textWidth = font.width(text);
         if (textWidth <= width) {
             graphics.drawString(font, text, x, y, color, false);

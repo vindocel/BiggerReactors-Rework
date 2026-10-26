@@ -68,4 +68,7 @@ public class ReactorTerminalContainer extends AbstractContainerMenu implements G
     public BlockPos machinePos() {
         return this.tileEntity.getBlockPos();
     }
+    @Override public java.util.List<java.util.Map<String,Object>> statistics() {
+        return tileEntity.nullableController()==null?java.util.List.of():tileEntity.controller().statistics();
+    }
 }

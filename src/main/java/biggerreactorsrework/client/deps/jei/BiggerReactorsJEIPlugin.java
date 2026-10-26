@@ -57,6 +57,19 @@ public class BiggerReactorsJEIPlugin implements IModPlugin {
         registration.addRecipeCategories(new BlockModeratorCategory(guiHelper));
         registration.addRecipeCategories(new FluidModeratorCategory(guiHelper));
         registration.addRecipeCategories(new CoilCategory(guiHelper));
+        registration.addRecipeCategories(new HeatExchangeCategory(guiHelper));
+    }
+
+    @Override
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    public void registerGuiHandlers(mezz.jei.api.registration.IGuiHandlerRegistration registration) {
+        registration.addGuiContainerHandler((Class) biggerreactorsrework.core.client.gui.screens.ModScreen.class,
+                new mezz.jei.api.gui.handlers.IGuiContainerHandler<biggerreactorsrework.core.client.gui.screens.ModScreen<?>>() {
+                    @Override
+                    public List<net.minecraft.client.renderer.Rect2i> getGuiExtraAreas(biggerreactorsrework.core.client.gui.screens.ModScreen<?> screen) {
+                        return screen.extraAreas();
+                    }
+                });
     }
 
     @Override
@@ -68,6 +81,12 @@ public class BiggerReactorsJEIPlugin implements IModPlugin {
         registration.addRecipeCatalyst(new ItemStack(ReactorTerminal.INSTANCE), BlockModeratorCategory.RECIPE_TYPE);
         registration.addRecipeCatalyst(new ItemStack(ReactorTerminal.INSTANCE), FluidModeratorCategory.RECIPE_TYPE);
         registration.addRecipeCatalyst(new ItemStack(TurbineTerminal.INSTANCE), CoilCategory.RECIPE_TYPE);
+        for(var block:List.of(
+                biggerreactorsrework.multiblocks.heatexchanger.blocks.HeatExchangerTerminalBlock.INSTANCE,
+                biggerreactorsrework.multiblocks.heatexchanger.blocks.HeatExchangerCondenserChannelBlock.INSTANCE,
+                biggerreactorsrework.multiblocks.heatexchanger.blocks.HeatExchangerEvaporatorChannelBlock.INSTANCE,
+                biggerreactorsrework.multiblocks.heatexchanger.blocks.HeatExchangerFluidPortBlock.INSTANCE))
+            registration.addRecipeCatalyst(new ItemStack(block),HeatExchangeCategory.RECIPE_TYPE);
     }
 
     @Override
@@ -78,9 +97,10 @@ public class BiggerReactorsJEIPlugin implements IModPlugin {
         registration.addRecipes(CyaniteReprocessingCategory.RECIPE_TYPE, biggerreactorsrework.machine.recipe.ReprocessingRecipes.all(net.minecraft.client.Minecraft.getInstance().level).stream().map(holder -> new CyaniteReprocessingCategory.Recipe(holder.value())).toList());
         registration.addRecipes(CoilCategory.RECIPE_TYPE, RecipeViewerData.coils().stream()
                 .map(c -> new CoilCategory.Recipe(c.block(), c.data())).toList());
-        registration.addRecipes(FluidModeratorCategory.RECIPE_TYPE, RecipeViewerData.moderatorFluids().stream()
-                .map(m -> new FluidModeratorCategory.Recipe(new FluidStack(m.fluid(), 1000), m.properties())).toList());
+        registration.addRecipes(FluidModeratorCategory.RECIPE_TYPE, RecipeViewerData.coolants().stream()
+                .map(FluidModeratorCategory.Recipe::new).toList());
         registration.addRecipes(BlockModeratorCategory.RECIPE_TYPE, RecipeViewerData.moderatorBlocks().stream()
                 .map(m -> new BlockModeratorCategory.Recipe(m.block(), m.properties())).toList());
+        registration.addRecipes(HeatExchangeCategory.RECIPE_TYPE,RecipeViewerData.heatExchanges());
     }
 }

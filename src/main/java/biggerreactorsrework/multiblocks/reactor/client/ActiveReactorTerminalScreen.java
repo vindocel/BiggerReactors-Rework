@@ -105,7 +105,7 @@ public class ActiveReactorTerminalScreen extends ModScreen<ReactorTerminalContai
         // (Top) Hot exhaust tank:
         RenderedElement<ReactorTerminalContainer> hotExhaustTank = new RenderedElement<>(this, 197, 25, 18, 64, 0, 152, Component.empty());
         hotExhaustTank.onRender = (@Nonnull GuiGraphics graphics, int mX, int mY) -> CommonRender.renderFluidGauge(graphics,
-                hotExhaustTank, reactorState.exhaustStored, reactorState.exhaustCapacity, exhaustFluid);
+                hotExhaustTank, reactorState.exhaustStored, reactorState.exhaustCapacity, biggerreactorsrework.client.CoolantVisuals.stack(reactorState.exhaustResourceLocation,reactorState.exhaustOrigin));
         this.addScreenElement(hotExhaustTank);
 
         // (Bottom) Progress bar:

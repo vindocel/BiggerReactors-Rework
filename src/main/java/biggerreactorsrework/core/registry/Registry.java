@@ -552,7 +552,11 @@ public class Registry {
             
             Supplier<? extends ModFluid> stillSupplier = () -> fluids[0];
             Supplier<? extends ModFluid> flowingSupplier = () -> fluids[1];
-            final var fluidType = new FluidType(FluidType.Properties.create().descriptionId("fluid." + modid + "." + name));
+            final var fluidType = new FluidType(FluidType.Properties.create().descriptionId("fluid." + modid + "." + name)) {
+                @Override public net.minecraft.network.chat.Component getDescription(net.neoforged.neoforge.fluids.FluidStack stack) {
+                    return name.equals("heated_coolant") ? biggerreactorsrework.registries.CoolantComponents.name(stack) : super.getDescription(stack);
+                }
+            };
             FLUID_CLIENT_INFO.add(new FluidClientInfo(fluidType,
                     ResourceLocation.fromNamespaceAndPath(modid, "block/fluid/" + name + "_still"),
                     ResourceLocation.fromNamespaceAndPath(modid, "block/fluid/" + name + "_flowing"),

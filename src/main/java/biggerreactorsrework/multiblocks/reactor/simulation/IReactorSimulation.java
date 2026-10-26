@@ -20,6 +20,8 @@ public interface IReactorSimulation extends ISerializable, IDebuggable {
      * call this even if inactive, as there can be some inactive decay
      */
     void tick(boolean active);
+    default double burnFraction() { return 1; }
+    default int manifoldContacts() { return 0; }
 
     /** Complete a pending calculation once before saving or moving fuel. */
     default void settle() { }

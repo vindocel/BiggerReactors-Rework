@@ -30,6 +30,18 @@ public class ReactorTerminalTile extends ReactorBaseTile implements MenuProvider
     }
     
     public final ReactorState reactorState = new ReactorState(this);
+    public String renderCold="minecraft:empty",renderHot="minecraft:empty",renderOrigin="";
+    public double renderColdFill,renderHotFill;
+    @Override protected net.minecraft.nbt.CompoundTag writeNBT(){
+        var tag=super.writeNBT();tag.putString("renderCold",renderCold);tag.putString("renderHot",renderHot);tag.putString("renderOrigin",renderOrigin);
+        tag.putDouble("renderColdFill",renderColdFill);tag.putDouble("renderHotFill",renderHotFill);return tag;
+    }
+    @Override protected void readNBT(net.minecraft.nbt.CompoundTag tag){
+        super.readNBT(tag);renderCold=tag.getString("renderCold");renderHot=tag.getString("renderHot");renderOrigin=tag.getString("renderOrigin");
+        renderColdFill=tag.getDouble("renderColdFill");renderHotFill=tag.getDouble("renderHotFill");
+    }
+    @Override protected net.minecraft.nbt.CompoundTag getUpdateNBT(){return writeNBT();}
+    @Override protected void handleUpdateNBT(net.minecraft.nbt.CompoundTag tag){readNBT(tag);}
     
     @Override
     public ReactorState getState() {

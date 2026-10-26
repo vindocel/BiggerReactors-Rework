@@ -32,6 +32,12 @@ public class HeatExchangerTerminalTile extends HeatExchangerBaseTile implements 
     }
     
     HeatExchangerState state = new HeatExchangerState(this);
+    public biggerreactorsrework.core.fluids.FluidRenderSnapshot primaryView=biggerreactorsrework.core.fluids.FluidRenderSnapshot.EMPTY;
+    public biggerreactorsrework.core.fluids.FluidRenderSnapshot secondaryView=biggerreactorsrework.core.fluids.FluidRenderSnapshot.EMPTY;
+    @Override protected net.minecraft.nbt.CompoundTag writeNBT(){var tag=super.writeNBT();tag.put("primaryView",primaryView.save());tag.put("secondaryView",secondaryView.save());return tag;}
+    @Override protected void readNBT(net.minecraft.nbt.CompoundTag tag){super.readNBT(tag);primaryView=biggerreactorsrework.core.fluids.FluidRenderSnapshot.load(tag.getCompound("primaryView"));secondaryView=biggerreactorsrework.core.fluids.FluidRenderSnapshot.load(tag.getCompound("secondaryView"));}
+    @Override protected net.minecraft.nbt.CompoundTag getUpdateNBT(){return writeNBT();}
+    @Override protected void handleUpdateNBT(net.minecraft.nbt.CompoundTag tag){readNBT(tag);}
     
     @Nonnull
     @Override
@@ -46,6 +52,8 @@ public class HeatExchangerTerminalTile extends HeatExchangerBaseTile implements 
             return;
         }
         
+        state.condenserIntakeOrigin=biggerreactorsrework.registries.CoolantComponents.origin(controller().condenserTank.fluidComponentsInTank(0));
+        state.evaporatorExhaustOrigin=biggerreactorsrework.registries.CoolantComponents.origin(controller().evaporatorTank.fluidComponentsInTank(1));
         state.condenserTankSize = controller().condenserTank.perSideCapacity;
         
         state.condenserIntakeFluid = BuiltInRegistries.FLUID.getKey(controller().condenserTank.fluidTypeInTank(0)).toString();

@@ -76,8 +76,7 @@ public abstract class BaseReactorSimulation implements IReactorSimulation {
             coolantTank = null;
             manifoldSignalingProperties = new ReactorModeratorRegistry.ModeratorProperties(defaultModeratorProperties);
         } else {
-            long perSideCapacity = controlRods.length * y * configuration.coolantTankCapacityPerFuelRod();
-            perSideCapacity += simulationDescription.manifoldCount() * configuration.coolantTankCapacityPerFuelRod();
+            long perSideCapacity = simulationDescription.manifoldCount() * configuration.coolantTankCapacityPerFuelRod();
             output = coolantTank = new CoolantTank(perSideCapacity, simulationDescription.defaultModeratorProperties(), configuration);
             battery = null;
             manifoldSignalingProperties = coolantTank;
@@ -87,6 +86,7 @@ public abstract class BaseReactorSimulation implements IReactorSimulation {
             for (int j = 0; j < y; j++) {
                 for (int k = 0; k < z; k++) {
                     var newProperties = simulationDescription.moderatorPropertiesAt(i, j, k);
+                    if (!configuration.passivelyCooled()) newProperties=simulationDescription.defaultModeratorProperties();
                     if (simulationDescription.isManifoldAt(i, j, k)) {
                         newProperties = manifoldSignalingProperties;
                     }
@@ -158,6 +158,7 @@ public abstract class BaseReactorSimulation implements IReactorSimulation {
             }
         }
         stackToCoolantSystemRFKT *= configuration.stackToCoolantRFMKT();
+        if (!configuration.passivelyCooled()) stackToCoolantSystemRFKT=fuelToManifoldSurfaceArea*configuration.stackToCoolantRFMKT();
         
         if (configuration.passivelyCooled()) {
             stackToCoolantSystemRFKT *= configuration.passiveCoolingTransferEfficiency();
@@ -182,9 +183,31 @@ public abstract class BaseReactorSimulation implements IReactorSimulation {
     
     @Override
     public final void tick(boolean active) {
+        double oldFuelHeat=fuelHeat.temperature(), oldStackHeat=stackHeat.temperature(), oldFertility=fuelFertility;
         double toBurn = 0;
         if (wasActiveLastTick || (!isAsync() && active)) {
             toBurn = radiate();
+            if(coolantTank!=null) {
+                double proposed=Math.max(0,(fuelHeat.temperature()-oldFuelHeat)*fuelHeat.rfPerKelvin())+
+                        Math.max(0,(stackHeat.temperature()-oldStackHeat)*stackHeat.rfPerKelvin());
+                var transition=coolantTank.transition();
+                double available=Math.min(coolantTank.liquidAmount(),coolantTank.perSideCapacity()-coolantTank.vaporAmount());
+                double headroom=Math.max(0,(biggerreactorsrework.Config.CONFIG.Reactor.MaxFuelTemperature-oldFuelHeat)*fuelHeat.rfPerKelvin());
+                double ceiling=biggerreactorsrework.Config.CONFIG.Reactor.MaxFuelTemperature;
+                double allowed=0;
+                if(transition!=null && available>0 && coolantTank.perSideCapacity()>0) {
+                    double k=stackToCoolantSystemRFKT*transition.liquidRFMKT()*Math.max(.01,(double)coolantTank.liquidAmount()/coolantTank.perSideCapacity());
+                    double maxFromContact=fuelHeat.rfPerKelvin()*((ceiling-transition.boilingPoint())*Math.exp(Math.min(20,k/fuelHeat.rfPerKelvin()))-(oldFuelHeat-transition.boilingPoint()));
+                    allowed=Math.max(0,Math.min(headroom+available*transition.latentHeat()/coolantTank.recovery(),maxFromContact));
+                }
+                double fraction=transition==null || available<=0 || fuelToManifoldSurfaceArea<=0 ? 0 : Math.min(1,allowed/Math.max(1,proposed));
+                fraction=Math.min(fraction,burnFraction+.02);
+                burnFraction=fraction;
+                fuelHeat.setTemperature(oldFuelHeat+(fuelHeat.temperature()-oldFuelHeat)*fraction);
+                stackHeat.setTemperature(oldStackHeat+(stackHeat.temperature()-oldStackHeat)*fraction);
+                fuelFertility=oldFertility+(fuelFertility-oldFertility)*fraction;
+                toBurn*=fraction;
+            }
         } else {
             fuelTank.burn(0);
         }
@@ -201,8 +224,8 @@ public abstract class BaseReactorSimulation implements IReactorSimulation {
             fuelFertility = Math.max(0f, fuelFertility - Math.max(configuration.fuelFertilityMinimumDecay(), fuelFertility / denominator));
         }
         
-        fuelHeat.transferWith(stackHeat, fuelToCasingRFKT + fuelToManifoldSurfaceArea * (coolantTank == null ? defaultModeratorProperties : coolantTank).heatConductivity());
-        output.transferWith(stackHeat, stackToCoolantSystemRFKT);
+        fuelHeat.transferWith(stackHeat, fuelToCasingRFKT + (coolantTank==null ? fuelToManifoldSurfaceArea*defaultModeratorProperties.heatConductivity() : 0));
+        output.transferWith(coolantTank==null?stackHeat:fuelHeat, stackToCoolantSystemRFKT);
         stackHeat.transferWith(ambientHeat, casingToAmbientRFKT);
         
         wasActiveLastTick = false;
@@ -212,6 +235,10 @@ public abstract class BaseReactorSimulation implements IReactorSimulation {
             wasActiveLastTick = true;
         }
     }
+
+    private double burnFraction=1;
+    @Override public double burnFraction() { return burnFraction; }
+    @Override public int manifoldContacts() { return (int)fuelToManifoldSurfaceArea; }
     
     @Override
     public final void settle() {

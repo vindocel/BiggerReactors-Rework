@@ -94,8 +94,13 @@ public class HeatExchangerState implements GuiSync.IGUIPacket {
         this.heatExchangerTerminalTile.updateState();
     }
 
+    public String condenserIntakeOrigin="";
+    public String evaporatorExhaustOrigin="";
     @Override
     public void read(@Nonnull Map<?, ?> data) {
+        condenserIntakeOrigin = data.get("condenserIntakeOrigin") instanceof String v ? v : "";
+        evaporatorExhaustOrigin = data.get("evaporatorExhaustOrigin") instanceof String v ? v : "";
+
         this.condenserTankSize = (Long) data.get("condenserTankSize");
         
         this.condenserIntakeFluid = (String) data.get("condenserIntakeFluid");
@@ -124,6 +129,9 @@ public class HeatExchangerState implements GuiSync.IGUIPacket {
     public Map<?, ?> write() {
         this.heatExchangerTerminalTile.updateState();
         HashMap<String, Object> data = new HashMap<>();
+        data.put("condenserIntakeOrigin",condenserIntakeOrigin);
+        data.put("evaporatorExhaustOrigin",evaporatorExhaustOrigin);
+
 
         data.put("condenserTankSize", this.condenserTankSize);
         

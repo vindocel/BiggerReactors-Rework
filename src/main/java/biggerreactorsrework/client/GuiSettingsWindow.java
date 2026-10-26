@@ -32,17 +32,26 @@ public final class GuiSettingsWindow {
     private int x() { return Mth.clamp((screen.width - WIDTH) / 2 + offsetX, 4, Math.max(4, screen.width - WIDTH - 4)); }
     private int y() { return Mth.clamp((screen.height - HEIGHT) / 2 + offsetY, 4, Math.max(4, screen.height - HEIGHT - 6)); }
 
+    /** The area the open window covers, kept free of other overlays. */
+    public net.minecraft.client.renderer.Rect2i area() { return new net.minecraft.client.renderer.Rect2i(x() - 4, y() - 4, WIDTH + 8, HEIGHT + 10); }
+
     private static boolean inside(double mx, double my, int x, int y, int width, int height) {
         return mx >= x && mx < x + width && my >= y && my < y + height;
     }
 
     private boolean onTab(double mx, double my) {
         return screen.hasAppearanceSettings() && !screen.isSettingsTabCovered(mx, my)
-                && inside(mx, my, screen.settingsTabX(), screen.settingsTabY(), GuiFrame.TAB_SIZE, GuiFrame.TAB_SIZE);
+                && inside(mx, my, screen.settingsTabX(), screen.settingsTabY(), GuiFrame.TAB_SIZE,
+                screen.hasStatistics() ? GuiStatisticsWindow.TAB_PITCH + GuiFrame.TAB_BUTTON_TOP - 1 : GuiFrame.TAB_SIZE);
     }
 
     public boolean contains(double mx, double my) {
-        return onTab(mx, my) || open && inside(mx, my, x() - 4, y() - 4, WIDTH + 8, HEIGHT + 10);
+        return onTab(mx, my) || covers(mx, my);
+    }
+
+    /** Whether the open window is under the point. */
+    public boolean covers(double mx, double my) {
+        return open() && inside(mx, my, x() - 4, y() - 4, WIDTH + 8, HEIGHT + 10);
     }
 
     private static Component text(String key) {
@@ -56,7 +65,7 @@ public final class GuiSettingsWindow {
     public void renderTab(GuiGraphics g, int mouseX, int mouseY) {
         if (!screen.hasAppearanceSettings()) return;
         int tabX = screen.settingsTabX(), tabY = screen.settingsTabY();
-        screen.getFrame().ear(g, tabX, tabY, GuiFrame.TAB_SIZE, true);
+        screen.getFrame().ear(g, tabX, tabY, screen.hasStatistics() ? GuiStatisticsWindow.TAB_PITCH + GuiFrame.TAB_SIZE : GuiFrame.TAB_SIZE, true);
         GuiArt.tabButton(g, tabX, tabY, true, onTab(mouseX, mouseY), open, screen.getFrame());
         GuiIcon.SETTINGS.draw(g,
                 GuiFrame.tabButtonX(tabX, true) + (GuiFrame.TAB_BUTTON - GuiIcon.SETTINGS.width()) / 2,
@@ -108,7 +117,7 @@ public final class GuiSettingsWindow {
     }
 
     public boolean mousePressed(double mx, double my, int button) {
-        if (!open && !onTab(mx, my)) return false;
+        if (!contains(mx, my)) return false;
         consumeRelease = true;
         if (button != 0) return true;
         if (onTab(mx, my)) {
@@ -147,13 +156,13 @@ public final class GuiSettingsWindow {
 
     public boolean mouseReleased() {
         dragging = false;
-        boolean consumed = consumeRelease || open;
+        boolean consumed = consumeRelease;
         consumeRelease = false;
         return consumed;
     }
 
     public boolean mouseDragged(double mx, double my) {
-        if (!open) return false;
+        if (!open || !dragging) return false;
         if (dragging) {
             offsetX = (int) Math.round(mx - dragX) - (screen.width - WIDTH) / 2;
             offsetY = (int) Math.round(my - dragY) - (screen.height - HEIGHT) / 2;

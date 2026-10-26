@@ -111,7 +111,7 @@ public class HeatExchangerTerminalScreen extends ModScreen<HeatExchangerTerminal
         // (Top) Condenser intake tank:
         RenderedElement<HeatExchangerTerminalContainer> condenserIntakeTank = new RenderedElement<>(this, 10, 36, 18, 64, 0, 144, Component.empty());
         condenserIntakeTank.onRender = (@Nonnull GuiGraphics graphics, int mX, int mY) -> CommonRender.renderFluidGauge(graphics,
-                condenserIntakeTank, heatExchangerState.condenserIntakeFluidAmount, heatExchangerState.condenserTankSize, this.condenserIntakeFluid);
+                condenserIntakeTank, heatExchangerState.condenserIntakeFluidAmount, heatExchangerState.condenserTankSize, biggerreactorsrework.client.CoolantVisuals.stack(heatExchangerState.condenserIntakeFluid,heatExchangerState.condenserIntakeOrigin));
         this.addScreenElement(condenserIntakeTank);
 
         // (Top) Evaporator intake tank:
@@ -139,7 +139,7 @@ public class HeatExchangerTerminalScreen extends ModScreen<HeatExchangerTerminal
         // (Top) Evaporator exhaust tank:
         RenderedElement<HeatExchangerTerminalContainer> evaporatorExhaustTank = new RenderedElement<>(this, 140, 36, 18, 64, 0, 144, Component.empty());
         evaporatorExhaustTank.onRender = (@Nonnull GuiGraphics graphics, int mX, int mY) -> CommonRender.renderFluidGauge(graphics,
-                evaporatorExhaustTank, heatExchangerState.evaporatorExhaustFluidAmount, heatExchangerState.evaporatorTankSize, this.evaporatorExhaustFluid);
+                evaporatorExhaustTank, heatExchangerState.evaporatorExhaustFluidAmount, heatExchangerState.evaporatorTankSize, biggerreactorsrework.client.CoolantVisuals.stack(heatExchangerState.evaporatorExhaustFluid,heatExchangerState.evaporatorExhaustOrigin));
         this.addScreenElement(evaporatorExhaustTank);
     }
 

@@ -4,6 +4,7 @@ import biggerreactorsrework.BiggerReactors;
 import biggerreactorsrework.Config;
 import biggerreactorsrework.client.deps.RecipeViewerData;
 import biggerreactorsrework.client.deps.RecipeViewerData.Cyanite;
+import biggerreactorsrework.client.deps.RecipeViewerData.Stats;
 import biggerreactorsrework.client.deps.RecipeViewers;
 import biggerreactorsrework.items.ingots.BlutoniumIngot;
 import biggerreactorsrework.items.ingots.CyaniteIngot;
@@ -17,9 +18,7 @@ import dev.emi.emi.api.recipe.BasicEmiRecipe;
 import dev.emi.emi.api.recipe.EmiRecipeCategory;
 import dev.emi.emi.api.stack.EmiIngredient;
 import dev.emi.emi.api.stack.EmiStack;
-import dev.emi.emi.api.widget.TextWidget;
 import dev.emi.emi.api.widget.WidgetHolder;
-import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.material.Fluids;
@@ -39,37 +38,70 @@ public class BiggerReactorsEmiPlugin implements EmiPlugin {
     static final EmiRecipeCategory MODERATOR_BLOCK = new EmiRecipeCategory(RecipeViewers.MODERATOR_BLOCK, REACTOR_TERMINAL);
     static final EmiRecipeCategory MODERATOR_FLUID = new EmiRecipeCategory(RecipeViewers.MODERATOR_FLUID, REACTOR_TERMINAL);
     static final EmiRecipeCategory TURBINE_COIL = new EmiRecipeCategory(RecipeViewers.TURBINE_COIL, TURBINE_TERMINAL);
-    private static final ResourceLocation INFO_BACKGROUND = ResourceLocation.fromNamespaceAndPath(BiggerReactors.modid, "textures/jei/common.png");
-    private static final int INFO_WIDTH = 144;
-    private static final int INFO_TEXT_X = 80;
-    private static final int INFO_LINE = 12;
-    private static final int INFO_TEXT = 0xFF000000;
+    static final EmiStack EXCHANGER=EmiStack.of(biggerreactorsrework.multiblocks.heatexchanger.blocks.HeatExchangerTerminalBlock.INSTANCE);
+    static final EmiRecipeCategory HEAT_EXCHANGE=new EmiRecipeCategory(RecipeViewers.HEAT_EXCHANGE,EXCHANGER);
 
     @Override
     public void register(EmiRegistry registry) {
+        registry.addGenericExclusionArea((screen, consumer) -> {
+            if (screen instanceof biggerreactorsrework.core.client.gui.screens.ModScreen<?> modScreen) {
+                for (var area : modScreen.extraAreas()) {
+                    consumer.accept(new dev.emi.emi.api.widget.Bounds(area.getX(), area.getY(), area.getWidth(), area.getHeight()));
+                }
+            }
+        });
         registry.addCategory(CYANITE_REPROCESSING);
         registry.addCategory(MODERATOR_BLOCK);
         registry.addCategory(MODERATOR_FLUID);
         registry.addCategory(TURBINE_COIL);
+        registry.addCategory(HEAT_EXCHANGE);
         registry.addWorkstation(CYANITE_REPROCESSING, REPROCESSOR);
         registry.addWorkstation(MODERATOR_BLOCK, REACTOR_TERMINAL);
         registry.addWorkstation(MODERATOR_FLUID, REACTOR_TERMINAL);
         registry.addWorkstation(TURBINE_COIL, TURBINE_TERMINAL);
+        registry.addWorkstation(HEAT_EXCHANGE,EXCHANGER);
+        registry.addWorkstation(HEAT_EXCHANGE,EmiStack.of(biggerreactorsrework.multiblocks.heatexchanger.blocks.HeatExchangerCondenserChannelBlock.INSTANCE));
+        registry.addWorkstation(HEAT_EXCHANGE,EmiStack.of(biggerreactorsrework.multiblocks.heatexchanger.blocks.HeatExchangerEvaporatorChannelBlock.INSTANCE));
+        registry.addWorkstation(HEAT_EXCHANGE,EmiStack.of(biggerreactorsrework.multiblocks.heatexchanger.blocks.HeatExchangerFluidPortBlock.INSTANCE));
         if (!Config.CONFIG.EnableJEIIntegration) {
             return;
         }
         for (var holder : registry.getRecipeManager().getAllRecipesFor(biggerreactorsrework.machine.recipe.ReprocessingRecipes.TYPE.get())) registry.addRecipe(new Reprocessing(holder));
         for (RecipeViewerData.ModeratorBlock moderator : RecipeViewerData.moderatorBlocks()) {
             registry.addRecipe(new Info(MODERATOR_BLOCK, "moderator_block", EmiStack.of(moderator.block()),
-                    RecipeViewerData.moderatorLines(moderator.properties()), 0, 46));
+                    Stats.moderator(moderator.properties())));
         }
-        for (RecipeViewerData.ModeratorFluid moderator : RecipeViewerData.moderatorFluids()) {
-            registry.addRecipe(new Info(MODERATOR_FLUID, "moderator_fluid", EmiStack.of(moderator.fluid(), 1000),
-                    RecipeViewerData.moderatorLines(moderator.properties()), 0, 46));
-        }
+        for (var coolant : RecipeViewerData.coolants()) registry.addRecipe(new FluidConversion(MODERATOR_FLUID, "coolant",
+                net.minecraft.core.registries.BuiltInRegistries.FLUID.getKey(coolant.input().getFluid()), coolant.card()));
+        for (var recipe : RecipeViewerData.heatExchanges()) registry.addRecipe(new FluidConversion(HEAT_EXCHANGE, "heat_exchange",
+                RecipeViewerData.heatExchangeId(recipe), recipe.card()));
         for (RecipeViewerData.Coil coil : RecipeViewerData.coils()) {
             registry.addRecipe(new Info(TURBINE_COIL, "turbine_coil", EmiStack.of(coil.block()),
-                    RecipeViewerData.coilLines(coil.data()), 6, 34));
+                    Stats.coil(coil.data())));
+        }
+    }
+
+    /** Added 2026-10-26: a cold and a hot fluid with the properties of the conversion drawn as bars, like the moderator pages. */
+    private static final class FluidConversion extends BasicEmiRecipe {
+        private final RecipeViewerData.FluidCard card;
+
+        FluidConversion(EmiRecipeCategory category, String kind, ResourceLocation cold, RecipeViewerData.FluidCard card) {
+            super(category, syntheticId(kind, cold),
+                    RecipeViewerData.FluidCard.WIDTH, card.height());
+            this.card = card;
+            inputs.add(EmiStack.of(card.input().getFluid(), card.input().getComponentsPatch(), 1000));
+            outputs.add(EmiStack.of(card.output().getFluid(), card.output().getComponentsPatch(), 1000));
+        }
+
+        @Override
+        public void addWidgets(WidgetHolder widgets) {
+            widgets.addDrawable(0, 0, RecipeViewerData.FluidCard.WIDTH, card.height(), (g, mouseX, mouseY, delta) -> card.draw(g));
+            widgets.addSlot(inputs.getFirst(), 0, RecipeViewerData.FluidCard.inputY()).drawBack(false);
+            widgets.addSlot(outputs.getFirst(), 0, card.outputY()).drawBack(false).recipeContext(this);
+            for (int i = 0; i < card.stats().size(); i++) {
+                widgets.addTooltipText(Stats.tooltip(card.stats().get(i)), Stats.rowX(), RecipeViewerData.FluidCard.rowY(i),
+                        RecipeViewerData.FluidCard.WIDTH - Stats.rowX(), Stats.ROW);
+            }
         }
     }
 
@@ -101,19 +133,15 @@ public class BiggerReactorsEmiPlugin implements EmiPlugin {
         }
     }
 
-    /** A block or fluid with its properties written beside it, like the JEI categories. */
+    /** A block or fluid with its properties drawn as bars beside it, like the JEI categories. */
     private static final class Info extends BasicEmiRecipe {
         private final EmiIngredient stack;
-        private final List<Component> lines;
-        private final int v;
-        private final int height;
+        private final List<Stats.Stat> stats;
 
-        Info(EmiRecipeCategory category, String kind, EmiStack stack, List<Component> lines, int v, int height) {
-            super(category, syntheticId(kind, stack.getId()), INFO_WIDTH, height);
+        Info(EmiRecipeCategory category, String kind, EmiStack stack, List<Stats.Stat> stats) {
+            super(category, syntheticId(kind, stack.getId()), Stats.WIDTH, Stats.height(stats));
             this.stack = stack;
-            this.lines = lines;
-            this.v = v;
-            this.height = height;
+            this.stats = stats;
             inputs.add(stack);
         }
 
@@ -124,10 +152,10 @@ public class BiggerReactorsEmiPlugin implements EmiPlugin {
 
         @Override
         public void addWidgets(WidgetHolder widgets) {
-            widgets.addTexture(INFO_BACKGROUND, 0, 0, INFO_WIDTH, height, 0, v);
-            widgets.addSlot(stack, 0, (height - 18) / 2).drawBack(false);
-            for (int i = 0; i < lines.size(); i++) {
-                widgets.addText(lines.get(i), INFO_TEXT_X, i * INFO_LINE, INFO_TEXT, false).horizontalAlign(TextWidget.Alignment.CENTER);
+            widgets.addDrawable(0, 0, Stats.WIDTH, Stats.height(stats), (g, mouseX, mouseY, delta) -> Stats.draw(g, stats));
+            widgets.addSlot(stack, 0, Stats.slotY(stats)).drawBack(false);
+            for (int i = 0; i < stats.size(); i++) {
+                widgets.addTooltipText(Stats.tooltip(stats.get(i)), Stats.rowX(), i * Stats.ROW, Stats.rowWidth(), Stats.ROW);
             }
         }
     }

@@ -61,6 +61,8 @@ public class FluidTransitionRegistry {
     }
     
     public static class FluidTransition implements ITransitionProperties {
+        public double recovery = 1;
+        public boolean genericHot() { return gases.contains(biggerreactorsrework.fluids.HeatedCoolant.INSTANCE); }
         public final List<Fluid> liquids;
         public final List<Fluid> gases;
         public final double latentHeat;
@@ -117,6 +119,13 @@ public class FluidTransitionRegistry {
     public static FluidTransition gasTransition(Fluid gas) {
         return gasTransitions.get(gas);
     }
+
+    public static FluidTransition gasTransition(Fluid gas, net.minecraft.core.component.DataComponentPatch components) {
+        if (gas == biggerreactorsrework.fluids.HeatedCoolant.INSTANCE) return CoolantComponents.resolve(components);
+        return components.isEmpty() ? gasTransition(gas) : null;
+    }
+
+    public static Collection<FluidTransition> transitions() { return List.copyOf(new HashSet<>(liquidTransitions.values())); }
     
     // TODO: unify these names across all registries
     private enum RegistryType {
@@ -149,6 +158,7 @@ public class FluidTransitionRegistry {
     
         @ConfigValue(range = "[0,)")
         public double turbineMultiplier;
+        @ConfigValue(range = "(0,1]") public double recovery = 1;
     }
     
     private static final DatapackLoader<FluidTransitionJsonData> loader = new DatapackLoader<>(FluidTransitionJsonData::new);
@@ -207,6 +217,7 @@ public class FluidTransitionRegistry {
             }
             
             FluidTransition transition = new FluidTransition(liquids, gases, transitionData.latentHeat, transitionData.boilingPoint, transitionData.liquidThermalConductivity, transitionData.gasThermalConductivity, transitionData.turbineMultiplier);
+            transition.recovery = transitionData.recovery;
             
             for (Fluid liquid : transition.liquids) {
                 if (liquidTransitions.put(liquid, transition) != null) {
@@ -216,6 +227,7 @@ public class FluidTransitionRegistry {
             }
             
             for (Fluid gas : transition.gases) {
+                if (gas == biggerreactorsrework.fluids.HeatedCoolant.INSTANCE) continue;
                 if (gasTransitions.put(gas, transition) != null) {
                     BiggerReactors.LOGGER.error("Duplicate transitions given for gas fluid " + BuiltInRegistries.FLUID.getKey(gas).toString());
                 }

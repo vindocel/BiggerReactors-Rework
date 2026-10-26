@@ -122,17 +122,18 @@ public final class GaugeBar {
      * The interior rows {@code top..HEIGHT - FRAME} filled with the fluid's own animated texture and tint, its
      * opacity scaled by {@value #FLUID_OPACITY}.
      */
-    private static void fluidRows(GuiGraphics g, int x, int y, int top, Fluid fluid) {
+    private static void fluidRows(GuiGraphics g, int x, int y, int top, net.neoforged.neoforge.fluids.FluidStack stack) {
+        Fluid fluid=stack.getFluid();
         if (top >= HEIGHT - FRAME || fluid == Fluids.EMPTY) {
             return;
         }
         final IClientFluidTypeExtensions extension = IClientFluidTypeExtensions.of(fluid);
-        final ResourceLocation still = extension.getStillTexture();
+        final ResourceLocation still = extension.getStillTexture(stack);
         if (still == null) {
             return;
         }
         final TextureAtlasSprite sprite = Minecraft.getInstance().getTextureAtlas(InventoryMenu.BLOCK_ATLAS).apply(still);
-        final int tint = extension.getTintColor();
+        final int tint = extension.getTintColor(stack);
         final float red = ((tint >> 16) & 0xFF) / 255F;
         final float green = ((tint >> 8) & 0xFF) / 255F;
         final float blue = (tint & 0xFF) / 255F;
@@ -170,11 +171,13 @@ public final class GaugeBar {
      * Fluid tank: the fluid's own texture fills the bar, a transparent reflection moves over the filled part, and the
      * frame with the level marks goes on top.
      */
-    public static void drawFluid(GuiGraphics g, int x, int y, double stored, double capacity, Fluid fluid) {
+    public static void drawFluid(GuiGraphics g,int x,int y,double stored,double capacity,Fluid fluid){drawFluid(g,x,y,stored,capacity,new net.neoforged.neoforge.fluids.FluidStack(fluid,1));}
+    public static void drawFluid(GuiGraphics g, int x, int y, double stored, double capacity, net.neoforged.neoforge.fluids.FluidStack stack) {
+        Fluid fluid=stack.getFluid();
         GuiTheme.blit(g, FLUID_EMPTY, x, y, 0, 0, WIDTH, HEIGHT, WIDTH, HEIGHT);
         final int top = fillTop(HEIGHT - FRAME, stored, capacity);
         if (top < HEIGHT - FRAME && fluid != Fluids.EMPTY) {
-            fluidRows(g, x, y, top, fluid);
+            fluidRows(g, x, y, top, stack);
             // The reflection is mostly transparent: a plain blit draws without blending and would make it opaque.
             RenderSystem.enableBlend();
             RenderSystem.defaultBlendFunc();
@@ -188,7 +191,7 @@ public final class GaugeBar {
      * Control rod: the fuel fluid behind, the rod coming down from the top as it is inserted (0 to 100).
      */
     public static void drawControlRod(GuiGraphics g, int x, int y, double insertion, Fluid fuel) {
-        fluidRows(g, x, y, FRAME, fuel);
+        fluidRows(g, x, y, FRAME, new net.neoforged.neoforge.fluids.FluidStack(fuel,1));
         // The rod texture starts above the interior, under the frame.
         final int rows = FRAME + filledPixels(INTERIOR_HEIGHT, insertion, 100);
         if (rows > 0) {

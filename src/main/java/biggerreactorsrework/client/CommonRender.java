@@ -49,13 +49,14 @@ public class CommonRender {
      * @param fluidCapacity The max fluid capacity that can be displayed.
      * @param fluid         The fluid to use.
      */
-    public static <T extends AbstractContainerMenu> void renderFluidGauge(@Nonnull GuiGraphics graphics, @Nonnull RenderedElement<T> symbol, long fluidStored, long fluidCapacity, Fluid fluid) {
-        GaugeBar.drawFluid(graphics, symbol.x, symbol.y, fluidStored, fluidCapacity, fluid);
+    public static <T extends AbstractContainerMenu> void renderFluidGauge(@Nonnull GuiGraphics graphics,@Nonnull RenderedElement<T> symbol,long stored,long capacity,Fluid fluid){renderFluidGauge(graphics,symbol,stored,capacity,new FluidStack(fluid,1));}
+    public static <T extends AbstractContainerMenu> void renderFluidGauge(@Nonnull GuiGraphics graphics, @Nonnull RenderedElement<T> symbol, long fluidStored, long fluidCapacity, FluidStack stack) {
+        GaugeBar.drawFluid(graphics, symbol.x, symbol.y, fluidStored, fluidCapacity, stack);
         // Update tooltip.
         symbol.tooltip = Component.literal(String.format("%s/%s of %s",
                 RenderHelper.formatValue((fluidStored / 1000.0), "B", true),
                 RenderHelper.formatValue((fluidCapacity / 1000.0), "B", true),
-                new FluidStack(fluid, 1).getHoverName().getString().toLowerCase(Locale.US)));
+                stack.getHoverName().getString()));
         RenderHelper.clearRenderColor();
     }
 }

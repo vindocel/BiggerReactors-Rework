@@ -13,8 +13,9 @@ import net.neoforged.fml.ModList;
 public final class RecipeViewers {
     public static final ResourceLocation CYANITE_REPROCESSING = ResourceLocation.fromNamespaceAndPath(BiggerReactors.modid, "cyanite_reprocessing");
     public static final ResourceLocation MODERATOR_BLOCK = ResourceLocation.fromNamespaceAndPath(BiggerReactors.modid, "classic/reactor_moderator_block");
-    public static final ResourceLocation MODERATOR_FLUID = ResourceLocation.fromNamespaceAndPath(BiggerReactors.modid, "classic/reactor_moderator_fluid");
+    public static final ResourceLocation MODERATOR_FLUID = ResourceLocation.fromNamespaceAndPath(BiggerReactors.modid, "classic/reactor_coolant");
     public static final ResourceLocation TURBINE_COIL = ResourceLocation.fromNamespaceAndPath(BiggerReactors.modid, "classic/turbine_coil");
+    public static final ResourceLocation HEAT_EXCHANGE = ResourceLocation.fromNamespaceAndPath(BiggerReactors.modid, "heat_exchange");
 
     private RecipeViewers() {
     }

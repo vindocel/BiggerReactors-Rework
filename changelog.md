@@ -1,4 +1,40 @@
-# 1.21.1-0.1.0 (BiggerReactors-Rework, unreleased)
+# 1.21.1-0.1.2 (BiggerReactors-Rework, unreleased)
+
+## Liquid cooling
+ - reactor manifolds and exchanger channels now fill their whole visual path using the relative cold/hot proportions, including abrupt stock changes and tiny nonempty amounts; actual inventory gauges and conversion remain unchanged
+ - corrected sodium's heat-exchange temperature so the same reactor and exchanger produce more steam with sodium than Cryo Fuel or Liquid Obsidian; added a finite closed-loop comparison of all coolant tiers using identical geometry and control rods
+ - preserved existing sodium inventories across this specific temperature correction without accepting unrelated coolant profile changes
+ - JEI and EMI coolant entries show heat-exchange temperature and the correct destination of the hot output instead of labeling coolant heat capacity as FE/mB
+ - empty coolant tank pairs now clear their selected fluid, origin and fractional heat so another coolant can enter; fixes both manual emptying and loading previously empty saves, while keeping nonempty fluids separated
+ - added an automated water/obsidian comparison for the saved 6×6×6 reactor, preserving individual rod insertions and checking finite closed-loop coolant conservation and steady-state steam/fuel progression
+ - fixed a client crash when rendering exchanger fluids: channels resolve assembly through their terminal instead of reading an ASSEMBLED property they do not have
+ - assembled turbines now send rotor geometry even at zero RPM and accept geometry arriving before the assembled block state
+ - repaired 119 malformed English color codes that displayed stray characters in machine screens and tooltips
+ - both heat exchanger circuits now display their input/output fluids inside straight channels and elbows, sharing tube space according to synchronized tank proportions; only aggregate views are synchronized during operation
+ - manifold fluids now span continuous vertical columns, with hot coolant rising from below and cold coolant descending from above in shared space
+ - heat exchangers retain operating temperatures on load/reassembly; statistics identify warmup, partial supply and indirect heat transfer, and show channel temperatures
+ - the guide and both channel item tooltips explain face contact, indirect transfer across a gap and the full-inlet steady-state assumptions behind potential conversion
+ - heated coolant texture generation now isolates external fluids without client texture properties, preventing an atlas reload failure and subsequent duplicate mod setup registrations
+
+## Battery
+ - recipes are more expensive: the casing uses blutonium ingots instead of iron, the energy port uses redstone blocks, and the terminal and cell use ludicrite ingots
+ - fixed a crash when saving and closing a world with a battery, caused by cells updating their neighbors while their chunks were unloading
+
+## JEI and EMI
+ - added the Heat Exchanger category with indexed hot-to-cold coolant conversions and water-to-steam evaporation; terminal, both channel types and fluid port expose it, and optional hot fluid origins remain intact
+ - moderator blocks, moderator fluids and turbine coils now show each property as a colored bar, scaled to the best value available and colored by how it ranks against the other options
+ - hovering a property explains it and lists its benefits and drawbacks
+ - reactor coolant and heat exchange pages now follow the moderator page layout and width: cold and hot fluids stacked with an arrow, names on top, ranked bars for heat per mB, temperature, conductivity and recovery, and notes for the destination or circuit
+ - statistics side tab sits under the appearance tab on the same ear instead of overlapping it on reactor, turbine and heat exchanger terminals
+ - statistics window grouped into Structure, Fuel, Fluids and Performance sections, with the operating condition pinned on top, terminal-style units and a bar comparing current and potential rates
+ - guide coolant tables keep names at normal size, sliding inside their column, and show the fluid on hover; the heat exchanger chapter lists the fluids it exchanges
+ - guide models no longer list or draw empty interior spaces as air, and reactor manifolds are drawn closed with coolant inside instead of showing only their outer faces
+ - statistics window can be dragged by its title and uses its own icon on the side tab
+ - side tabs, ears and open popups are reported to the recipe viewer, which moves its ingredient list out of the way instead of covering the screen
+ - recipe viewer tooltips are drawn above the reprocessor's face configuration window
+ - appearance, statistics and face configuration popups can stay open together and close in any order; the last one clicked comes to the front, and each popup only blocks the area it covers
+
+# 1.21.1-0.1.0 (BiggerReactors-Rework)
 
 Independent fork and rework of BiggerReactors. Mod id `biggerreactorsrework`, meant for new worlds:
 worlds and machines from the original mod are not migrated.

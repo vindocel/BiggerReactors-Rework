@@ -107,6 +107,13 @@ public class BatteryTerminalScreen extends ModScreen<BatteryTerminalContainer> {
         }
     }
 
+    @Override
+    public List<net.minecraft.client.renderer.Rect2i> extraAreas() {
+        var areas = super.extraAreas();
+        areas.add(new net.minecraft.client.renderer.Rect2i(this.getGuiLeft() + WIDTH, this.getGuiTop() + ARMOR_EAR_Y, GuiFrame.TAB_SIZE, ARMOR_EAR_HEIGHT));
+        return areas;
+    }
+
     private boolean onArmorTab(double mouseX, double mouseY) {
         int earX = this.getGuiLeft() + WIDTH;
         int earY = this.getGuiTop() + ARMOR_EAR_Y;

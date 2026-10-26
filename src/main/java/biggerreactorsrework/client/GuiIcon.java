@@ -39,6 +39,7 @@ public record GuiIcon(ResourceLocation texture, int width, int height) {
     public static final GuiIcon FUEL_USAGE_RATE = of("fuel_usage_rate", 16, 13);
     public static final GuiIcon HELP = of("help", 16, 16);
     public static final GuiIcon SETTINGS = of("settings", 16, 16);
+    public static final GuiIcon STATISTICS = of("statistics", 16, 16);
     public static final GuiIcon REACTIVITY = of("reactivity", 16, 16);
     public static final GuiIcon REACTOR_ACTIVITY = of("reactor_activity", 16, 12);
     public static final GuiIcon ROTOR_EFFICIENCY = of("rotor_efficiency", 16, 16);

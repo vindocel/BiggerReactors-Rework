@@ -42,6 +42,8 @@ public class TurbineRotorBearingTile extends TurbineBaseTile implements IEventMu
     public ArrayList<Vector4i> rotorConfiguration = null;
     public AABB AABB = null;
     private long sendFullUpdate = Long.MAX_VALUE;
+    // Modified 2026-10-25: geometry synchronization must not depend on a change in RPM.
+    public boolean needsFullUpdate() { return sendFullUpdate!=Long.MAX_VALUE && sendFullUpdate<=CoreEvents.tickNumber(); }
 
     // client render state, advanced by the renderer from real frame time
     public double renderAngle = 0;
@@ -57,7 +59,7 @@ public class TurbineRotorBearingTile extends TurbineBaseTile implements IEventMu
                 return nbt;
             }
             nbt.putDouble("speed", controller().simulation().RPM());
-            if (sendFullUpdate < CoreEvents.tickNumber()) {
+            if (needsFullUpdate()) {
                 sendFullUpdate = Long.MAX_VALUE;
                 nbt.put("config", getUpdateTag(registries()));
             }
@@ -67,7 +69,7 @@ public class TurbineRotorBearingTile extends TurbineBaseTile implements IEventMu
 
     @Override
     public void handleUpdateNBT(CompoundTag nbt) {
-        if (getBlockState().getValue(ASSEMBLED) && nbt.contains("speed")) {
+        if (!nbt.getBoolean("disassembled") && nbt.contains("speed")) {
             speed = nbt.getDouble("speed");
             if (nbt.contains("config")) {
                 handleUpdateTag(nbt.getCompound("config"), registries());

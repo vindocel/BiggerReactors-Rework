@@ -26,6 +26,10 @@ public class CoolantTank extends HeatBody implements IReactorSimulation.ICoolant
     private long maxTransitionedLastTick;
     private long transitionedLastTick;
     private long rfTransferredLastTick;
+    private double thermalRemainder;
+    public double environmentalLossLastTick;
+    public FluidTransitionRegistry.ITransitionProperties transition() { return transitionProperties; }
+    public double recovery() { return transitionProperties instanceof FluidTransitionRegistry.FluidTransition t ? t.recovery : 1; }
     
     CoolantTank(long perSideCapacity, ReactorModeratorRegistry.IModeratorProperties defaultModeratorProperties, SimulationConfiguration configuration) {
         this.configuration = configuration;
@@ -37,6 +41,7 @@ public class CoolantTank extends HeatBody implements IReactorSimulation.ICoolant
     @Override
     public double transferWith(HeatBody body, double rfkt) {
         if (transitionProperties == null) {
+            environmentalLossLastTick=0;
             maxTransitionedLastTick = 0;
             transitionedLastTick = 0;
             rfTransferredLastTick = 0;
@@ -63,7 +68,8 @@ public class CoolantTank extends HeatBody implements IReactorSimulation.ICoolant
     
     @Override
     public double absorbRF(double rf) {
-        if (rf > 0 || transitionProperties == null) {
+        environmentalLossLastTick=0;
+        if (!Double.isFinite(rf) || rf > 0 || transitionProperties == null) {
             maxTransitionedLastTick = 0;
             transitionedLastTick = 0;
             rfTransferredLastTick = 0;
@@ -72,21 +78,25 @@ public class CoolantTank extends HeatBody implements IReactorSimulation.ICoolant
         
         rf = Math.abs(rf);
     
-        final double transitionMultiplier = configuration.outputMultiplier() * configuration.activeOutputMultiplier();
-        final double effectiveLatentHeat = transitionProperties.latentHeat() * transitionMultiplier;
+        final double effectiveLatentHeat = transitionProperties.latentHeat();
         
-        long toTransition = (long) (rf / effectiveLatentHeat);
+        double captured=rf*recovery();
+        long toTransition = (long) (captured / effectiveLatentHeat);
         final long maxTransitionable = Math.min(liquidAmount, perSideCapacity - vaporAmount);
         
         maxTransitionedLastTick = toTransition;
-        toTransition = Math.min(maxTransitionable, toTransition);
+        var result=PhaseChange.accept(captured,effectiveLatentHeat,maxTransitionable,thermalRemainder);
+        toTransition = result.units();
+        thermalRemainder = result.remainder();
         transitionedLastTick = toTransition;
         
         liquidAmount -= transitionedLastTick;
         vaporAmount += transitionedLastTick;
         
-        rf = toTransition * effectiveLatentHeat;
+        rf = result.accepted();
         rfTransferredLastTick = (long) rf;
+        environmentalLossLastTick=rf/recovery()-rf;
+        rf+=environmentalLossLastTick;
         rf *= -1;
         
         return rf;
@@ -95,11 +105,13 @@ public class CoolantTank extends HeatBody implements IReactorSimulation.ICoolant
     @Override
     public void dumpLiquid() {
         liquidAmount = 0;
+        if(vaporAmount==0)thermalRemainder=0;
     }
     
     @Override
     public void dumpVapor() {
         vaporAmount = 0;
+        if(liquidAmount==0)thermalRemainder=0;
     }
     
     @Override
@@ -149,6 +161,7 @@ public class CoolantTank extends HeatBody implements IReactorSimulation.ICoolant
     @Override
     public void setTransitionProperties(FluidTransitionRegistry.ITransitionProperties transitionProperties) {
         this.transitionProperties = transitionProperties;
+        if(transitionProperties==null)thermalRemainder=0;
     }
     
     @Override
@@ -220,6 +233,7 @@ public class CoolantTank extends HeatBody implements IReactorSimulation.ICoolant
         var compound = new DataCompound();
         compound.put("liquidAmount", liquidAmount);
         compound.put("gasAmount", vaporAmount);
+        compound.put("thermalRemainder",thermalRemainder);
         return compound;
     }
     
@@ -227,5 +241,9 @@ public class CoolantTank extends HeatBody implements IReactorSimulation.ICoolant
     public void load(@Nonnull DataCompound compound) {
         liquidAmount = compound.getLong("liquidAmount");
         vaporAmount = compound.getLong("gasAmount");
+        liquidAmount=Math.max(0,liquidAmount);
+        vaporAmount=Math.max(0,vaporAmount);
+        thermalRemainder=Math.max(0,compound.getDouble("thermalRemainder"));
+        if(!Double.isFinite(thermalRemainder))thermalRemainder=0;
     }
 }
