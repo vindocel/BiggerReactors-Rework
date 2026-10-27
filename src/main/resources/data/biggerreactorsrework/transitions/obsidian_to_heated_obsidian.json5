@@ -1,0 +1,12 @@
+{
+  "liquidType": "registry",
+  "liquid": "biggerreactorsrework:liquid_obsidian",
+  "gasType": "registry",
+  "gas": "biggerreactorsrework:heated_coolant",
+  "latentHeat": 36,
+  "boilingPoint": 773.15,
+  "liquidThermalConductivity": 2.2,
+  "gasThermalConductivity": 1.8,
+  "turbineMultiplier": 0,
+  "recovery": 0.71765
+}

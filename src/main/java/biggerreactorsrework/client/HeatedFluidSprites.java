@@ -35,9 +35,17 @@ public final class HeatedFluidSprites implements SpriteSource {
         var source=source(stack);var candidate=id(source,flowing);
         return AVAILABLE.contains(candidate)?candidate:ResourceLocation.fromNamespaceAndPath(BiggerReactors.modid,"block/fluid/liquid_obsidian_still");
     }
+    public static boolean missing(java.util.List<biggerreactorsrework.registries.FluidTransitionRegistry.FluidTransition> profiles) {
+        return profiles.stream().filter(t->t.genericHot()).anyMatch(t->!AVAILABLE.contains(id(t.liquids.getFirst(),false)));
+    }
     public void run(ResourceManager resources,Output output){
         AVAILABLE.clear();
-        for(var source:BuiltInRegistries.FLUID) {
+        // Modified 2026-10-26: derive only eligible generic outputs; native hot fluids already have sprites.
+        var eligible=new java.util.HashSet<Fluid>();
+        var cryo=ResourceLocation.fromNamespaceAndPath("ad_astra","cryo_fuel");
+        if(BuiltInRegistries.FLUID.containsKey(cryo))eligible.add(BuiltInRegistries.FLUID.get(cryo));
+        for(var profile:biggerreactorsrework.registries.CoolantSync.profiles())if(profile.genericHot())eligible.addAll(profile.liquids);
+        for(var source:eligible) {
             try {
                 addSource(resources,output,source);
             } catch (RuntimeException unavailable) {
@@ -51,15 +59,27 @@ public final class HeatedFluidSprites implements SpriteSource {
             if(source==Fluids.EMPTY || source==HeatedCoolant.INSTANCE || !source.isSource(source.defaultFluidState()))return;
             var extension=IClientFluidTypeExtensions.of(source);
             for(boolean flowing:new boolean[]{false,true}) {
-                var texture=flowing?extension.getFlowingTexture(new FluidStack(source,1)):extension.getStillTexture(new FluidStack(source,1));
-                if(texture==null)continue;
+                ResourceLocation sourceTexture;
+                int sourceTint;
+                try {
+                    sourceTexture=flowing?extension.getFlowingTexture(new FluidStack(source,1)):extension.getStillTexture(new FluidStack(source,1));
+                    sourceTint=extension.getTintColor(new FluidStack(source,1));
+                } catch(RuntimeException unavailable) {
+                    if(!BuiltInRegistries.FLUID.getKey(source).toString().equals("ad_astra:cryo_fuel"))throw unavailable;
+                    // Verified against this integration's registered client fluid data: tinted vanilla water.
+                    sourceTexture=ResourceLocation.withDefaultNamespace(flowing?"block/water_flow":"block/water_still");
+                    sourceTint=-9633798;
+                }
+                if(sourceTexture==null)continue;
+                final var texture=sourceTexture;
+                final int tint=sourceTint;
                 var resource=resources.getResource(texture.withPath(p->"textures/"+p+".png"));
                 if(resource.isEmpty())continue;
-                var target=id(source,flowing);int tint=extension.getTintColor(new FluidStack(source,1));
+                var target=id(source,flowing);
                 AVAILABLE.add(target);
                 output.add(target,loader->{
                     var original=loader.loadSprite(texture,resource.get());
-                    if(original==null)return null;
+                    if(original==null){AVAILABLE.remove(target);return null;}
                     try {
                         var input=original.getOriginalImage();var image=new NativeImage(input.getWidth(),input.getHeight(),false);
                         for(int y=0;y<input.getHeight();y++)for(int x=0;x<input.getWidth();x++){

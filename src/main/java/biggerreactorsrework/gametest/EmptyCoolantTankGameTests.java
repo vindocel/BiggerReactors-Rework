@@ -22,8 +22,8 @@ public final class EmptyCoolantTankGameTests {
         var steam=FluidTransitionRegistry.liquidTransition(Fluids.WATER).gases.getFirst();
         for(boolean condenser:new boolean[]{true,false}) {
             var tank=new FluidTransitionTank(condenser);tank.perSideCapacity=10000;
-            tank.fill(condenser?Fluids.LAVA:LiquidObsidian.INSTANCE,DataComponentPatch.EMPTY,2,false);
-            tank.absorbRF(condenser?30.5:-30.5);
+            tank.fill(condenser?biggerreactorsrework.fluids.HeatedCoolant.INSTANCE:LiquidObsidian.INSTANCE,condenser?biggerreactorsrework.registries.CoolantComponents.heated(FluidTransitionRegistry.liquidTransition(LiquidObsidian.INSTANCE)):DataComponentPatch.EMPTY,2,false);
+            tank.absorbRF((condenser?1:-1)*(2*FluidTransitionRegistry.liquidTransition(LiquidObsidian.INSTANCE).latentHeat+.5));
             var saved=tank.serializeNBT();
             h.assertTrue(tank.drain(2,FluidAction.SIMULATE).getAmount()==2 && tank.serializeNBT().equals(saved),"drain preview reset the profile");
             tank.drain(1,FluidAction.EXECUTE);
@@ -41,12 +41,12 @@ public final class EmptyCoolantTankGameTests {
 
     @GameTest(template="empty_7x7x7")
     public static void oldEmptySaveAndManualDumpClearSelection(GameTestHelper h) {
-        var tank=new FluidTransitionTank(true);tank.perSideCapacity=10000;tank.fill(Fluids.LAVA,DataComponentPatch.EMPTY,100,false);
+        var tank=new FluidTransitionTank(true);tank.perSideCapacity=10000;tank.fill(biggerreactorsrework.fluids.HeatedCoolant.INSTANCE,biggerreactorsrework.registries.CoolantComponents.heated(FluidTransitionRegistry.liquidTransition(biggerreactorsrework.fluids.LiquidObsidian.INSTANCE)),100,false);
         var oldSave=tank.serializeNBT();oldSave.putLong("inAmount",0);oldSave.putLong("outAmount",0);oldSave.putDouble("thermalRemainder",.5);
         var restored=new FluidTransitionTank(true);restored.perSideCapacity=10000;restored.deserializeNBT(oldSave);
         var steam=FluidTransitionRegistry.liquidTransition(Fluids.WATER).gases.getFirst();
         h.assertTrue(restored.activeTransition()==null && restored.fill(steam,DataComponentPatch.EMPTY,1,false)==1,"old empty save kept a coolant lock");
-        tank.absorbRF(15.5);tank.dumpTank(0);
+        tank.absorbRF(FluidTransitionRegistry.liquidTransition(LiquidObsidian.INSTANCE).latentHeat+.5);tank.dumpTank(0);
         h.assertTrue(tank.activeTransition()!=null,"dumping only input cleared nonempty output");
         tank.dumpTank(1);
         h.assertTrue(tank.activeTransition()==null && tank.serializeNBT().isEmpty(),"manual empty retained old selection");
@@ -59,7 +59,7 @@ public final class EmptyCoolantTankGameTests {
         var d=OperationGameTests.description(3);for(int y=0;y<3;y++)d.setManifold(0,y,1,true);
         var simulation=new TimeSlicedReactorSimulation(d,new SimulationConfiguration(293.15,false));var tank=new ReactorTransitionTank(simulation.coolantTank());
         tank.fill(LiquidObsidian.INSTANCE,DataComponentPatch.EMPTY,1,false);
-        ((biggerreactorsrework.multiblocks.reactor.simulation.base.CoolantTank)simulation.coolantTank()).absorbRF(-30);
+        ((biggerreactorsrework.multiblocks.reactor.simulation.base.CoolantTank)simulation.coolantTank()).absorbRF(-100);
         tank.drain(1,FluidAction.EXECUTE);
         h.assertTrue(tank.activeTransition()==null && simulation.coolantTank().liquidAmount()==0 && simulation.coolantTank().vaporAmount()==0,"reactor did not clear an empty coolant profile");
         h.assertTrue(tank.fill(Fluids.WATER,DataComponentPatch.EMPTY,1,false)==1,"reactor refused replacement coolant");

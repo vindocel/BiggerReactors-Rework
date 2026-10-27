@@ -381,15 +381,17 @@ public final class RecipeViewerData {
         public static final int WIDTH = 162;
         public static final int HEIGHT = GaugeBar.HEIGHT;
         /** Slot frames (18x18); the items go 1 px inside. */
-        public static final int INPUT_X = 36;
-        public static final int OUTPUT_X = 108;
+        public static final int INPUT_X = 48;
+        public static final int OUTPUT_X = 112;
         public static final int SLOT_Y = 15;
-        public static final int ARROW_X = 68;
+        public static final int ARROW_X = 80;
         public static final int ARROW_Y = 15;
         public static final int ARROW_WIDTH = 24;
         public static final int ARROW_HEIGHT = 18;
         public static final int ENERGY_X = 0;
-        public static final int WATER_X = WIDTH - GaugeBar.WIDTH;
+        public static final int WATER_X = 22;
+
+        public static final int PRODUCT_X = WIDTH - GaugeBar.WIDTH;
 
         public static int ticks() {
             return Config.CONFIG.CyaniteReprocessor.TotalWorkTime;
@@ -407,11 +409,13 @@ public final class RecipeViewerData {
 
         public static void draw(GuiGraphics g, biggerreactorsrework.machine.recipe.ReprocessingRecipe recipe) {
             long energy = recipe == null ? energy() : (long)recipe.energy()*recipe.duration();
-            long water = recipe == null ? water() : (long)recipe.water()*recipe.duration();
+            long water = recipe == null ? water() : recipe.totalFluid();
             int ticks = recipe == null ? ticks() : recipe.duration();
             EnergyBar.draw(g, ENERGY_X, 0, GaugeBar.WIDTH, HEIGHT,
                     EnergyBar.fraction(energy, Config.CONFIG.CyaniteReprocessor.EnergyTankCapacity));
-            GaugeBar.drawFluid(g, WATER_X, 0, water, Config.CONFIG.CyaniteReprocessor.WaterTankCapacity, recipe == null ? Fluids.WATER : recipe.fluid());
+            // Modified 2026-10-27: viewer ingredient renderers draw the complete decorated gauge once.
+            GaugeBar.drawFluid(g, WATER_X, 0, 0, 1, Fluids.EMPTY);
+            GaugeBar.drawFluid(g, PRODUCT_X, 0, 0, Config.CONFIG.CyaniteReprocessor.WaterTankCapacity, Fluids.EMPTY);
             GuiArt.slot(g, INPUT_X, SLOT_Y, 18);
             GuiArt.slot(g, OUTPUT_X, SLOT_Y, 18);
             long cycle = Math.max(1, ticks) * 50L;
@@ -429,7 +433,7 @@ public final class RecipeViewerData {
         public static List<Component> waterTooltip() { return waterTooltip(null); }
 
         public static List<Component> waterTooltip(biggerreactorsrework.machine.recipe.ReprocessingRecipe recipe) {
-            long water = recipe == null ? water() : (long)recipe.water()*recipe.duration();
+            long water = recipe == null ? water() : recipe.totalFluid();
             return List.of(Component.translatable("recipe_viewer.biggerreactorsrework.cyanite_reprocessing.water",
                     RenderHelper.formatValue(water / 1000.0, "B", true)));
         }

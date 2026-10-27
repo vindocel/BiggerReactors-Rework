@@ -92,7 +92,7 @@ public final class CoolingCalibrationGameTests {
         double w=ratios.get("minecraft:water"),o=ratios.get("biggerreactorsrework:liquid_obsidian");
         h.assertTrue(w>best,"water circuit must outperform the best tested solid moderator per fuel");
         h.assertTrue(o>w,"obsidian circuit must outperform water per fuel");
-        if(ratios.containsKey("ad_astra:cryo_fuel"))h.assertTrue(ratios.get("ad_astra:cryo_fuel")>=o && ratios.get("ad_astra:cryo_fuel")<=o*1.10,"Cryo Fuel must remain near the obsidian tier");
+        if(ratios.containsKey("ad_astra:cryo_fuel"))h.assertTrue(o>ratios.get("ad_astra:cryo_fuel"),"new obsidian tier must outperform unchanged Cryo Fuel");
         if(ratios.containsKey("mekanism:sodium"))h.assertTrue(ratios.get("mekanism:sodium")>Math.max(o,ratios.getOrDefault("ad_astra:cryo_fuel",o)),"sodium must be the highest tested tier");
         h.succeed();
     }

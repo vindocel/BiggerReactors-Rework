@@ -1,5 +1,7 @@
 package biggerreactorsrework.registries;
 
+// Modified 2026-10-26: clear client authority on disconnect and retain valid empty snapshots.
+
 import biggerreactorsrework.BiggerReactors;
 import biggerreactorsrework.core.networking.SimpleChannel;
 import biggerreactorsrework.core.serialization.DataCompound;
@@ -12,6 +14,8 @@ import java.util.*;
 /** Resolved optional profiles, shared by client tooltips, guide and recipe viewers. */
 public final class CoolantSync {
     private static List<FluidTransitionRegistry.FluidTransition> clientProfiles=List.of();
+    private static boolean received;
+    public static void clearClient(){clientProfiles=List.of();received=false;}
     private static final SimpleChannel CHANNEL=new SimpleChannel(ResourceLocation.fromNamespaceAndPath(BiggerReactors.modid,"coolants"),(data,ctx)->{
         var result=new ArrayList<FluidTransitionRegistry.FluidTransition>();
         for(var value:data.getList("profiles"))if(value instanceof Map<?,?> map){
@@ -21,11 +25,12 @@ public final class CoolantSync {
                     number(map,"latent"),number(map,"boiling"),number(map,"liquid"),number(map,"gas"),number(map,"turbine"));
             t.recovery=number(map,"recovery");result.add(t);
         }
-        clientProfiles=List.copyOf(result);
+        clientProfiles=List.copyOf(result); received=true;
+        if (net.neoforged.fml.loading.FMLEnvironment.dist.isClient()) biggerreactorsrework.BiggerReactorsClient.refreshCoolantSprites(clientProfiles);
     },null);
     private static double number(Map<?,?> map,String key){return ((Number)map.get(key)).doubleValue();}
     public static void init(){NeoForge.EVENT_BUS.addListener(CoolantSync::send);}
-    public static List<FluidTransitionRegistry.FluidTransition> profiles(){return clientProfiles.isEmpty()?List.copyOf(FluidTransitionRegistry.transitions()):clientProfiles;}
+    public static List<FluidTransitionRegistry.FluidTransition> profiles(){return received || net.neoforged.fml.loading.FMLEnvironment.dist.isClient() && biggerreactorsrework.BiggerReactorsClient.connected()?clientProfiles:List.copyOf(FluidTransitionRegistry.transitions());}
     public static FluidTransitionRegistry.FluidTransition find(ResourceLocation cold){return profiles().stream().filter(t->BuiltInRegistries.FLUID.getKey(t.liquids.getFirst()).equals(cold)).findFirst().orElse(null);}
     private static void send(OnDatapackSyncEvent event){
         var rows=new ArrayList<Map<String,Object>>();

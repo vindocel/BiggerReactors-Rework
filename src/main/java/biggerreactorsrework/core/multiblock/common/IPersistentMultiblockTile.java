@@ -1,5 +1,7 @@
 package biggerreactorsrework.core.multiblock.common;
 
+// Modified 2026-10-26: persist machine origin separately from delegated contents.
+
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -32,6 +34,7 @@ public interface IPersistentMultiblockTile<
         
         @Nullable
         CompoundTag controllerNBT;
+        @Nullable java.util.UUID origin;
         IValidatedMultiblock.AssemblyState lastAssemblyState = IValidatedMultiblock.AssemblyState.DISASSEMBLED;
         int expectedBlocks = 0;
         
@@ -62,6 +65,7 @@ public interface IPersistentMultiblockTile<
         
         @Override
         public void readNBT(CompoundTag nbt) {
+            origin = nbt.hasUUID("machine_origin") ? nbt.getUUID("machine_origin") : null;
             // backwards compat with opening older worlds
             // TODO: require this
             if (nbt.contains("last_assembly_state")) {
@@ -83,6 +87,8 @@ public interface IPersistentMultiblockTile<
                 controllerNBT = controllerPersistentModule.getNBT();
             }
             final var toReturn = new CompoundTag();
+            if (controllerPersistentModule != null && controllerPersistentModule.origin() != null) origin = controllerPersistentModule.origin();
+            if (origin != null) toReturn.putUUID("machine_origin", origin);
             toReturn.putString("last_assembly_state", lastAssemblyState.toString());
             if (controllerNBT != null) {
                 toReturn.put("controller_data", controllerNBT);

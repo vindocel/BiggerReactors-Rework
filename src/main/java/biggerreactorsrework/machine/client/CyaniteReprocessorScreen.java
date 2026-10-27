@@ -47,6 +47,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @OnlyIn(Dist.CLIENT)
+// Modified 2026-10-27: input water beside FE, separate product tank and a dedicated title row.
 public class CyaniteReprocessorScreen extends ModScreen<CyaniteReprocessorContainer> {
 
 
@@ -106,7 +107,7 @@ public class CyaniteReprocessorScreen extends ModScreen<CyaniteReprocessorContai
     private RenderedElement<CyaniteReprocessorContainer> progressBar;
 
     public CyaniteReprocessorScreen(CyaniteReprocessorContainer container, Inventory playerInventory, Component title) {
-        super(container, playerInventory, title, 176, 175);
+        super(container, playerInventory, title, 176, 190);
 
         // Initialize reprocessor state.
         cyaniteReprocessorState = (CyaniteReprocessorState) this.getMenu().getGuiPacket();
@@ -137,7 +138,7 @@ public class CyaniteReprocessorScreen extends ModScreen<CyaniteReprocessorContai
      */
     public void initTooltips() {
         // (Left) Internal battery:
-        this.addScreenElement(new TooltipElement<>(this, 8, 6, 16, 16, Component.translatable("screen.biggerreactorsrework.cyanite_reprocessor.internal_battery.tooltip")));
+        this.addScreenElement(new TooltipElement<>(this, 8, 21, 16, 16, Component.translatable("screen.biggerreactorsrework.cyanite_reprocessor.internal_battery.tooltip")));
     }
 
     /**
@@ -145,21 +146,30 @@ public class CyaniteReprocessorScreen extends ModScreen<CyaniteReprocessorContai
      */
     public void initGauges() {
         // (Top) Internal battery:
-        RenderedElement<CyaniteReprocessorContainer> internalBattery = new RenderedElement<>(this, 7, 25, 18, 64, 0, 0, Component.empty());
+        RenderedElement<CyaniteReprocessorContainer> internalBattery = new RenderedElement<>(this, 7, 40, 18, 64, 0, 0, Component.empty());
         internalBattery.onRender = (@Nonnull GuiGraphics graphics, int mX, int mY) -> CommonRender.renderEnergyGauge(graphics,
                 internalBattery, cyaniteReprocessorState.energyStored, cyaniteReprocessorState.energyCapacity);
         this.addScreenElement(internalBattery);
 
         // (Top) Water tank:
-        RenderedElement<CyaniteReprocessorContainer> waterTank = new RenderedElement<>(this, 151, 25, 18, 64, 0, 0, Component.empty());
+        RenderedElement<CyaniteReprocessorContainer> waterTank = new RenderedElement<>(this, 28, 40, 18, 64, 0, 0, Component.empty());
         waterTank.onRender = (@Nonnull GuiGraphics graphics, int mX, int mY) -> CommonRender.renderFluidGauge(graphics,
                 waterTank, cyaniteReprocessorState.waterStored, cyaniteReprocessorState.waterCapacity,
-                Fluids.WATER.getSource());
+                net.minecraft.core.registries.BuiltInRegistries.FLUID.get(ResourceLocation.parse(cyaniteReprocessorState.inputFluid)));
         this.addScreenElement(waterTank);
+        var outputTank = new RenderedElement<CyaniteReprocessorContainer>(this,151,40,18,64,0,0,Component.empty());
+        outputTank.onRender=(graphics,mX,mY)->CommonRender.renderFluidGauge(graphics,outputTank,
+            cyaniteReprocessorState.outputStored,cyaniteReprocessorState.outputCapacity,
+            net.minecraft.core.registries.BuiltInRegistries.FLUID.get(ResourceLocation.parse(cyaniteReprocessorState.outputFluid)));
+        this.addScreenElement(outputTank);
+        var status=new RenderedElement<CyaniteReprocessorContainer>(this,54,84,90,10,0,0,null);
+        status.onRender=(g,mx,my)->g.drawString(this.getFont(),this.getFont().plainSubstrByWidth(
+            Component.translatable("screen.biggerreactorsrework.industrial_processor."+cyaniteReprocessorState.condition).getString(),90),status.x,status.y,GuiTheme.textColor(),false);
+        this.addScreenElement(status);
 
         // (Center) Progress bar:
         // With a recipe viewer installed, clicking the arrow shows the reprocessing recipe.
-        RenderedElement<CyaniteReprocessorContainer> progressBar = new RenderedElement<>(this, 75, 40, 24, 18, 0, 0,
+        RenderedElement<CyaniteReprocessorContainer> progressBar = new RenderedElement<>(this, 83, 55, 24, 18, 0, 0,
                 RecipeViewers.available() ? Component.translatable("screen.biggerreactorsrework.show_recipes") : null);
         this.progressBar = progressBar;
         progressBar.onRender = (@Nonnull GuiGraphics graphics, int mX, int mY) -> GaugeBar.drawProgressArrow(graphics,
@@ -172,10 +182,16 @@ public class CyaniteReprocessorScreen extends ModScreen<CyaniteReprocessorContai
      */
     public void initSymbols() {
         // (Right) Water tank symbol:
-        RenderedElement<CyaniteReprocessorContainer> waterTankSymbol = new RenderedElement<>(this, 152, 6, 16, 16, 0, 0, Component.translatable("screen.biggerreactorsrework.cyanite_reprocessor.water_tank.tooltip"));
+        RenderedElement<CyaniteReprocessorContainer> waterTankSymbol = new RenderedElement<>(this, 29, 21, 16, 16, 0, 0, Component.translatable("screen.biggerreactorsrework.cyanite_reprocessor.water_tank.tooltip"));
         waterTankSymbol.onRender = (@Nonnull GuiGraphics graphics, int mX, int mY) -> GuiArt.fluidSymbol(graphics,
                 waterTankSymbol.x, waterTankSymbol.y, Fluids.WATER.getSource(), GuiIcon.WATER_DROP_MASK, GuiIcon.WATER_DROP, GuiTheme.panelColor(), true);
         this.addScreenElement(waterTankSymbol);
+        var outputSymbol=new RenderedElement<CyaniteReprocessorContainer>(this,152,21,16,16,0,0,
+            Component.translatable("screen.biggerreactorsrework.industrial_processor.output"));
+        outputSymbol.onRender=(g,mx,my)->GuiArt.fluidSymbol(g,outputSymbol.x,outputSymbol.y,
+            cyaniteReprocessorState.outputStored>0?net.minecraft.core.registries.BuiltInRegistries.FLUID.get(ResourceLocation.parse(cyaniteReprocessorState.outputFluid)):biggerreactorsrework.fluids.LiquidObsidian.INSTANCE,
+            GuiIcon.WATER_DROP_MASK,GuiIcon.WATER_DROP,GuiTheme.panelColor(),true);
+        this.addScreenElement(outputSymbol);
     }
 
     @Override
@@ -287,7 +303,10 @@ public class CyaniteReprocessorScreen extends ModScreen<CyaniteReprocessorContai
                 switches.add(new AutoSwitch("autoInput", this.cyaniteReprocessorState.autoInput, true, "auto_input"));
                 switches.add(new AutoSwitch("autoEject", this.cyaniteReprocessorState.autoEject, false, "auto_eject"));
             }
-            case FLUID -> switches.add(new AutoSwitch("autoInputFluid", this.cyaniteReprocessorState.autoInputFluid, true, "auto_input_fluid"));
+            case FLUID -> {
+                switches.add(new AutoSwitch("autoInputFluid",this.cyaniteReprocessorState.autoInputFluid,true,"auto_input_fluid"));
+                switches.add(new AutoSwitch("autoEjectFluid",this.cyaniteReprocessorState.autoEjectFluid,false,"auto_eject_fluid"));
+            }
             case ENERGY -> {
             }
         }
@@ -586,13 +605,13 @@ public class CyaniteReprocessorScreen extends ModScreen<CyaniteReprocessorContai
      */
     @Override
     protected void drawBackground(@Nonnull GuiGraphics graphics, int x, int y) {
-        GuiArt.panel(graphics, x, y, 176, 175, this.frame());
-        GuiIcon.BATTERY.draw(graphics, x + 11, y + 6);
-        GuiArt.ring(graphics, x + 41, y + 38, 22, 0xFF3DAAFF);
-        GuiArt.slot(graphics, x + 43, y + 40, 18);
-        GuiArt.ring(graphics, x + 113, y + 38, 22, 0xFF2727FF);
-        GuiArt.slot(graphics, x + 115, y + 40, 18);
-        GuiArt.playerInventory(graphics, x + 7, y + 92);
+        GuiArt.panel(graphics, x, y, 176, 190, this.frame());
+        GuiIcon.BATTERY.draw(graphics, x + 11, y + 21);
+        GuiArt.ring(graphics, x + 53, y + 53, 22, 0xFF3DAAFF);
+        GuiArt.slot(graphics, x + 55, y + 55, 18);
+        GuiArt.ring(graphics, x + 113, y + 53, 22, 0xFF2727FF);
+        GuiArt.slot(graphics, x + 115, y + 55, 18);
+        GuiArt.playerInventory(graphics, x + 7, y + 107);
     }
 
     @Override

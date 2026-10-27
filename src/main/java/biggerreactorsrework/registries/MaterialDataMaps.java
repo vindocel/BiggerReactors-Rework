@@ -1,5 +1,7 @@
 package biggerreactorsrework.registries;
 
+// Modified 2026-10-26: preserve configurable recovery and generic-hot origin semantics.
+
 import biggerreactorsrework.BiggerReactors;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
@@ -32,11 +34,12 @@ public final class MaterialDataMaps {
             POSITIVE.fieldOf("efficiency").forGetter(Coil::efficiency),POSITIVE.fieldOf("extractionRate").forGetter(Coil::extractionRate),
             POSITIVE.validate(n->n<2?DataResult.success(n):DataResult.error(()->"Bonus must be < 2")).fieldOf("bonus").forGetter(Coil::bonus)).apply(i,Coil::new));
     }
-    public record Transition(ExtraCodecs.TagOrElementLocation gas,double latentHeat,double boilingPoint,double liquidThermalConductivity,double gasThermalConductivity,double turbineMultiplier) {
+    public record Transition(ExtraCodecs.TagOrElementLocation gas,double latentHeat,double boilingPoint,double liquidThermalConductivity,double gasThermalConductivity,double turbineMultiplier,double recovery) {
         public static final Codec<Transition> CODEC=RecordCodecBuilder.create(i->i.group(
             ExtraCodecs.TAG_OR_ELEMENT_ID.fieldOf("gas").forGetter(Transition::gas),POSITIVE.fieldOf("latentHeat").forGetter(Transition::latentHeat),
             POSITIVE.fieldOf("boilingPoint").forGetter(Transition::boilingPoint),NONNEGATIVE.fieldOf("liquidThermalConductivity").forGetter(Transition::liquidThermalConductivity),
-            NONNEGATIVE.fieldOf("gasThermalConductivity").forGetter(Transition::gasThermalConductivity),NONNEGATIVE.fieldOf("turbineMultiplier").forGetter(Transition::turbineMultiplier)).apply(i,Transition::new));
+            NONNEGATIVE.fieldOf("gasThermalConductivity").forGetter(Transition::gasThermalConductivity),NONNEGATIVE.fieldOf("turbineMultiplier").forGetter(Transition::turbineMultiplier),
+            POSITIVE.validate(n->n<=1?DataResult.success(n):DataResult.error(()->"Recovery must be in (0,1]")).optionalFieldOf("recovery",1d).forGetter(Transition::recovery)).apply(i,Transition::new));
     }
     private static ResourceLocation id(String path){return ResourceLocation.fromNamespaceAndPath(BiggerReactors.modid,path);}
     public static final DataMapType<Block,Moderator> MODERATOR=DataMapType.builder(id("reactor_moderator"),Registries.BLOCK,Moderator.CODEC).build();
@@ -60,9 +63,10 @@ public final class MaterialDataMaps {
             if(outputs.isEmpty()){BiggerReactors.LOGGER.error("Ignoring transition with missing gas: {}",d.gas);return;}
             outputs.sort(java.util.Comparator.comparing(BuiltInRegistries.FLUID::getKey));
             var transition=new FluidTransitionRegistry.FluidTransition(List.of(holder.value()),List.copyOf(outputs),d.latentHeat,d.boilingPoint,d.liquidThermalConductivity,d.gasThermalConductivity,d.turbineMultiplier);
+            transition.recovery=d.recovery;
             var previous=liquids.put(holder.value(),transition);
             if(previous!=null)previous.gases.forEach(gas->{if(gases.get(gas)==previous)gases.remove(gas);});
-            outputs.forEach(gas->gases.put(gas,transition));
+            outputs.stream().filter(gas->gas!=biggerreactorsrework.fluids.HeatedCoolant.INSTANCE).forEach(gas->gases.put(gas,transition));
         });
     }
     private MaterialDataMaps(){}

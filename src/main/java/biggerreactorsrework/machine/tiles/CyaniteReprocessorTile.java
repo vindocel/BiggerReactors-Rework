@@ -55,6 +55,7 @@ import javax.annotation.Nullable;
  * Turns 2 cyanite ingots into 1 blutonium ingot, using water and energy while it works.
  * Each face is configured per material (items, water, energy) and can pull and push items and water by itself.
  */
+// Modified 2026-10-27: industrial processing with independent item/fluid products and legacy saves.
 public class CyaniteReprocessorTile extends BlockEntity implements MenuProvider, IHasUpdatableState<CyaniteReprocessorState> {
 
     @RegisterTile("cyanite_reprocessor")
@@ -147,6 +148,22 @@ public class CyaniteReprocessorTile extends BlockEntity implements MenuProvider,
      * Automation: pull cyanite from item input sides, push blutonium through item output sides, pull water from water
      * input sides.
      */
+    private boolean autoEjectFluid = false;
+    private final FluidTank outputTank = new FluidTank(Config.CONFIG.CyaniteReprocessor.WaterTankCapacity) {
+        @Override protected void onContentsChanged() { CyaniteReprocessorTile.this.setChanged(); }
+    };
+    private final IFluidHandler combinedFluids = fluidView(true,true);
+    private IFluidHandler fluidView(boolean input,boolean output) {
+        return new IFluidHandler() {
+            public int getTanks(){return 2;}
+            public FluidStack getFluidInTank(int tank){return (tank==0?fluidTank:outputTank).getFluid().copy();}
+            public int getTankCapacity(int tank){return (tank==0?fluidTank:outputTank).getCapacity();}
+            public boolean isFluidValid(int tank,FluidStack stack){return tank==0 && input && fluidTank.isFluidValid(stack);}
+            public int fill(FluidStack stack,FluidAction action){return input?fluidTank.fill(stack,action):0;}
+            public FluidStack drain(FluidStack stack,FluidAction action){return output?outputTank.drain(stack,action):FluidStack.EMPTY;}
+            public FluidStack drain(int amount,FluidAction action){return output?outputTank.drain(amount,action):FluidStack.EMPTY;}
+        };
+    }
     private boolean autoInput = false;
     private boolean autoEject = false;
     private boolean autoInputFluid = false;
@@ -215,10 +232,14 @@ public class CyaniteReprocessorTile extends BlockEntity implements MenuProvider,
      */
     @Nullable
     public IFluidHandler fluidFor(@Nullable Direction side) {
-        if (side == null) {
-            return this.fluidTank;
-        }
-        return this.route(side, Transmission.FLUID) == SideRoute.FLUID_INPUT ? this.waterInput : null;
+        if (side == null) return combinedFluids;
+        SideRoute route = this.route(side, Transmission.FLUID);
+        return switch(route) {
+            case FLUID_INPUT -> waterInput;
+            case FLUID_OUTPUT -> fluidView(false,true);
+            case FLUID_INPUT_OUTPUT -> combinedFluids;
+            default -> null;
+        };
     }
 
     /**
@@ -284,6 +305,7 @@ public class CyaniteReprocessorTile extends BlockEntity implements MenuProvider,
                 this.autoEject = !this.autoEject;
                 this.setChanged();
             }
+            case "autoEjectFluid" -> { this.autoEjectFluid=!this.autoEjectFluid;this.setChanged(); }
             case "autoInputFluid" -> {
                 this.autoInputFluid = !this.autoInputFluid;
                 this.setChanged();
@@ -359,18 +381,39 @@ public class CyaniteReprocessorTile extends BlockEntity implements MenuProvider,
     /**
      * Pulls water from the blocks on the water input sides, at the configured transfer rate.
      */
+    // Modified 2026-10-26: use the recipe's fluid instead of assuming water.
+    private void autoEjectFluidCycle() {
+        for(RelativeFace face:RelativeFace.VALUES) {
+            var route=this.route(face,Transmission.FLUID);
+            if(route!=SideRoute.FLUID_OUTPUT && route!=SideRoute.FLUID_INPUT_OUTPUT)continue;
+            var target=neighbor(Capabilities.FluidHandler.BLOCK,face.toDirection(facing()));
+            if(target!=null)FluidUtil.tryFluidTransfer(target,outputTank,Config.CONFIG.CyaniteReprocessor.TransferRate,true);
+        }
+    }
+
+    private int pullRecipeFluid(IFluidHandler source,int space) {
+        var input=itemHandler.getStackInSlot(CyaniteReprocessorItemHandler.INPUT_SLOT_INDEX);
+        for(var entry:biggerreactorsrework.machine.recipe.ReprocessingRecipes.all(level)) {
+            var recipe=entry.value();
+            if(!recipe.matches(new net.minecraft.world.item.crafting.SingleRecipeInput(input),level) || recipe.totalFluid()==0)continue;
+            int moved=FluidUtil.tryFluidTransfer(fluidTank,source,new FluidStack(recipe.fluid(),space),true).getAmount();
+            if(moved>0)return moved;
+        }
+        return 0;
+    }
+
     private void autoInputFluidCycle() {
         for (RelativeFace face : RelativeFace.VALUES) {
             int space = Math.min(this.fluidTank.getSpace(), Config.CONFIG.CyaniteReprocessor.TransferRate);
             if (space <= 0) {
                 return;
             }
-            if (this.route(face, Transmission.FLUID) != SideRoute.FLUID_INPUT) {
+            if (this.route(face, Transmission.FLUID) != SideRoute.FLUID_INPUT && this.route(face, Transmission.FLUID) != SideRoute.FLUID_INPUT_OUTPUT) {
                 continue;
             }
             IFluidHandler source = this.neighbor(Capabilities.FluidHandler.BLOCK, face.toDirection(this.facing()));
             if (source != null) {
-                FluidUtil.tryFluidTransfer(this.fluidTank, source, new FluidStack(Fluids.WATER, space), true);
+                pullRecipeFluid(source, space);
             }
         }
     }
@@ -459,6 +502,21 @@ public class CyaniteReprocessorTile extends BlockEntity implements MenuProvider,
         this.cyaniteReprocessorState.energyCapacity = this.energyStorage.getMaxEnergyStored();
         this.cyaniteReprocessorState.waterStored = this.fluidTank.getFluidAmount();
         this.cyaniteReprocessorState.waterCapacity = this.fluidTank.getCapacity();
+        this.cyaniteReprocessorState.outputStored = outputTank.getFluidAmount();
+        this.cyaniteReprocessorState.outputCapacity = outputTank.getCapacity();
+        this.cyaniteReprocessorState.outputFluid = net.minecraft.core.registries.BuiltInRegistries.FLUID.getKey(outputTank.getFluid().getFluid()).toString();
+        this.cyaniteReprocessorState.inputFluid = net.minecraft.core.registries.BuiltInRegistries.FLUID.getKey(fluidTank.getFluid().getFluid()).toString();
+        this.cyaniteReprocessorState.autoEjectFluid = autoEjectFluid;
+        var entry=biggerreactorsrework.machine.recipe.ReprocessingRecipes.all(level).stream()
+            .filter(r->r.value().matches(new net.minecraft.world.item.crafting.SingleRecipeInput(itemHandler.getStackInSlot(0)),level)).findFirst().orElse(null);
+        String condition="no_item";
+        if(entry!=null) {
+            var recipe=entry.value();int needed=recipe.fluidCostAt(Math.min(workHandler.getProgress(),recipe.duration()-1));
+            boolean space=recipe.producesFluid()?outputTank.fill(recipe.fluidResult(),IFluidHandler.FluidAction.SIMULATE)==recipe.fluidResult().getAmount():itemHandler.insertItem(1,recipe.result(),true).isEmpty();
+            condition=!space?"output_full":energyStorage.getEnergyStored()<recipe.energy()?"no_energy":
+                needed>0 && (fluidTank.getFluid().getFluid()!=recipe.fluid() || fluidTank.getFluidAmount()<needed)?"no_water":"working";
+        }
+        cyaniteReprocessorState.condition=condition;
         this.cyaniteReprocessorState.itemSides = this.sides.pack(Transmission.ITEM);
         this.cyaniteReprocessorState.fluidSides = this.sides.pack(Transmission.FLUID);
         this.cyaniteReprocessorState.energySides = this.sides.pack(Transmission.ENERGY);
@@ -504,6 +562,8 @@ public class CyaniteReprocessorTile extends BlockEntity implements MenuProvider,
         this.energyStorage.set(childCompound.getInt("energyStored"));
         // Read fluids.
         this.fluidTank.readFromNBT(registries, childCompound.getCompound("fluidTank"));
+        this.outputTank.readFromNBT(registries, childCompound.getCompound("outputTank"));
+        this.autoEjectFluid = childCompound.getBoolean("autoEjectFluid");
         this.itemPresentLastTick = this.itemHandler.getStackInSlot(CyaniteReprocessorItemHandler.INPUT_SLOT_INDEX).copy();
         // Read sides and automation.
         this.sides.load(childCompound.getCompound("sides"));
@@ -531,6 +591,8 @@ public class CyaniteReprocessorTile extends BlockEntity implements MenuProvider,
         childCompound.putInt("energyStored", this.energyStorage.getEnergyStored());
         // Write fluids.
         childCompound.put("fluidTank", this.fluidTank.writeToNBT(registries, new CompoundTag()));
+        childCompound.put("outputTank", this.outputTank.writeToNBT(registries,new CompoundTag()));
+        childCompound.putBoolean("autoEjectFluid",autoEjectFluid);
         // Write sides and automation.
         childCompound.put("sides", this.sides.save());
         childCompound.putBoolean("autoInput", this.autoInput);
@@ -567,10 +629,11 @@ public class CyaniteReprocessorTile extends BlockEntity implements MenuProvider,
     }
 
     private boolean canWork(biggerreactorsrework.machine.recipe.ReprocessingRecipe recipe) {
-        ItemStack product = recipe.result();
-        if (!itemHandler.insertItem(CyaniteReprocessorItemHandler.OUTPUT_SLOT_INDEX, product, true).isEmpty()) return false;
-        return energyStorage.getEnergyStored() >= recipe.energy() && (recipe.water() == 0 ||
-                (fluidTank.getFluid().getFluid() == recipe.fluid() && fluidTank.getFluidAmount() >= recipe.water()));
+        boolean room=recipe.producesFluid() ? outputTank.fill(recipe.fluidResult(),IFluidHandler.FluidAction.SIMULATE)==recipe.fluidResult().getAmount() :
+            itemHandler.insertItem(CyaniteReprocessorItemHandler.OUTPUT_SLOT_INDEX,recipe.result(),true).isEmpty();
+        int water=recipe.fluidCostAt(workHandler.getProgress());
+        return room && energyStorage.getEnergyStored()>=recipe.energy() && (water==0 ||
+            fluidTank.getFluid().getFluid()==recipe.fluid() && fluidTank.getFluidAmount()>=water);
     }
 
     /**
@@ -601,6 +664,7 @@ public class CyaniteReprocessorTile extends BlockEntity implements MenuProvider,
 
         var selected = biggerreactorsrework.machine.recipe.ReprocessingRecipes.all(level).stream()
                 .filter(r -> r.value().matches(new net.minecraft.world.item.crafting.SingleRecipeInput(inputStack), level))
+                .filter(r -> r.value().water() == 0 || fluidTank.isEmpty() || r.value().fluid() == fluidTank.getFluid().getFluid())
                 .findFirst().orElse(null);
         if (selected == null) {
             if (workHandler.getProgress() != 0) doUpdate = true;
@@ -618,13 +682,14 @@ public class CyaniteReprocessorTile extends BlockEntity implements MenuProvider,
                 isActive = true; doUpdate = true;
                 workHandler.increment(1);
                 energyStorage.consume(recipe.energy());
-                fluidTank.drain(recipe.water(), IFluidHandler.FluidAction.EXECUTE);
-            } else if (workHandler.getProgress() > 0) {
+                fluidTank.drain(recipe.fluidCostAt(workHandler.getProgress()-1), IFluidHandler.FluidAction.EXECUTE);
+            } else if (!recipe.producesFluid() && workHandler.getProgress() > 0) {
                 workHandler.decrement(Math.min(2, workHandler.getProgress())); doUpdate = true;
             }
             if (workHandler.isFinished()) {
                 itemHandler.extractItem(CyaniteReprocessorItemHandler.INPUT_SLOT_INDEX, recipe.count(), false);
-                itemHandler.insertItem(CyaniteReprocessorItemHandler.OUTPUT_SLOT_INDEX, recipe.result(), false);
+                if(recipe.producesFluid())outputTank.fill(recipe.fluidResult(),IFluidHandler.FluidAction.EXECUTE);
+                else itemHandler.insertItem(CyaniteReprocessorItemHandler.OUTPUT_SLOT_INDEX, recipe.result(), false);
                 workHandler.clear();
                 itemPresentLastTick = itemHandler.getStackInSlot(CyaniteReprocessorItemHandler.INPUT_SLOT_INDEX).copy();
             }
@@ -643,6 +708,8 @@ public class CyaniteReprocessorTile extends BlockEntity implements MenuProvider,
         if (doUpdate) {
             this.setChanged();
         }
+
+        if(autoEjectFluid)autoEjectFluidCycle();
 
         // Update the current machine state.
         this.updateState();

@@ -35,6 +35,8 @@ public class MultiblockController<
         > implements IModularMultiblockController<TileType, BlockType, ControllerType>, IDebuggable {
     
     
+    private static final java.util.concurrent.atomic.AtomicLong NEXT_MERGE_ORDER=new java.util.concurrent.atomic.AtomicLong();
+    private final long mergeOrder=NEXT_MERGE_ORDER.getAndIncrement();
     public final Level level;
     @SuppressWarnings("unchecked")
     public final ModuleMap<MultiblockTileModule<TileType, BlockType, ControllerType>, TileType> blocks = new ModuleMap<MultiblockTileModule<TileType, BlockType, ControllerType>, TileType>(new MultiblockTileModule[0]);
@@ -167,7 +169,10 @@ public class MultiblockController<
         }
         
         if (toAttachModule.controller() != null && toAttachModule.controller() != this) {
-            if (toAttachModule.controller().blocks.size() > blocks.size()) {
+            if (independentStock(toAttachModule.controller())) return;
+            MultiblockController<TileType, BlockType, ControllerType> other=toAttachModule.controller();
+            boolean ours=hasInventory(),theirs=other.hasInventory();
+            if (ours!=theirs?theirs:other.blocks.size()>blocks.size() || other.blocks.size()==blocks.size() && other.mergeOrder<mergeOrder) {
                 toAttachModule.controller().controllersToMerge.add(self());
             } else {
                 controllersToMerge.add(toAttachModule.controller());
@@ -470,21 +475,26 @@ public class MultiblockController<
     private void processMerges() {
         while (!controllersToMerge.isEmpty()) {
             ObjectOpenHashSet<MultiblockController<TileType, BlockType, ControllerType>> newToMerge = new ObjectOpenHashSet<>();
-            for (MultiblockController<TileType, BlockType, ControllerType> otherController : controllersToMerge) {
+            for (MultiblockController<TileType, BlockType, ControllerType> queuedController : controllersToMerge) {
+                // Modified 2026-10-26: queued references may point to controllers absorbed earlier in this tick.
+                // Resolve the live owner before checking emptiness, inventory or registry removal.
+                var otherController=queuedController;
+                while(otherController.mergedInto!=null)otherController=otherController.mergedInto;
+                if (otherController==this || otherController.blocks.isEmpty()) continue;
                 //noinspection unchecked
                 final var otherCased = (ControllerType) otherController;
+                if (independentStock(otherController)) {
+                    otherController.controllersToMerge.remove(self());
+                    continue;
+                }
+                if (!hasInventory() && otherController.hasInventory()) {
+                    otherController.controllersToMerge.add(self());
+                    continue;
+                }
                 MultiblockRegistry.removeController(otherController);
                 otherController.controllersToMerge.remove(self());
                 newToMerge.addAll(otherController.controllersToMerge);
                 otherController.controllersToMerge.clear();
-                if (otherController.mergedInto != null && otherController.mergedInto != this) {
-                    newToMerge.add(otherController.mergedInto);
-                    otherController.mergedInto.controllersToMerge.add(this);
-                    continue;
-                }
-                if (otherController.blocks.size() == 0) {
-                    continue;
-                }
                 for (var module : modules()) {
                     module.merge(otherCased);
                 }
@@ -589,6 +599,24 @@ public class MultiblockController<
     protected void onPartBroken(@Nonnull TileType tile) {
     }
     
+    /** Modified 2026-10-26: independent inventories must be drained before controllers can merge. */
+    protected boolean hasStoredContents() { return false; }
+
+    protected final boolean hasInventory() {
+        var persistent=module(biggerreactorsrework.core.multiblock.common.IPersistentMultiblock.class,
+                biggerreactorsrework.core.multiblock.common.IPersistentMultiblock.Module.class);
+        return hasStoredContents() || persistent!=null && persistent.hasPendingContents();
+    }
+
+    private boolean independentStock(MultiblockController<TileType, BlockType, ControllerType> other) {
+        if (!hasInventory() || !other.hasInventory()) return false;
+        var a=module(biggerreactorsrework.core.multiblock.common.IPersistentMultiblock.class,
+                biggerreactorsrework.core.multiblock.common.IPersistentMultiblock.Module.class);
+        var b=other.module(biggerreactorsrework.core.multiblock.common.IPersistentMultiblock.class,
+                biggerreactorsrework.core.multiblock.common.IPersistentMultiblock.Module.class);
+        return a!=null && b!=null && a.origin()!=null && b.origin()!=null && !a.origin().equals(b.origin());
+    }
+
     protected void merge(ControllerType other) {
     }
     

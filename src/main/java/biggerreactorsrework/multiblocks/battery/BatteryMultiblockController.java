@@ -1,5 +1,7 @@
 package biggerreactorsrework.multiblocks.battery;
 
+// Modified 2026-10-26: protect independently stocked batteries when joining controllers.
+
 import biggerreactorsrework.Config;
 import biggerreactorsrework.core.CoreEvents;
 import biggerreactorsrework.core.debug.DebugInfo;
@@ -364,15 +366,20 @@ public class BatteryMultiblockController extends MultiblockController<BatteryBas
                 insert(source.extractEnergy(room, false), false);
             }
         }
-        IEnergyStorage target = BatteryItemHandler.energy(items.getStackInSlot(BatteryItemHandler.CHARGE_SLOT));
-        if (target != null && target.canReceive()) {
-            int available = (int) Math.min(Integer.MAX_VALUE, extract(Long.MAX_VALUE, true));
-            if (available > 0) {
-                extract(target.receiveEnergy(available, false), false);
-            }
-        }
+        chargeItem(items.getStackInSlot(BatteryItemHandler.CHARGE_SLOT));
     }
-    
+
+    /** Modified 2026-10-27: item slots and open-menu equipment share the battery's output budget. */
+    public int chargeItem(ItemStack stack) {
+        IEnergyStorage target = BatteryItemHandler.energy(stack);
+        if (target == null || !target.canReceive()) return 0;
+        int available = (int) Math.min(Integer.MAX_VALUE, extract(Long.MAX_VALUE, true));
+        if (available <= 0) return 0;
+        int received = Math.clamp(target.receiveEnergy(available, false), 0, available);
+        if (received > 0) extract(received, false);
+        return received;
+    }
+
     private void updateTerminalStates() {
         for (BatteryTerminalTile terminal : terminals) {
             BlockState state = terminal.getBlockState();
@@ -438,6 +445,10 @@ public class BatteryMultiblockController extends MultiblockController<BatteryBas
 
     public void runRequest(String requestName, @Nullable Object requestData) {
     }
+
+    @Override
+    protected boolean hasStoredContents() { return stored>0
+                || !items.getStackInSlot(0).isEmpty() || !items.getStackInSlot(1).isEmpty(); }
 
     @Override
     public CompoundTag mergeNBTs(CompoundTag nbtA, CompoundTag nbtB) {

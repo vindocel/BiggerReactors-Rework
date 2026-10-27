@@ -1,5 +1,7 @@
 package biggerreactorsrework.multiblocks.heatexchanger;
 
+// Modified 2026-10-26: protect inventories when joining controllers.
+
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -271,6 +273,8 @@ public class HeatExchangerMultiblockController extends MultiblockController<Heat
 
     public final FluidTransitionTank evaporatorTank = new FluidTransitionTank(false);
     public final FluidTransitionTank condenserTank = new FluidTransitionTank(true);
+    // Modified 2026-10-26: coupled conversion limits from persistent steam output only.
+    public final HeatExchangerBackpressure outputPressure=new HeatExchangerBackpressure(condenserTank,evaporatorTank);
 
     public final HeatBody ambientHeatBody = new HeatBody();
     public final HeatBody airHeatBody = new HeatBody();
@@ -294,7 +298,7 @@ public class HeatExchangerMultiblockController extends MultiblockController<Heat
         if(!key.equals(statisticsProfile)){if(capacityEstimate!=null)capacityEstimate.cancel(true);capacityEstimate=null;statisticsProfile=key;}
         if(capacityEstimate==null && primary!=null && secondary!=null){var g=statisticsGeometry;var cold=secondary;capacityEstimate=biggerreactorsrework.core.util.Statistics.estimate(()->HeatExchangerCapacity.measure(g,primary,cold));}
         var potential=capacityEstimate!=null && capacityEstimate.isDone() && !capacityEstimate.isCompletedExceptionally()?capacityEstimate.getNow(null):null;
-        rows.add(biggerreactorsrework.core.util.Statistics.row("dimensions",(max().x()-min().x()+1)+" × "+(max().y()-min().y()+1)+" × "+(max().z()-min().z()+1)));
+        rows.add(biggerreactorsrework.core.util.Statistics.row("dimensions",(max().x()-min().x()+1)+" \u00D7 "+(max().y()-min().y()+1)+" \u00D7 "+(max().z()-min().z()+1)));
         rows.add(biggerreactorsrework.core.util.Statistics.row("condenser_channels",condenserChannels.size()));
         rows.add(biggerreactorsrework.core.util.Statistics.row("evaporator_channels",evaporatorChannels.size()));
         rows.add(biggerreactorsrework.core.util.Statistics.row("contacts",Math.round(channelRFKT/Config.CONFIG.HeatExchanger.ChannelFEPerKelvinMetreSquared)));
@@ -311,11 +315,16 @@ public class HeatExchangerMultiblockController extends MultiblockController<Heat
         rows.add(biggerreactorsrework.core.util.Statistics.quantity("water_capacity",evaporatorTank.perSideCapacity));
         rows.add(biggerreactorsrework.core.util.Statistics.quantity("water_stored",evaporatorTank.fluidAmountInTank(0)));
         rows.add(biggerreactorsrework.core.util.Statistics.quantity("steam_stored",evaporatorTank.fluidAmountInTank(1)));
+        rows.add(biggerreactorsrework.core.util.Statistics.row("output_occupancy",String.format(java.util.Locale.ROOT,"%.1f%%",evaporatorTank.perSideCapacity<=0?0:100d*evaporatorTank.fluidAmountInTank(1)/evaporatorTank.perSideCapacity)));
+        rows.add(biggerreactorsrework.core.util.Statistics.row("output_retained",String.format(java.util.Locale.ROOT,"%.1f%%",100*outputPressure.retainedFraction())));
+        rows.add(biggerreactorsrework.core.util.Statistics.row("output_limit",String.format(java.util.Locale.ROOT,"%.1f%%",100*outputPressure.limit())));
         rows.add(biggerreactorsrework.core.util.Statistics.row("primary_temperature",String.format(java.util.Locale.ROOT,"%.1f K",condenserHeatBody.temperature())));
         rows.add(biggerreactorsrework.core.util.Statistics.row("secondary_temperature",String.format(java.util.Locale.ROOT,"%.1f K",evaporatorHeatBody.temperature())));
         rows.add(biggerreactorsrework.core.util.Statistics.power("thermal_storage_change",thermalStorageChange));
-        String reason=condenserTank.fluidAmountInTank(0)==0?"no_heat":evaporatorTank.fluidAmountInTank(0)==0?"no_water":
-                condenserTank.fluidAmountInTank(1)>=condenserTank.perSideCapacity?"cold_blocked":evaporatorTank.fluidAmountInTank(1)>=evaporatorTank.perSideCapacity?"steam_blocked":"normal";
+        String reason=condenserTank.hasUnresolvedProfile() || evaporatorTank.hasUnresolvedProfile()?"invalid_coolant":condenserTank.fluidAmountInTank(0)==0?"no_heat":evaporatorTank.fluidAmountInTank(0)==0?"no_water":
+                evaporatorTank.fluidAmountInTank(1)>=evaporatorTank.perSideCapacity?"steam_blocked":
+                outputPressure.limit()<.999?(outputPressure.retainedFraction()>0?"steam_accumulation":"output_recovering"):
+                condenserTank.fluidAmountInTank(1)>=condenserTank.perSideCapacity?"cold_blocked":"normal";
         if(reason.equals("normal") && potential!=null && condenserTank.transitionedLastTick()<potential.converted()*.99) {
             reason=thermalStorageChange>Math.max(1,primary==null?1:primary.latentHeat)?"warming_up":"partial_supply";
         }
@@ -471,7 +480,12 @@ public class HeatExchangerMultiblockController extends MultiblockController<Heat
     @Override
     public void tick() {
         double before=airHeatBody.rf()+condenserHeatBody.rf()+evaporatorHeatBody.rf();
+        outputPressure.tick();
         condenserTank.sampleFlows();evaporatorTank.sampleFlows();
+        // Modified 2026-10-27: invalid legacy circuits remain stopped until explicitly emptied.
+        if(condenserTank.hasUnresolvedProfile() || evaporatorTank.hasUnresolvedProfile()) {
+            thermalStorageChange=0;return;
+        }
         condenserTank.transferWith(condenserHeatBody, condenserChannels.size() * Config.CONFIG.HeatExchanger.ChannelInternalSurfaceArea);
         condenserHeatBody.transferWith(airHeatBody, condenserAirRFKT);
         condenserHeatBody.transferWith(evaporatorHeatBody, channelRFKT);
@@ -487,6 +501,9 @@ public class HeatExchangerMultiblockController extends MultiblockController<Heat
     }
     
     @Override
+    protected boolean hasStoredContents() { return condenserTank.hasStoredContents() || evaporatorTank.hasStoredContents(); }
+
+    @Override
     public CompoundTag mergeNBTs(CompoundTag nbtA, CompoundTag nbtB) {
         // TODO: this, as a whole, this
         return nbtA;
@@ -496,6 +513,7 @@ public class HeatExchangerMultiblockController extends MultiblockController<Heat
     public void read(CompoundTag nbt) {
         condenserTank.deserializeNBT(nbt.getCompound("condenserTank"));
         evaporatorTank.deserializeNBT(nbt.getCompound("evaporatorTank"));
+        outputPressure.load(nbt.getCompound("outputPressure"));
         ambientHeatBody.setTemperature(nbt.getDouble("ambientHeatBody"));
         airHeatBody.setTemperature(nbt.getDouble("airHeatBody"));
         condenserHeatBody.setTemperature(nbt.getDouble("condenserHeatBody"));
@@ -509,6 +527,7 @@ public class HeatExchangerMultiblockController extends MultiblockController<Heat
         final var nbt = new CompoundTag();
         nbt.put("condenserTank", condenserTank.serializeNBT());
         nbt.put("evaporatorTank", evaporatorTank.serializeNBT());
+        nbt.put("outputPressure",outputPressure.save());
         nbt.putDouble("ambientHeatBody", ambientHeatBody.temperature());
         nbt.putDouble("airHeatBody", airHeatBody.temperature());
         nbt.putDouble("condenserHeatBody", condenserHeatBody.temperature());

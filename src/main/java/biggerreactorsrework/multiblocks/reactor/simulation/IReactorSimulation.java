@@ -21,6 +21,8 @@ public interface IReactorSimulation extends ISerializable, IDebuggable {
      */
     void tick(boolean active);
     default double burnFraction() { return 1; }
+    default double outputLimit() { return 1; }
+    default double retainedOutputFraction() { return 0; }
     default int manifoldContacts() { return 0; }
 
     /** Complete a pending calculation once before saving or moving fuel. */

@@ -53,7 +53,7 @@ public final class CoolingIntegrationGameTests {
     @GameTest(template="empty_7x7x7")
     public static void heatedCoolantIdentitySurvivesSaveAndExternalTank(GameTestHelper h){
         var cryo=ResourceLocation.parse("ad_astra:cryo_fuel");
-        if(!BuiltInRegistries.FLUID.containsKey(cryo)){h.assertTrue(FluidTransitionRegistry.transitions().stream().noneMatch(t->t.genericHot()),"absent optional coolant leaked into registry");h.succeed();return;}
+        if(!BuiltInRegistries.FLUID.containsKey(cryo)){h.assertTrue(FluidTransitionRegistry.transitions().stream().noneMatch(t->t.genericHot() && t.liquids.contains(BuiltInRegistries.FLUID.get(cryo))),"absent optional coolant leaked into registry");h.succeed();return;}
         var fluid=BuiltInRegistries.FLUID.get(cryo);var profile=FluidTransitionRegistry.liquidTransition(fluid);
         h.assertTrue(profile!=null && profile.genericHot(),"Cryo Fuel integration missing");
         var tank=new FluidTransitionTank(false);tank.perSideCapacity=10000;tank.fill(fluid,DataComponentPatch.EMPTY,1000,false);

@@ -27,4 +27,12 @@ class PhaseChangeTest {
     @Test void malformedEnergyCannotGenerateFluid() {
         for(double energy:new double[]{Double.NaN,Double.POSITIVE_INFINITY,-1,0})assertEquals(0,PhaseChange.accept(energy,15,100,0).units());
     }
+    @Test void completeHotBatchCannotReleaseAnExtraFractionalUnit() {
+        var batch=PhaseChange.accept(1e9,36,1000,0);
+        assertEquals(1000,batch.units());assertEquals(36000,batch.accepted());assertEquals(0,batch.remainder());
+        var partial=PhaseChange.accept(18,36,1,0);
+        var last=PhaseChange.accept(1e9,36,1,partial.remainder());
+        assertEquals(36,partial.accepted()+last.accepted());assertEquals(0,last.remainder());
+    }
+
 }

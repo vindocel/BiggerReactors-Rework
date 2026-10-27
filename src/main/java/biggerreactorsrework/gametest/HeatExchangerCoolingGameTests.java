@@ -105,10 +105,10 @@ public final class HeatExchangerCoolingGameTests {
     private static double secondaryHeat(long amount){return amount*FluidTransitionRegistry.liquidTransition(Fluids.WATER).latentHeat;}
 
     @GameTest(template="empty_7x7x7")
-    public static void indirectExchangeWarmsUpAndConservesPrimaryVolume(GameTestHelper h) {
+    public static void indirectExchangeStabilizesAndConservesPrimaryVolume(GameTestHelper h) {
         var cfg=biggerreactorsrework.Config.CONFIG.HeatExchanger;
         var geometry=new HeatExchangerCapacity.Geometry(39,39,0,79,79,79.6,4170,293.15);
-        var primary=FluidTransitionRegistry.gasTransition(Fluids.LAVA);
+        var primary=FluidTransitionRegistry.liquidTransition(biggerreactorsrework.fluids.LiquidObsidian.INSTANCE);
         var secondary=FluidTransitionRegistry.liquidTransition(Fluids.WATER);
         var potential=HeatExchangerCapacity.measure(geometry,primary,secondary);
         var hot=new FluidTransitionTank(true);var water=new FluidTransitionTank(false);
@@ -116,9 +116,10 @@ public final class HeatExchangerCoolingGameTests {
         HeatBody c=new HeatBody(),e=new HeatBody(),air=new HeatBody(),ambient=new HeatBody();
         c.setRfPerKelvin(39*cfg.ChannelFEPerKelvinUnitVolume);e.setRfPerKelvin(39*cfg.ChannelFEPerKelvinUnitVolume);air.setRfPerKelvin(4170);ambient.setInfinite(true);
         for(var b:new HeatBody[]{c,e,air,ambient})b.setTemperature(293.15);
+        int flow=(int)Math.min(3076,potential.converted()*.5);
         long supplied=0,returned=0,early=0,late=0;
         for(int tick=0;tick<60000;tick++) {
-            supplied+=hot.fill(Fluids.LAVA,DataComponentPatch.EMPTY,3076,false);
+            supplied+=hot.fill(biggerreactorsrework.fluids.HeatedCoolant.INSTANCE,biggerreactorsrework.registries.CoolantComponents.heated(FluidTransitionRegistry.liquidTransition(biggerreactorsrework.fluids.LiquidObsidian.INSTANCE)),flow,false);
             water.fill(Fluids.WATER,DataComponentPatch.EMPTY,water.perSideCapacity,false);
             hot.transferWith(c,39*cfg.ChannelInternalSurfaceArea);c.transferWith(air,geometry.condenserAir());c.transferWith(e,0);
             e.transferWith(air,geometry.evaporatorAir());water.transferWith(e,39*cfg.ChannelInternalSurfaceArea);air.transferWith(ambient,geometry.ambientArea());
@@ -127,8 +128,8 @@ public final class HeatExchangerCoolingGameTests {
             if(tick<2000)early+=amount;if(tick>=58000)late+=amount;
         }
         h.assertTrue(supplied==returned+hot.fluidAmountInTank(0)+hot.fluidAmountInTank(1),"primary coolant was lost or duplicated");
-        h.assertTrue(late>early,"thermal warmup was not reproduced");
-        h.assertTrue(Math.abs(late/2000d-3076)<31,"oversized exchanger did not stabilize at incoming flow");
+        h.assertTrue(c.temperature()>293.15 && e.temperature()>293.15,"channel temperatures did not warm up");
+        h.assertTrue(Math.abs(late/2000d-flow)<Math.max(2,flow*.01),"oversized exchanger did not stabilize at incoming flow");
         h.assertTrue(potential.converted()>late/2000d,"full tank estimate must exceed partial supply throughput");
         BiggerReactors.LOGGER.info("Indirect HX warmup: first 2000 ticks={} mB/t; final 2000={} mB/t; ideal={} mB/t; residual={} mB",early/2000d,late/2000d,potential.converted(),hot.fluidAmountInTank(0));
         h.succeed();

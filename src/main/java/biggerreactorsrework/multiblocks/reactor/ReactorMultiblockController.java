@@ -1,5 +1,7 @@
 package biggerreactorsrework.multiblocks.reactor;
 
+// Modified 2026-10-26: protect independently stored inventories when joining controllers.
+
 import it.unimi.dsi.fastutil.longs.Long2ObjectLinkedOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.core.BlockPos;
@@ -351,6 +353,11 @@ public class ReactorMultiblockController extends MultiblockController<ReactorBas
     }
     
     @Override
+    protected boolean hasStoredContents() { return simulation!=null && (simulation.fuelTank().totalStored()>0 || simulation.battery()!=null && simulation.battery().stored()>0)
+                || coolantTank!=null && coolantTank.hasStoredContents()
+                || fuelRods.stream().anyMatch(rod->rod.fuel>0 || rod.waste>0); }
+
+    @Override
     public CompoundTag mergeNBTs(CompoundTag nbtA, CompoundTag nbtB) {
         return nbtA;
     }
@@ -445,10 +452,9 @@ public class ReactorMultiblockController extends MultiblockController<ReactorBas
             airProperties = ReactorModeratorRegistry.ModeratorProperties.EMPTY_MODERATOR;
         }
         simulationDescription.setDefaultIModeratorProperties(airProperties);
-        // if we already have a simulation, it is the reference
-        if (simulation != null) {
-            simulationData = simulation.save();
-        }
+        // Modified 2026-10-27: keep the fluid identity paired with the saved simulation volumes.
+        if (simulation != null) simulationData = simulation.save();
+        if (coolantTank != null) coolantTankNBT = coolantTank.serializeNBT();
         final var simulationBuilder = new SimulationDescription.Builder(Config.CONFIG.Reactor.useFullPassSimulation, Config.CONFIG.Reactor.allowOffThreadSimulation, Config.CONFIG.Reactor.allowMultiThreadSimulation);
         final var simulationConfiguration = new SimulationConfiguration(Config.CONFIG.Reactor, 293.15, coolantPorts.isEmpty());
         simulation = simulationBuilder.build(simulationDescription, simulationConfiguration);
@@ -517,6 +523,7 @@ public class ReactorMultiblockController extends MultiblockController<ReactorBas
         distributeFuel();
         if (simulation != null) {
             simulationData = simulation.save();
+            if (coolantTank != null) coolantTankNBT = coolantTank.serializeNBT();
             simulation = null;
         }
     }
@@ -535,7 +542,7 @@ public class ReactorMultiblockController extends MultiblockController<ReactorBas
         var rows=new java.util.ArrayList<java.util.Map<String,Object>>();
         if(simulation==null || statisticsDescription==null) return rows;
         var s=simulation;
-        rows.add(biggerreactorsrework.core.util.Statistics.row("dimensions",(statisticsDescription.x()+2)+" × "+(statisticsDescription.y()+2)+" × "+(statisticsDescription.z()+2)));
+        rows.add(biggerreactorsrework.core.util.Statistics.row("dimensions",(statisticsDescription.x()+2)+" \u00D7 "+(statisticsDescription.y()+2)+" \u00D7 "+(statisticsDescription.z()+2)));
         rows.add(biggerreactorsrework.core.util.Statistics.quantity("fuel_capacity",s.fuelTank().capacity()));
         rows.add(biggerreactorsrework.core.util.Statistics.quantity("fuel_stored",s.fuelTank().fuel()));
         rows.add(biggerreactorsrework.core.util.Statistics.quantity("waste",s.fuelTank().waste()));
@@ -561,6 +568,9 @@ public class ReactorMultiblockController extends MultiblockController<ReactorBas
             rows.add(biggerreactorsrework.core.util.Statistics.quantity("cold_capacity",coolantTank.perSideCapacity()));
             rows.add(biggerreactorsrework.core.util.Statistics.quantity("cold_stored",coolantTank.liquidAmount()));
             rows.add(biggerreactorsrework.core.util.Statistics.quantity("hot_stored",coolantTank.vaporAmount()));
+            rows.add(biggerreactorsrework.core.util.Statistics.row("output_occupancy",String.format(java.util.Locale.ROOT,"%.1f%%",coolantTank.perSideCapacity()<=0?0:100d*coolantTank.vaporAmount()/coolantTank.perSideCapacity())));
+            rows.add(biggerreactorsrework.core.util.Statistics.row("output_retained",String.format(java.util.Locale.ROOT,"%.1f%%",100*s.retainedOutputFraction())));
+            rows.add(biggerreactorsrework.core.util.Statistics.row("output_limit",String.format(java.util.Locale.ROOT,"%.1f%%",100*s.outputLimit())));
             if(potential!=null) rows.add(biggerreactorsrework.core.util.Statistics.rate("conversion_potential",potential.converted()));
             rows.add(biggerreactorsrework.core.util.Statistics.rate("conversion_current",s.coolantTank().transitionedLastTick()));
             rows.add(biggerreactorsrework.core.util.Statistics.rate("input_current",coolantTank.inputRate));
@@ -568,9 +578,11 @@ public class ReactorMultiblockController extends MultiblockController<ReactorBas
             if(reactorActivity==ReactorActivity.ACTIVE && manual>0 && s.fuelTank().fuel()>0) {
                 if(profile==null || coolantTank.liquidAmount()==0)reason="cold_shortage";
                 else if(coolantTank.vaporAmount()>=coolantTank.perSideCapacity())reason="hot_blocked";
+                else if(s.outputLimit()<.999)reason=s.retainedOutputFraction()>0?"hot_accumulation":"output_recovering";
                 else if(s.burnFraction()<.999)reason="thermal_limit";
                 else if(manual<.999)reason="manual";
             }
+            if(profile==null && (coolantTank.liquidAmount()>0 || coolantTank.vaporAmount()>0))reason=coolantTank.hasUnresolvedProfile()?"invalid_coolant":"unidentified_coolant";
         } else {
             if(potential!=null)rows.add(biggerreactorsrework.core.util.Statistics.power("power_potential",potential.power()));
             rows.add(biggerreactorsrework.core.util.Statistics.power("power_current",s.battery().generatedLastTick()));
@@ -606,7 +618,7 @@ public class ReactorMultiblockController extends MultiblockController<ReactorBas
             return;
         }
         
-        simulation.tick(reactorActivity == ReactorActivity.ACTIVE);
+        simulation.tick(reactorActivity == ReactorActivity.ACTIVE && (coolantTank==null || !coolantTank.hasUnresolvedProfile()));
         if(coolantTank!=null)coolantTank.sampleFlows();
         if(CoreEvents.tickNumber()%10==0)updateCoolantRendering();
         if (autoEjectWaste) {

@@ -1,26 +1,45 @@
 package biggerreactorsrework.client;
 
+import biggerreactorsrework.core.util.FluidSurfaceMesh;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.*;
+import net.minecraft.core.Direction;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.neoforged.neoforge.client.extensions.common.IClientFluidTypeExtensions;
 import net.neoforged.neoforge.fluids.FluidStack;
+import java.util.List;
 
-/** Shared interior fluid geometry for manifolds and exchanger channels. */
+/** Modified 2026-10-27: shared shader-compatible exterior surfaces, native tint alpha and vanilla render layers. */
 public final class FluidBoxRenderer {
+    public record Volume(FluidStack stack,FluidSurfaceMesh.Box box,int hidden) { }
+    public static int mask(Direction side) {
+        int axis=switch(side.getAxis()){case X->0;case Y->1;case Z->2;};
+        return 1<<(axis*2+(side.getAxisDirection()==Direction.AxisDirection.POSITIVE?1:0));
+    }
     public static void draw(PoseStack pose,MultiBufferSource buffers,FluidStack stack,float x0,float y0,float z0,float x1,float y1,float z1,int light,int overlay){
-        if(stack.isEmpty() || y1<=y0)return;
-        var extension=IClientFluidTypeExtensions.of(stack.getFluid());var texture=extension.getStillTexture(stack);if(texture==null)return;
-        var sprite=Minecraft.getInstance().getTextureAtlas(InventoryMenu.BLOCK_ATLAS).apply(texture);
-        var vertices=buffers.getBuffer(RenderType.entityTranslucent(InventoryMenu.BLOCK_ATLAS));int color=extension.getTintColor(stack);
-        float[][] corners={{x0,y0,z0},{x1,y0,z0},{x1,y1,z0},{x0,y1,z0},{x0,y0,z1},{x1,y0,z1},{x1,y1,z1},{x0,y1,z1}};
-        int[][] faces={{0,3,2,1},{4,5,6,7},{0,4,7,3},{1,2,6,5},{3,7,6,2},{0,1,5,4}};
-        float[][] normals={{0,0,-1},{0,0,1},{-1,0,0},{1,0,0},{0,1,0},{0,-1,0}};
-        for(int f=0;f<6;f++)for(int v=0;v<4;v++){
-            float[] point=corners[faces[f][v]];
-            vertices.addVertex(pose.last(),point[0],point[1],point[2]).setColor((color>>16)&255,(color>>8)&255,color&255,220)
-                .setUv(v==0||v==3?sprite.getU0():sprite.getU1(),v<2?sprite.getV1():sprite.getV0()).setOverlay(overlay).setLight(light).setNormal(pose.last(),normals[f][0],normals[f][1],normals[f][2]);
+        draw(pose,buffers,List.of(new Volume(stack,new FluidSurfaceMesh.Box(x0,y0,z0,x1,y1,z1),0)),light,overlay);
+    }
+    public static void draw(PoseStack pose,MultiBufferSource buffers,List<Volume> volumes,int light,int overlay){
+        var joined=volumes.stream().filter(v->!v.stack.isEmpty()).map(Volume::box).toList();
+        for(var volume:volumes){
+            var stack=volume.stack;if(stack.isEmpty() || !volume.box.valid())continue;
+            var extension=IClientFluidTypeExtensions.of(stack.getFluid());var texture=extension.getStillTexture(stack);if(texture==null)continue;
+            var sprite=Minecraft.getInstance().getTextureAtlas(InventoryMenu.BLOCK_ATLAS).apply(texture);
+            int color=extension.getTintColor(stack),alpha=color>>>24;
+            // Contained fluids have no artificial transparency; genuinely translucent tints keep their alpha.
+            var layer=alpha==255?RenderType.entityCutout(InventoryMenu.BLOCK_ATLAS):RenderType.entityTranslucentCull(InventoryMenu.BLOCK_ATLAS);
+            var vertices=buffers.getBuffer(layer);
+            int emission=stack.getFluidType().getLightLevel(stack);
+            int packedLight=LightTexture.pack(Math.max(LightTexture.block(light),emission),LightTexture.sky(light));
+            for(var face:FluidSurfaceMesh.faces(volume.box,joined,volume.hidden))for(int i=0;i<4;i++){
+                var point=face.vertex(i);float[] normal=new float[3];normal[face.axis()]=face.positive()?1:-1;
+                float u=point[(face.axis()+1)%3],v=point[(face.axis()+2)%3];
+                vertices.addVertex(pose.last(),point[0],point[1],point[2])
+                        .setColor((color>>16)&255,(color>>8)&255,color&255,alpha)
+                        .setUv(sprite.getU(u),sprite.getV(1-v)).setOverlay(overlay).setLight(packedLight)
+                        .setNormal(pose.last(),normal[0],normal[1],normal[2]);
+            }
         }
     }
     private FluidBoxRenderer() { }

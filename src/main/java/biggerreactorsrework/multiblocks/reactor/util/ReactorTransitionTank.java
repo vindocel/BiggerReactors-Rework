@@ -104,6 +104,7 @@ public class ReactorTransitionTank extends FluidTransitionTank {
         return filled;
     }
 
+    @Override public boolean hasStoredContents() { pullUpdate(); return super.hasStoredContents(); }
     @Override public long fluidAmountInTank(int tank) { pullUpdate(); return super.fluidAmountInTank(tank); }
     @Override public CompoundTag serializeNBT(){pullUpdate();return super.serializeNBT();}
     

@@ -83,9 +83,9 @@ public final class CoolingGameTests {
         long hot=evaporator.fluidAmountInTank(1),cold=evaporator.fluidAmountInTank(0);
         h.assertTrue(hot>0 && hot+cold==1000,"evaporation created or lost fluid");
         var restored=new FluidTransitionTank(false);restored.perSideCapacity=10000;restored.deserializeNBT(evaporator.serializeNBT());
-        h.assertTrue(restored.fluidAmountInTank(1)==hot && restored.fluidTypeInTank(1)==Fluids.LAVA,"save changed hot output");
+        h.assertTrue(restored.fluidAmountInTank(1)==hot && restored.fluidTypeInTank(1)==biggerreactorsrework.fluids.HeatedCoolant.INSTANCE,"save changed hot output");
         var condenser=new FluidTransitionTank(true);condenser.perSideCapacity=10000;
-        condenser.fill(Fluids.LAVA,DataComponentPatch.EMPTY,hot,false);
+        condenser.fill(biggerreactorsrework.fluids.HeatedCoolant.INSTANCE,biggerreactorsrework.registries.CoolantComponents.heated(FluidTransitionRegistry.liquidTransition(biggerreactorsrework.fluids.LiquidObsidian.INSTANCE)),hot,false);
         body.setTemperature(300);condenser.transferWith(body,1000);
         h.assertTrue(condenser.fluidAmountInTank(0)+condenser.fluidAmountInTank(1)==hot,"condensation created or lost fluid");
         h.assertTrue(condenser.fluidTypeInTank(1)==LiquidObsidian.INSTANCE,"wrong cold output");
@@ -94,7 +94,7 @@ public final class CoolingGameTests {
     @GameTest(template="empty_7x7x7")
     public static void zeroPowerCoolantsCannotEnterTurbine(GameTestHelper h) {
         var tank=new biggerreactorsrework.multiblocks.turbine.simulation.modern.FluidTank();tank.perSideCapacity=10000;
-        h.assertTrue(tank.fill(Fluids.LAVA,DataComponentPatch.EMPTY,1000,false)==0,"lava bypassed turbine whitelist");
+        h.assertTrue(tank.fill(biggerreactorsrework.fluids.HeatedCoolant.INSTANCE,biggerreactorsrework.registries.CoolantComponents.heated(FluidTransitionRegistry.liquidTransition(biggerreactorsrework.fluids.LiquidObsidian.INSTANCE)),1000,false)==0,"lava bypassed turbine whitelist");
         h.succeed();
     }
 

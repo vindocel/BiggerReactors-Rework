@@ -1,5 +1,7 @@
 package biggerreactorsrework.multiblocks.battery.client;
 
+// Modified 2026-10-27: top plus charges items; bottom minus drains items into the battery.
+
 import biggerreactorsrework.client.CommonRender;
 import biggerreactorsrework.client.GuiArt;
 import biggerreactorsrework.client.GuiFrame;
@@ -88,8 +90,8 @@ public class BatteryTerminalScreen extends ModScreen<BatteryTerminalContainer> {
         GuiIcon.ENERGY_INPUT.draw(graphics, x + 32, y + 43);
         GuiIcon.ENERGY_OUTPUT.draw(graphics, x + 32, y + 65);
 
-        drawBatterySlot(graphics, x + DISCHARGE_X - 1, y + DISCHARGE_Y - 1, true);
-        drawBatterySlot(graphics, x + CHARGE_X - 1, y + CHARGE_Y - 1, false);
+        drawBatterySlot(graphics, x + DISCHARGE_X - 1, y + DISCHARGE_Y - 1, false);
+        drawBatterySlot(graphics, x + CHARGE_X - 1, y + CHARGE_Y - 1, true);
         GuiArt.playerInventory(graphics, x + INVENTORY_X - 1, y + INVENTORY_Y - 1);
 
         this.frame().ear(graphics, x + WIDTH, y + ARMOR_EAR_Y, ARMOR_EAR_HEIGHT, false);

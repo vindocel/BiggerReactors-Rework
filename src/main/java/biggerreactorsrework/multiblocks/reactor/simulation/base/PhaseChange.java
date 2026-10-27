@@ -10,7 +10,8 @@ public final class PhaseChange {
         remainder = Double.isFinite(remainder)?Math.max(0,Math.min(Math.nextDown(latent),remainder)):0;
         double total=energy+remainder;
         long units=Math.min(available,(long)(total/latent));
-        double rest=Math.min(Math.nextDown(latent),Math.max(0,total-units*latent));
+        // Modified 2026-10-27: no fractional extra unit beyond the available batch/output space.
+        double rest=units==available?0:Math.min(Math.nextDown(latent),Math.max(0,total-units*latent));
         return new Result(units,Math.max(0,units*latent+rest-remainder),rest);
     }
 }

@@ -43,6 +43,11 @@ public class FluidTransitionTank extends HeatBody implements IFluidTankHandler, 
     private CompoundTag unresolved;
     private double incoming,outgoing;
     public double inputRate,outputRate;
+    // Modified 2026-10-26: opt-in limiter; ordinary tanks and turbine behavior are unchanged.
+    private double conversionLimit=1;
+    private biggerreactorsrework.core.util.OutputBackpressure outputObserver;
+    public void setConversionLimit(double limit){conversionLimit=Double.isFinite(limit)?Math.clamp(limit,0,1):0;}
+    public void observeOutputWith(biggerreactorsrework.core.util.OutputBackpressure observer){outputObserver=observer;}
     public void sampleFlows(){inputRate=.9*inputRate+.1*incoming;outputRate=.9*outputRate+.1*outgoing;incoming=0;outgoing=0;}
     public boolean hasUnresolvedProfile(){return unresolved!=null;}
     
@@ -170,6 +175,7 @@ public class FluidTransitionTank extends HeatBody implements IFluidTankHandler, 
             if (!simulate) {
                 outFluid = fluid;
                 outAmount -= toDrain;outgoing+=toDrain;
+                if(outputObserver!=null)outputObserver.released(outAmount,perSideCapacity);
                 clearSelectionIfEmpty();
             }
             return toDrain;
@@ -183,6 +189,7 @@ public class FluidTransitionTank extends HeatBody implements IFluidTankHandler, 
         }
         if (tank == OUT_TANK) {
             outAmount = 0;
+            if(outputObserver!=null)outputObserver.released(outAmount,perSideCapacity);
         }
         if(unresolved!=null) {
             if(tank==IN_TANK)unresolved.putLong("inAmount",0);
@@ -236,7 +243,7 @@ public class FluidTransitionTank extends HeatBody implements IFluidTankHandler, 
             return 0;
         }
         
-        rf = Math.abs(rf);
+        rf = Math.abs(rf)*conversionLimit;
         
         long toTransition = (long) ((rf + thermalRemainder) / activeTransition.latentHeat);
         long maxTransitionable = Math.min(inAmount, perSideCapacity - outAmount);
@@ -283,10 +290,24 @@ public class FluidTransitionTank extends HeatBody implements IFluidTankHandler, 
         return nbt;
     }
     
+    /** Modified 2026-10-26: quarantined saved fluids also prevent destructive inventory merges. */
+    public boolean hasStoredContents() {
+        return inAmount>0 || outAmount>0 || unresolved!=null &&
+                (unresolved.getLong("inAmount")>0 || unresolved.getLong("outAmount")>0);
+    }
+
     @Override
     public void deserializeNBT(CompoundTag nbt) {
+        // Modified 2026-10-27: retain invalid legacy stock without reinterpreting its product.
+        inAmount=Math.max(0,nbt.getLong("inAmount"));outAmount=Math.max(0,nbt.getLong("outAmount"));
+        inFluid=Fluids.EMPTY;outFluid=Fluids.EMPTY;
+        inComponents=DataComponentPatch.EMPTY;outComponents=DataComponentPatch.EMPTY;
         unresolved=nbt.contains("inFluid")?nbt.copy():null;
         activeTransition=null;
+        transitionUpdate();
+        if (inAmount+outAmount>0 && ((condenser && "minecraft:lava".equals(nbt.getString("inFluid"))) ||
+            (!condenser && "biggerreactorsrework:liquid_obsidian".equals(nbt.getString("inFluid")) &&
+             "minecraft:lava".equals(nbt.getString("outFluid"))))) return;
         if(nbt.getLong("inAmount")==0 && nbt.getLong("outAmount")==0) {
             inAmount=0;outAmount=0;unresolved=null;clearSelectionIfEmpty();return;
         }

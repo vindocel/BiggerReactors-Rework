@@ -12,6 +12,9 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 public class CoolantTank extends HeatBody implements IReactorSimulation.ICoolantTank, ReactorModeratorRegistry.IModeratorProperties, ISerializable {
+    // Modified 2026-10-26: applies only to this active-reactor tank.
+    public final biggerreactorsrework.core.util.OutputBackpressure outputPressure=new biggerreactorsrework.core.util.OutputBackpressure();
+    public void updateOutputPressure(){outputPressure.tick(vaporAmount,perSideCapacity);}
     private final SimulationConfiguration configuration;
     
     private final long perSideCapacity;
@@ -76,7 +79,7 @@ public class CoolantTank extends HeatBody implements IReactorSimulation.ICoolant
             return 0;
         }
         
-        rf = Math.abs(rf);
+        rf = Math.abs(rf)*outputPressure.limit();
     
         final double effectiveLatentHeat = transitionProperties.latentHeat();
         
@@ -111,6 +114,7 @@ public class CoolantTank extends HeatBody implements IReactorSimulation.ICoolant
     @Override
     public void dumpVapor() {
         vaporAmount = 0;
+        outputPressure.released(vaporAmount,perSideCapacity);
         if(liquidAmount==0)thermalRemainder=0;
     }
     
@@ -129,12 +133,14 @@ public class CoolantTank extends HeatBody implements IReactorSimulation.ICoolant
     @Override
     public long insertVapor(long amount) {
         vaporAmount += amount;
+        if(amount<0)outputPressure.released(vaporAmount,perSideCapacity);
         return amount;
     }
     
     @Override
     public long extractVapor(long amount) {
         vaporAmount -= amount;
+        if(amount>0)outputPressure.released(vaporAmount,perSideCapacity);
         return amount;
     }
     
@@ -234,6 +240,7 @@ public class CoolantTank extends HeatBody implements IReactorSimulation.ICoolant
         compound.put("liquidAmount", liquidAmount);
         compound.put("gasAmount", vaporAmount);
         compound.put("thermalRemainder",thermalRemainder);
+        compound.put("outputPressure",outputPressure.save());
         return compound;
     }
     
@@ -245,5 +252,6 @@ public class CoolantTank extends HeatBody implements IReactorSimulation.ICoolant
         vaporAmount=Math.max(0,vaporAmount);
         thermalRemainder=Math.max(0,compound.getDouble("thermalRemainder"));
         if(!Double.isFinite(thermalRemainder))thermalRemainder=0;
+        outputPressure.load(compound.getCompound("outputPressure").toROBNMap());
     }
 }

@@ -1,5 +1,7 @@
 package biggerreactorsrework.client;
 
+// Modified 2026-10-26: keep the gross-generation row in performance comparisons.
+
 import biggerreactorsrework.core.client.gui.GuiSync;
 import biggerreactorsrework.core.client.gui.screens.ModScreen;
 import biggerreactorsrework.registries.CoolantComponents;
@@ -51,7 +53,7 @@ public final class GuiStatisticsWindow {
         if(value.startsWith("@pair:")){
             String[] parts=value.substring(6).split("\\|",-1);
             if(parts.length>=3)return Component.empty().append(fluid(parts[0],parts.length>=4?parts[3]:"").copy().withColor(0xFF3A78C0))
-                    .append(" → ").append(fluid(parts[1],parts[2]).copy().withColor(0xFFC8582A));
+                    .append(" \u2192 ").append(fluid(parts[1],parts[2]).copy().withColor(0xFFC8582A));
         }
         return Component.literal(value);
     }
@@ -64,7 +66,8 @@ public final class GuiStatisticsWindow {
         for(var key:java.util.List.of("pair","cold_capacity","primary_capacity","water_capacity","cold_stored","hot_stored","water_stored","steam_stored",
                 "input_current","output_current","water_discarded","vent","primary_temperature","secondary_temperature","thermal_storage_change"))SECTIONS.put(key,"fluids");
         for(var key:java.util.List.of("burn_current","burn_potential","manual_limit","conversion_current","conversion_potential","steam_current","steam_potential",
-                "water_potential","power_current","power_potential","rpm","efficiency","flow_selected","flow_structural","flow_efficient"))SECTIONS.put(key,"performance");
+                "water_potential","power_current","power_gross","power_potential","rpm","efficiency","flow_selected","flow_structural","flow_efficient",
+                "output_occupancy","output_retained","output_limit"))SECTIONS.put(key,"performance");
     }
     private static final java.util.regex.Pattern AMOUNT=java.util.regex.Pattern.compile("(-?[0-9][0-9.,]*) (mB/t|mB|FE/t)");
 
@@ -117,8 +120,8 @@ public final class GuiStatisticsWindow {
             for(var row:section.getValue()){
                 String key=String.valueOf(row.get("key")),value=String.valueOf(row.get("value"));
                 double progress=-1;
-                if(key.endsWith("_current")){
-                    double potential=amount(values.getOrDefault(key.substring(0,key.length()-8)+"_potential",""));
+                if(key.endsWith("_current") || key.equals("power_gross")){
+                    double potential=amount(values.getOrDefault(key.equals("power_gross")?"power_potential":key.substring(0,key.length()-8)+"_potential",""));
                     double current=amount(value);
                     if(potential>0 && !Double.isNaN(current))progress=Mth.clamp(current/potential,0,1);
                 }

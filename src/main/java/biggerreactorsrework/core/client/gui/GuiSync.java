@@ -1,5 +1,7 @@
 package biggerreactorsrework.core.client.gui;
 
+// Modified 2026-10-26: bind screen messages to the originating menu and position.
+
 import biggerreactorsrework.core.networking.SimpleChannel;
 import biggerreactorsrework.core.registry.OnModLoad;
 import biggerreactorsrework.core.serialization.DataCompound;
@@ -49,6 +51,9 @@ public class GuiSync {
         default void runRequest(@Nonnull String requestName, @Nullable Object requestData) {
             var compound = new DataCompound();
 
+            if (!(this instanceof net.minecraft.world.inventory.AbstractContainerMenu menu)) return;
+            compound.put("menu", menu.containerId);
+            compound.put("position", machinePos().asLong());
             compound.put("request", requestName);
             if (requestData != null) {
                 compound.put("data", requestData);
@@ -104,13 +109,16 @@ public class GuiSync {
             }
             //noinspection unchecked
             var snapshot=new java.util.HashMap<String,Object>((Map<String,Object>)packetMap);
+            snapshot.put("menu",player.containerMenu.containerId);
+            snapshot.put("position",provider.machinePos().asLong());
             snapshot.put("statistics",provider.statistics());
             INSTANCE.sendToPlayer(player, new DataCompound(snapshot));
         }
     }
 
     private static void clientHandler(DataCompound compound, IPayloadContext ctx) {
-        if (ctx.player().containerMenu instanceof IGUIPacketProvider provider) {
+        if (ctx.player().containerMenu instanceof IGUIPacketProvider provider
+                && matches(compound, ctx.player().containerMenu, provider)) {
             if(compound.get("statistics") instanceof java.util.List<?> list) {
                 var rows=new java.util.ArrayList<java.util.Map<String,Object>>();
                 for(var row:list)if(row instanceof java.util.Map<?,?> map && map.get("key") instanceof String key && map.get("value") instanceof String value)
@@ -124,12 +132,18 @@ public class GuiSync {
         }
     }
 
+    // Modified 2026-10-26: bind requests and snapshots to the originating menu and machine.
+    private static boolean matches(DataCompound data, net.minecraft.world.inventory.AbstractContainerMenu menu, IGUIPacketProvider provider) {
+        return data.get("menu") instanceof Integer id && id == menu.containerId
+                && data.get("position") instanceof Long position && position == provider.machinePos().asLong();
+    }
+
     private static void serverHandler(DataCompound compound, IPayloadContext ctx) {
         if (!(compound.get("request") instanceof String request) || request.isEmpty() || request.length() > MAX_REQUEST_NAME_LENGTH) {
             return;
         }
         final var player = ctx.player();
-        if (!(player.containerMenu instanceof IGUIPacketProvider provider) || !player.containerMenu.stillValid(player)) {
+        if (!(player.containerMenu instanceof IGUIPacketProvider provider) || !player.containerMenu.stillValid(player) || !matches(compound, player.containerMenu, provider)) {
             return;
         }
         provider.executeRequest(request, compound.get("data"));

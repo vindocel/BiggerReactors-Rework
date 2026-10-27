@@ -1,6 +1,62 @@
-# 1.21.1-0.1.2 (BiggerReactors-Rework, unreleased)
+# 1.21.1-0.1.3 (BiggerReactors-Rework, unreleased)
+
+## Industrial viewer visuals (2026-10-27)
+ - use the machine's decorated animated fluid gauges in JEI and EMI, preserving ingredient interactions
+ - remove the empty dark tooltip over the Industrial Processor operating-condition label
+
+
+## Correct hot-volume yield and recipe-viewer layout (2026-10-27)
+ - correct obsidian's yield target to steam per equal volume of hot coolant, not nuclear fuel: 1000 mB hot obsidian gives 9000 mB ideal steam versus 7500 mB for hot Cryo
+ - cap fractional phase-change heat at the available batch volume
+ - show both Industrial Processor recipes in JEI/EMI with input water beside FE and liquid product in the output tank, preserving searchable ingredients
+
+
+## Industrial processing and obsidian coolant revision (2026-10-27)
+ - expand the existing Cyanite Reprocessor into the Industrial Processor while preserving its registry IDs, crafting recipe and cyanite processing
+ - add obsidian and water processing into Liquid Obsidian, a separate product tank, fluid output routes, automatic ejection and the revised water/energy layout
+ - replace the lava coolant pair with identified heated Liquid Obsidian; legacy pairs stop as invalid until manually emptied
+ - give hot obsidian 20% more heat per mB than unchanged hot Cryo Fuel, verified with equal-volume exchanger batches; leave other coolant and turbine coefficients unchanged
+ - update native recipes, JEI/EMI, guide, locales and protocol 4 synchronization; verify 56 unit tests and 79 GameTests per environment
+
+
+## Battery terminal and Unicode fixes (2026-10-27)
+
+- Move the item-charging slot to the top (+) and the item-discharging slot to the bottom (-), preserving persisted slot IDs and energy direction.
+- Charge equipped armor and offhand FE items only while a valid battery terminal is open on the server; share the output budget with item slots, ports and other viewers.
+- Deduplicate equipment charging within each server tick and synchronize modified item components through the menu.
+- Correct corrupted dimension/conversion separators and serialize new ROBN strings as length-prefixed UTF-8 with an explicit type tag. Retain legacy string decoding and bounds checks; reject malformed UTF-8.
+- Bump internal network protocol to 3 so incompatible clients cannot decode the new string representation.
+- Add Unicode round-trip, legacy compatibility and malformed-payload tests, plus a real battery/menu GameTest covering equipment charging, closing, shared limits and plus/minus behavior.
+
+## Contained-fluid rendering and reactor repair (2026-10-27)
+ - render only exterior fluid surfaces, omitting shared phase, segment and bend caps; use consistent UVs, outward normals, face culling, native tint alpha and fluid emission light
+ - use vanilla cutout rendering for opaque contained fluids and the culled translucent layer for translucent tints, avoiding forced transparency behind machine glass without depending on Iris
+ - preserve coolant profile/origin alongside simulation volumes when disassembling or rebuilding a reactor; fixes stored coolant becoming unidentified and rejecting refill after casing repair
+ - show unidentified coolant instead of Air for orphaned stored amounts; require an explicit coolant-port manual dump before refilling an already unidentified tank, without silently changing its contents
+ - add exterior-mesh/winding regression tests and real reactor repair/refill tests
+
+## Turbine reload regression (2026-10-26)
+ - resolve queued controller aliases before checking emptiness or removing controllers from the registry; prevents loaded turbine parts and rotor bearings from remaining split between controllers
+ - use deterministic inventory/size/creation-order merge selection while preserving the independent-inventory protection
+ - add fresh, stocked, staged, alias-chain and shuffled saved-turbine regression cases; exclude their fixtures from distribution artifacts
+
+## Production audit fixes (2026-10-26)
+ - validate binary lengths/nesting before collection allocation, reject nontext compound keys and bind GUI packets to their menu and position (internal protocol 2)
+ - validate rod commands and numeric configuration bounds, including open endpoints and nonfinite numbers
+ - replace removed persistence delegates; preserve machine origin across parts and refuse merging independently stocked machines, including inventories awaiting NBT load
+ - respect liquid output protection when settling pending asynchronous radiation
+ - reprocessor automatic input uses recipe fluids and selects matching fluid alternatives; machine recipes stay out of the vanilla crafting book
+ - add recovery to transition data maps, distinguish empty client snapshots from missing sync and clear coolant cache on disconnect
+ - derive only eligible heated sprites, repair Cryo Fuel texture fallback and label turbine generation as gross without changing turbine mechanics
+ - remove five unused textures and 64 duplicate JSON keys; synchronize locale keys, keeping English fallback where Chinese translations are unavailable
+ - exclude GameTests and their empty template from the distribution jar; keep generated numerical studies local
 
 ## Liquid cooling
+ - added measured restricted-extraction experiments for obsidian-to-lava reactors and lava/water exchangers, checking steady bottlenecks, complete blockage, recovery and per-tick fluid/heat balances
+ - active reactors now reduce burn and coolant conversion linearly with persistent hot output stock; exchangers limit both conversions from retained steam only, preserving turbine behavior and solid-mode generation
+ - output monitoring ignores normal transfer batches cleared within one second, stops immediately at full capacity and recovers by up to five percentage points per tick; saved monitoring state survives reloads
+ - added output occupancy, retained occupancy and operating-limit statistics with localized bottleneck/recovery reasons, plus guide explanations in English and Portuguese
+ - reactor thermal protection now accounts for the output conversion limit when estimating sustainable heat removal
  - reactor manifolds and exchanger channels now fill their whole visual path using the relative cold/hot proportions, including abrupt stock changes and tiny nonempty amounts; actual inventory gauges and conversion remain unchanged
  - corrected sodium's heat-exchange temperature so the same reactor and exchanger produce more steam with sodium than Cryo Fuel or Liquid Obsidian; added a finite closed-loop comparison of all coolant tiers using identical geometry and control rods
  - preserved existing sodium inventories across this specific temperature correction without accepting unrelated coolant profile changes

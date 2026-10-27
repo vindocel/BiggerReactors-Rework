@@ -27,6 +27,20 @@ public class CyaniteReprocessingCategory implements IRecipeCategory<CyaniteRepro
     public record Recipe(biggerreactorsrework.machine.recipe.ReprocessingRecipe value) {
     }
 
+    // Modified 2026-10-27: retain JEI ingredient semantics while using the machine's gauge art.
+    private static final mezz.jei.api.ingredients.IIngredientRenderer<net.neoforged.neoforge.fluids.FluidStack> TANK_RENDERER =
+            new mezz.jei.api.ingredients.IIngredientRenderer<>() {
+                @Override public int getWidth() { return biggerreactorsrework.client.GaugeBar.WIDTH; }
+                @Override public int getHeight() { return biggerreactorsrework.client.GaugeBar.HEIGHT; }
+                @Override public void render(GuiGraphics g, net.neoforged.neoforge.fluids.FluidStack fluid) {
+                    biggerreactorsrework.client.GaugeBar.drawFluid(g,0,0,fluid.getAmount(),Math.max(1,fluid.getAmount()),fluid);
+                }
+                @Override public java.util.List<Component> getTooltip(net.neoforged.neoforge.fluids.FluidStack fluid,net.minecraft.world.item.TooltipFlag flag) {
+                    return java.util.List.of(fluid.getHoverName(),Component.literal(
+                        biggerreactorsrework.core.client.gui.RenderHelper.formatValue(fluid.getAmount()/1000.0,"B",true)));
+                }
+            };
+
     private final IDrawable icon;
 
     public CyaniteReprocessingCategory(IGuiHelper gui) {
@@ -62,10 +76,16 @@ public class CyaniteReprocessingCategory implements IRecipeCategory<CyaniteRepro
     public void setRecipe(IRecipeLayoutBuilder builder, Recipe recipe, IFocusGroup focuses) {
         builder.addSlot(RecipeIngredientRole.INPUT, Cyanite.INPUT_X + 1, Cyanite.SLOT_Y + 1)
                 .addItemStacks(java.util.Arrays.stream(recipe.value().ingredient().getItems()).map(stack -> stack.copyWithCount(recipe.value().count())).toList());
-        builder.addSlot(RecipeIngredientRole.OUTPUT, Cyanite.OUTPUT_X + 1, Cyanite.SLOT_Y + 1)
-                .addItemStack(recipe.value().result());
+        if(recipe.value().producesFluid()) {
+            var product=recipe.value().fluidResult();
+            builder.addSlot(RecipeIngredientRole.OUTPUT,Cyanite.PRODUCT_X,0)
+                .addFluidStack(product.getFluid(),product.getAmount(),product.getComponentsPatch())
+                .setCustomRenderer(mezz.jei.api.neoforge.NeoForgeTypes.FLUID_STACK,TANK_RENDERER);
+        } else builder.addSlot(RecipeIngredientRole.OUTPUT,Cyanite.OUTPUT_X+1,Cyanite.SLOT_Y+1).addItemStack(recipe.value().result());
         // Water is drawn in the machine's own tank; this keeps it in the recipe lookups.
-        builder.addInvisibleIngredients(RecipeIngredientRole.INPUT).addFluidStack(recipe.value().fluid(), (long)recipe.value().water()*recipe.value().duration());
+        if(recipe.value().totalFluid()>0) builder.addSlot(RecipeIngredientRole.INPUT,Cyanite.WATER_X,0)
+                .addFluidStack(recipe.value().fluid(),recipe.value().totalFluid())
+                .setCustomRenderer(mezz.jei.api.neoforge.NeoForgeTypes.FLUID_STACK,TANK_RENDERER);
     }
 
     @Override

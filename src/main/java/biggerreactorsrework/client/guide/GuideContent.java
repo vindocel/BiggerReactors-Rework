@@ -93,6 +93,7 @@ final class GuideContent {
           chapters.add(new Chapter("moderators",()->new ItemStack(BuiltInRegistries.ITEM.get(GuideIds.id("graphite_block"))),List.copyOf(elements))); }
         { var elements=new ArrayList<GuideElement>();
           elements.add(new GuideElements.Text(Component.translatable("guide.biggerreactorsrework.content.active")));
+          elements.add(new GuideElements.Text(Component.translatable("guide.biggerreactorsrework.content.active_output_protection")));
           elements.add(new GuideElements.Heading(Component.translatable("guide.biggerreactorsrework.coolants")));
           elements.add(coolantTable());
           elements.addAll(GuideMultiblock.elements(GuideStructures.reactor(5,true)));
@@ -135,6 +136,7 @@ final class GuideContent {
         { var elements=new ArrayList<GuideElement>();
           elements.add(limits("exchanger",4,3,3,biggerreactorsrework.Config.CONFIG.HeatExchanger.MaxLength,biggerreactorsrework.Config.CONFIG.HeatExchanger.MaxHeight,biggerreactorsrework.Config.CONFIG.HeatExchanger.MaxWidth));
           elements.add(new GuideElements.Text(Component.translatable("guide.biggerreactorsrework.content.exchanger")));
+          elements.add(new GuideElements.Text(Component.translatable("guide.biggerreactorsrework.content.exchanger_output_protection")));
           elements.add(new GuideElements.Crafting(GuideIds.id("crafting/heat_exchanger/casing")));
           elements.add(new GuideElements.Crafting(GuideIds.id("crafting/heat_exchanger/glass")));
           elements.add(new GuideElements.Crafting(GuideIds.id("crafting/heat_exchanger/terminal")));

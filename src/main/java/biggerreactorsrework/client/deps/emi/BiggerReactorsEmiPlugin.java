@@ -110,6 +110,18 @@ public class BiggerReactorsEmiPlugin implements EmiPlugin {
         return ResourceLocation.fromNamespaceAndPath(BiggerReactors.modid, "/" + kind + "/" + entry.getNamespace() + "/" + entry.getPath());
     }
 
+    // Modified 2026-10-27: native EMI tank interaction, shared animated machine rendering.
+    private static final class IndustrialTankWidget extends dev.emi.emi.api.widget.TankWidget {
+        private final net.neoforged.neoforge.fluids.FluidStack fluid;
+        IndustrialTankWidget(EmiIngredient ingredient,int x,int y,net.neoforged.neoforge.fluids.FluidStack fluid) {
+            super(ingredient,x,y,biggerreactorsrework.client.GaugeBar.WIDTH,biggerreactorsrework.client.GaugeBar.HEIGHT,Math.max(1,fluid.getAmount()));
+            this.fluid=fluid.copy();drawBack(false);
+        }
+        @Override public void drawStack(net.minecraft.client.gui.GuiGraphics g,int mouseX,int mouseY,float delta) {
+            biggerreactorsrework.client.GaugeBar.drawFluid(g,x,y,fluid.getAmount(),Math.max(1,fluid.getAmount()),fluid);
+        }
+    }
+
     private static final class Reprocessing extends BasicEmiRecipe {
         private final biggerreactorsrework.machine.recipe.ReprocessingRecipe recipe;
         Reprocessing(net.minecraft.world.item.crafting.RecipeHolder<biggerreactorsrework.machine.recipe.ReprocessingRecipe> holder) {
@@ -118,15 +130,17 @@ public class BiggerReactorsEmiPlugin implements EmiPlugin {
             recipe = holder.value();
             inputs.add(EmiIngredient.of(recipe.ingredient(), recipe.count()));
             // Water is drawn in the machine's own tank; listing it keeps it in the recipe lookups.
-            if (recipe.water()>0) inputs.add(EmiStack.of(recipe.fluid(), (long)recipe.water()*recipe.duration()));
-            outputs.add(EmiStack.of(recipe.result()));
+            if (recipe.totalFluid()>0) inputs.add(EmiStack.of(recipe.fluid(), recipe.totalFluid()));
+            outputs.add(recipe.producesFluid()?EmiStack.of(recipe.fluidResult().getFluid(),recipe.fluidResult().getComponentsPatch(),recipe.fluidResult().getAmount()):EmiStack.of(recipe.result()));
         }
 
         @Override
         public void addWidgets(WidgetHolder widgets) {
             widgets.addDrawable(0, 0, Cyanite.WIDTH, Cyanite.HEIGHT, (g, mouseX, mouseY, delta) -> Cyanite.draw(g, recipe));
             widgets.addSlot(inputs.getFirst(), Cyanite.INPUT_X, Cyanite.SLOT_Y).drawBack(false);
-            widgets.addSlot(outputs.getFirst(), Cyanite.OUTPUT_X, Cyanite.SLOT_Y).drawBack(false).recipeContext(this);
+            if(recipe.producesFluid()) widgets.add(new IndustrialTankWidget(outputs.getFirst(),Cyanite.PRODUCT_X,0,recipe.fluidResult())).recipeContext(this);
+            else widgets.addSlot(outputs.getFirst(),Cyanite.OUTPUT_X,Cyanite.SLOT_Y).drawBack(false).recipeContext(this);
+            if(inputs.size()>1)widgets.add(new IndustrialTankWidget(inputs.get(1),Cyanite.WATER_X,0,new net.neoforged.neoforge.fluids.FluidStack(recipe.fluid(),(int)Math.min(Integer.MAX_VALUE,recipe.totalFluid()))));
             widgets.addTooltipText(Cyanite.energyTooltip(recipe), Cyanite.ENERGY_X, 0, 18, Cyanite.HEIGHT);
             widgets.addTooltipText(Cyanite.waterTooltip(recipe), Cyanite.WATER_X, 0, 18, Cyanite.HEIGHT);
             widgets.addTooltipText(Cyanite.timeTooltip(recipe), Cyanite.ARROW_X, Cyanite.ARROW_Y, Cyanite.ARROW_WIDTH, Cyanite.ARROW_HEIGHT);

@@ -1,5 +1,7 @@
 package biggerreactorsrework;
 
+// Modified 2026-10-26: scope derived sprites to synchronized generic coolant profiles.
+
 import biggerreactorsrework.machine.client.CyaniteReprocessorScreen;
 import biggerreactorsrework.machine.containers.CyaniteReprocessorContainer;
 import biggerreactorsrework.multiblocks.heatexchanger.client.HeatExchangerFluidPortScreen;
@@ -30,9 +32,20 @@ public final class BiggerReactorsClient {
     private BiggerReactorsClient() {
     }
 
+    public static boolean connected() { return net.minecraft.client.Minecraft.getInstance().getConnection()!=null; }
+    private static boolean coolantReloadPending;
+    public static void refreshCoolantSprites(java.util.List<biggerreactorsrework.registries.FluidTransitionRegistry.FluidTransition> profiles) {
+        if (!coolantReloadPending && biggerreactorsrework.client.HeatedFluidSprites.missing(profiles)) {
+            coolantReloadPending=true;
+            net.minecraft.client.Minecraft.getInstance().reloadResourcePacks().whenComplete((unused,error)->coolantReloadPending=false);
+        }
+    }
+
     static void init(IEventBus modBus) {
         modBus.addListener(biggerreactorsrework.client.HeatedFluidSprites::register);
         biggerreactorsrework.client.GuiSettingsEvents.register();
+        net.neoforged.neoforge.common.NeoForge.EVENT_BUS.addListener(
+                (net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent.LoggingOut event) -> biggerreactorsrework.registries.CoolantSync.clearClient());
         modBus.addListener((net.neoforged.neoforge.client.event.RegisterShadersEvent event) -> {
             try {
                 event.registerShader(new net.minecraft.client.renderer.ShaderInstance(event.getResourceProvider(),

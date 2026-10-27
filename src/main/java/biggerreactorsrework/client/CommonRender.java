@@ -56,7 +56,7 @@ public class CommonRender {
         symbol.tooltip = Component.literal(String.format("%s/%s of %s",
                 RenderHelper.formatValue((fluidStored / 1000.0), "B", true),
                 RenderHelper.formatValue((fluidCapacity / 1000.0), "B", true),
-                stack.getHoverName().getString()));
+                (stack.isEmpty()?Component.translatable(fluidStored>0?"fluid.biggerreactorsrework.unidentified":"fluid.biggerreactorsrework.empty"):stack.getHoverName()).getString()));
         RenderHelper.clearRenderColor();
     }
 }

@@ -4,8 +4,8 @@ plugins {
     id 'net.neoforged.moddev' version '2.0.148'
 }
 
-// gradle.properties holds the base version of the open update (mod_version=0.1.2); a release build passes the
-// full version from its tag (-Prelease_version=0.1.2-beta.1), so alphas and betas need no version commit.
+// gradle.properties holds the base version of the open update (mod_version=0.1.3); a release build passes the
+// full version from its tag (-Prelease_version=0.1.3-beta.1), so alphas and betas need no version commit.
 var releaseVersion = providers.gradleProperty('release_version').orElse(mod_version).get()
 version = releaseVersion
 group = mod_group_id
@@ -40,6 +40,7 @@ neoForge {
             type = 'gameTestServer'
             // own folder: GameTests always run with only Minecraft, NeoForge and this mod
             gameDirectory = project.file('run/gametest')
+            systemProperty 'biggerreactorsrework.testEnergyItems', 'true'
             systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
         }
 
@@ -47,6 +48,7 @@ neoForge {
         gameTestCompat {
             type = 'gameTestServer'
             gameDirectory = project.file('run/gametest-compat')
+            systemProperty 'biggerreactorsrework.testEnergyItems', 'true'
             systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
         }
 
@@ -128,6 +130,10 @@ dependencies {
     testImplementation platform('org.junit:junit-bom:5.11.3')
     testImplementation 'org.junit.jupiter:junit-jupiter'
     testImplementation 'com.google.code.gson:gson:2.10.1'
+    // Exercise the real decoder/configuration using libraries already supplied by Minecraft.
+    testImplementation files(provider { configurations.compileClasspath.files.findAll {
+        it.name.startsWith('fastutil-') || it.name.startsWith('datafixerupper-')
+    } })
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
@@ -136,6 +142,10 @@ test {
 }
 
 tasks.named('jar', Jar).configure {
+    // Modified 2026-10-26: test code remains available to development runs only.
+    exclude 'biggerreactorsrework/gametest/**'
+    exclude 'data/biggerreactorsrework/structure/empty_*x*x*.nbt'
+    exclude 'data/biggerreactorsrework/structure/saved_turbine_reload.nbt'
     manifest {
         attributes([
                 'Specification-Title'   : mod_id,

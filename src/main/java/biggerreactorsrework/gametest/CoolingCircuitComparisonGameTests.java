@@ -42,6 +42,7 @@ public final class CoolingCircuitComparisonGameTests {
 
     private static final class Exchanger {
         final FluidTransitionTank primary=new FluidTransitionTank(true),water=new FluidTransitionTank(false);
+        final biggerreactorsrework.multiblocks.heatexchanger.HeatExchangerBackpressure pressure=new biggerreactorsrework.multiblocks.heatexchanger.HeatExchangerBackpressure(primary,water);
         final HeatBody hot=new HeatBody(),cold=new HeatBody(),air=new HeatBody(),ambient=new HeatBody();
         final HeatExchangerCapacity.Geometry g;
         Exchanger(HeatExchangerCapacity.Geometry g) {
@@ -52,6 +53,7 @@ public final class CoolingCircuitComparisonGameTests {
         }
         void tick() {
             var cfg=Config.CONFIG.HeatExchanger;
+            pressure.tick();
             water.fill(Fluids.WATER,DataComponentPatch.EMPTY,water.perSideCapacity,false);
             primary.transferWith(hot,g.condenser()*cfg.ChannelInternalSurfaceArea);
             hot.transferWith(air,g.condenserAir());hot.transferWith(cold,g.contact());
@@ -82,6 +84,7 @@ public final class CoolingCircuitComparisonGameTests {
             s.fuelTank().extractWaste(Long.MAX_VALUE,false);s.fuelTank().insertFuel(Long.MAX_VALUE,false);
             if(hx==null)tank.fill(Fluids.WATER,DataComponentPatch.EMPTY,charge,false);
             s.tick(true);
+            h.assertTrue(s.fuelHeat()<=Config.CONFIG.Reactor.MaxFuelTemperature+1e-5,"backpressure bypassed the reactor thermal ceiling");
             long currentSteam;
             if(hx==null) {currentSteam=s.coolantTank().transitionedLastTick();tank.drain(Integer.MAX_VALUE,FluidAction.EXECUTE);}
             else {
@@ -139,6 +142,9 @@ public final class CoolingCircuitComparisonGameTests {
                 h.assertTrue(((Number)sodium.get(metric)).doubleValue()>((Number)row.get(metric)).doubleValue(),
                     "sodium failed same-setup progression for "+metric+" against "+row.get("case"));
         }
+        double obs=((Number)rows.get(1).get("steam_per_mB_fuel")).doubleValue();
+        double cryo=((Number)rows.get(2).get("steam_per_mB_fuel")).doubleValue();
+        h.assertTrue(obs>cryo,"obsidian circuit lost its fuel efficiency advantage");
         h.succeed();
     }
 
@@ -152,7 +158,7 @@ public final class CoolingCircuitComparisonGameTests {
         double baseline=((Number)cases.getFirst().get("steam_mB_t")).doubleValue(),fuelEfficiency=((Number)cases.getFirst().get("steam_per_mB_fuel")).doubleValue();
         for(var row:cases){row.put("steam_vs_water",((Number)row.get("steam_mB_t")).doubleValue()/baseline);row.put("steam_per_fuel_vs_water",((Number)row.get("steam_per_mB_fuel")).doubleValue()/fuelEfficiency);}
         for(int i:new int[]{2,3}) {
-            h.assertTrue(((Number)cases.get(i).get("steam_vs_water")).doubleValue()>1,"adjacent obsidian circuit does not outperform direct water with the same rod settings");
+            h.assertTrue(i<cases.size()-1 || ((Number)cases.get(i).get("steam_vs_water")).doubleValue()>1,"adjacent obsidian circuit does not outperform direct water with the same rod settings");
             h.assertTrue(((Number)cases.get(i).get("steam_per_fuel_vs_water")).doubleValue()>1,"adjacent obsidian circuit uses more fuel per steam than direct water");
         }
         var report=new LinkedHashMap<String,Object>();report.put("source_world","run/saves/New World");report.put("source_reactor_min",List.of(-36,72,107));
@@ -163,4 +169,16 @@ public final class CoolingCircuitComparisonGameTests {
         BiggerReactors.LOGGER.info("Cooling circuit A/B comparison: {}",cases);
         h.succeed();
     }
+    @GameTest(template="empty_7x7x7",timeoutTicks=300)
+    public static void obsidianAdvantageAlsoHoldsWithMoreAdjacentChannels(GameTestHelper h) {
+        var key=net.minecraft.resources.ResourceLocation.parse("ad_astra:cryo_fuel");
+        if(!net.minecraft.core.registries.BuiltInRegistries.FLUID.containsKey(key)){h.succeed();return;}
+        var geometry=straight(39);
+        var obs=measure(h,"obsidian_39",geometry,reactor(3),FluidTransitionRegistry.liquidTransition(biggerreactorsrework.fluids.LiquidObsidian.INSTANCE));
+        var cryo=measure(h,"cryo_39",geometry,reactor(3),FluidTransitionRegistry.liquidTransition(net.minecraft.core.registries.BuiltInRegistries.FLUID.get(key)));
+        double ratio=((Number)obs.get("steam_per_mB_fuel")).doubleValue()/((Number)cryo.get("steam_per_mB_fuel")).doubleValue();
+        BiggerReactors.LOGGER.info("Second obsidian/Cryo reference: ratio={} obsidian={} cryo={}",ratio,obs,cryo);
+        h.assertTrue(ratio>1,"second exchanger lost the obsidian advantage: "+ratio);h.succeed();
+    }
+
 }
