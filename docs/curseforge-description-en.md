@@ -25,6 +25,7 @@ Design your own reactor, turn its heat into steam, drive a turbine and store the
 | 🔁 Coolant circuits | Water, manufactured Liquid Obsidian and optional Cryo Fuel and liquid sodium circuits. |
 | ⚙️ Industrial Processor | One machine for cyanite recycling and Liquid Obsidian production, with separate item and fluid outputs. |
 | 🖥️ Redesigned interfaces | Metallic frames, clearer resource bars and consistent machine controls. |
+| 💡 Soft machine lighting | Operating terminals, reactor fuel, hot exchanger fluids and the running Industrial Processor emit a modest glow. |
 | 📊 Machine statistics | Current and potential rates, flow measurements and explanations of bottlenecks. |
 | 🔋 Multiblock battery | Expandable FE storage, item charging and equipped-gear charging. |
 | 📖 In-game guide | Interactive multiblock views, recipes and operating advice. |
@@ -105,13 +106,13 @@ Eject cyanite from your reactor and recycle it into blutonium, or supply obsidia
 - ♻️ **2 cyanite ingots + water + FE → 1 blutonium ingot**, preserving the existing recipe and costs.
 - 🟣 **1 obsidian block + 100 mB water + FE → 100 mB Liquid Obsidian**.
 - 📦 Blutonium leaves through the item output; Liquid Obsidian leaves through the fluid output. Only the output needed by the active recipe can block that process.
-- 📚 **JEI and EMI** show both recipes, including the water, energy, time and correct item or fluid result.
+- 📚 **JEI, EMI and REI** show both recipes, including the water, energy, time and correct item or fluid result.
 
 With the default configuration, the obsidian recipe takes **200 ticks (10 seconds at 20 TPS)** and uses **200 FE**. The coolant is manufactured cold; the reactor supplies the heat.
 
 Liquid Obsidian circulates as a reusable coolant. It heats up into **Heated Liquid Obsidian** in the reactor, then cools back into Liquid Obsidian in the heat exchanger. **It no longer becomes lava, and ordinary lava cannot supply this coolant circuit.**
 
-> 🔎 Explore coolant properties and conversions through the in-game guide, machine statistics and JEI/EMI. Use that information to tune your own plant.
+> 🔎 Explore coolant properties and conversions through the in-game guide, machine statistics and JEI/EMI/REI. Use that information to tune your own plant.
 
 ### 🖥️ Processor interface
 
@@ -218,7 +219,7 @@ Learn the plant inside the game:
 
 | Integration | What it adds |
 | --- | --- |
-| 📚 JEI and EMI | Both Industrial Processor recipes, moderators, turbine coils and current heat-exchanger fluid conversions. |
+| 📚 JEI, EMI and REI | Both Industrial Processor recipes, moderators, turbine coils and current heat-exchanger fluid conversions. |
 | 💻 CC Tweaked | Supported peripherals for machine monitoring and control. |
 | 🔎 Jade | Supported machine information in the inspection overlay. |
 | 🧪 Mekanism | The liquid sodium coolant option. |

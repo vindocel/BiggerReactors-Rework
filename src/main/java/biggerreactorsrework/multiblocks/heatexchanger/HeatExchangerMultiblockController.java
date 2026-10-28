@@ -472,9 +472,26 @@ public class HeatExchangerMultiblockController extends MultiblockController<Heat
         if(renderTerminals.isEmpty())return;var terminal=renderTerminals.iterator().next();
         var primary=biggerreactorsrework.core.fluids.FluidRenderSnapshot.capture(condenserTank);
         var secondary=biggerreactorsrework.core.fluids.FluidRenderSnapshot.capture(evaporatorTank);
+        // Modified 2026-10-27: light follows the visible hot-phase span, never steam or the cold return.
+        boolean hot=!condenserTank.hasUnresolvedProfile() && biggerreactorsrework.multiblocks.MachineLighting.hotFluid(condenserTank.fluidTypeInTank(0));
+        for(var channel:condenserChannels) {
+            var span=biggerreactorsrework.core.util.FluidPath.span(primary.inputFill(),primary.outputFill(),channel.coolantPathIndex,channel.coolantPathLength,false);
+            setChannelLight(channel,hot && channel.coolantPathLength>0 && span.end()>span.start());
+        }
         if(primary.equals(terminal.primaryView) && secondary.equals(terminal.secondaryView))return;
         terminal.primaryView=primary;terminal.secondaryView=secondary;
         level.sendBlockUpdated(terminal.getBlockPos(),terminal.getBlockState(),terminal.getBlockState(),2);
+    }
+
+    private void setChannelLight(HeatExchangerChannelTile channel,boolean lit) {
+        var state=channel.getBlockState();var property=net.minecraft.world.level.block.state.properties.BlockStateProperties.LIT;
+        if(state.hasProperty(property) && state.getValue(property)!=lit)
+            level.setBlock(channel.getBlockPos(),state.setValue(property,lit),3);
+    }
+
+    @Override
+    public void onDisassembled() {
+        condenserChannels.forEach(channel->setChannelLight(channel,false));
     }
 
     @Override
@@ -484,7 +501,7 @@ public class HeatExchangerMultiblockController extends MultiblockController<Heat
         condenserTank.sampleFlows();evaporatorTank.sampleFlows();
         // Modified 2026-10-27: invalid legacy circuits remain stopped until explicitly emptied.
         if(condenserTank.hasUnresolvedProfile() || evaporatorTank.hasUnresolvedProfile()) {
-            thermalStorageChange=0;return;
+            if(CoreEvents.tickNumber()%10==0)updateFluidRendering();thermalStorageChange=0;return;
         }
         condenserTank.transferWith(condenserHeatBody, condenserChannels.size() * Config.CONFIG.HeatExchanger.ChannelInternalSurfaceArea);
         condenserHeatBody.transferWith(airHeatBody, condenserAirRFKT);

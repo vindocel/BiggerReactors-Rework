@@ -26,8 +26,9 @@ import static biggerreactorsrework.core.multiblock.IAssemblyStateBlock.ASSEMBLED
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
 public abstract class BatteryBaseBlock extends ModularBlock implements IMultiblockBlock, EntityBlock, IRectangularMultiblockBlock {
-    public static final Block.Properties PROPERTIES_SOLID = Block.Properties.of().sound(SoundType.METAL).destroyTime(2).explosionResistance(10).isValidSpawn((a, b, c, d) -> false).requiresCorrectToolForDrops();
-    public static final Block.Properties PROPERTIES_GLASS = Block.Properties.of().sound(SoundType.GLASS).noOcclusion().destroyTime(2).explosionResistance(2).isValidSpawn((a, b, c, d) -> false).requiresCorrectToolForDrops();
+    // Modified 2026-10-27: active terminal light.
+    public static final Block.Properties PROPERTIES_SOLID = Block.Properties.of().lightLevel(biggerreactorsrework.multiblocks.MachineLighting::emission).sound(SoundType.METAL).destroyTime(2).explosionResistance(10).isValidSpawn((a, b, c, d) -> false).requiresCorrectToolForDrops();
+    public static final Block.Properties PROPERTIES_GLASS = Block.Properties.of().lightLevel(biggerreactorsrework.multiblocks.MachineLighting::emission).sound(SoundType.GLASS).noOcclusion().destroyTime(2).explosionResistance(2).isValidSpawn((a, b, c, d) -> false).requiresCorrectToolForDrops();
     
     public BatteryBaseBlock() {
         this(true);

@@ -4,8 +4,10 @@ BiggerReactors-Rework is an independent fork and rework of BiggerReactors for **
 It runs with only Minecraft, NeoForge and this mod installed.
 
 - Mod id and namespace: `biggerreactorsrework`
+- Soft block lighting for operating terminals, reactor fuel, hot exchanger fluids and the running Industrial Processor.
 - Repository: https://github.com/vindocel/BiggerReactors-Rework
 - Meant for new worlds. Worlds and machines from the original BiggerReactors are not migrated.
+- Optional JEI, EMI and Roughly Enough Items (REI) integration: Industrial Processor recipes, moderator and coolant properties, turbine coils and heat-exchanger conversions. Machine shortcuts open the installed viewer.
 
 ## Origin and credits
 

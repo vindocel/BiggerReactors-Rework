@@ -35,6 +35,8 @@ public class CyaniteReprocessor extends Block implements EntityBlock {
 
     public CyaniteReprocessor() {
         super(Properties.of()
+                // Modified 2026-10-27: light follows the existing processing animation.
+                .lightLevel(biggerreactorsrework.multiblocks.MachineLighting::emission)
                 .sound(SoundType.STONE)
                 .destroyTime(1.0F)
                 .explosionResistance(1.0F)

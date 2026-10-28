@@ -278,8 +278,9 @@ public final class RecipeViewerData {
                 GuiArt.scrollingText(g, font, Component.translatable(KEY + stat.name()).getString(), LABEL_X, y, MARK_X - LABEL_X - 2, text);
                 g.drawString(font, mark(stat), MARK_X, y, color(stat), false);
                 int barY = y + 1;
-                g.fill(BAR_X - 1, barY - 1, BAR_X + BAR_WIDTH + 1, barY + BAR_HEIGHT + 1, BAR_FRAME);
-                g.fill(BAR_X, barY, BAR_X + BAR_WIDTH, barY + BAR_HEIGHT, BAR_TRACK);
+                // Modified 2026-10-27: neutral property-bar chrome follows the active drawing theme.
+                g.fill(BAR_X - 1, barY - 1, BAR_X + BAR_WIDTH + 1, barY + BAR_HEIGHT + 1, GuiTheme.chromeColor(BAR_FRAME));
+                g.fill(BAR_X, barY, BAR_X + BAR_WIDTH, barY + BAR_HEIGHT, GuiTheme.chromeColor(BAR_TRACK));
                 int fill = stat.max() <= 0 ? 0 : (int) Math.round(BAR_WIDTH * stat.value() / stat.max());
                 if (stat.value() > 0) {
                     fill = Math.max(1, fill);

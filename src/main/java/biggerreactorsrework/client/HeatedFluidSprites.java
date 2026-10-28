@@ -40,8 +40,9 @@ public final class HeatedFluidSprites implements SpriteSource {
     }
     public void run(ResourceManager resources,Output output){
         AVAILABLE.clear();
-        // Modified 2026-10-26: derive only eligible generic outputs; native hot fluids already have sprites.
+        // Modified 2026-10-27: preload built-in generic outputs before server profiles arrive.
         var eligible=new java.util.HashSet<Fluid>();
+        eligible.add(biggerreactorsrework.fluids.LiquidObsidian.INSTANCE);
         var cryo=ResourceLocation.fromNamespaceAndPath("ad_astra","cryo_fuel");
         if(BuiltInRegistries.FLUID.containsKey(cryo))eligible.add(BuiltInRegistries.FLUID.get(cryo));
         for(var profile:biggerreactorsrework.registries.CoolantSync.profiles())if(profile.genericHot())eligible.addAll(profile.liquids);

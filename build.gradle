@@ -97,6 +97,12 @@ configurations {
 }
 
 repositories {
+    // Modified 2026-10-27: optional native REI integration.
+    maven {
+        name = 'Shedaniel'
+        url = 'https://maven.shedaniel.me/'
+        content { includeGroup 'me.shedaniel'; includeGroup 'dev.architectury'; includeGroup 'me.shedaniel.cloth' }
+    }
     // Optional integrations: compile-only APIs, nothing is bundled.
     maven {
         name = 'TerraformersMC'
@@ -121,6 +127,8 @@ repositories {
 }
 
 dependencies {
+    compileOnly "me.shedaniel:RoughlyEnoughItems-neoforge:${rei_version}"
+    compileOnly "dev.architectury:architectury-neoforge:${architectury_version}"
     compileOnly "dev.emi:emi-neoforge:${emi_version}:api"
     compileOnly "mezz.jei:jei-${minecraft_version}-neoforge-api:${jei_version}"
     compileOnly "cc.tweaked:cc-tweaked-${minecraft_version}-core-api:${cc_version}"

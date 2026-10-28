@@ -32,9 +32,9 @@ public class BiggerReactorsJEIPlugin implements IModPlugin {
         return ResourceLocation.fromNamespaceAndPath(BiggerReactors.modid, "jei_plugin");
     }
 
-    /** Skipped when EMI is installed, which has its own plugin. */
+    /** Modified 2026-10-27: viewers with native plugins do not need JEI compatibility categories. */
     private static boolean enabled() {
-        return !RecipeViewers.emi();
+        return !RecipeViewers.emi() && !RecipeViewers.rei();
     }
 
     @Override

@@ -232,7 +232,9 @@ public class Util {
             states.forEach((bPos, state) -> {
                 LevelChunkSection section = chunkSections[(bPos.getY() >> 4) - chunk.getMinSection()];
                 if (section != null) {
-                    section.setBlockState(bPos.getX() & 15, bPos.getY() & 15, bPos.getZ() & 15, state);
+                    var oldState=section.setBlockState(bPos.getX() & 15, bPos.getY() & 15, bPos.getZ() & 15, state);
+                    // Modified 2026-10-27: batched assembly updates must invalidate changed emitters.
+                    if(oldState.getLightEmission(world,bPos)!=state.getLightEmission(world,bPos)) world.getLightEngine().checkBlock(bPos);
                     markForUpdatePacket(bPos);
                 }
             });
@@ -322,6 +324,8 @@ public class Util {
                     if (oldState == state) {
                         return;
                     }
+                    // Modified 2026-10-27: fuel-level batches relight only when emission actually changes.
+                    if(oldState.getLightEmission()!=state.getLightEmission()) world.getLightEngine().checkBlock(BlockPos.of(bPosLong));
                     if (oldState.getBlock() != state.getBlock()) {
                         throw new IllegalStateException("CoreEvents Util fast setBlockStates does not handle changing block type");
                     }

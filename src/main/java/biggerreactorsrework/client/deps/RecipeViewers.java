@@ -3,6 +3,7 @@ package biggerreactorsrework.client.deps;
 import biggerreactorsrework.BiggerReactors;
 import biggerreactorsrework.client.deps.emi.EmiBridge;
 import biggerreactorsrework.client.deps.jei.JeiBridge;
+import biggerreactorsrework.client.deps.rei.ReiBridge;
 import net.minecraft.resources.ResourceLocation;
 import net.neoforged.fml.ModList;
 
@@ -26,7 +27,12 @@ public final class RecipeViewers {
     }
 
     public static boolean available() {
-        return emi() || (ModList.get().isLoaded("jei") && JeiBridge.ready());
+        return emi() || rei() || (ModList.get().isLoaded("jei") && JeiBridge.ready());
+    }
+
+    /** Modified 2026-10-27: native REI support, with EMI retaining priority when both are installed. */
+    public static boolean rei() {
+        return ModList.get().isLoaded("roughlyenoughitems");
     }
 
     /** Shows the categories (EMI shows the first one; JEI shows them all as tabs). */
@@ -36,6 +42,8 @@ public final class RecipeViewers {
         }
         if (emi()) {
             EmiBridge.show(categories[0]);
+        } else if (rei()) {
+            ReiBridge.show(categories);
         } else if (ModList.get().isLoaded("jei")) {
             JeiBridge.show(categories);
         }

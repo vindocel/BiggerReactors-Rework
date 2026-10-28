@@ -23,6 +23,14 @@ public class HeatExchangerCondenserChannelBlock extends HeatExchangerBaseBlock i
     
     public HeatExchangerCondenserChannelBlock() {
         super(PROPERTIES_GLASS);
+        registerDefaultState(defaultBlockState().setValue(net.minecraft.world.level.block.state.properties.BlockStateProperties.LIT, false));
+    }
+
+    // Modified 2026-10-27: the server marks only channel segments containing a visible hot phase.
+    @Override
+    protected void buildStateDefinition(net.minecraft.world.level.block.state.StateDefinition.Builder<Block, BlockState> builder) {
+        super.buildStateDefinition(builder);
+        builder.add(net.minecraft.world.level.block.state.properties.BlockStateProperties.LIT);
     }
 
     @Nullable

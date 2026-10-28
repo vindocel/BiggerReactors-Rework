@@ -1,5 +1,26 @@
 # 1.21.1-0.1.3 (BiggerReactors-Rework, unreleased)
 
+## Machine lighting (2026-10-27)
+ - add level 7 light to operating multiblock terminals and visible reactor fuel
+ - add level 6 light to processing Industrial Processors and the visible hot-fluid segments of exchanger condenser paths; exclude steam and cold returns
+ - update lighting on state/stock changes and disassembly, including batched fuel and assembly updates
+
+## REI theme compatibility (2026-10-27)
+ - follow REI's active light/dark theme across all native categories, with readable property labels and values
+ - reuse the machine theme for slots, gauge frames, progress arrows and neutral property-bar chrome, including separately rendered industrial fluid gauges
+ - update on each draw without changing machine appearance preferences or tinting ingredients and fluids
+
+## Login resource loading and REI alignment (2026-10-27)
+ - prepare heated Liquid Obsidian sprites during the initial atlas load, avoiding a full resource reload when the default coolant profiles arrive on world login
+ - center REI items and fluid icons inside the shared 18 px slot frames, including industrial inputs/outputs, moderator blocks, coils and fluid conversions
+
+## Roughly Enough Items integration (2026-10-27)
+ - add native optional REI categories for both Industrial Processor recipes, solid moderators, reactor coolants, turbine coils and heat-exchanger conversions
+ - share property rankings, percentages, explanatory tooltips and decorated fluid gauges with the existing viewer data
+ - open REI from machine recipe shortcuts and register terminals, channels and ports as category workstations
+ - preserve fluid origin components and ingredient lookups; exclude machine tabs and movable popups from the ingredient overlay
+ - retain EMI priority and skip JEI compatibility categories when a native REI plugin is active
+
 ## Industrial viewer visuals (2026-10-27)
  - use the machine's decorated animated fluid gauges in JEI and EMI, preserving ingredient interactions
  - remove the empty dark tooltip over the Industrial Processor operating-condition label
