@@ -441,9 +441,9 @@
   "screen.biggerreactorsrework.settings.background": "Background color",
   "screen.biggerreactorsrework.settings.light": "Light",
   "screen.biggerreactorsrework.settings.dark": "Dark",
-  "screen.biggerreactorsrework.settings.all": "All machines",
+  "screen.biggerreactorsrework.settings.all": "Appearance for all machines",
   "screen.biggerreactorsrework.settings.all.on": "Enabled: the selected color is used for all machines.",
-  "screen.biggerreactorsrework.settings.all.off": "Disabled: the choice applies only to this machine.",
+  "screen.biggerreactorsrework.settings.all.off": "Disabled: the color applies only to this machine. Volume is always individual.",
   "block.biggerreactorsrework.battery_casing": "Battery Casing",
   "block.biggerreactorsrework.battery_glass": "Battery Glass",
   "block.biggerreactorsrework.battery_terminal": "Battery Terminal",
@@ -610,5 +610,13 @@
   "screen.biggerreactorsrework.industrial_processor.no_water": "Needs water",
   "screen.biggerreactorsrework.industrial_processor.no_energy": "Needs energy",
   "screen.biggerreactorsrework.industrial_processor.output_full": "Output full",
-  "screen.biggerreactorsrework.industrial_processor.working": "Processing"
+  "screen.biggerreactorsrework.industrial_processor.working": "Processing",
+  "screen.biggerreactorsrework.settings.volume": "Volume: %s",
+  "screen.biggerreactorsrework.settings.volume.mute": "Muted",
+  "screen.biggerreactorsrework.settings.volume.help": "Volume",
+  "screen.biggerreactorsrework.settings.volume.decrease": "Decrease volume",
+  "screen.biggerreactorsrework.settings.volume.increase": "Increase volume",
+  "subtitles.biggerreactorsrework.reactor_running": "Reactor running",
+  "subtitles.biggerreactorsrework.boiler_running": "Heat exchanger running",
+  "subtitles.biggerreactorsrework.turbine_running": "Turbine spinning"
 }

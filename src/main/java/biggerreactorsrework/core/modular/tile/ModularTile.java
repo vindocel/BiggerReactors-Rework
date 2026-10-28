@@ -32,6 +32,18 @@ import java.util.function.Function;
 
 @NonnullDefault
 public class ModularTile extends BlockEntity implements IModularTile, IDebuggable {
+    // Modified 2026-10-28: audio snapshots are synchronized, not persisted simulation data.
+    public biggerreactorsrework.audio.MachineAudioState machineAudio = biggerreactorsrework.audio.MachineAudioState.EMPTY;
+    private void readMachineAudio(CompoundTag tag) {
+        if (tag.contains("machine_audio")) machineAudio = biggerreactorsrework.audio.MachineAudioState.load(tag.getCompound("machine_audio"));
+        if (level != null && level.isClientSide && biggerreactorsrework.audio.MachineAudio.supported(this))
+            biggerreactorsrework.audio.MachineAudio.clientUpdate.accept(this);
+    }
+    private boolean writeMachineAudio(CompoundTag tag) {
+        if (!biggerreactorsrework.audio.MachineAudio.supported(this)) return false;
+        tag.put("machine_audio", machineAudio.save());
+        return true;
+    }
     
     public static final Logger MODULE_LOGGER = LogManager.getLogger("BiggerReactors-Rework/ModularTile");
     @Deprecated(forRemoval = true)
@@ -98,6 +110,8 @@ public class ModularTile extends BlockEntity implements IModularTile, IDebuggabl
         super.onLoad();
         moduleList.forEach(TileModule::onAdded);
         onAdded();
+        if (level.isClientSide && biggerreactorsrework.audio.MachineAudio.supported(this))
+            biggerreactorsrework.audio.MachineAudio.clientUpdate.accept(this);
         var worldUnloadTiles = (level.isClientSide() ? clientWorldUnloadEventTiles : serverWorldUnloadEventTiles).computeIfAbsent(level, __ -> new ObjectArrayList<>());
         index = worldUnloadTiles.size();
         worldUnloadTiles.add(this);
@@ -227,6 +241,7 @@ public class ModularTile extends BlockEntity implements IModularTile, IDebuggabl
     public final void handleUpdateTag(CompoundTag compound, HolderLookup.Provider registries) {
         super.handleUpdateTag(compound, registries);
         nbtRegistries = registries;
+        readMachineAudio(compound);
         if (compound.contains("local")) {
             CompoundTag local = compound.getCompound("local");
             handleDataNBT(local);
@@ -254,6 +269,7 @@ public class ModularTile extends BlockEntity implements IModularTile, IDebuggabl
     public final CompoundTag getUpdateTag(HolderLookup.Provider registries) {
         CompoundTag nbt = super.getUpdateTag(registries);
         nbtRegistries = registries;
+        writeMachineAudio(nbt);
         CompoundTag subNBTs = subNBTs(TileModule::getDataNBT);
         if (subNBTs != null) {
             nbt.put("sub", subNBTs);
@@ -277,6 +293,7 @@ public class ModularTile extends BlockEntity implements IModularTile, IDebuggabl
     @Override
     public final void onDataPacket(Connection net, ClientboundBlockEntityDataPacket pkt, HolderLookup.Provider registries) {
         nbtRegistries = registries;
+        readMachineAudio(pkt.getTag());
         assert level != null;
         // getters are client only, so, cant grab it on the server even if i want to
         if (!level.isClientSide) {
@@ -303,6 +320,7 @@ public class ModularTile extends BlockEntity implements IModularTile, IDebuggabl
         boolean sendPacket = false;
         CompoundTag subNBTs = subNBTs(TileModule::getUpdateNBT);
         CompoundTag nbt = new CompoundTag();
+        sendPacket = writeMachineAudio(nbt);
         if (subNBTs != null) {
             nbt.put("sub", subNBTs);
         }

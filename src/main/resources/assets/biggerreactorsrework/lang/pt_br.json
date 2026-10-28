@@ -441,9 +441,9 @@
   "screen.biggerreactorsrework.settings.background": "Cor do fundo",
   "screen.biggerreactorsrework.settings.light": "Claro",
   "screen.biggerreactorsrework.settings.dark": "Escuro",
-  "screen.biggerreactorsrework.settings.all": "Todas as máquinas",
+  "screen.biggerreactorsrework.settings.all": "Aparência de todas as máquinas",
   "screen.biggerreactorsrework.settings.all.on": "Ativado: a cor escolhida é usada em todas as máquinas.",
-  "screen.biggerreactorsrework.settings.all.off": "Desativado: a escolha vale apenas para esta máquina.",
+  "screen.biggerreactorsrework.settings.all.off": "Desativado: a cor vale apenas para esta máquina. O volume é sempre individual.",
   "block.biggerreactorsrework.battery_casing": "Carcaça da Bateria",
   "block.biggerreactorsrework.battery_glass": "Vidro da Bateria",
   "block.biggerreactorsrework.battery_terminal": "Terminal da Bateria",
@@ -610,5 +610,13 @@
   "screen.biggerreactorsrework.industrial_processor.no_water": "Falta água",
   "screen.biggerreactorsrework.industrial_processor.no_energy": "Falta energia",
   "screen.biggerreactorsrework.industrial_processor.output_full": "Saída cheia",
-  "screen.biggerreactorsrework.industrial_processor.working": "Processando"
+  "screen.biggerreactorsrework.industrial_processor.working": "Processando",
+  "screen.biggerreactorsrework.settings.volume": "Volume: %s",
+  "screen.biggerreactorsrework.settings.volume.mute": "Mudo",
+  "screen.biggerreactorsrework.settings.volume.help": "Volume",
+  "screen.biggerreactorsrework.settings.volume.decrease": "Diminuir volume",
+  "screen.biggerreactorsrework.settings.volume.increase": "Aumentar volume",
+  "subtitles.biggerreactorsrework.reactor_running": "Reator funcionando",
+  "subtitles.biggerreactorsrework.boiler_running": "Trocador de calor funcionando",
+  "subtitles.biggerreactorsrework.turbine_running": "Turbina girando"
 }

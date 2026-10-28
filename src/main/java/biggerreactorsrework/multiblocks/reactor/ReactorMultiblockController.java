@@ -244,6 +244,7 @@ public class ReactorMultiblockController extends MultiblockController<ReactorBas
     private ReactorActivity reactorActivity = ReactorActivity.INACTIVE;
     
     private final Set<ReactorTerminalTile> terminals = new HashSet<>();
+    private long soundActiveUntil;
     private final ObjectArrayList<ReactorControlRodTile> controlRods = new ObjectArrayList<>();
     private final ObjectArrayList<ReactorFuelRodTile> fuelRods = new ObjectArrayList<>();
     // because class cast exception when getting elements, wrapping is required
@@ -518,6 +519,7 @@ public class ReactorMultiblockController extends MultiblockController<ReactorBas
 
     @Override
     public void onDisassembled() {
+        biggerreactorsrework.audio.MachineAudio.publish(0, min(), max(), terminals, false, 0);
         if(capacityEstimate!=null)capacityEstimate.cancel(true);
         capacityEstimate=null;statisticsProfile="";
         distributeFuel();
@@ -619,6 +621,10 @@ public class ReactorMultiblockController extends MultiblockController<ReactorBas
         }
         
         simulation.tick(reactorActivity == ReactorActivity.ACTIVE && (coolantTank==null || !coolantTank.hasUnresolvedProfile()));
+        // Modified 2026-10-28: observe actual burning, allowing short operation gaps.
+        if (simulation.fuelTank().burnedLastTick() > 0) soundActiveUntil = CoreEvents.tickNumber() + 10;
+        biggerreactorsrework.audio.MachineAudio.publish(0, min(), max(), terminals,
+                reactorActivity == ReactorActivity.ACTIVE && CoreEvents.tickNumber() < soundActiveUntil, 0);
         if(coolantTank!=null)coolantTank.sampleFlows();
         if(CoreEvents.tickNumber()%10==0)updateCoolantRendering();
         if (autoEjectWaste) {

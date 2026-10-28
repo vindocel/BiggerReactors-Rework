@@ -363,6 +363,7 @@ public class TurbineMultiblockController extends MultiblockController<TurbineBas
     
     @Override
     public void onDisassembled() {
+        biggerreactorsrework.audio.MachineAudio.publish(2, min(), max(), terminals, false, 0);
         if(capacityEstimate!=null)capacityEstimate.cancel(true);
         capacityEstimate=null;statisticsKey="";
         rpmSync.reset();
@@ -494,6 +495,8 @@ public class TurbineMultiblockController extends MultiblockController<TurbineBas
         }
         
         simulation.tick();
+        // Modified 2026-10-28: coast-down follows actual speed, independent of the toggle.
+        biggerreactorsrework.audio.MachineAudio.publish(2, min(), max(), terminals, simulation.RPM() > 20, simulation.RPM());
         
         biggerreactorsrework.core.energy.PowerDistribution.distribute(simulation.battery().stored(), powerTaps,
                 TurbinePowerTapTile::distributePower, simulation.battery()::extract);

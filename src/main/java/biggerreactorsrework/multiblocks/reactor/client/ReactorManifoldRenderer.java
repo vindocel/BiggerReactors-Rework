@@ -30,6 +30,6 @@ public final class ReactorManifoldRenderer implements BlockEntityRenderer<Reacto
         if(index>0 && bottom<=.00001f)hidden|=biggerreactorsrework.client.FluidBoxRenderer.mask(net.minecraft.core.Direction.DOWN);
         if(index+1<height && top>=.99999f)hidden|=biggerreactorsrework.client.FluidBoxRenderer.mask(net.minecraft.core.Direction.UP);
         volumes.add(new biggerreactorsrework.client.FluidBoxRenderer.Volume(stack,
-                new biggerreactorsrework.core.util.FluidSurfaceMesh.Box(.18f,bottom,.18f,.82f,top,.82f),hidden));
+                biggerreactorsrework.core.util.ManifoldFluidGeometry.box(bottom,top),hidden));
     }
 }

@@ -36,6 +36,23 @@ public final class GuiThemes {
 
     public static boolean dark(BlockPos pos) { return preferences().dark(key(pos)); }
     public static boolean applyToAll() { return preferences().applyToAll(); }
+    // Modified 2026-10-28: every terminal of a multiblock shares its canonical position.
+    public static int volume(BlockPos pos) { return preferences().volume(volumeKey(pos)); }
+    public static void setVolume(BlockPos pos, int percent) {
+        preferences().setVolume(volumeKey(pos), percent);
+        save();
+    }
+    private static String volumeKey(BlockPos pos) {
+        var level = Minecraft.getInstance().level;
+        if (level != null && level.getBlockEntity(pos) instanceof biggerreactorsrework.core.modular.tile.ModularTile tile
+                && tile.machineAudio.kind() >= 0) {
+            return key(tile.machineAudio.min()) + "|audio:" + tile.machineAudio.kind();
+        }
+        return key(pos) + "|audio";
+    }
+    public static int machineVolume(biggerreactorsrework.audio.MachineAudioState state) {
+        return preferences().volume(key(state.min()) + "|audio:" + state.kind());
+    }
 
     public static void choose(BlockPos pos, boolean dark) {
         preferences().choose(key(pos), dark);

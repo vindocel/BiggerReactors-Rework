@@ -97,7 +97,9 @@ final class GuideMultiblock {
                     Minecraft.getInstance().getBlockRenderer().renderSingleBlock(block,pose,g.bufferSource(),LightTexture.FULL_BRIGHT,OverlayTexture.NO_OVERLAY);
                     // Coolant inside, as in a working reactor; the frame alone shows only its outer faces.
                     if(block.getBlock()==ReactorManifold.INSTANCE)biggerreactorsrework.client.FluidBoxRenderer.draw(pose,g.bufferSource(),
-                            new net.neoforged.neoforge.fluids.FluidStack(net.minecraft.world.level.material.Fluids.WATER,1000),.18f,0f,.18f,.82f,1f,.82f,LightTexture.FULL_BRIGHT,OverlayTexture.NO_OVERLAY);
+                            java.util.List.of(new biggerreactorsrework.client.FluidBoxRenderer.Volume(
+                                    new net.neoforged.neoforge.fluids.FluidStack(net.minecraft.world.level.material.Fluids.WATER,1000),
+                                    biggerreactorsrework.core.util.ManifoldFluidGeometry.box(0,1),0)),LightTexture.FULL_BRIGHT,OverlayTexture.NO_OVERLAY);
                     pose.popPose();
                 }g.flush();
                 if(state.highlight!=null)for(var box:example.boxes()){

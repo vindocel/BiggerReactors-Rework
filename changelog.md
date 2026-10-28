@@ -1,5 +1,15 @@
 # 1.21.1-0.1.3 (BiggerReactors-Rework, unreleased)
 
+## Machine audio and rod seams (2026-10-28)
+ - shorten volume tooltips and fit the focus outline to the full rectangular −/+ buttons
+ - add approved reactor, boiler and RPM-dependent turbine loops, calibrated to their agreed maximum levels
+ - add local per-multiblock volume/mute controls in Settings, independent of shared appearance
+ - synchronize operating audio without opening the GUI; deduplicate terminals and release unloaded sources
+ - use the same 25-block attenuation from the structure surface for reactor, boiler and all turbine anchors; preserve approved gains
+ - bring reactor manifold coolant against the outer grille using shared world/guide geometry and a minimal surface clearance; preserve fluid quantities and cold/hot slices
+ - close full fuel/waste segment micro-gaps and omit internal rod caps while retaining exposed and partial surfaces
+ - pass 68 unit tests and 85 dedicated-server GameTests; the author confirmed the final audio, UI and visual changes work correctly in game on 2026-10-28
+
 ## Machine lighting (2026-10-27)
  - add level 7 light to operating multiblock terminals and visible reactor fuel
  - add level 6 light to processing Industrial Processors and the visible hot-fluid segments of exchanger condenser paths; exclude steam and cold returns

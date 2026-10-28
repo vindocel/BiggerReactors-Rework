@@ -42,6 +42,8 @@ public final class BiggerReactorsClient {
     }
 
     static void init(IEventBus modBus) {
+        // Modified 2026-10-28: positional loops and per-machine local volume.
+        biggerreactorsrework.client.sound.MachineSoundManager.init();
         modBus.addListener(biggerreactorsrework.client.HeatedFluidSprites::register);
         biggerreactorsrework.client.GuiSettingsEvents.register();
         net.neoforged.neoforge.common.NeoForge.EVENT_BUS.addListener(
@@ -61,6 +63,7 @@ public final class BiggerReactorsClient {
         modBus.addListener(BiggerReactorsClient::registerClientExtensions);
         HeatExchangerChannelModels.init(modBus);
         biggerreactorsrework.client.ConnectedGlassModels.init(modBus);
+        biggerreactorsrework.client.ReactorRodModels.init(modBus);
         modBus.addListener((net.neoforged.fml.event.lifecycle.FMLClientSetupEvent event) -> event.enqueueWork(() ->
                 biggerreactorsrework.items.tools.GuideBookItem.open = biggerreactorsrework.client.guide.GuideBookAnimation::requestOpen));
         net.neoforged.neoforge.common.NeoForge.EVENT_BUS.addListener(biggerreactorsrework.client.guide.GuideBookAnimation::onClientTick);

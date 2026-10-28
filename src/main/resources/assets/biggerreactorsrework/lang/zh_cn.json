@@ -610,5 +610,13 @@
   "screen.biggerreactorsrework.industrial_processor.no_water": "Needs water",
   "screen.biggerreactorsrework.industrial_processor.no_energy": "Needs energy",
   "screen.biggerreactorsrework.industrial_processor.output_full": "Output full",
-  "screen.biggerreactorsrework.industrial_processor.working": "Processing"
+  "screen.biggerreactorsrework.industrial_processor.working": "Processing",
+  "screen.biggerreactorsrework.settings.volume": "Volume: %s",
+  "screen.biggerreactorsrework.settings.volume.mute": "Muted",
+  "screen.biggerreactorsrework.settings.volume.help": "Volume",
+  "screen.biggerreactorsrework.settings.volume.decrease": "Decrease volume",
+  "screen.biggerreactorsrework.settings.volume.increase": "Increase volume",
+  "subtitles.biggerreactorsrework.reactor_running": "Reactor running",
+  "subtitles.biggerreactorsrework.boiler_running": "Heat exchanger running",
+  "subtitles.biggerreactorsrework.turbine_running": "Turbine spinning"
 }

@@ -57,6 +57,7 @@ public class HeatExchangerMultiblockController extends MultiblockController<Heat
     public final Set<HeatExchangerChannelTile> evaporatorChannels = new LinkedHashSet<>();
     private final Set<HeatExchangerFluidPortTile> fluidPorts = new LinkedHashSet<>();
     private final Set<biggerreactorsrework.multiblocks.heatexchanger.tiles.HeatExchangerTerminalTile> renderTerminals=new LinkedHashSet<>();
+    private long soundActiveUntil;
     
     @Nullable
     @Override
@@ -491,6 +492,7 @@ public class HeatExchangerMultiblockController extends MultiblockController<Heat
 
     @Override
     public void onDisassembled() {
+        biggerreactorsrework.audio.MachineAudio.publish(1, min(), max(), renderTerminals, false, 0);
         condenserChannels.forEach(channel->setChannelLight(channel,false));
     }
 
@@ -501,6 +503,7 @@ public class HeatExchangerMultiblockController extends MultiblockController<Heat
         condenserTank.sampleFlows();evaporatorTank.sampleFlows();
         // Modified 2026-10-27: invalid legacy circuits remain stopped until explicitly emptied.
         if(condenserTank.hasUnresolvedProfile() || evaporatorTank.hasUnresolvedProfile()) {
+            biggerreactorsrework.audio.MachineAudio.publish(1, min(), max(), renderTerminals, false, 0);
             if(CoreEvents.tickNumber()%10==0)updateFluidRendering();thermalStorageChange=0;return;
         }
         condenserTank.transferWith(condenserHeatBody, condenserChannels.size() * Config.CONFIG.HeatExchanger.ChannelInternalSurfaceArea);
@@ -508,6 +511,10 @@ public class HeatExchangerMultiblockController extends MultiblockController<Heat
         condenserHeatBody.transferWith(evaporatorHeatBody, channelRFKT);
         evaporatorHeatBody.transferWith(airHeatBody, evaporatorAirRFKT);
         evaporatorTank.transferWith(evaporatorHeatBody, evaporatorChannels.size() * Config.CONFIG.HeatExchanger.ChannelInternalSurfaceArea);
+        // Modified 2026-10-28: real conversion drives the boiler loop, not stored heat.
+        if (condenserTank.transitionedLastTick() > 0 || evaporatorTank.transitionedLastTick() > 0)
+            soundActiveUntil = CoreEvents.tickNumber() + 10;
+        biggerreactorsrework.audio.MachineAudio.publish(1, min(), max(), renderTerminals, CoreEvents.tickNumber() < soundActiveUntil, 0);
         airHeatBody.transferWith(ambientHeatBody, airAmbientRFKT);
         thermalStorageChange=airHeatBody.rf()+condenserHeatBody.rf()+evaporatorHeatBody.rf()-before;
         fluidPorts.forEach(HeatExchangerFluidPortTile::pushFluid);

@@ -11,6 +11,7 @@ import org.lwjgl.glfw.GLFW;
 
 /** Shared, draggable appearance popup. Input is intercepted before machine controls and inventory slots. */
 public final class GuiSettingsWindow {
+    // Modified 2026-10-28: independent machine volume in the existing settings popup.
     private static final int WIDTH = 190;
     private static final int HEIGHT = 106;
     private static final int CLOSE_WIDTH = 10;
@@ -18,6 +19,7 @@ public final class GuiSettingsWindow {
     private final ModScreen<?> screen;
     private boolean open;
     private boolean dragging;
+    private boolean volumeDragging;
     private boolean consumeRelease;
     private boolean rendering;
     private int focus;
@@ -25,15 +27,18 @@ public final class GuiSettingsWindow {
     private double dragX, dragY;
 
     public GuiSettingsWindow(ModScreen<?> screen) { this.screen = screen; }
+    private boolean hasSound() { return screen.hasStatistics(); }
+    private int height() { return hasSound() ? 152 : HEIGHT; }
+    private int choices() { return hasSound() ? 6 : 4; }
 
     public boolean open() { return screen.hasAppearanceSettings() && open; }
     public boolean rendering() { return rendering; }
 
     private int x() { return Mth.clamp((screen.width - WIDTH) / 2 + offsetX, 4, Math.max(4, screen.width - WIDTH - 4)); }
-    private int y() { return Mth.clamp((screen.height - HEIGHT) / 2 + offsetY, 4, Math.max(4, screen.height - HEIGHT - 6)); }
+    private int y() { return Mth.clamp((screen.height - height()) / 2 + offsetY, 4, Math.max(4, screen.height - height() - 6)); }
 
     /** The area the open window covers, kept free of other overlays. */
-    public net.minecraft.client.renderer.Rect2i area() { return new net.minecraft.client.renderer.Rect2i(x() - 4, y() - 4, WIDTH + 8, HEIGHT + 10); }
+    public net.minecraft.client.renderer.Rect2i area() { return new net.minecraft.client.renderer.Rect2i(x() - 4, y() - 4, WIDTH + 8, height() + 10); }
 
     private static boolean inside(double mx, double my, int x, int y, int width, int height) {
         return mx >= x && mx < x + width && my >= y && my < y + height;
@@ -51,7 +56,7 @@ public final class GuiSettingsWindow {
 
     /** Whether the open window is under the point. */
     public boolean covers(double mx, double my) {
-        return open() && inside(mx, my, x() - 4, y() - 4, WIDTH + 8, HEIGHT + 10);
+        return open() && inside(mx, my, x() - 4, y() - 4, WIDTH + 8, height() + 10);
     }
 
     private static Component text(String key) {
@@ -84,7 +89,7 @@ public final class GuiSettingsWindow {
                 return;
             }
             int x = x(), y = y();
-            GuiArt.panel(g, x, y, WIDTH, HEIGHT, screen.getFrame());
+            GuiArt.panel(g, x, y, WIDTH, height(), screen.getFrame());
             GuiArt.scrollingText(g, screen.getFont(), text("title").getString(), x + 8, y + 8, WIDTH - 38, GuiTheme.textColor());
             GuiArt.button(g, closeX(), closeY(), CLOSE_WIDTH, CLOSE_HEIGHT,
                     focus == 3 || inside(mouseX, mouseY, closeX(), closeY(), CLOSE_WIDTH, CLOSE_HEIGHT), GuiIcon.CLOSE, screen.getFrame());
@@ -101,6 +106,7 @@ public final class GuiSettingsWindow {
             if (inside(mouseX, mouseY, x + 12, y + 78, WIDTH - 24, 18)) {
                 g.renderTooltip(screen.getFont(), text(all ? "all.on" : "all.off"), mouseX, mouseY);
             }
+            if (hasSound()) volume(g, x, y, mouseX, mouseY);
         } finally {
             g.flush();
             g.pose().popPose();
@@ -116,6 +122,31 @@ public final class GuiSettingsWindow {
         if (focus == index) GuiArt.ring(g, x + 3, y + 3, 16, 0xFFACDC42);
     }
 
+    private void volume(GuiGraphics g, int x, int y, int mx, int my) {
+        int value = GuiThemes.volume(screen.machinePos());
+        Component level = value == 0 ? text("volume.mute") : Component.literal(value + "%");
+        g.drawString(screen.getFont(), Component.translatable("screen.biggerreactorsrework.settings.volume", level), x + 12, y + 105, GuiTheme.textColor(), false);
+        for (int i = 0; i < 12; i++) {
+            int bx = x + 12 + i * 14;
+            boolean selected = i > 0 && i < 11 && value >= i * 10;
+            GuiArt.buttonBackground(g, bx, y + 122, 12, 18, inside(mx, my, bx, y + 122, 12, 18), selected, false, screen.getFrame());
+            if (i == 0 || i == 11) {
+                g.drawString(screen.getFont(), i == 0 ? "−" : "+", bx + 3, y + 127, 0xFFFFFFFF, false);
+                if (focus == (i == 0 ? 4 : 5)) GuiArt.ring(g, bx, y + 122, 12, 18, 0xFFACDC42);
+            } else g.fill(bx + 3, y + 126, bx + 9, y + 136, selected ? 0xFF36CFEE : 0xFF44545B);
+        }
+        if (inside(mx, my, x + 12, y + 103, 166, 37)) {
+            String help = inside(mx, my, x + 12, y + 122, 12, 18) ? "volume.decrease"
+                    : inside(mx, my, x + 166, y + 122, 12, 18) ? "volume.increase" : "volume.help";
+            g.renderTooltip(screen.getFont(), text(help), mx, my);
+        }
+    }
+
+    private void setBarVolume(double mx) {
+        int segment = Mth.clamp((int)((mx - x() - 26) / 14) + 1, 1, 10);
+        GuiThemes.setVolume(screen.machinePos(), segment * 10);
+    }
+
     public boolean mousePressed(double mx, double my, int button) {
         if (!contains(mx, my)) return false;
         consumeRelease = true;
@@ -123,6 +154,7 @@ public final class GuiSettingsWindow {
         if (onTab(mx, my)) {
             open = !open;
             dragging = false;
+            volumeDragging = false;
             if (open) focus = GuiThemes.dark(screen.machinePos()) ? 1 : 0;
             screen.setFocused(null);
             clickSound();
@@ -134,6 +166,13 @@ public final class GuiSettingsWindow {
             activate(1);
         } else if (inside(mx, my, x() + 12, y() + 78, WIDTH - 24, 18)) {
             activate(2);
+        } else if (hasSound() && inside(mx, my, x() + 12, y() + 122, 12, 18)) {
+            activate(4);
+        } else if (hasSound() && inside(mx, my, x() + 166, y() + 122, 12, 18)) {
+            activate(5);
+        } else if (hasSound() && inside(mx, my, x() + 26, y() + 122, 138, 18)) {
+            volumeDragging = true;
+            setBarVolume(mx);
         } else if (inside(mx, my, x(), y(), WIDTH - 25, 22)) {
             dragging = true;
             dragX = mx - x();
@@ -148,7 +187,9 @@ public final class GuiSettingsWindow {
             case 0 -> GuiThemes.choose(screen.machinePos(), false);
             case 1 -> GuiThemes.choose(screen.machinePos(), true);
             case 2 -> GuiThemes.setApplyToAll(screen.machinePos(), !GuiThemes.applyToAll());
-            case 3 -> { open = false; dragging = false; }
+            case 3 -> { open = false; dragging = false; volumeDragging = false; }
+            case 4 -> GuiThemes.setVolume(screen.machinePos(), GuiThemes.volume(screen.machinePos()) - 10);
+            case 5 -> GuiThemes.setVolume(screen.machinePos(), GuiThemes.volume(screen.machinePos()) + 10);
             default -> throw new IllegalArgumentException("Unknown settings choice");
         }
         clickSound();
@@ -156,28 +197,33 @@ public final class GuiSettingsWindow {
 
     public boolean mouseReleased() {
         dragging = false;
+        volumeDragging = false;
         boolean consumed = consumeRelease;
         consumeRelease = false;
         return consumed;
     }
 
     public boolean mouseDragged(double mx, double my) {
+        if (open && volumeDragging) { setBarVolume(mx); return true; }
         if (!open || !dragging) return false;
         if (dragging) {
             offsetX = (int) Math.round(mx - dragX) - (screen.width - WIDTH) / 2;
-            offsetY = (int) Math.round(my - dragY) - (screen.height - HEIGHT) / 2;
+            offsetY = (int) Math.round(my - dragY) - (screen.height - height()) / 2;
             offsetX = x() - (screen.width - WIDTH) / 2;
-            offsetY = y() - (screen.height - HEIGHT) / 2;
+            offsetY = y() - (screen.height - height()) / 2;
         }
         return true;
     }
 
     public boolean keyPressed(int keyCode, int modifiers) {
         if (!open) return false;
-        if (keyCode == GLFW.GLFW_KEY_ESCAPE) { open = false; dragging = false; }
-        else if (keyCode == GLFW.GLFW_KEY_TAB) focus = Math.floorMod(focus + ((modifiers & GLFW.GLFW_MOD_SHIFT) == 0 ? 1 : -1), 4);
-        else if (keyCode == GLFW.GLFW_KEY_LEFT || keyCode == GLFW.GLFW_KEY_UP) focus = Math.floorMod(focus - 1, 4);
-        else if (keyCode == GLFW.GLFW_KEY_RIGHT || keyCode == GLFW.GLFW_KEY_DOWN) focus = (focus + 1) % 4;
+        if (keyCode == GLFW.GLFW_KEY_ESCAPE) { open = false; dragging = false; volumeDragging = false; }
+        else if (keyCode == GLFW.GLFW_KEY_TAB) focus = Math.floorMod(focus + ((modifiers & GLFW.GLFW_MOD_SHIFT) == 0 ? 1 : -1), choices());
+        else if (hasSound() && focus >= 4 && (keyCode == GLFW.GLFW_KEY_LEFT || keyCode == GLFW.GLFW_KEY_RIGHT)) {
+            GuiThemes.setVolume(screen.machinePos(), GuiThemes.volume(screen.machinePos()) + (keyCode == GLFW.GLFW_KEY_LEFT ? -10 : 10));
+        }
+        else if (keyCode == GLFW.GLFW_KEY_LEFT || keyCode == GLFW.GLFW_KEY_UP) focus = Math.floorMod(focus - 1, choices());
+        else if (keyCode == GLFW.GLFW_KEY_RIGHT || keyCode == GLFW.GLFW_KEY_DOWN) focus = (focus + 1) % choices();
         else if (keyCode == GLFW.GLFW_KEY_ENTER || keyCode == GLFW.GLFW_KEY_KP_ENTER || keyCode == GLFW.GLFW_KEY_SPACE) activate(focus);
         return true;
     }

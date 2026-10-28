@@ -1,4 +1,4 @@
-<!-- DESCRIÇÃO EM INGLÊS PARA CURSEFORGE E MODRINTH — revisão 27/10/2026
+<!-- DESCRIÇÃO EM INGLÊS PARA CURSEFORGE E MODRINTH — revisão 28/10/2026
 URLs de imagens já publicadas foram preservadas. Substitua IMAGEM_PROCESSADOR_INDUSTRIAL
 pela imagem do bloco e IMAGEM_UI_PROCESSADOR_INDUSTRIAL pela nova interface antes de publicar.
 A screenshot antiga do Cyanite Reprocessor foi mantida somente em comentário para referência. -->
@@ -11,7 +11,7 @@ A screenshot antiga do Cyanite Reprocessor foi mantida somente em comentário pa
 
 Design your own reactor, turn its heat into steam, drive a turbine and store the power in a multiblock battery.
 
-**BiggerReactors-Rework** brings the BiggerReactors foundation to **Minecraft 1.21.1 on NeoForge**, with **rebuilt liquid cooling, redesigned interfaces and a new battery multiblock**.
+**BiggerReactors-Rework** brings the BiggerReactors foundation to **Minecraft 1.21.1 on NeoForge**, with **rebuilt liquid cooling, redesigned interfaces, original machine sounds and a new battery multiblock**.
 
 > 🧬 An independent fork of **BiggerReactors**, carrying forward the legacy of **Big Reactors**. Original authors and contributors are credited below.
 
@@ -25,6 +25,7 @@ Design your own reactor, turn its heat into steam, drive a turbine and store the
 | 🔁 Coolant circuits | Water, manufactured Liquid Obsidian and optional Cryo Fuel and liquid sodium circuits. |
 | ⚙️ Industrial Processor | One machine for cyanite recycling and Liquid Obsidian production, with separate item and fluid outputs. |
 | 🖥️ Redesigned interfaces | Metallic frames, clearer resource bars and consistent machine controls. |
+| 🔊 Original machine sounds | Distinct reactor, heat-exchanger and turbine sounds, with turbine audio following rotor speed and individual volume/mute controls for each multiblock. |
 | 💡 Soft machine lighting | Operating terminals, reactor fuel, hot exchanger fluids and the running Industrial Processor emit a modest glow. |
 | 📊 Machine statistics | Current and potential rates, flow measurements and explanations of bottlenecks. |
 | 🔋 Multiblock battery | Expandable FE storage, item charging and equipped-gear charging. |
@@ -201,6 +202,20 @@ Redesigned screens bring resources and controls together. Each machine shows its
 Potential values assume the conditions shown in the statistics panel. Compare them with current rates to see where supply, controls or circulation are holding the machine back.
 
 The **settings tab** switches each screen between a light and a dark background, for one machine or for all machines at once.
+
+---
+
+## 🔊 Hear your power plant come to life
+
+**Machine audio is a new addition in this rework.** Your reactor, heat exchanger and turbine now have their own original operating sounds:
+
+- ⚛️ **Reactor:** a steady industrial hum with coolant-circulation texture.
+- 🔥 **Heat exchanger:** deep boiling and bubbling as it operates.
+- 🌀 **Turbine:** distinct blade passes with a restrained steam background, changing with rotor speed as it accelerates and slows down.
+
+The sounds are positional and fade with distance, giving your plant an audible presence as you move around it.
+
+**Set the volume for each individual multiblock in its Settings window, or mute it completely.** Turning down one reactor leaves your other reactors, heat exchangers and turbines unchanged. These are your personal listening settings; they do not change another player's volume. Sharing a light/dark appearance across machines never shares their sound settings.
 
 ---
 
