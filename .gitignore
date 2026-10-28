@@ -34,3 +34,6 @@ publishlocal
 
 # IntelliJ
 .idea
+
+# Generated numerical experiments (kept locally for inspection)
+/output/cooling-study/

@@ -156,10 +156,15 @@ public final class GuiArt {
      * 1 pixel colored ring.
      */
     public static void ring(@Nonnull GuiGraphics graphics, int x, int y, int size, int color) {
-        fill(graphics, x, y, x + size, y + 1, color);
-        fill(graphics, x, y + size - 1, x + size, y + size, color);
-        fill(graphics, x, y, x + 1, y + size, color);
-        fill(graphics, x + size - 1, y, x + size, y + size, color);
+        ring(graphics, x, y, size, size, color);
+    }
+
+    // Modified 2026-10-28: rectangular controls keep a full-size focus outline.
+    public static void ring(@Nonnull GuiGraphics graphics, int x, int y, int width, int height, int color) {
+        fill(graphics, x, y, x + width, y + 1, color);
+        fill(graphics, x, y + height - 1, x + width, y + height, color);
+        fill(graphics, x, y, x + 1, y + height, color);
+        fill(graphics, x + width - 1, y, x + width, y + height, color);
     }
 
     /**
@@ -278,6 +283,10 @@ public final class GuiArt {
      * (and back) inside that width, so all of it can be read without shrinking or cutting it.
      */
     public static void scrollingText(@Nonnull GuiGraphics graphics, @Nonnull Font font, String text, int x, int y, int width, int color) {
+        scrollingText(graphics, font, net.minecraft.network.chat.Component.literal(text), x, y, width, color);
+    }
+
+    public static void scrollingText(@Nonnull GuiGraphics graphics, @Nonnull Font font, net.minecraft.network.chat.Component text, int x, int y, int width, int color) {
         int textWidth = font.width(text);
         if (textWidth <= width) {
             graphics.drawString(font, text, x, y, color, false);

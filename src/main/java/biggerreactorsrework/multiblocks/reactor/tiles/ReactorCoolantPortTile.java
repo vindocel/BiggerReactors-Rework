@@ -101,6 +101,7 @@ public class ReactorCoolantPortTile extends ReactorBaseTile implements IFluidTan
         }
         return transitionTank.fluidValidForTank(tank, fluid);
     }
+    @Override public boolean fluidValidForTank(int tank,Fluid fluid,DataComponentPatch components){return transitionTank!=null && transitionTank.fluidValidForTank(tank,fluid,components);}
     
     @Override
     public long fill(Fluid fluid, DataComponentPatch components, long amount, boolean simulate) {
@@ -124,10 +125,11 @@ public class ReactorCoolantPortTile extends ReactorBaseTile implements IFluidTan
         }
         if (handler != null && transitionTank != null) {
             Fluid fluid = transitionTank.vaporType();
+            var components = transitionTank.fluidComponentsInTank(1);
             long amount = transitionTank.vaporAmount();
-            amount = transitionTank.drain(fluid, DataComponentPatch.EMPTY, amount, true);
-            amount = handler.fill(fluid, DataComponentPatch.EMPTY, amount, false);
-            amount = transitionTank.drain(fluid, DataComponentPatch.EMPTY, amount, false);
+            amount = transitionTank.drain(fluid, components, amount, true);
+            amount = handler.fill(fluid, components, amount, false);
+            amount = transitionTank.drain(fluid, components, amount, false);
             return amount;
         } else {
             handler = null;

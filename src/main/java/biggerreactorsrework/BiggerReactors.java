@@ -28,12 +28,16 @@ public class BiggerReactors {
     private static String version;
 
     public BiggerReactors(IEventBus modBus, ModContainer container) {
+        // Modified 2026-10-28: common events, with playback isolated to the client.
+        biggerreactorsrework.registries.MachineSounds.register(modBus);
+        biggerreactorsrework.registries.CoolantComponents.register(modBus);
         version = container.getModInfo().getVersion().toString();
         new Registry(modid, BiggerReactors.class.getPackageName(), modBus, new ReferenceArrayList<>(), new ReferenceArrayList<>());
         biggerreactorsrework.machine.recipe.ReprocessingRecipes.register(modBus);
         modBus.addListener(biggerreactorsrework.registries.MaterialDataMaps::register);
         modBus.addListener(biggerreactorsrework.data.ModDataGeneration::gather);
         CoreEvents.init();
+        biggerreactorsrework.registries.CoolantSync.init();
         NeoForge.EVENT_BUS.addListener(this::onReloadData);
         if (ModList.get().isLoaded("computercraft")) {
             ComputerCraftCompat.init(modBus);

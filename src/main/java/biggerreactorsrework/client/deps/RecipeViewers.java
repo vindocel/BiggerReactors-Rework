@@ -3,6 +3,7 @@ package biggerreactorsrework.client.deps;
 import biggerreactorsrework.BiggerReactors;
 import biggerreactorsrework.client.deps.emi.EmiBridge;
 import biggerreactorsrework.client.deps.jei.JeiBridge;
+import biggerreactorsrework.client.deps.rei.ReiBridge;
 import net.minecraft.resources.ResourceLocation;
 import net.neoforged.fml.ModList;
 
@@ -13,8 +14,9 @@ import net.neoforged.fml.ModList;
 public final class RecipeViewers {
     public static final ResourceLocation CYANITE_REPROCESSING = ResourceLocation.fromNamespaceAndPath(BiggerReactors.modid, "cyanite_reprocessing");
     public static final ResourceLocation MODERATOR_BLOCK = ResourceLocation.fromNamespaceAndPath(BiggerReactors.modid, "classic/reactor_moderator_block");
-    public static final ResourceLocation MODERATOR_FLUID = ResourceLocation.fromNamespaceAndPath(BiggerReactors.modid, "classic/reactor_moderator_fluid");
+    public static final ResourceLocation MODERATOR_FLUID = ResourceLocation.fromNamespaceAndPath(BiggerReactors.modid, "classic/reactor_coolant");
     public static final ResourceLocation TURBINE_COIL = ResourceLocation.fromNamespaceAndPath(BiggerReactors.modid, "classic/turbine_coil");
+    public static final ResourceLocation HEAT_EXCHANGE = ResourceLocation.fromNamespaceAndPath(BiggerReactors.modid, "heat_exchange");
 
     private RecipeViewers() {
     }
@@ -25,7 +27,12 @@ public final class RecipeViewers {
     }
 
     public static boolean available() {
-        return emi() || (ModList.get().isLoaded("jei") && JeiBridge.ready());
+        return emi() || rei() || (ModList.get().isLoaded("jei") && JeiBridge.ready());
+    }
+
+    /** Modified 2026-10-27: native REI support, with EMI retaining priority when both are installed. */
+    public static boolean rei() {
+        return ModList.get().isLoaded("roughlyenoughitems");
     }
 
     /** Shows the categories (EMI shows the first one; JEI shows them all as tabs). */
@@ -35,6 +42,8 @@ public final class RecipeViewers {
         }
         if (emi()) {
             EmiBridge.show(categories[0]);
+        } else if (rei()) {
+            ReiBridge.show(categories);
         } else if (ModList.get().isLoaded("jei")) {
             JeiBridge.show(categories);
         }

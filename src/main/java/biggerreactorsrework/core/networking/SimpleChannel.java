@@ -1,5 +1,7 @@
 package biggerreactorsrework.core.networking;
 
+// Modified 2026-10-27: require protocol 4 for industrial item/fluid recipe and tank synchronization.
+
 import biggerreactorsrework.core.registry.OnModLoad;
 import biggerreactorsrework.core.serialization.DataCompound;
 import biggerreactorsrework.core.util.NonnullDefault;
@@ -29,7 +31,7 @@ public class SimpleChannel {
      * Upper bound for a single encoded compound, keeps a malformed or hostile packet from allocating without limit.
      */
     private static final int MAX_PAYLOAD_BYTES = 1 << 20;
-    private static final String PROTOCOL_VERSION = "1";
+    private static final String PROTOCOL_VERSION = "4";
 
     private static final List<SimpleChannel> channelsToRegister = new ObjectArrayList<>();
 

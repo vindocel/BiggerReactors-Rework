@@ -1,5 +1,7 @@
 package biggerreactorsrework;
 
+// Modified 2026-10-26: scope derived sprites to synchronized generic coolant profiles.
+
 import biggerreactorsrework.machine.client.CyaniteReprocessorScreen;
 import biggerreactorsrework.machine.containers.CyaniteReprocessorContainer;
 import biggerreactorsrework.multiblocks.heatexchanger.client.HeatExchangerFluidPortScreen;
@@ -30,8 +32,22 @@ public final class BiggerReactorsClient {
     private BiggerReactorsClient() {
     }
 
+    public static boolean connected() { return net.minecraft.client.Minecraft.getInstance().getConnection()!=null; }
+    private static boolean coolantReloadPending;
+    public static void refreshCoolantSprites(java.util.List<biggerreactorsrework.registries.FluidTransitionRegistry.FluidTransition> profiles) {
+        if (!coolantReloadPending && biggerreactorsrework.client.HeatedFluidSprites.missing(profiles)) {
+            coolantReloadPending=true;
+            net.minecraft.client.Minecraft.getInstance().reloadResourcePacks().whenComplete((unused,error)->coolantReloadPending=false);
+        }
+    }
+
     static void init(IEventBus modBus) {
+        // Modified 2026-10-28: positional loops and per-machine local volume.
+        biggerreactorsrework.client.sound.MachineSoundManager.init();
+        modBus.addListener(biggerreactorsrework.client.HeatedFluidSprites::register);
         biggerreactorsrework.client.GuiSettingsEvents.register();
+        net.neoforged.neoforge.common.NeoForge.EVENT_BUS.addListener(
+                (net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent.LoggingOut event) -> biggerreactorsrework.registries.CoolantSync.clearClient());
         modBus.addListener((net.neoforged.neoforge.client.event.RegisterShadersEvent event) -> {
             try {
                 event.registerShader(new net.minecraft.client.renderer.ShaderInstance(event.getResourceProvider(),
@@ -47,6 +63,7 @@ public final class BiggerReactorsClient {
         modBus.addListener(BiggerReactorsClient::registerClientExtensions);
         HeatExchangerChannelModels.init(modBus);
         biggerreactorsrework.client.ConnectedGlassModels.init(modBus);
+        biggerreactorsrework.client.ReactorRodModels.init(modBus);
         modBus.addListener((net.neoforged.fml.event.lifecycle.FMLClientSetupEvent event) -> event.enqueueWork(() ->
                 biggerreactorsrework.items.tools.GuideBookItem.open = biggerreactorsrework.client.guide.GuideBookAnimation::requestOpen));
         net.neoforged.neoforge.common.NeoForge.EVENT_BUS.addListener(biggerreactorsrework.client.guide.GuideBookAnimation::onClientTick);
@@ -58,6 +75,8 @@ public final class BiggerReactorsClient {
     private static void registerRenderers(EntityRenderersEvent.RegisterRenderers event) {
         assert TurbineRotorBearingTile.SUPPLIER.TYPE != null;
         event.registerBlockEntityRenderer(TurbineRotorBearingTile.SUPPLIER.TYPE, TurbineRotorRenderer::new);
+        event.registerBlockEntityRenderer(biggerreactorsrework.multiblocks.reactor.tiles.ReactorManifoldTile.SUPPLIER.TYPE,ReactorManifoldRenderer::new);
+        event.registerBlockEntityRenderer(biggerreactorsrework.multiblocks.heatexchanger.tiles.HeatExchangerChannelTile.SUPPLIER.TYPE,biggerreactorsrework.multiblocks.heatexchanger.client.HeatExchangerFluidRenderer::new);
     }
     
     private static void registerClientExtensions(RegisterClientExtensionsEvent event) {
@@ -69,7 +88,13 @@ public final class BiggerReactorsClient {
             event.registerFluidType(new IClientFluidTypeExtensions() {
                 @Override
                 public ResourceLocation getStillTexture() {
-                    return info.stillTexture();
+                    return info.type()==biggerreactorsrework.fluids.HeatedCoolant.INSTANCE.getFluidType()?ResourceLocation.fromNamespaceAndPath(BiggerReactors.modid,"block/fluid/liquid_obsidian_still"):info.stillTexture();
+                }
+                @Override public ResourceLocation getStillTexture(net.neoforged.neoforge.fluids.FluidStack stack) {
+                    return stack.getFluid()==biggerreactorsrework.fluids.HeatedCoolant.INSTANCE?biggerreactorsrework.client.HeatedFluidSprites.texture(stack,false):getStillTexture();
+                }
+                @Override public ResourceLocation getFlowingTexture(net.neoforged.neoforge.fluids.FluidStack stack) {
+                    return stack.getFluid()==biggerreactorsrework.fluids.HeatedCoolant.INSTANCE?biggerreactorsrework.client.HeatedFluidSprites.texture(stack,true):getFlowingTexture();
                 }
                 
                 @Override

@@ -112,6 +112,7 @@ public class ReactorModeratorRegistry {
     public static ModeratorProperties blockModeratorProperties(Block block) {
         return registry.get(block);
     }
+    public static Map<Block,ModeratorProperties> snapshot(){return Map.copyOf(registry);}
     
     // TODO: unify these names across all registries
     private enum RegistryType {
@@ -193,6 +194,9 @@ public class ReactorModeratorRegistry {
             }
         }
         MaterialDataMaps.moderators(registry);
+        // Rework 2026-10-25: fluids are transported inside manifolds, never world-space moderators.
+        registry.keySet().removeIf(block -> block instanceof net.minecraft.world.level.block.LiquidBlock ||
+                !block.defaultBlockState().getFluidState().isEmpty());
         BiggerReactors.LOGGER.info("Loaded " + registry.size() + " moderator entries");
     }
     

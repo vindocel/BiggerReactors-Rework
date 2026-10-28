@@ -42,9 +42,9 @@ public class CyaniteReprocessorContainer extends AbstractContainerMenu implement
         if (this.tileEntity != null) {
             IItemHandler handler = tileEntity.getItemHandler();
             // Add input slot.
-            this.addSlot(new SlotItemHandler(handler, CyaniteReprocessorItemHandler.INPUT_SLOT_INDEX, 44, 41));
+            this.addSlot(new SlotItemHandler(handler, CyaniteReprocessorItemHandler.INPUT_SLOT_INDEX, 56, 56));
             // Add output slot.
-            this.addSlot(new SlotItemHandler(handler, CyaniteReprocessorItemHandler.OUTPUT_SLOT_INDEX, 116, 41));
+            this.addSlot(new SlotItemHandler(handler, CyaniteReprocessorItemHandler.OUTPUT_SLOT_INDEX, 116, 56));
         }
 
         // Populate player inventory.
@@ -109,7 +109,7 @@ public class CyaniteReprocessorContainer extends AbstractContainerMenu implement
      * Draw and initialize the player's inventory.
      */
     private void populatePlayerInventory() {
-        int guiOffset = 93;
+        int guiOffset = 108;
 
         // Add player inventory;
         for (int rowIndex = 0; rowIndex < 3; rowIndex++) {

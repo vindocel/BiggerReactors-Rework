@@ -1,0 +1,62 @@
+{
+  "machine.reactor.loop": {
+    "subtitle": "subtitles.biggerreactorsrework.reactor_running",
+    "sounds": [
+      {
+        "name": "biggerreactorsrework:machine/reator_loop",
+        "stream": true,
+        "volume": 1.0,
+        "pitch": 1.0,
+        "attenuation_distance": 25
+      }
+    ]
+  },
+  "machine.boiler.loop": {
+    "subtitle": "subtitles.biggerreactorsrework.boiler_running",
+    "sounds": [
+      {
+        "name": "biggerreactorsrework:machine/boiler_loop",
+        "stream": true,
+        "volume": 1.0,
+        "pitch": 1.0,
+        "attenuation_distance": 25
+      }
+    ]
+  },
+  "machine.turbine.low_loop": {
+    "subtitle": "subtitles.biggerreactorsrework.turbine_running",
+    "sounds": [
+      {
+        "name": "biggerreactorsrework:machine/turbina_300rpm_loop",
+        "stream": true,
+        "volume": 1.0,
+        "pitch": 1.0,
+        "attenuation_distance": 25
+      }
+    ]
+  },
+  "machine.turbine.mid_loop": {
+    "subtitle": "subtitles.biggerreactorsrework.turbine_running",
+    "sounds": [
+      {
+        "name": "biggerreactorsrework:machine/turbina_900rpm_loop",
+        "stream": true,
+        "volume": 1.0,
+        "pitch": 1.0,
+        "attenuation_distance": 25
+      }
+    ]
+  },
+  "machine.turbine.high_loop": {
+    "subtitle": "subtitles.biggerreactorsrework.turbine_running",
+    "sounds": [
+      {
+        "name": "biggerreactorsrework:machine/turbina_1800rpm_loop",
+        "stream": true,
+        "volume": 1.0,
+        "pitch": 1.0,
+        "attenuation_distance": 25
+      }
+    ]
+  }
+}

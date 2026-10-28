@@ -36,6 +36,11 @@ public class CyaniteReprocessorState implements GuiSync.IGUIPacket {
      * The max water capacity of the machine.
      */
     public int waterCapacity = 0;
+    // Modified 2026-10-27: additional output tank; legacy machine registry is retained.
+    public int outputStored=0,outputCapacity=0;
+    public String outputFluid="minecraft:empty",inputFluid="minecraft:water";
+    public boolean autoEjectFluid=false;
+    public String condition="no_item";
 
     /**
      * Side routes per material, packed by {@link biggerreactorsrework.machine.side.SideConfiguration#pack}.
@@ -70,6 +75,10 @@ public class CyaniteReprocessorState implements GuiSync.IGUIPacket {
 
         this.waterStored = (Integer) data.get("waterStored");
         this.waterCapacity = (Integer) data.get("waterCapacity");
+        condition=(String)data.get("condition");
+        outputStored=(Integer)data.get("outputStored");outputCapacity=(Integer)data.get("outputCapacity");
+        outputFluid=(String)data.get("outputFluid");inputFluid=(String)data.get("inputFluid");
+        autoEjectFluid=(Integer)data.get("autoEjectFluid")!=0;
 
         this.itemSides = (Integer) data.get("itemSides");
         this.fluidSides = (Integer) data.get("fluidSides");
@@ -93,6 +102,10 @@ public class CyaniteReprocessorState implements GuiSync.IGUIPacket {
 
         data.put("waterStored", this.waterStored);
         data.put("waterCapacity", this.waterCapacity);
+        data.put("condition",condition);
+        data.put("outputStored",outputStored);data.put("outputCapacity",outputCapacity);
+        data.put("outputFluid",outputFluid);data.put("inputFluid",inputFluid);
+        data.put("autoEjectFluid",autoEjectFluid?1:0);
 
         data.put("itemSides", this.itemSides);
         data.put("fluidSides", this.fluidSides);

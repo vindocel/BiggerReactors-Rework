@@ -45,8 +45,16 @@ public abstract class ModScreen<T extends AbstractContainerMenu> extends Abstrac
     private final List<AbstractElement> screenElements;
 
     private final GuiSettingsWindow settingsWindow = new GuiSettingsWindow(this);
+    private final biggerreactorsrework.client.GuiStatisticsWindow statisticsWindow=new biggerreactorsrework.client.GuiStatisticsWindow(this);
+    public biggerreactorsrework.client.GuiStatisticsWindow statisticsWindow(){return statisticsWindow;}
+    public boolean hasStatistics(){return menu instanceof biggerreactorsrework.multiblocks.reactor.containers.ReactorTerminalContainer || menu instanceof biggerreactorsrework.multiblocks.heatexchanger.containers.HeatExchangerTerminalContainer || menu instanceof biggerreactorsrework.multiblocks.turbine.containers.TurbineTerminalContainer;}
 
     public GuiSettingsWindow settingsWindow() { return settingsWindow; }
+
+    /** Which of the two popups is drawn above the other and receives input first. */
+    private boolean statisticsInFront = true;
+    public boolean statisticsInFront() { return statisticsInFront; }
+    public void bringToFront(boolean statistics) { statisticsInFront = statistics; }
 
     /** Appearance is configured from machine terminals, not their ports and auxiliary controls. */
     public boolean hasAppearanceSettings() { return false; }
@@ -61,6 +69,18 @@ public abstract class ModScreen<T extends AbstractContainerMenu> extends Abstrac
     /** Left side, away from the reprocessor's existing right-side routing tab. */
     public int settingsTabX() { return this.leftPos - GuiFrame.TAB_SIZE; }
     public int settingsTabY() { return this.topPos + 4; }
+
+    /** Parts drawn outside the panel (side tabs and open popups); recipe viewer overlays keep clear of them. */
+    public List<net.minecraft.client.renderer.Rect2i> extraAreas() {
+        var areas = new java.util.ArrayList<net.minecraft.client.renderer.Rect2i>();
+        if (hasAppearanceSettings()) {
+            areas.add(new net.minecraft.client.renderer.Rect2i(settingsTabX(), settingsTabY(), GuiFrame.TAB_SIZE,
+                    hasStatistics() ? biggerreactorsrework.client.GuiStatisticsWindow.TAB_PITCH + GuiFrame.TAB_SIZE : GuiFrame.TAB_SIZE));
+        }
+        if (settingsWindow.open()) areas.add(settingsWindow.area());
+        if (statisticsWindow.open()) areas.add(statisticsWindow.area());
+        return areas;
+    }
 
     /**
      * Space kept between the title and the edges of the panel.
@@ -218,6 +238,7 @@ public abstract class ModScreen<T extends AbstractContainerMenu> extends Abstrac
         RenderHelper.setRenderColor(1.0F, 1.0F, 1.0F, 1.0F);
         this.drawBackground(guiGraphics, this.getGuiLeft(), this.getGuiTop());
         this.settingsWindow.renderTab(guiGraphics, mouseX, mouseY);
+        this.statisticsWindow.renderTab(guiGraphics,mouseX,mouseY);
     }
 
     /**
@@ -240,12 +261,20 @@ public abstract class ModScreen<T extends AbstractContainerMenu> extends Abstrac
         return this.frame();
     }
 
+    /** Slots under an open popup are not hovered. */
+    @Override
+    protected boolean isHovering(int x, int y, int width, int height, double mouseX, double mouseY) {
+        return !settingsWindow.covers(mouseX, mouseY) && !statisticsWindow.covers(mouseX, mouseY)
+                && super.isHovering(x, y, width, height, mouseX, mouseY);
+    }
+
     /**
      * The frame around the panel belongs to the screen: clicking it must not drop the carried item.
      */
     @Override
     protected boolean hasClickedOutside(double mouseX, double mouseY, int guiLeft, int guiTop, int button) {
         if (settingsWindow.contains(mouseX, mouseY)) return false;
+        if (statisticsWindow.contains(mouseX,mouseY))return false;
         return mouseX < guiLeft - GuiFrame.BAND || mouseY < guiTop - GuiFrame.BAND
                 || mouseX >= guiLeft + this.imageWidth + GuiFrame.BAND || mouseY >= guiTop + this.imageHeight + GuiFrame.BAND;
     }

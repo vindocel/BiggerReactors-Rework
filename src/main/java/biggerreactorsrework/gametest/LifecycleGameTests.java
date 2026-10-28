@@ -19,6 +19,24 @@ import static biggerreactorsrework.core.multiblock.IAssemblyStateBlock.ASSEMBLED
 @PrefixGameTestTemplate(false)
 public final class LifecycleGameTests {
     @GameTest(template="empty_7x7x7",timeoutTicks=200)
+    public static void stoppedRotorAcceptsGeometryBeforeAssembledStateArrives(GameTestHelper h){
+        GuideStructures.turbine().parts().forEach(h::setBlock);
+        h.setBlock(new BlockPos(0,2,2),biggerreactorsrework.multiblocks.turbine.blocks.TurbineGlass.INSTANCE);
+        var pos=new BlockPos(2,0,2);
+        h.startSequence().thenWaitUntil(()->h.assertTrue(h.getBlockState(pos).getValue(ASSEMBLED),"turbine not assembled"))
+            .thenExecute(()->{
+                var server=(biggerreactorsrework.multiblocks.turbine.tiles.TurbineRotorBearingTile)h.getBlockEntity(pos);
+                if(!server.isRenderBearing)server=(biggerreactorsrework.multiblocks.turbine.tiles.TurbineRotorBearingTile)h.getBlockEntity(new BlockPos(2,6,2));
+                var client=new biggerreactorsrework.multiblocks.turbine.tiles.TurbineRotorBearingTile(server.getType(),server.getBlockPos(),server.getBlockState().setValue(ASSEMBLED,false));
+                client.setLevel(h.getLevel());
+                var update=new net.minecraft.nbt.CompoundTag();update.putDouble("speed",0);
+                update.put("config",server.getUpdateTag(h.getLevel().registryAccess()));
+                client.handleUpdateNBT(update);
+                h.assertTrue(client.isRenderBearing && client.rotorConfiguration!=null && !client.rotorConfiguration.isEmpty(),"zero-RPM geometry lost before assembled block state");
+                h.assertTrue(client.speed==0,"stopped rotor was made to spin");
+            }).thenSucceed();
+    }
+    @GameTest(template="empty_7x7x7",timeoutTicks=200)
     public static void unloadKeepsIntentAndBreakCancelsIt(GameTestHelper h){
         GuideStructures.reactor(3,false).parts().forEach(h::setBlock);
         BlockPos terminal=new BlockPos(0,1,1),corner=BlockPos.ZERO;

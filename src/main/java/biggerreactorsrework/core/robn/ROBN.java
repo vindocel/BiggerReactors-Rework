@@ -28,13 +28,73 @@ public class ROBN {
     }
     
     public static Object fromROBN(List<Byte> buf) {
+        // Modified 2026-10-26: validate sizes and nesting before the decoder allocates collections.
+        var validation = new BinaryBounds(buf);
+        validation.value(0, null);
+        if (validation.position != buf.size()) throw new IllegalArgumentException("Trailing binary data");
         return fromROBN(buf.iterator());
+    }
+
+    private static final class BinaryBounds {
+        private final List<Byte> bytes;
+        private int position;
+        BinaryBounds(List<Byte> bytes) { this.bytes = bytes; }
+        private int next() {
+            if (position >= bytes.size()) throw new IllegalArgumentException("Truncated binary");
+            return bytes.get(position++) & 255;
+        }
+        private void skip(long count) {
+            if (count < 0 || count > bytes.size() - position) throw new IllegalArgumentException("Invalid binary length");
+            position += (int) count;
+        }
+        private long length() {
+            int raw = next();
+            Type type = Type.fromID((byte) raw);
+            if (type != Type.Int8 && type != Type.Int16 && type != Type.Int32 && type != Type.Int64)
+                throw new IllegalArgumentException("Invalid collection length type");
+            int size = Type.primitiveTypeSize(type);
+            long length = 0;
+            for (int i = 0; i < size; i++) length |= (long) next() << (8 * i);
+            if (size < 8 && (length & (1L << (size * 8 - 1))) != 0 || length < 0 || length > bytes.size() - position)
+                throw new IllegalArgumentException("Invalid collection length");
+            return length;
+        }
+        private void value(int depth, Type known) {
+            if (depth > 64) throw new IllegalArgumentException("Binary nesting exceeds 64 levels");
+            Type type = known == null ? Type.fromID((byte) next()) : known;
+            if (type == null) throw new IllegalArgumentException("Unknown binary type");
+            int size = Type.primitiveTypeSize(type);
+            if (size > 0) { skip(size); return; }
+            switch (type) {
+                case String -> { while (next() != 0) { } }
+                case Utf8String -> skip(length());
+                case Pair -> { value(depth + 1, null); value(depth + 1, null); }
+                case Map -> {
+                    long count = length();
+                    if (count > (bytes.size() - position) / 5) throw new IllegalArgumentException("Truncated map");
+                    for (long i = 0; i < count; i++) {
+                        if (Type.fromID((byte) next()) != Type.Pair) throw new IllegalArgumentException("Invalid map entry");
+                        value(depth + 1, null); value(depth + 1, null);
+                    }
+                }
+                case Vector -> {
+                    long count = length();
+                    Type element = Type.fromID((byte) next());
+                    if (element == null || element == Type.Undefined && count != 0) throw new IllegalArgumentException("Invalid vector type");
+                    int width = Type.primitiveTypeSize(element);
+                    if (width > 0) skip(count * width);
+                    else for (long i = 0; i < count; i++) value(depth + 1, element);
+                }
+                default -> throw new IllegalArgumentException("Unsupported binary type");
+            }
+        }
     }
     
     public enum Type {
         Undefined(0),
         
         String(1),
+        Utf8String(23),
         Bool(2),
         
         Int8(4),
@@ -70,7 +130,7 @@ public class ROBN {
         public static <T> Type typeID(Class<T> tClass) {
             
             if (tClass == java.lang.String.class) {
-                return String;
+                return Utf8String;
             }
             
             if (tClass == boolean.class || tClass == Boolean.class) {
@@ -147,6 +207,7 @@ public class ROBN {
         static {
             idLookup.put(Undefined.val, Undefined);
             idLookup.put(String.val, String);
+            idLookup.put(Utf8String.val, Utf8String);
             idLookup.put(Bool.val, Bool);
             idLookup.put(Int8.val, Int8);
             idLookup.put(Int16.val, Int16);
@@ -248,6 +309,8 @@ public class ROBN {
             
             case String:
                 return stringFromROBN(iterator);
+            case Utf8String:
+                return utf8FromROBN(iterator);
             case Bool:
             case Int8:
             case Int16:
@@ -695,15 +758,33 @@ public class ROBN {
     }
     
     
+    // Modified 2026-10-27: length-prefixed UTF-8 preserves names, symbols and embedded NULs.
+    // Type.String remains readable for existing saves; new writes use an explicit encoding tag.
     private static void stringToROBN(String str, ByteArrayList buf) {
-        buf.ensureCapacity(buf.size() + str.length() + 2);
-        buf.add(Type.String.val);
-        for (int i = 0; i < str.length(); i++) {
-            buf.add((byte) str.charAt(i));
-        }
-        buf.add((byte) 0);
+        byte[] bytes=str.getBytes(java.nio.charset.StandardCharsets.UTF_8);
+        buf.add(Type.Utf8String.val);
+        toROBN(bytes.length,buf);
+        buf.addAll(ByteArrayList.wrap(bytes));
     }
-    
+    private static Object utf8FromROBN(Iterator<Byte> iterator) {
+        Object raw=fromROBN(iterator);
+        if(!(raw instanceof Number count) || count.longValue()<0 || count.longValue()>Integer.MAX_VALUE)
+            throw new IllegalArgumentException("Invalid UTF-8 length");
+        byte[] bytes=new byte[count.intValue()];
+        for(int i=0;i<bytes.length;i++) {
+            if(!iterator.hasNext())throw new IllegalArgumentException("Truncated UTF-8 string");
+            bytes[i]=iterator.next();
+        }
+        try {
+            return java.nio.charset.StandardCharsets.UTF_8.newDecoder()
+                    .onMalformedInput(java.nio.charset.CodingErrorAction.REPORT)
+                    .onUnmappableCharacter(java.nio.charset.CodingErrorAction.REPORT)
+                    .decode(java.nio.ByteBuffer.wrap(bytes)).toString();
+        } catch(java.nio.charset.CharacterCodingException invalid) {
+            throw new IllegalArgumentException("Malformed UTF-8 string",invalid);
+        }
+    }
+
     private static Object stringFromROBN(Iterator<Byte> iterator) {
         StringBuilder builder = new StringBuilder();
         while (true) {
@@ -714,7 +795,7 @@ public class ROBN {
             if (next == 0) {
                 break;
             }
-            builder.append((char) next);
+            builder.append((char) (next & 255));
         }
         return builder.toString();
     }

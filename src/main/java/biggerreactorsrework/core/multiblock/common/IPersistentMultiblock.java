@@ -49,6 +49,31 @@ public interface IPersistentMultiblock<
         @Nullable
         private TileType saveDelegate;
         private boolean hasSaveDelegate = false;
+        @Nullable private java.util.UUID origin;
+        public java.util.UUID origin() { return origin; }
+        public boolean hasPendingContents() {
+            return shouldReadNBT && nbt!=null && storedData(nbt);
+        }
+        private static boolean storedData(Object value) {
+            var keys=java.util.Set.of("fuel","waste","liquidAmount","gasAmount","inAmount","outAmount","storedPower");
+            if(value instanceof CompoundTag tag) {
+                for(String key:tag.getAllKeys()) {
+                    if(keys.contains(key) && tag.get(key) instanceof net.minecraft.nbt.NumericTag n && n.getAsDouble()>0)return true;
+                    if(key.equals("Items") && tag.get(key) instanceof net.minecraft.nbt.ListTag list && !list.isEmpty())return true;
+                    if(key.equals("simulationData") && tag.get(key) instanceof net.minecraft.nbt.ByteArrayTag array) {
+                        try {if(storedData(new biggerreactorsrework.core.serialization.DataCompound(array.getAsByteArray()).toROBNMap()))return true;}
+                        catch(IllegalArgumentException invalid){return true;}
+                    }
+                    if(tag.get(key) instanceof CompoundTag child && storedData(child))return true;
+                }
+            } else if(value instanceof java.util.Map<?,?> map) {
+                for(var entry:map.entrySet()) {
+                    if(keys.contains(entry.getKey()) && entry.getValue() instanceof Number number && number.doubleValue()>0)return true;
+                    if(entry.getValue() instanceof java.util.Map<?,?> && storedData(entry.getValue()))return true;
+                }
+            }
+            return false;
+        }
         @Nullable
         private IPersistentMultiblockTile.Module<TileType, BlockType, ControllerType> saveDelegateModule;
         @Nullable
@@ -70,6 +95,7 @@ public interface IPersistentMultiblock<
         private void partAdded(TileType newPart) {
             final var persistentModule = newPart.module(IPersistentMultiblockTile.class, IPersistentMultiblockTile.Module.class);
             assert persistentModule != null;
+            if (origin == null) origin = persistentModule.origin;
             if (expectedBlocks == 0) {
                 expectedBlocks = persistentModule.expectedBlocks;
             }
@@ -104,6 +130,8 @@ public interface IPersistentMultiblock<
         
         private void partRemoved(TileType oldPart) {
             if (oldPart == saveDelegate) {
+                // Modified 2026-10-26: allow a surviving part to take over persistence.
+                hasSaveDelegate = false;
                 saveDelegate = null;
                 saveDelegateModule = null;
             }
@@ -152,9 +180,6 @@ public interface IPersistentMultiblock<
         public void onPartBroken(TileType tile) {
             expectedBlocks = 0;
             partRemoved(tile);
-            if (tile == saveDelegate) {
-                hasSaveDelegate = false;
-            }
         }
         
         private void pickDelegate() {
@@ -182,6 +207,14 @@ public interface IPersistentMultiblock<
         
         @Override
         public void onStateTransition(AssemblyState oldAssemblyState, AssemblyState newAssemblyState) {
+            if (newAssemblyState == AssemblyState.ASSEMBLED) {
+                if (origin == null) origin = java.util.UUID.randomUUID();
+                for (var tile : controller.blocks.tileElements()) {
+                    if (tile == null) continue;
+                    var part = tile.module(IPersistentMultiblockTile.class, IPersistentMultiblockTile.Module.class);
+                    if (part != null) part.origin = origin;
+                }
+            }
             if (shouldReadNBT) {
                 shouldReadNBT = false;
                 if (nbt != null) {

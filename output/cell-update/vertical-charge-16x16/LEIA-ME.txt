@@ -1,9 +1,0 @@
-CONCEITO ANIMADO EM PIXELS REAIS
-
-Cada bloco mede 16x16. O painel de 3 colunas e 2 blocos de altura mede 48x32. A prévia amplia os pixels 16 vezes, sem suavização.
-
-O fundo escuro e a arte vermelha são os mesmos do conceito aprovado. Onze barras com espaçamento regular percorrem cada coluna, incluindo o encontro entre os dois blocos, como na última imagem de referência.
-
-A animação tem 14 quadros: preenchimento cumulativo da barra inferior até a superior, pausa completa e reinício. Não há trecho descendo. Os seis arquivos de energia em tiles/ têm quadros 16x16, todos sincronizados no mesmo ciclo de 4 ticks por quadro. A fase de cima continua a de baixo; não são duas animações locais repetidas.
-
-As camadas do corpo e da energia ficam separadas. Os arquivos em tiles/ correspondem às seis posições deste painel de conceito. Para colunas de outras alturas, o renderizador precisa selecionar a fase pela altura real; essa integração não faz parte desta prévia. Nenhuma textura atual ou código do jogo foi substituído.

@@ -32,6 +32,19 @@ import javax.annotation.Nonnull;
 @OnlyIn(Dist.CLIENT)
 public class CommonReactorTerminalScreen extends ModScreen<ReactorTerminalContainer> {
 
+    // Modified 2026-10-25: server-authoritative burn limits and current bottleneck.
+    private static Component burnTooltip(ModScreen<ReactorTerminalContainer> screen) {
+        var tooltip=Component.empty();
+        for(var row:biggerreactorsrework.core.client.gui.GuiSync.statistics(screen.getMenu())) {
+            String key=String.valueOf(row.get("key"));
+            if(!java.util.Set.of("burn_potential","manual_limit","burn_current","status").contains(key))continue;
+            if(!tooltip.getString().isEmpty())tooltip.append("\n");
+            tooltip.append(Component.translatable("screen.biggerreactorsrework.statistics."+key)).append(": ")
+                .append(biggerreactorsrework.client.GuiStatisticsWindow.value(String.valueOf(row.get("value"))));
+        }
+        return tooltip.getString().isEmpty()?Component.translatable("screen.biggerreactorsrework.statistics.status.calculating"):tooltip;
+    }
+
     /**
      * Width of the readouts in the left column, up to the end of its separators.
      */
@@ -83,12 +96,14 @@ public class CommonReactorTerminalScreen extends ModScreen<ReactorTerminalContai
         screen.addScreenElement(temperatureReadoutTooltip);
 
         // (Left) Fuel consumption rate tooltip:
-        screen.addScreenElement(new TooltipElement<>(screen, 8, 57, 16, 16, Component.translatable("screen.biggerreactorsrework.reactor_terminal.fuel_usage_rate.tooltip")));
+        var fuelIconTooltip=new TooltipElement<>(screen,8,57,16,16,Component.empty());
+        fuelIconTooltip.onTick=()->fuelIconTooltip.tooltip=burnTooltip(screen);
+        screen.addScreenElement(fuelIconTooltip);
 
         // (Left) Fuel consumption readout tooltip:
         TooltipElement<ReactorTerminalContainer> fuelConsumptionReadoutTooltip = new TooltipElement<>(screen, 26, 57, 77, 16, Component.empty());
         fuelConsumptionReadoutTooltip.onTick = () -> {
-            fuelConsumptionReadoutTooltip.tooltip = Component.literal(String.format("%.3f mB/t", reactorState.fuelUsageRate));
+            fuelConsumptionReadoutTooltip.tooltip = burnTooltip(screen);
         };
         screen.addScreenElement(fuelConsumptionReadoutTooltip);
 
@@ -253,7 +268,7 @@ public class CommonReactorTerminalScreen extends ModScreen<ReactorTerminalContai
         renderReadout(graphics, screen, String.format("%.0f K", heatStored), 23);
 
         // Render text for fuel consumption rate:
-        renderReadout(graphics, screen, RenderHelper.formatValue((fuelUsageRate / 1000.0), 3, "B/t", true), 61);
+        renderReadout(graphics, screen, RenderHelper.formatValue(fuelUsageRate, 3, "mB/t", true), 61);
 
         // Render text for reactivity rate (no fancy suffix for percentages):
         renderReadout(graphics, screen, String.format("%.1f%%", (reactivityRate * 100.0)), 80);

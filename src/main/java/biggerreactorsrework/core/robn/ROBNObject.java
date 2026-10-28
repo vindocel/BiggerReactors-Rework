@@ -19,7 +19,9 @@ public interface ROBNObject {
         if (!(robnObject instanceof Map)) {
             throw new IllegalArgumentException("Malformed binary");
         }
-        // TODO: 7/26/20 check to make sure the keys are strings
+        // Modified 2026-10-26: reject nonstring compound keys at the decoding boundary.
+        if (((Map<?, ?>) robnObject).keySet().stream().anyMatch(key -> !(key instanceof String)))
+            throw new IllegalArgumentException("Compound keys must be strings");
         //noinspection unchecked
         fromROBNMap((Map<String, Object>) robnObject);
     }

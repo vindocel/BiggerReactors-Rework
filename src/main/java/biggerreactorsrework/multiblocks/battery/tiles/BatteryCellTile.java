@@ -37,7 +37,10 @@ public class BatteryCellTile extends BatteryBaseTile {
     public void setEnergy(long energy) {
         if (this.energy != energy) {
             this.energy = energy;
-            setChanged();
+            // Called while chunks unload, where setChanged's neighbour updates would load chunks; only mark the chunk.
+            if (level != null) {
+                level.blockEntityChanged(worldPosition);
+            }
         }
     }
     

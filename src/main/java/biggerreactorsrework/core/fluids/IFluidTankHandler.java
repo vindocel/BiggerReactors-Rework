@@ -45,7 +45,7 @@ public interface IFluidTankHandler extends IFluidHandler {
 
     @Override
     default boolean isFluidValid(int tank, FluidStack resource) {
-        return fluidValidForTank(tank, resource.getFluid());
+        return fluidValidForTank(tank, resource.getFluid(),resource.getComponentsPatch());
     }
 
     @Override
@@ -107,6 +107,7 @@ public interface IFluidTankHandler extends IFluidHandler {
     long fluidAmountInTank(int tank);
 
     boolean fluidValidForTank(int tank, Fluid fluid);
+    default boolean fluidValidForTank(int tank,Fluid fluid,DataComponentPatch components){return components.isEmpty() && fluidValidForTank(tank,fluid);}
 
     long fill(Fluid fluid, DataComponentPatch components, long amount, boolean simulate);
 

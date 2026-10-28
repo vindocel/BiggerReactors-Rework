@@ -39,7 +39,14 @@ final class GuideReferences {
     private static final Set<ResourceLocation> SEEN = new HashSet<>();
 
     /** What a reference shows: an item, or a fluid that has no item of its own. */
-    record Target(ItemStack stack, Fluid fluid, Component name) {
+    record Target(ItemStack stack, Fluid fluid, Component name, net.neoforged.neoforge.fluids.FluidStack fluidStack) {
+        Target(ItemStack stack, Fluid fluid, Component name) {
+            this(stack, fluid, name, net.neoforged.neoforge.fluids.FluidStack.EMPTY);
+        }
+
+        static Target of(net.neoforged.neoforge.fluids.FluidStack stack) {
+            return new Target(ItemStack.EMPTY, stack.getFluid(), stack.getHoverName(), stack);
+        }
     }
 
     /** A referenced word on one line, in pixels from the start of the line. */

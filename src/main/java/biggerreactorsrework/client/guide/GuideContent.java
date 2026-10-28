@@ -93,6 +93,9 @@ final class GuideContent {
           chapters.add(new Chapter("moderators",()->new ItemStack(BuiltInRegistries.ITEM.get(GuideIds.id("graphite_block"))),List.copyOf(elements))); }
         { var elements=new ArrayList<GuideElement>();
           elements.add(new GuideElements.Text(Component.translatable("guide.biggerreactorsrework.content.active")));
+          elements.add(new GuideElements.Text(Component.translatable("guide.biggerreactorsrework.content.active_output_protection")));
+          elements.add(new GuideElements.Heading(Component.translatable("guide.biggerreactorsrework.coolants")));
+          elements.add(coolantTable());
           elements.addAll(GuideMultiblock.elements(GuideStructures.reactor(5,true)));
           chapters.add(new Chapter("active",()->new ItemStack(BuiltInRegistries.ITEM.get(GuideIds.id("reactor_coolant_port"))),List.copyOf(elements))); }
         { var elements=new ArrayList<GuideElement>();
@@ -133,12 +136,15 @@ final class GuideContent {
         { var elements=new ArrayList<GuideElement>();
           elements.add(limits("exchanger",4,3,3,biggerreactorsrework.Config.CONFIG.HeatExchanger.MaxLength,biggerreactorsrework.Config.CONFIG.HeatExchanger.MaxHeight,biggerreactorsrework.Config.CONFIG.HeatExchanger.MaxWidth));
           elements.add(new GuideElements.Text(Component.translatable("guide.biggerreactorsrework.content.exchanger")));
+          elements.add(new GuideElements.Text(Component.translatable("guide.biggerreactorsrework.content.exchanger_output_protection")));
           elements.add(new GuideElements.Crafting(GuideIds.id("crafting/heat_exchanger/casing")));
           elements.add(new GuideElements.Crafting(GuideIds.id("crafting/heat_exchanger/glass")));
           elements.add(new GuideElements.Crafting(GuideIds.id("crafting/heat_exchanger/terminal")));
           elements.add(new GuideElements.Crafting(GuideIds.id("crafting/heat_exchanger/condenser_channel_alt")));
           elements.add(new GuideElements.Crafting(GuideIds.id("crafting/heat_exchanger/evaporator_channel")));
           elements.add(new GuideElements.Crafting(GuideIds.id("crafting/heat_exchanger/fluid_port")));
+          elements.add(new GuideElements.Heading(Component.translatable("guide.biggerreactorsrework.exchanges")));
+          elements.add(exchangeTable());
           elements.addAll(GuideMultiblock.elements(GuideStructures.exchanger()));
           chapters.add(new Chapter("exchanger",()->new ItemStack(BuiltInRegistries.ITEM.get(GuideIds.id("heat_exchanger_terminal"))),List.copyOf(elements))); }
         { var elements=new ArrayList<GuideElement>();
@@ -157,6 +163,36 @@ final class GuideContent {
         var recipes=ReprocessingRecipes.all(Minecraft.getInstance().level);
         if(recipes.isEmpty())elements.add(new GuideReprocessing(GuideIds.id("cyanite_reprocessing")));
         else recipes.forEach(holder->elements.add(new GuideReprocessing(holder.id())));
+    }
+    private static GuideElements.Table coolantTable() {
+        return GuideElements.Table.named(List.of(Component.translatable("guide.biggerreactorsrework.coolants.cold"),Component.translatable("guide.biggerreactorsrework.coolants.hot")),
+            new float[]{1,1},
+            ()->biggerreactorsrework.client.deps.RecipeViewerData.coolants().stream().map(c->List.of(c.input().getHoverName().getString(),c.output().getHoverName().getString())).toList(),
+            (cells,column)->{
+                for(var c:biggerreactorsrework.client.deps.RecipeViewerData.coolants()){
+                    var stack=column==0?c.input():c.output();
+                    if(stack.getHoverName().getString().equals(cells.get(column)))return GuideReferences.Target.of(stack);
+                }
+                return null;
+            });
+    }
+    private static Component circuit(boolean evaporation){
+        return Component.translatable("guide.biggerreactorsrework.exchanges."+(evaporation?"evaporator":"condenser"));
+    }
+    private static GuideElements.Table exchangeTable() {
+        return GuideElements.Table.named(List.of(Component.translatable("guide.biggerreactorsrework.exchanges.input"),
+                Component.translatable("guide.biggerreactorsrework.exchanges.output"),Component.translatable("guide.biggerreactorsrework.exchanges.circuit")),
+            new float[]{1.2f,1.2f,.8f},
+            ()->biggerreactorsrework.client.deps.RecipeViewerData.heatExchanges().stream().map(e->List.of(e.input().getHoverName().getString(),
+                e.output().getHoverName().getString(),circuit(e.evaporation()).getString())).toList(),
+            (cells,column)->{
+                if(column>1)return null;
+                for(var e:biggerreactorsrework.client.deps.RecipeViewerData.heatExchanges()){
+                    var stack=column==0?e.input():e.output();
+                    if(stack.getHoverName().getString().equals(cells.get(column)))return GuideReferences.Target.of(stack);
+                }
+                return null;
+            });
     }
     private static String number(double n) { return java.math.BigDecimal.valueOf(n).stripTrailingZeros().toPlainString(); }
     private static GuideElements.Table propertyTable(boolean moderator) {

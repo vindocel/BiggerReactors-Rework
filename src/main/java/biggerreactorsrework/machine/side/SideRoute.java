@@ -14,7 +14,10 @@ public enum SideRoute {
     /**
      * Energy is always the light blue of the energy bar.
      */
-    ENERGY_INPUT(Transmission.ENERGY, 0xFF36CFEE);
+    ENERGY_INPUT(Transmission.ENERGY, 0xFF36CFEE),
+    // Modified 2026-10-27: append to preserve serialized ordinals.
+    FLUID_OUTPUT(Transmission.FLUID, 0xFF366BD0),
+    FLUID_INPUT_OUTPUT(Transmission.FLUID, 0xFFA460D9);
 
     public static final SideRoute[] VALUES = values();
 

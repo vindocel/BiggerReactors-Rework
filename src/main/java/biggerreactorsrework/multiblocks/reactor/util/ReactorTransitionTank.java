@@ -79,13 +79,14 @@ public class ReactorTransitionTank extends FluidTransitionTank {
     
     @Override
     public void dumpTank(int tank) {
+        if(tank==IN_TANK)internalTank.dumpLiquid();else internalTank.dumpVapor();
+        pullUpdate();
         super.dumpTank(tank);
-        pushUpdate();
     }
     
     private void pushUpdate() {
-        internalTank.insertLiquid(liquidAmount() - internalTank.liquidAmount());
-        internalTank.insertVapor(vaporAmount() - internalTank.vaporAmount());
+        internalTank.insertLiquid(inAmount - internalTank.liquidAmount());
+        internalTank.insertVapor(outAmount - internalTank.vaporAmount());
     }
     
     private void pullUpdate() {
@@ -94,15 +95,18 @@ public class ReactorTransitionTank extends FluidTransitionTank {
     }
     
     @Override
-    @SuppressWarnings("deprecation")
-    public long fill(@Nonnull Fluid fluid, long amount, boolean simulate, @Nullable FluidTransitionRegistry.FluidTransition transition) {
+    public long fill(@Nonnull Fluid fluid, DataComponentPatch components, long amount, boolean simulate) {
         pullUpdate();
-        long filled = super.fill(fluid, amount, simulate, transition);
+        long filled = super.fill(fluid, components, amount, simulate);
         if (!simulate) {
             pushUpdate();
         }
         return filled;
     }
+
+    @Override public boolean hasStoredContents() { pullUpdate(); return super.hasStoredContents(); }
+    @Override public long fluidAmountInTank(int tank) { pullUpdate(); return super.fluidAmountInTank(tank); }
+    @Override public CompoundTag serializeNBT(){pullUpdate();return super.serializeNBT();}
     
     public long drain(@Nonnull Fluid fluid, DataComponentPatch components, long amount, boolean simulate) {
         pullUpdate();
@@ -119,14 +123,8 @@ public class ReactorTransitionTank extends FluidTransitionTank {
         if (airProperties == null) {
             airProperties = ReactorModeratorRegistry.ModeratorProperties.EMPTY_MODERATOR;
         }
-        var liquidProperties = airProperties;
-        Fluid liquid = inFluid;
-        if (liquid != null) {
-            liquidProperties = ReactorModeratorRegistry.blockModeratorProperties(liquid.defaultFluidState().createLegacyBlock().getBlock());
-            if (liquidProperties == null) {
-                liquidProperties = airProperties;
-            }
-        }
+        var liquidProperties = activeTransition == null ? airProperties :
+                new ReactorModeratorRegistry.ModeratorProperties(0.3,0.7,1.35,activeTransition.liquidRFMKT);
         internalTank.setTransitionProperties(activeTransition);
         internalTank.setModeratorProperties(liquidProperties);
     }

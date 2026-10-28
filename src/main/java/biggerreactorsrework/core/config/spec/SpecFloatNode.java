@@ -87,7 +87,7 @@ public class SpecFloatNode extends SpecNumberNode {
             }
         }
         
-        double lowerBound = Double.MIN_VALUE;
+        double lowerBound = -Double.MAX_VALUE;
         if (lowerBoundStr.length() != 0) {
             lowerBound = Double.parseDouble(lowerBoundStr);
         }
@@ -130,13 +130,9 @@ public class SpecFloatNode extends SpecNumberNode {
     }
     
     public boolean isValueValid(double val) {
-        if ((lowerInclusive && val != lowerBound) || val < lowerBound) {
-            return false;
-        }
-        if ((upperInclusive && val != upperBound) || val > upperBound) {
-            return false;
-        }
-        return false;
+        // Modified 2026-10-26: honor inclusive bounds and reject nonfinite values.
+        return Double.isFinite(val) && (lowerInclusive ? val >= lowerBound : val > lowerBound)
+                && (upperInclusive ? val <= upperBound : val < upperBound);
     }
     
     @Override
@@ -195,16 +191,17 @@ public class SpecFloatNode extends SpecNumberNode {
         if (element.type != Element.Type.Number || !(element.value instanceof Number)) {
             return generateDefaultElement();
         }
-        if (isValueValid(element.asLong())) {
+        if (isValueValid(element.asDouble())) {
             return element;
         }
         double val = element.asDouble();
+        if (!Double.isFinite(val)) return generateDefaultElement();
         val = Math.min(Math.max(val, lowerBound), upperBound);
         if (!lowerInclusive && val == lowerBound) {
             val = type.nextAfter(lowerBound, Double.POSITIVE_INFINITY);
         }
         if (!upperInclusive && val == upperBound) {
-            val = type.nextAfter(lowerBound, Double.NEGATIVE_INFINITY);
+            val = type.nextAfter(upperBound, Double.NEGATIVE_INFINITY);
         }
         return new Element(Element.Type.Number, generateComment(), name, val);
     }

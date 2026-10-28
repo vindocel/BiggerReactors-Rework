@@ -66,20 +66,22 @@ public class ReactorControlRodTile extends ReactorBaseTile implements MenuProvid
         
         // Change the insertion level of the rod.
         if (requestName.equals("changeInsertionLevel")) {
-            Pair<Double, Boolean> dataPair = (Pair<Double, Boolean>) requestData;
-            double newLevel = this.insertion + dataPair.getFirst();
+            // Modified 2026-10-26: reject malformed/nonfinite client commands before mutation.
+            if (!(requestData instanceof Pair<?, ?> dataPair) || !(dataPair.getFirst() instanceof Double delta)
+                    || !Double.isFinite(delta) || !(dataPair.getSecond() instanceof Boolean all)) return;
+            double newLevel = this.insertion + delta;
             newLevel = Math.max(0, Math.min(100, newLevel));
-            if (dataPair.getSecond()) {
+            if (all) {
                 controller().setAllControlRodLevels(newLevel);
             } else {
-                this.insertion = newLevel;
+                setInsertion(newLevel);
                 controller().updateControlRodLevels();
             }
         }
         
         // Set the name for the control rod.
         if (requestName.equals("setName")) {
-            this.setName((String) requestData);
+            if (requestData instanceof String name && name.length() <= 128) this.setName(name);
         }
         
         super.runRequest(requestName, requestData);
@@ -88,7 +90,7 @@ public class ReactorControlRodTile extends ReactorBaseTile implements MenuProvid
     private double insertion = 0;
     
     public void setInsertion(double newLevel) {
-        if (Double.isNaN(newLevel)) {
+        if (!Double.isFinite(newLevel)) {
             return;
         }
         if (newLevel < 0) {

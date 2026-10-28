@@ -31,7 +31,7 @@ public interface SideRules {
             }
             return switch (transmission) {
                 case ITEM -> ITEM_BASIC;
-                case FLUID -> FLUID_IN;
+                case FLUID -> List.of(SideRoute.NONE, SideRoute.FLUID_INPUT, SideRoute.FLUID_OUTPUT, SideRoute.FLUID_INPUT_OUTPUT);
                 case ENERGY -> ENERGY;
             };
         }

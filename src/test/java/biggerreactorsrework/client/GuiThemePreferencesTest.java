@@ -6,6 +6,31 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
 class GuiThemePreferencesTest {
+    @Test void volumeIsIndependentOfTypePositionWorldAndGlobalTheme() {
+        var themes = new GuiThemePreferences();
+        String reactor = "world1|overworld|1,2,3|audio:0";
+        themes.setVolume(reactor, 40);
+        themes.choose(reactor, true);
+        themes.setApplyToAll(reactor, true);
+        assertEquals(40, themes.volume(reactor));
+        assertEquals(100, themes.volume("world1|overworld|4,2,3|audio:0"));
+        assertEquals(100, themes.volume("world1|overworld|1,2,3|audio:2"));
+        assertEquals(100, themes.volume("world2|overworld|1,2,3|audio:0"));
+        assertEquals(100, themes.volume("world1|nether|1,2,3|audio:0"));
+        themes.setVolume("turbine", 0);
+        var writer = new StringWriter(); themes.write(writer);
+        var loaded = GuiThemePreferences.read(new StringReader(writer.toString()));
+        assertEquals(40, loaded.volume(reactor)); assertEquals(0, loaded.volume("turbine"));
+        assertTrue(loaded.dark("new_machine"));
+        loaded.setVolume(reactor, 100); assertEquals(100, loaded.volume(reactor));
+    }
+    @Test void volumeBoundsAndLegacyPreferencesRemainSafe() {
+        var themes = GuiThemePreferences.read(new StringReader("{\"applyToAll\":true,\"allDark\":true}"));
+        assertEquals(100, themes.volume("new"));
+        themes.setVolume("low", -20); themes.setVolume("high", 500);
+        assertEquals(0, themes.volume("low")); assertEquals(100, themes.volume("high"));
+        assertThrows(IllegalArgumentException.class, () -> GuiThemePreferences.read(new StringReader("{\"volumes\":{\"x\":\"bad\"}}")));
+    }
     @Test void lightIsTheDefaultForAllMachines() {
         var themes = new GuiThemePreferences();
         assertTrue(themes.applyToAll());

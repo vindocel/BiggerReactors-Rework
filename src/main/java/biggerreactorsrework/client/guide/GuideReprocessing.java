@@ -21,11 +21,14 @@ record GuideReprocessing(ResourceLocation id) implements GuideElement {
         screen.fixedText(g,Component.translatable("guide.biggerreactorsrework.process.machine"),x,y+14,width,GuideElements.MUTED);
         GuideProcesses.flow(screen,g,x,y+30,width,mx,my,input,
                 new ItemStack(biggerreactorsrework.machine.blocks.CyaniteReprocessor.INSTANCE),recipe.result());
-        screen.fixedText(g,recipe.result().getHoverName(),x,y,width,GuideElements.HEADING);
-        screen.fixedText(g,Component.literal(recipe.duration()+" t / "+recipe.energy()+" FE/t / "+recipe.water()+" mB/t"),x,y+55,width,GuideElements.BODY);
-        if(recipe.water()>0){
+        if(recipe.producesFluid()) {
+            screen.fluidSlot(g,recipe.fluidResult().getFluid(),x+width-20,y+30,mx,my);
+            screen.fixedText(g,recipe.fluidResult().getHoverName(),x,y,width,GuideElements.HEADING);
+        } else screen.fixedText(g,recipe.result().getHoverName(),x,y,width,GuideElements.HEADING);
+        screen.fixedText(g,Component.literal(recipe.duration()+" t / "+recipe.energy()+" FE/t / "+recipe.totalFluid()+" mB"),x,y+55,width,GuideElements.BODY);
+        if(recipe.totalFluid()>0){
             screen.fluidSlot(g,recipe.fluid(),x,y+70,mx,my);
-            screen.fixedText(g,Component.literal(((long)recipe.water()*recipe.duration())+" mB"),x+23,y+75,width-23,GuideElements.BODY);
+            screen.fixedText(g,Component.literal(recipe.totalFluid()+" mB"),x+23,y+75,width-23,GuideElements.BODY);
         }
     }
 }

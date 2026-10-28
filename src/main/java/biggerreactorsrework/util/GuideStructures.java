@@ -24,11 +24,13 @@ public final class GuideStructures {
     public static Example reactor(int size, boolean active) {
         var p=shell(size,size,size,ReactorCasing.INSTANCE);int c=size/2;
         for(int x=1;x<size-1;x++) for(int z=1;z<size-1;z++) for(int y=1;y<size-1;y++)
-            put(p,x,y,z,x==c&&z==c ? ReactorFuelRod.INSTANCE : MaterialBlock.GRAPHITE);
+            put(p,x,y,z,x==c&&z==c ? ReactorFuelRod.INSTANCE : active ?
+                    (Math.abs(x-c)+Math.abs(z-c)==1?ReactorManifold.INSTANCE:Blocks.AIR) : MaterialBlock.GRAPHITE);
         put(p,c,size-1,c,ReactorControlRod.INSTANCE);
         put(p,0,1,c,ReactorTerminal.INSTANCE);put(p,c,1,0,ReactorAccessPort.INSTANCE);
         put(p,size-1,1,c,active?ReactorCoolantPort.INSTANCE:ReactorPowerTap.INSTANCE);
         if(active) put(p,c,1,size-1,ReactorCoolantPort.INSTANCE);
+        connect(p);
         return new Example(active?"active":size==3?"minimal":"moderated",size,size,size,Collections.unmodifiableMap(p));
     }
     public static Example turbine() {

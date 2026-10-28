@@ -42,6 +42,7 @@ final class GuideMultiblock {
         var boxes=new ArrayList<Box>();Block glass=e.id().equals("turbine")?TurbineGlass.INSTANCE:e.id().equals("battery")?BatteryGlass.INSTANCE:e.id().equals("exchanger")?null:ReactorGlass.INSTANCE;
         boolean[] inlet={false};
         e.parts().forEach((pos,placed)->{
+            if(placed.isAir())return;
             var block=display(placed,inlet);
             String group=key(block.getBlock());
             if(block.getBlock()==ReactorCasing.INSTANCE||block.getBlock()==TurbineCasing.INSTANCE||block.getBlock()==BatteryCasing.INSTANCE){
@@ -51,8 +52,20 @@ final class GuideMultiblock {
         });
         return List.of(new Spread(new Preview(e.id(),e.width(),e.height(),e.depth(),List.copyOf(boxes),glass),Component.translatable("guide.biggerreactorsrework.viewer."+(e.id().equals("minimal")?"minimum":"dimensions"),e.width(),e.height(),e.depth())));
     }
-    /** Battery parts as they look in a working battery: charged cells, and one port each way. */
+    /**
+     * Battery parts as they look in a working battery: charged cells, and one port each way. Manifolds are drawn
+     * closed, with their full frame on every face. Modified 2026-10-26.
+     */
     private static BlockState display(BlockState block,boolean[] inlet){
+        if(block.getBlock()==ReactorManifold.INSTANCE){
+            for(var side:List.of(biggerreactorsrework.core.modular.block.IConnectedTexture.Module.NORTH_CONNECTED_PROPERTY,
+                    biggerreactorsrework.core.modular.block.IConnectedTexture.Module.SOUTH_CONNECTED_PROPERTY,
+                    biggerreactorsrework.core.modular.block.IConnectedTexture.Module.WEST_CONNECTED_PROPERTY,
+                    biggerreactorsrework.core.modular.block.IConnectedTexture.Module.EAST_CONNECTED_PROPERTY,
+                    biggerreactorsrework.core.modular.block.IConnectedTexture.Module.TOP_CONNECTED_PROPERTY,
+                    biggerreactorsrework.core.modular.block.IConnectedTexture.Module.BOTTOM_CONNECTED_PROPERTY))block=block.setValue(side,false);
+            return block;
+        }
         if(block.getBlock()==BatteryCell.INSTANCE)return block.setValue(biggerreactorsrework.core.multiblock.IAssemblyStateBlock.ASSEMBLED,true).setValue(BatteryCell.CHARGED,true);
         if(block.getBlock()==BatteryEnergyPort.INSTANCE){
             if(inlet[0])return block.setValue(BatteryEnergyPort.PortDirection.PORT_DIRECTION_ENUM_PROPERTY,BatteryEnergyPort.PortDirection.OUTLET);
@@ -81,7 +94,13 @@ final class GuideMultiblock {
                     int by=state.layer<0?box.y:state.layer,bh=state.layer<0?box.h:1;
                     var block=WALLS.equals(box.group)&&example.glass()!=null&&glass?example.glass().defaultBlockState():box.block;
                     pose.pushPose();pose.translate(box.x,by,box.z);pose.scale(box.w,bh,box.d);
-                    Minecraft.getInstance().getBlockRenderer().renderSingleBlock(block,pose,g.bufferSource(),LightTexture.FULL_BRIGHT,OverlayTexture.NO_OVERLAY);pose.popPose();
+                    Minecraft.getInstance().getBlockRenderer().renderSingleBlock(block,pose,g.bufferSource(),LightTexture.FULL_BRIGHT,OverlayTexture.NO_OVERLAY);
+                    // Coolant inside, as in a working reactor; the frame alone shows only its outer faces.
+                    if(block.getBlock()==ReactorManifold.INSTANCE)biggerreactorsrework.client.FluidBoxRenderer.draw(pose,g.bufferSource(),
+                            java.util.List.of(new biggerreactorsrework.client.FluidBoxRenderer.Volume(
+                                    new net.neoforged.neoforge.fluids.FluidStack(net.minecraft.world.level.material.Fluids.WATER,1000),
+                                    biggerreactorsrework.core.util.ManifoldFluidGeometry.box(0,1),0)),LightTexture.FULL_BRIGHT,OverlayTexture.NO_OVERLAY);
+                    pose.popPose();
                 }g.flush();
                 if(state.highlight!=null)for(var box:example.boxes()){
                     if(!box.group.equals(state.highlight)||state.layer>=0&&(state.layer<box.y||state.layer>=box.y+box.h))continue;

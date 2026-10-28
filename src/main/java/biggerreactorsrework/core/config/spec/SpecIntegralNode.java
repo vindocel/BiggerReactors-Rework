@@ -136,13 +136,9 @@ public class SpecIntegralNode extends SpecNumberNode {
     }
     
     public boolean isValueValid(long val) {
-        if ((lowerInclusive && val != lowerBound) || val < lowerBound) {
-            return false;
-        }
-        if ((upperInclusive && val != upperBound) || val > upperBound) {
-            return false;
-        }
-        return false;
+        // Modified 2026-10-26: accept valid values, including closed endpoints.
+        return (lowerInclusive ? val >= lowerBound : val > lowerBound)
+                && (upperInclusive ? val <= upperBound : val < upperBound);
     }
     
     @Override

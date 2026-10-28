@@ -38,9 +38,9 @@ public class BatteryTerminalContainer extends AbstractContainerMenu implements G
      */
     public static final int WIDTH = 200;
     public static final int DISCHARGE_X = WIDTH - 25;
-    public static final int DISCHARGE_Y = 23;
+    public static final int DISCHARGE_Y = 55;
     public static final int CHARGE_X = WIDTH - 25;
-    public static final int CHARGE_Y = 55;
+    public static final int CHARGE_Y = 23;
     public static final int INVENTORY_X = (WIDTH - 9 * 18) / 2 + 1;
     public static final int INVENTORY_Y = 105;
     public static final int ARMOR_X = WIDTH + 6;
@@ -56,9 +56,12 @@ public class BatteryTerminalContainer extends AbstractContainerMenu implements G
             InventoryMenu.EMPTY_ARMOR_SLOT_LEGGINGS, InventoryMenu.EMPTY_ARMOR_SLOT_BOOTS};
 
     private final BatteryBaseTile tileEntity;
+    private final Player owner;
+    private long chargedAtTick = Long.MIN_VALUE;
 
     public BatteryTerminalContainer(int windowId, BlockPos blockPos, Player player) {
         super(INSTANCE, windowId);
+        this.owner = player;
         this.tileEntity = (BatteryBaseTile) player.level().getBlockEntity(blockPos);
         this.getGuiPacket();
 
@@ -136,6 +139,23 @@ public class BatteryTerminalContainer extends AbstractContainerMenu implements G
     @Override
     public GuiSync.IGUIPacket getGuiPacket() {
         return this.tileEntity.batteryState();
+    }
+
+    /** Modified 2026-10-27: charge only the equipment displayed by this open, valid server menu. */
+    @Override
+    public void broadcastChanges() {
+        long tick = biggerreactorsrework.core.CoreEvents.tickNumber();
+        if (!owner.level().isClientSide && owner.containerMenu == this && stillValid(owner) && chargedAtTick != tick) {
+            chargedAtTick = tick;
+            var controller = tileEntity.nullableController();
+            if (controller != null) {
+                long charged = 0;
+                for (var slot : ARMOR_ORDER) charged += controller.chargeItem(owner.getItemBySlot(slot));
+                charged += controller.chargeItem(owner.getItemBySlot(EquipmentSlot.OFFHAND));
+                if (charged > 0) owner.getInventory().setChanged();
+            }
+        }
+        super.broadcastChanges();
     }
 
     @Override

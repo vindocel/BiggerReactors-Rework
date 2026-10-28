@@ -296,6 +296,30 @@ public class ModernTurbineSimulation implements ITurbineSimulation {
     public double rotorMass() {
         return rotorAxialMass;
     }
+
+    public java.util.function.Supplier<biggerreactorsrework.core.util.Statistics.Potential> capacityStudy() {
+        var copy=new ModernTurbineSimulation();
+        copy.x=x;copy.y=y;copy.z=z;copy.coilSize=coilSize;copy.inductionEfficiency=inductionEfficiency;
+        copy.inductorDragCoefficient=inductorDragCoefficient;copy.inductionEnergyExponentBonus=inductionEnergyExponentBonus;
+        copy.rotorCapacityPerRPM=rotorCapacityPerRPM;copy.maxFlowRate=maxFlowRate;copy.maxMaxFlowRate=maxMaxFlowRate;
+        copy.rotorShafts=rotorShafts;copy.rotorAxialMass=rotorAxialMass;copy.rotorMass=rotorMass;copy.linearBladeMetersPerRevolution=linearBladeMetersPerRevolution;
+        copy.fluidTank.perSideCapacity=fluidTank.perSideCapacity;copy.battery.setCapacity(battery.capacity());
+        copy.active=true;copy.coilEngaged=coilEngaged;copy.ventState=VentState.ALL;
+        var transition=fluidTank.activeTransition();
+        if(transition==null)transition=biggerreactorsrework.registries.FluidTransitionRegistry.liquidTransition(net.minecraft.world.level.material.Fluids.WATER);
+        var profile=transition;
+        return ()->{
+            if(profile==null || copy.rotorAxialMass<=0)return new biggerreactorsrework.core.util.Statistics.Potential(0,0,0);
+            double generated=0,flow=0;
+            for(int i=0;i<100000;i++) {
+                if((i&511)==0 && Thread.currentThread().isInterrupted()) throw new java.util.concurrent.CancellationException();
+                copy.fluidTank.idealSupply(profile);copy.tick();copy.battery.extract(Long.MAX_VALUE);
+                if(i>=90000){generated+=copy.FEGeneratedLastTick();flow+=copy.flowLastTick();}
+            }
+            double efficient=Math.min(copy.maxMaxFlowRate,copy.rotorCapacityPerRPM*Config.CONFIG.Turbine.EffectiveGridFrequency*60);
+            return new biggerreactorsrework.core.util.Statistics.Potential(efficient,flow/10000,generated/10000);
+        };
+    }
     
     @Override
     public String debugString() {

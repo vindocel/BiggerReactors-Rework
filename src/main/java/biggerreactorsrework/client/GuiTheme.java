@@ -16,11 +16,24 @@ public final class GuiTheme {
     public static final int LIGHT_PANEL = 0xFFC6C6C6;
     public static final int DARK_PANEL = GuiThemePalette.chrome(LIGHT_PANEL, true);
     private static ShaderInstance shader;
+    private static Boolean scopedDark;
 
     private GuiTheme() {}
 
     public static boolean dark() {
+        if (scopedDark != null) return scopedDark;
         return Minecraft.getInstance().screen instanceof ModScreen<?> screen && GuiThemes.dark(screen.machinePos());
+    }
+
+    /** Modified 2026-10-27: temporary theme for external viewer drawing, without changing player preferences. */
+    public static void withTheme(boolean dark, Runnable draw) {
+        Boolean previous = scopedDark;
+        scopedDark = dark;
+        try {
+            draw.run();
+        } finally {
+            scopedDark = previous;
+        }
     }
 
     public static int panelColor() { return dark() ? DARK_PANEL : LIGHT_PANEL; }

@@ -1,5 +1,7 @@
 package biggerreactorsrework.multiblocks.turbine;
 
+// Modified 2026-10-26: protect inventories and identify existing output as gross generation.
+
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.BlockPos;
@@ -361,6 +363,9 @@ public class TurbineMultiblockController extends MultiblockController<TurbineBas
     
     @Override
     public void onDisassembled() {
+        biggerreactorsrework.audio.MachineAudio.publish(2, min(), max(), terminals, false, 0);
+        if(capacityEstimate!=null)capacityEstimate.cancel(true);
+        capacityEstimate=null;statisticsKey="";
         rpmSync.reset();
         simulation.reset();
         for (TurbineRotorBearingTile rotorBearing : rotorBearings) {
@@ -377,6 +382,8 @@ public class TurbineMultiblockController extends MultiblockController<TurbineBas
     }
     
     protected void onValidationPassed() {
+        if(capacityEstimate!=null)capacityEstimate.cancel(true);
+        capacityEstimate=null;statisticsKey="";
         rpmSync.reset();
         Vector3i internalVolume = new Vector3i().add(max()).sub(min()).sub(1, 1, 1);
         
@@ -488,6 +495,8 @@ public class TurbineMultiblockController extends MultiblockController<TurbineBas
         }
         
         simulation.tick();
+        // Modified 2026-10-28: coast-down follows actual speed, independent of the toggle.
+        biggerreactorsrework.audio.MachineAudio.publish(2, min(), max(), terminals, simulation.RPM() > 20, simulation.RPM());
         
         biggerreactorsrework.core.energy.PowerDistribution.distribute(simulation.battery().stored(), powerTaps,
                 TurbinePowerTapTile::distributePower, simulation.battery()::extract);
@@ -499,7 +508,7 @@ public class TurbineMultiblockController extends MultiblockController<TurbineBas
             coolantPort.pushFluid();
         }
         
-        if (rpmSync.sample(CoreEvents.tickNumber(), simulation.RPM())) {
+        if (rpmSync.sample(CoreEvents.tickNumber(), simulation.RPM()) || rotorBearings.stream().anyMatch(TurbineRotorBearingTile::needsFullUpdate)) {
             for (TurbineRotorBearingTile rotorBearing : rotorBearings) {
                 level.sendBlockUpdated(rotorBearing.getBlockPos(), rotorBearing.getBlockState(), rotorBearing.getBlockState(), 0);
             }
@@ -534,6 +543,36 @@ public class TurbineMultiblockController extends MultiblockController<TurbineBas
         turbineState.energyCapacity = simulation.battery().capacity();
     }
     
+    private java.util.concurrent.CompletableFuture<biggerreactorsrework.core.util.Statistics.Potential> capacityEstimate;
+    private String statisticsKey="";
+    public java.util.List<java.util.Map<String,Object>> statistics() {
+        var rows=new java.util.ArrayList<java.util.Map<String,Object>>();
+        if(simulation==null)return rows;
+        String key=simulation.nominalFlowRate()+"/"+simulation.flowRateLimit()+"/"+simulation.serializeNBT().getBoolean("coilEngaged")+"/"+rotorShafts.size()+"/"+simulation.fluidTank().vaporType();
+        if(!key.equals(statisticsKey)){if(capacityEstimate!=null)capacityEstimate.cancel(true);capacityEstimate=null;statisticsKey=key;}
+        if(capacityEstimate==null && simulation instanceof biggerreactorsrework.multiblocks.turbine.simulation.modern.ModernTurbineSimulation modern)
+            capacityEstimate=biggerreactorsrework.core.util.Statistics.estimate(modern.capacityStudy());
+        var potential=capacityEstimate!=null && capacityEstimate.isDone() && !capacityEstimate.isCompletedExceptionally()?capacityEstimate.getNow(null):null;
+        rows.add(biggerreactorsrework.core.util.Statistics.row("dimensions",(max().x()-min().x()+1)+" \u00D7 "+(max().y()-min().y()+1)+" \u00D7 "+(max().z()-min().z()+1)));
+        rows.add(biggerreactorsrework.core.util.Statistics.row("rotor_shafts",rotorShafts.size()));
+        rows.add(biggerreactorsrework.core.util.Statistics.pair(simulation.fluidTank()));
+        rows.add(biggerreactorsrework.core.util.Statistics.rate("flow_structural",simulation.flowRateLimit()));
+        rows.add(biggerreactorsrework.core.util.Statistics.rate("flow_selected",simulation.nominalFlowRate()));
+        rows.add(biggerreactorsrework.core.util.Statistics.rate("conversion_current",simulation.flowLastTick()));
+        rows.add(biggerreactorsrework.core.util.Statistics.row("rpm",String.format(java.util.Locale.ROOT,"%.1f RPM",simulation.RPM())));
+        rows.add(biggerreactorsrework.core.util.Statistics.row("efficiency",String.format(java.util.Locale.ROOT,"%.1f %%",100*simulation.bladeEfficiencyLastTick())));
+        rows.add(biggerreactorsrework.core.util.Statistics.power("power_gross",simulation.FEGeneratedLastTick()));
+        if(potential!=null){rows.add(biggerreactorsrework.core.util.Statistics.rate("conversion_potential",potential.converted()));rows.add(biggerreactorsrework.core.util.Statistics.rate("flow_efficient",potential.burn()));rows.add(biggerreactorsrework.core.util.Statistics.power("power_potential",potential.power()));}
+        else rows.add(biggerreactorsrework.core.util.Statistics.row("power_potential","@status:calculating"));
+        rows.add(biggerreactorsrework.core.util.Statistics.quantity("steam_stored",simulation.fluidTank().vaporAmount()));
+        rows.add(biggerreactorsrework.core.util.Statistics.quantity("water_stored",simulation.fluidTank().liquidAmount()));
+        if(simulation.fluidTank() instanceof biggerreactorsrework.multiblocks.turbine.simulation.modern.FluidTank tank){rows.add(biggerreactorsrework.core.util.Statistics.rate("input_current",tank.inputRate));rows.add(biggerreactorsrework.core.util.Statistics.rate("output_current",tank.outputRate));rows.add(biggerreactorsrework.core.util.Statistics.rate("water_discarded",tank.discardedLastTick));}
+        rows.add(biggerreactorsrework.core.util.Statistics.row("vent","@status:vent_"+simulation.ventState().name().toLowerCase(java.util.Locale.ROOT)));
+        String reason=!simulation.active()?"inactive":simulation.fluidTank().vaporAmount()==0?"no_steam":simulation.ventState()==biggerreactorsrework.multiblocks.turbine.state.VentState.CLOSED && simulation.fluidTank().liquidAmount()>=simulation.fluidTank().perSideCapacity()?"cold_blocked":"normal";
+        rows.add(biggerreactorsrework.core.util.Statistics.row("status","@status:"+reason));
+        return rows;
+    }
+
     @SuppressWarnings("UnnecessaryReturnStatement")
     public void runRequest(String requestName, @Nullable Object requestData) {
         switch (requestName) {
@@ -590,6 +629,10 @@ public class TurbineMultiblockController extends MultiblockController<TurbineBas
         simulation.setCoilEngaged(engaged);
     }
     
+    @Override
+    protected boolean hasStoredContents() { return simulation!=null && (simulation.battery().stored()>0 || simulation.fluidTank().liquidAmount()>0 || simulation.fluidTank().vaporAmount()>0
+                || simulation.fluidTank() instanceof biggerreactorsrework.util.FluidTransitionTank tank && tank.hasStoredContents()); }
+
     @Override
     public CompoundTag mergeNBTs(CompoundTag nbtA, CompoundTag nbtB) {
         return nbtA;

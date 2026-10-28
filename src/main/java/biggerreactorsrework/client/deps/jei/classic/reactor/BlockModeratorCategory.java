@@ -1,6 +1,12 @@
 package biggerreactorsrework.client.deps.jei.classic.reactor;
 
+import biggerreactorsrework.BiggerReactors;
+import biggerreactorsrework.client.deps.RecipeViewerData.Stats;
+import biggerreactorsrework.multiblocks.reactor.blocks.ReactorTerminal;
+import biggerreactorsrework.registries.ReactorModeratorRegistry;
+import java.util.List;
 import mezz.jei.api.gui.builder.IRecipeLayoutBuilder;
+import mezz.jei.api.gui.builder.ITooltipBuilder;
 import mezz.jei.api.gui.drawable.IDrawable;
 import mezz.jei.api.gui.ingredient.IRecipeSlotsView;
 import mezz.jei.api.helpers.IGuiHelper;
@@ -8,77 +14,72 @@ import mezz.jei.api.recipe.IFocusGroup;
 import mezz.jei.api.recipe.RecipeIngredientRole;
 import mezz.jei.api.recipe.RecipeType;
 import mezz.jei.api.recipe.category.IRecipeCategory;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
-import biggerreactorsrework.BiggerReactors;
-import biggerreactorsrework.multiblocks.reactor.blocks.ReactorTerminal;
-import biggerreactorsrework.registries.ReactorModeratorRegistry;
-
-import java.awt.*;
-
 
 public class BlockModeratorCategory implements IRecipeCategory<BlockModeratorCategory.Recipe> {
-    private final IDrawable background;
     private final IDrawable icon;
     public static final ResourceLocation UID = ResourceLocation.fromNamespaceAndPath(BiggerReactors.modid, "classic/reactor_moderator_block");
     public static final RecipeType<Recipe> RECIPE_TYPE = new RecipeType<>(UID, Recipe.class);
-    
+
     public BlockModeratorCategory(IGuiHelper guiHelper) {
         icon = guiHelper.createDrawableItemStack(new ItemStack(ReactorTerminal.INSTANCE));
-        background = guiHelper.createDrawable(ResourceLocation.fromNamespaceAndPath(BiggerReactors.modid, "textures/jei/common.png"), 0, 0, 144, 46);
     }
-    
+
     @Override
     public RecipeType<Recipe> getRecipeType() {
         return RECIPE_TYPE;
     }
-    
+
     @Override
     public Component getTitle() {
         return Component.translatable("jei.biggerreactorsrework.classic.reactor_moderator_block");
     }
 
     @Override
-    public IDrawable getBackground() {
-        return background;
-    }
-
-    @Override
     public IDrawable getIcon() {
         return icon;
     }
-    
+
+    @Override
+    public int getWidth() {
+        return Stats.WIDTH;
+    }
+
+    @Override
+    public int getHeight() {
+        return 4 * Stats.ROW;
+    }
+
     @Override
     public void setRecipe(IRecipeLayoutBuilder builder, Recipe recipe, IFocusGroup focuses) {
-        var slot = builder.addSlot(RecipeIngredientRole.INPUT, 1, 15);
-        slot.addItemStack(recipe.getInput());
+        builder.addSlot(RecipeIngredientRole.INPUT, 1, Stats.slotY(recipe.stats()) + 1).addItemStack(recipe.getInput());
     }
-    
+
     @Override
     public void draw(Recipe recipe, IRecipeSlotsView recipeSlotsView, GuiGraphics guiGraphics, double mouseX, double mouseY) {
-        Minecraft mc = Minecraft.getInstance();
-        Component[] info = {
-                Component.translatable("jei.biggerreactorsrework.classic.reactor_moderator_moderation", recipe.getModeratorProperties().moderation()),
-                Component.translatable("jei.biggerreactorsrework.classic.reactor_moderator_absorption", recipe.getModeratorProperties().absorption()),
-                Component.translatable("jei.biggerreactorsrework.classic.reactor_moderator_conductivity", recipe.getModeratorProperties().heatConductivity()),
-                Component.translatable("jei.biggerreactorsrework.classic.reactor_moderator_efficiency", recipe.getModeratorProperties().heatEfficiency())
-        };
-        guiGraphics.drawString(mc.font,  info[0], 80 - mc.font.width(info[0]) / 2, 0, Color.BLACK.getRGB(), false);
-        guiGraphics.drawString(mc.font,  info[1], 80 - mc.font.width(info[1]) / 2, 12, Color.BLACK.getRGB(), false);
-        guiGraphics.drawString(mc.font,  info[2], 80 - mc.font.width(info[2]) / 2, 24, Color.BLACK.getRGB(), false);
-        guiGraphics.drawString(mc.font,  info[3], 80 - mc.font.width(info[3]) / 2, 36, Color.BLACK.getRGB(), false);
+        Stats.draw(guiGraphics, recipe.stats());
+    }
+
+    @Override
+    public void getTooltip(ITooltipBuilder tooltip, Recipe recipe, IRecipeSlotsView recipeSlotsView, double mouseX, double mouseY) {
+        int row = Stats.row(recipe.stats(), mouseX, mouseY);
+        if (row >= 0) {
+            tooltip.addAll(Stats.tooltip(recipe.stats().get(row)));
+        }
     }
 
     public static class Recipe {
         private final ItemStack input;
         private final ReactorModeratorRegistry.IModeratorProperties moderatorProperties;
+        private final List<Stats.Stat> stats;
 
         public Recipe(ItemStack input, ReactorModeratorRegistry.IModeratorProperties moderatorProperties) {
             this.input = input;
             this.moderatorProperties = moderatorProperties;
+            this.stats = Stats.moderator(moderatorProperties);
         }
 
         public ItemStack getInput() {
@@ -87,6 +88,10 @@ public class BlockModeratorCategory implements IRecipeCategory<BlockModeratorCat
 
         public ReactorModeratorRegistry.IModeratorProperties getModeratorProperties() {
             return moderatorProperties;
+        }
+
+        public List<Stats.Stat> stats() {
+            return stats;
         }
     }
 }

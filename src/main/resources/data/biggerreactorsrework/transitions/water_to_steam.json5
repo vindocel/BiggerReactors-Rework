@@ -1,20 +1,12 @@
 {
-    // Resource location type
-    liquidType: "registry",
-    // resource location
-    liquid: "minecraft:water",
-    // thermal conductivity, in watts per metre-kelvin
-    liquidThermalConductivity: 0.6,
-    // resource location type
-    gasType: "tag",
-    // resource location
-    gas: "c:steam",
-    // thermal conductivity, in watts per metre-kelvin
-    gasThermalConductivity: 0.025,
-    // latent heat of vaporization, in rf/mb
-    latentHeat: 4,
-    // boiling point, in K
-    boilingPoint: 373.15,
-    // effect multiplier in a turbine, 0 to disable for a turbine
-    turbineMultiplier: 2.5,
+  "liquidType": "registry",
+  "liquid": "minecraft:water",
+  "gasType": "registry",
+  "gas": "biggerreactorsrework:steam",
+  "latentHeat": 4,
+  "boilingPoint": 373.15,
+  "liquidThermalConductivity": 0.6,
+  "gasThermalConductivity": 0.025,
+  "turbineMultiplier": 2.5,
+  "recovery": 0.6
 }

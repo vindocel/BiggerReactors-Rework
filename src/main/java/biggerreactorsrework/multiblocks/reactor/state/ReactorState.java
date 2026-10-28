@@ -105,8 +105,11 @@ public class ReactorState implements GuiSync.IGUIPacket {
         this.reactorTerminalTile = reactorTerminalTile;
     }
 
+    public String exhaustOrigin="";
     @Override
     public void read(@Nonnull Map<?, ?> data) {
+        exhaustOrigin = data.get("exhaustOrigin") instanceof String v ? v : "";
+
         reactorActivity = ReactorActivity.fromInt((Integer) data.get("reactorActivity"));
         reactorType = ReactorType.fromInt((Integer) data.get("reactorType"));
 
@@ -140,6 +143,8 @@ public class ReactorState implements GuiSync.IGUIPacket {
     public Map<?, ?> write() {
         reactorTerminalTile.updateState();
         HashMap<String, Object> data = new HashMap<>();
+        data.put("exhaustOrigin",exhaustOrigin);
+
         data.put("reactorActivity", reactorActivity.toInt());
         data.put("reactorType", reactorType.toInt());
 
