@@ -1,4 +1,13 @@
-# 1.21.1-0.1.3 (BiggerReactors-Rework, unreleased)
+# 1.21.1-0.1.4 (BiggerReactors-Rework, unreleased)
+
+## Multiblock protection and visual fixes (2026-10-29)
+ - prevent Carry On from picking up blocks of assembled reactors, turbines, heat exchangers and batteries, including ports, terminals and interior blocks
+ - keep loose and disassembled parts carryable, preserve normal machine interactions and allow placing already carried blocks against assembled structures
+ - unify the battery appearance preference across its terminal and body, preserving separate energy-port screens
+ - expand visible fluids to meet the inner red/blue channel borders of the heat exchanger, with a small clearance to avoid overlapping surfaces
+ - preserve fluid quantities, capacities, heat transfer and machine balance
+
+# 1.21.1-0.1.3 (BiggerReactors-Rework)
 
 ## Machine audio and rod seams (2026-10-28)
  - shorten volume tooltips and fit the focus outline to the full rectangular −/+ buttons

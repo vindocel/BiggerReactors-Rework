@@ -251,8 +251,24 @@ public class GuideScreen extends Screen {
     private void prepareModelHover(int index,int x,int mx,int my){
         if(index<0||index>=book.pages.size())return;
         for(var placed:book.pages.get(index).elements())
-            if(placed.element() instanceof GuideMultiblock.PartsPanel parts)
-                parts.prepareHover(this,x+PAD_X,pageY()+PAD_TOP+placed.y(),contentW,mx,my);
+            placed.element().prepare(this,x+PAD_X,pageY()+PAD_TOP+placed.y(),contentW,mx,my);
+    }
+
+    /** Elements of the two open pages with their top-left corners: {element, x, y, height}. */
+    private List<Object[]> visibleElements() {
+        var result = new java.util.ArrayList<Object[]>();
+        for (int side = 0; side < 2; side++) {
+            int index = 2 * spread + side;
+            if (index >= book.pages.size()) continue;
+            int x = (side == 0 ? leftPageX() : rightPageX()) + PAD_X;
+            for (var placed : book.pages.get(index).elements())
+                result.add(new Object[]{placed.element(), x, pageY() + PAD_TOP + placed.y(), placed.height()});
+        }
+        return result;
+    }
+
+    int contentHeight() {
+        return contentH;
     }
 
     /** A page: paper with the shade of the spine, its elements and its number. */
@@ -451,6 +467,10 @@ public class GuideScreen extends Screen {
     }
 
     /** The still texture of a fluid, 16 × 16, tinted. */
+    void fluidIcon(GuiGraphics g, Fluid fluid, int x, int y) {
+        fluidIcon(g, new FluidStack(fluid, 1), x, y);
+    }
+
     private void fluidIcon(GuiGraphics g, FluidStack stack, int x, int y) {
         IClientFluidTypeExtensions ext = IClientFluidTypeExtensions.of(stack.getFluid());
         TextureAtlasSprite sprite = minecraft.getTextureAtlas(InventoryMenu.BLOCK_ATLAS).apply(ext.getStillTexture(stack));
@@ -536,6 +556,7 @@ public class GuideScreen extends Screen {
             turnTo(spread + 1);
             return true;
         }
+        for (var visible : visibleElements()) ((GuideElement) visible[0]).unfocus();
         for (int side = 0; side < 2; side++) {
             int index = 2 * spread + side;
             int cx = (side == 0 ? leftPageX() : rightPageX()) + PAD_X;
@@ -564,8 +585,8 @@ public class GuideScreen extends Screen {
 
     @Override
     public boolean mouseReleased(double mouseX, double mouseY, int button) {
-        if (dragTarget instanceof GuideMultiblock.Viewer viewer) {
-            viewer.release();
+        if (dragTarget != null) {
+            dragTarget.release();
         }
         dragTarget = null;
         return super.mouseReleased(mouseX, mouseY, button);
@@ -573,11 +594,15 @@ public class GuideScreen extends Screen {
 
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
-        for(int side=0;side<2;side++){
-            int index=2*spread+side;if(index>=book.pages.size())continue;
-            int x=(side==0?leftPageX():rightPageX())+PAD_X,y=pageY()+PAD_TOP;
-            for(var placed:book.pages.get(index).elements())
-                if(placed.element() instanceof GuideMultiblock.Viewer viewer&&mouseX>=x&&mouseX<x+contentW&&mouseY>=y+placed.y()&&mouseY<y+placed.y()+placed.height()-20){viewer.zoom(scrollY);return true;}
+        if (turning()) {
+            return true;
+        }
+        for (var visible : visibleElements()) {
+            int x = (int) visible[1], y = (int) visible[2], h = (int) visible[3];
+            if (mouseX >= x && mouseX < x + contentW && mouseY >= y && mouseY < y + h
+                    && ((GuideElement) visible[0]).scroll(this, mouseX, mouseY, x, y, contentW, h, scrollY)) {
+                return true;
+            }
         }
         if (scrollY < 0) {
             turnTo(spread + 1);
@@ -589,6 +614,13 @@ public class GuideScreen extends Screen {
 
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+        if (!turning()) {
+            for (var visible : visibleElements()) {
+                if (((GuideElement) visible[0]).keyPressed(this, keyCode, scanCode, modifiers)) {
+                    return true;
+                }
+            }
+        }
         switch (keyCode) {
             case GLFW.GLFW_KEY_RIGHT, GLFW.GLFW_KEY_PAGE_DOWN -> turnTo(spread + 1);
             case GLFW.GLFW_KEY_LEFT, GLFW.GLFW_KEY_PAGE_UP -> turnTo(spread - 1);
@@ -604,10 +636,26 @@ public class GuideScreen extends Screen {
         return true;
     }
 
-    /** The screen closed (any way): the book in the hand closes too. */
+    @Override
+    public boolean charTyped(char codePoint, int modifiers) {
+        if (!turning()) {
+            for (var visible : visibleElements()) {
+                if (((GuideElement) visible[0]).charTyped(this, codePoint, modifiers)) {
+                    return true;
+                }
+            }
+        }
+        return super.charTyped(codePoint, modifiers);
+    }
+
+    /**
+     * The screen closed (any way): the book in the hand closes too, and the calculator's form and running
+     * calculation are discarded. Resizing the window only calls {@link #init()} and keeps them.
+     */
     @Override
     public void removed() {
         GuideMultiblock.reset();
+        CalculatorSession.closed();
         super.removed();
         biggerreactorsrework.client.guide.GuideBookAnimation.screenClosed();
     }

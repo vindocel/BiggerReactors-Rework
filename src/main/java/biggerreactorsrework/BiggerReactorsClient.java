@@ -47,7 +47,10 @@ public final class BiggerReactorsClient {
         modBus.addListener(biggerreactorsrework.client.HeatedFluidSprites::register);
         biggerreactorsrework.client.GuiSettingsEvents.register();
         net.neoforged.neoforge.common.NeoForge.EVENT_BUS.addListener(
-                (net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent.LoggingOut event) -> biggerreactorsrework.registries.CoolantSync.clearClient());
+                (net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent.LoggingOut event) -> {
+                    biggerreactorsrework.registries.CoolantSync.clearClient();
+                    biggerreactorsrework.client.calculator.CalculatorClient.disconnected();
+                });
         modBus.addListener((net.neoforged.neoforge.client.event.RegisterShadersEvent event) -> {
             try {
                 event.registerShader(new net.minecraft.client.renderer.ShaderInstance(event.getResourceProvider(),

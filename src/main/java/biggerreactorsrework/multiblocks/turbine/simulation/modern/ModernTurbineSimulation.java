@@ -297,6 +297,11 @@ public class ModernTurbineSimulation implements ITurbineSimulation {
         return rotorAxialMass;
     }
 
+    /** Inlet full and outlet empty, as in {@link #capacityStudy()}; for calculations outside the level only. */
+    public void idealSupply(biggerreactorsrework.registries.FluidTransitionRegistry.FluidTransition transition) {
+        fluidTank.idealSupply(transition);
+    }
+
     public java.util.function.Supplier<biggerreactorsrework.core.util.Statistics.Potential> capacityStudy() {
         var copy=new ModernTurbineSimulation();
         copy.x=x;copy.y=y;copy.z=z;copy.coilSize=coilSize;copy.inductionEfficiency=inductionEfficiency;

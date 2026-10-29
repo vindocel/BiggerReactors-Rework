@@ -53,6 +53,10 @@ public class TurbineCoilRegistry {
     public static synchronized CoilData getCoilData(Block block) {
         return registry.get(block);
     }
+
+    public static synchronized Map<Block, CoilData> snapshot() {
+        return Map.copyOf(registry);
+    }
     // TODO: unify these names across all registries
     private enum RegistryType {
         tag,

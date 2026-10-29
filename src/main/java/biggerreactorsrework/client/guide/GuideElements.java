@@ -158,11 +158,17 @@ final class GuideElements {
         private final Component title;
         private final Text body;
         private final int accent;
+        private final boolean attention;
 
         Note(Component title, Component body, int accent) {
+            this(title, body, accent, false);
+        }
+
+        Note(Component title, Component body, int accent, boolean attention) {
             this.title = title;
             this.body = new Text(body);
             this.accent = accent;
+            this.attention = attention;
         }
 
         @Override
@@ -173,9 +179,23 @@ final class GuideElements {
         @Override
         public void render(GuideScreen screen, GuiGraphics g, int x, int y, int width, int mouseX, int mouseY) {
             int h = height(screen, width);
-            g.fill(x, y, x + width, y + h, 0x1E000000 | (accent & 0x00FFFFFF));
+            g.fill(x, y, x + width, y + h, attention ? 0x38D4AC45 : 0x1E000000 | (accent & 0x00FFFFFF));
             g.fill(x, y, x + 2, y + h, accent);
-            g.drawString(screen.font(), title, x + 6, y + 4, accent, false);
+            if (attention) {
+                // Added 2026-10-29: a native pixel warning symbol, independent of font glyphs and external assets.
+                for (int row = 0; row < 12; row++) {
+                    int half = (row + 1) / 2;
+                    g.fill(x + 12 - half, y + 2 + row, x + 13 + half, y + 3 + row, accent);
+                    if (row >= 2 && row < 11) {
+                        int inner = (row - 1) / 2;
+                        g.fill(x + 12 - inner, y + 2 + row, x + 13 + inner, y + 3 + row, 0xFFE2C365);
+                    }
+                }
+                g.fill(x + 11, y + 6, x + 13, y + 10, BODY);
+                g.fill(x + 11, y + 11, x + 13, y + 12, BODY);
+            }
+            if (attention) screen.fittedText(g, title, x + 23, y + 4, width - 27, accent);
+            else g.drawString(screen.font(), title, x + 6, y + 4, accent, false);
             body.render(screen, g, x + 6, y + 15, width - 10, mouseX, mouseY);
         }
     }

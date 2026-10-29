@@ -34,7 +34,7 @@ public final class GuiThemes {
         return preferences;
     }
 
-    public static boolean dark(BlockPos pos) { return preferences().dark(key(pos)); }
+    public static boolean dark(BlockPos pos) { return preferences().dark(appearanceKey(pos)); }
     public static boolean applyToAll() { return preferences().applyToAll(); }
     // Modified 2026-10-28: every terminal of a multiblock shares its canonical position.
     public static int volume(BlockPos pos) { return preferences().volume(volumeKey(pos)); }
@@ -55,13 +55,22 @@ public final class GuiThemes {
     }
 
     public static void choose(BlockPos pos, boolean dark) {
-        preferences().choose(key(pos), dark);
+        preferences().choose(appearanceKey(pos), dark);
         save();
     }
 
     public static void setApplyToAll(BlockPos pos, boolean value) {
-        preferences().setApplyToAll(key(pos), value);
+        preferences().setApplyToAll(appearanceKey(pos), value);
         save();
+    }
+
+    // Modified 2026-10-29: the clicked battery block is a menu origin, not a separate appearance preference.
+    private static String appearanceKey(BlockPos pos) {
+        var level = Minecraft.getInstance().level;
+        if (level != null && level.getBlockEntity(pos) instanceof biggerreactorsrework.multiblocks.battery.tiles.BatteryBaseTile tile
+                && !(tile instanceof biggerreactorsrework.multiblocks.battery.tiles.BatteryEnergyPortTile))
+            return key(tile.batteryState().appearancePos);
+        return key(pos);
     }
 
     private static String key(BlockPos pos) {

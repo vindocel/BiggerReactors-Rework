@@ -38,7 +38,13 @@ public class BiggerReactors {
         modBus.addListener(biggerreactorsrework.data.ModDataGeneration::gather);
         CoreEvents.init();
         biggerreactorsrework.registries.CoolantSync.init();
+        modBus.addListener(biggerreactorsrework.calculator.service.CalculatorNetwork::register);
+        biggerreactorsrework.calculator.service.CalculatorService.init();
         NeoForge.EVENT_BUS.addListener(this::onReloadData);
+        // Modified 2026-10-29: optional pickup protection for assembled multiblocks.
+        if (ModList.get().isLoaded("carryon")) {
+            biggerreactorsrework.compat.carryon.CarryOnCompat.init();
+        }
         if (ModList.get().isLoaded("computercraft")) {
             ComputerCraftCompat.init(modBus);
         }
@@ -48,6 +54,8 @@ public class BiggerReactors {
     }
 
     public void onReloadData(final ReloadDataEvent reloadDataEvent) {
+        // Calculations read these registries: stop them before the registries are rebuilt.
+        biggerreactorsrework.calculator.service.CalculatorService.invalidate();
         ReactorModeratorRegistry.loadRegistry();
         TurbineCoilRegistry.loadRegistry();
         FluidTransitionRegistry.loadRegistry();

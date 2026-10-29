@@ -9,6 +9,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class BatteryState implements GuiSync.IGUIPacket {
+
+    // Modified 2026-10-29: all battery entry points use one appearance identity, independent of the menu origin.
+    public net.minecraft.core.BlockPos appearancePos;
+    public boolean appearanceReady;
     
     public long energyStored = 0;
     public long energyCapacity = 0;
@@ -23,10 +27,15 @@ public class BatteryState implements GuiSync.IGUIPacket {
     
     public BatteryState(BatteryBaseTile tile) {
         this.tile = tile;
+        this.appearancePos = tile.getBlockPos();
     }
     
     @Override
     public void read(@Nonnull Map<?, ?> data) {
+        if (data.get("appearancePos") instanceof Long position) {
+            appearancePos = net.minecraft.core.BlockPos.of(position);
+            appearanceReady = true;
+        }
         energyStored = ((Number) data.get("energyStored")).longValue();
         energyCapacity = ((Number) data.get("energyCapacity")).longValue();
         lastInput = ((Number) data.get("lastInput")).longValue();
@@ -42,6 +51,7 @@ public class BatteryState implements GuiSync.IGUIPacket {
     public Map<?, ?> write() {
         tile.updateBatteryState();
         HashMap<String, Object> data = new HashMap<>();
+        data.put("appearancePos", appearancePos.asLong());
         data.put("energyStored", energyStored);
         data.put("energyCapacity", energyCapacity);
         data.put("lastInput", lastInput);

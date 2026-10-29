@@ -427,6 +427,12 @@ public class BatteryMultiblockController extends MultiblockController<BatteryBas
     }
 
     public void updateDataPacket(BatteryState state) {
+        // Modified 2026-10-29: preserve the terminal's existing theme when opening through any battery part.
+        terminals.stream().map(BatteryTerminalTile::getBlockPos).min(BlockPos::compareTo)
+                .ifPresent(position -> {
+                    state.appearancePos = position.immutable();
+                    state.appearanceReady = true;
+                });
         state.energyStored = stored;
         state.energyCapacity = capacity;
         state.lastInput = lastInput;

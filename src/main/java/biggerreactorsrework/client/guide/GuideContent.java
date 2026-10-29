@@ -21,7 +21,11 @@ final class GuideContent {
             combine("reactor","reactor_terminal",sections,"build_reactor","reactor_parts","reactor_panel","active","moderators","efficiency"),
             combine("turbine","turbine_terminal",sections,"turbine_parts","build_turbine","automation"),
             combine("battery","battery_terminal",sections,"battery_parts","build_battery"),
-            combine("exchanger","heat_exchanger_terminal",sections,"exchanger"));
+            combine("exchanger","heat_exchanger_terminal",sections,"exchanger"),
+            // Added 2026-10-28: new calculation, recents and saved results all live inside this entry.
+            new Chapter("calculator",()->stack("reactor_computer_port"),List.of(
+                    new CalculatorPages.Spread(),
+                    new GuideElements.Text(Component.translatable("guide.biggerreactorsrework.calculator.help")))));
     }
     private static Chapter combine(String id,String icon,Map<String,Chapter> sections,String... included) {
         var elements=new ArrayList<GuideElement>();

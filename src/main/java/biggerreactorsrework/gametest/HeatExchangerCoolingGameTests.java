@@ -42,7 +42,7 @@ public final class HeatExchangerCoolingGameTests {
                     var input=biggerreactorsrework.core.util.FluidPath.boxes(entry,exit,a);
                     var output=biggerreactorsrework.core.util.FluidPath.boxes(entry,exit,b);
                     double filled=input.stream().mapToDouble(HeatExchangerCoolingGameTests::volume).sum()+output.stream().mapToDouble(HeatExchangerCoolingGameTests::volume).sum();
-                    h.assertTrue(Math.abs(filled-.25)<1e-7,"pipe orientation or elbow left an unfilled volume");
+                    h.assertTrue(Math.abs(filled-channelArea())<1e-6,"pipe orientation or elbow left an unfilled volume");
                     for(var x:input)for(var y:output)h.assertTrue(overlap(x,y)<1e-8,"phases overlap after a stock change");
                 }
             }
@@ -53,8 +53,16 @@ public final class HeatExchangerCoolingGameTests {
         for(var entry:net.minecraft.core.Direction.values())for(var exit:net.minecraft.core.Direction.values())if(entry!=exit){
             var a=biggerreactorsrework.core.util.FluidPath.boxes(entry,exit,new biggerreactorsrework.core.util.FluidPath.Span(0,.6f));
             var b=biggerreactorsrework.core.util.FluidPath.boxes(entry,exit,new biggerreactorsrework.core.util.FluidPath.Span(.6f,1));
-            h.assertTrue(Math.abs(a.stream().mapToDouble(HeatExchangerCoolingGameTests::volume).sum()-.15)<1e-7,"input volume depends on pipe orientation");
-            h.assertTrue(Math.abs(b.stream().mapToDouble(HeatExchangerCoolingGameTests::volume).sum()-.10)<1e-7,"output volume depends on pipe orientation");
+            // Modified 2026-10-29: the model opening spans pixels 2..14, with 0.02 px clearance on each side.
+            for(var box:java.util.stream.Stream.concat(a.stream(),b.stream()).toList()) {
+                float[] lower={box.x0(),box.y0(),box.z0()},upper={box.x1(),box.y1(),box.z1()};
+                for(var axis:net.minecraft.core.Direction.Axis.values()) if(axis!=entry.getAxis() && axis!=exit.getAxis()) {
+                    int i=switch(axis){case X->0;case Y->1;case Z->2;};
+                    h.assertTrue(Math.abs(lower[i]-2.02/16)<1e-6 && Math.abs(upper[i]-13.98/16)<1e-6,"fluid does not meet the channel's inner frame");
+                }
+            }
+            h.assertTrue(Math.abs(a.stream().mapToDouble(HeatExchangerCoolingGameTests::volume).sum()-.6*channelArea())<1e-6,"input volume depends on pipe orientation");
+            h.assertTrue(Math.abs(b.stream().mapToDouble(HeatExchangerCoolingGameTests::volume).sum()-.4*channelArea())<1e-6,"output volume depends on pipe orientation");
             for(var x:a)for(var y:b)h.assertTrue(overlap(x,y)<1e-8,"two fluids overlap at an elbow");
         }
         for(int i=0;i<9;i++) {
@@ -66,6 +74,7 @@ public final class HeatExchangerCoolingGameTests {
         h.succeed();
     }
     private static double volume(biggerreactorsrework.core.util.FluidPath.Box b){return (b.x1()-b.x0())*(b.y1()-b.y0())*(b.z1()-b.z0());}
+    private static double channelArea(){return Math.pow((12-.04)/16,2);}
     private static double overlap(biggerreactorsrework.core.util.FluidPath.Box a,biggerreactorsrework.core.util.FluidPath.Box b){return Math.max(0,Math.min(a.x1(),b.x1())-Math.max(a.x0(),b.x0()))*Math.max(0,Math.min(a.y1(),b.y1())-Math.max(a.y0(),b.y0()))*Math.max(0,Math.min(a.z1(),b.z1())-Math.max(a.z0(),b.z0()));}
     @GameTest(template="empty_7x7x7",timeoutTicks=150)
     public static void savedHeatSurvivesReassembly(GameTestHelper h) {
