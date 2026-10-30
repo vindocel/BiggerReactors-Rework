@@ -64,9 +64,13 @@ public final class GuiThemes {
         save();
     }
 
-    // Modified 2026-10-29: the clicked battery block is a menu origin, not a separate appearance preference.
+    // Modified 2026-10-30: terminal/sensor appearance identities are independent of menu positions.
     private static String appearanceKey(BlockPos pos) {
         var level = Minecraft.getInstance().level;
+        if (level != null && level.getBlockEntity(pos) instanceof biggerreactorsrework.multiblocks.reactor.tiles.ReactorBaseTile reactor)
+            return key(reactor.appearancePos);
+        if (level != null && level.getBlockEntity(pos) instanceof biggerreactorsrework.multiblocks.turbine.tiles.TurbineBaseTile turbine)
+            return key(turbine.appearancePos);
         if (level != null && level.getBlockEntity(pos) instanceof biggerreactorsrework.multiblocks.battery.tiles.BatteryBaseTile tile
                 && !(tile instanceof biggerreactorsrework.multiblocks.battery.tiles.BatteryEnergyPortTile))
             return key(tile.batteryState().appearancePos);

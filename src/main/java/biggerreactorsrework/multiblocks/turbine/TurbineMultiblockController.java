@@ -277,6 +277,15 @@ public class TurbineMultiblockController extends MultiblockController<TurbineBas
     private boolean updateBlockStates = false;
     
     private final Set<TurbineTerminalTile> terminals = new HashSet<>();
+
+    public net.minecraft.core.BlockPos appearancePos(net.minecraft.core.BlockPos fallback) {
+        net.minecraft.core.BlockPos anchor = null;
+        for (var terminal : terminals) {
+            var pos = terminal.getBlockPos();
+            if (anchor == null || pos.compareTo(anchor) < 0) anchor = pos;
+        }
+        return anchor == null ? fallback : anchor.immutable();
+    }
     private final Set<TurbineFluidPortTile> fluidPorts = new HashSet<>();
     private final Set<TurbineRotorBearingTile> rotorBearings = new HashSet<>();
     private final ObjectArrayList<TurbineRotorShaftTile> rotorShafts = new ObjectArrayList<>();

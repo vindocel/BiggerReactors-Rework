@@ -92,6 +92,7 @@ public class TurbineState implements GuiSync.IGUIPacket {
     
     @Override
     public void read(@Nonnull Map<?, ?> data) {
+        turbineTerminalTile.readAppearance(data);
         turbineActivity = ((Boolean) data.get("turbineActivity")) ? TurbineActivity.ACTIVE : TurbineActivity.INACTIVE;
         ventState = VentState.fromInt((Integer) data.get("ventState"));
         coilStatus = (Boolean) data.get("coilStatus");
@@ -121,6 +122,7 @@ public class TurbineState implements GuiSync.IGUIPacket {
     public Map<?, ?> write() {
         turbineTerminalTile.updateState();
         HashMap<String, Object> data = new HashMap<>();
+        data.put("appearancePos", turbineTerminalTile.writeAppearance());
         
         data.put("turbineActivity", turbineActivity == TurbineActivity.ACTIVE);
         data.put("ventState", ventState.toInt());

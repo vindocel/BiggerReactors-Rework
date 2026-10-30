@@ -28,6 +28,8 @@ public final class BatteryAppearanceGameTests {
         h.setBlock(glass, BatteryGlass.INSTANCE);
         h.setBlock(2, 2, 1, BatteryEnergyPort.INSTANCE);
         h.setBlock(2, 2, 3, BatteryEnergyPort.INSTANCE);
+        var sensorPos = new BlockPos(2, 1, 2);
+        h.setBlock(sensorPos, BatteryRedstonePort.INSTANCE);
         h.startSequence().thenWaitUntil(() -> h.assertTrue(((BatteryBaseTile) h.getBlockEntity(terminal)).isBatteryAssembled(), "battery not ready"))
                 .thenExecute(() -> {
                     var player = net.neoforged.neoforge.common.util.FakePlayerFactory.getMinecraft(h.getLevel());
@@ -45,6 +47,14 @@ public final class BatteryAppearanceGameTests {
                         h.assertTrue(received.appearanceReady && received.appearancePos.equals(expected), "appearance identity was lost in synchronization");
                     }
                     h.assertTrue(h.getBlockEntity(new BlockPos(2, 2, 1)) instanceof net.minecraft.world.MenuProvider, "energy port lost its own menu");
+                    var sensor = (biggerreactorsrework.multiblocks.battery.tiles.BatteryRedstonePortTile) h.getBlockEntity(sensorPos);
+                    var sensorMenu = new biggerreactorsrework.multiblocks.battery.containers.BatteryRedstonePortContainer(43, sensor.getBlockPos(), player);
+                    var snapshot = sensorMenu.getGuiPacket().write();
+                    h.assertTrue(expected.asLong() == (Long) snapshot.get("appearancePos"), "sensor uses a different appearance identity");
+                    var receivedSensor = biggerreactorsrework.multiblocks.battery.tiles.BatteryRedstonePortTile.SUPPLIER.create(sensor.getBlockPos(), sensor.getBlockState());
+                    receivedSensor.read(snapshot);
+                    h.assertTrue(receivedSensor.batteryState().appearanceReady && receivedSensor.batteryState().appearancePos.equals(expected), "sensor lost the battery theme identity on synchronization");
+                    h.assertTrue(sensorMenu.machinePos().equals(sensor.getBlockPos()), "theme sharing changed the sensor request origin");
                 }).thenSucceed();
     }
 }

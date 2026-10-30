@@ -244,6 +244,15 @@ public class ReactorMultiblockController extends MultiblockController<ReactorBas
     private ReactorActivity reactorActivity = ReactorActivity.INACTIVE;
     
     private final Set<ReactorTerminalTile> terminals = new HashSet<>();
+
+    public net.minecraft.core.BlockPos appearancePos(net.minecraft.core.BlockPos fallback) {
+        net.minecraft.core.BlockPos anchor = null;
+        for (var terminal : terminals) {
+            var pos = terminal.getBlockPos();
+            if (anchor == null || pos.compareTo(anchor) < 0) anchor = pos;
+        }
+        return anchor == null ? fallback : anchor.immutable();
+    }
     private long soundActiveUntil;
     private final ObjectArrayList<ReactorControlRodTile> controlRods = new ObjectArrayList<>();
     private final ObjectArrayList<ReactorFuelRodTile> fuelRods = new ObjectArrayList<>();

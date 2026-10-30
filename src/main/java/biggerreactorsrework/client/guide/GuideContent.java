@@ -130,6 +130,8 @@ final class GuideContent {
           elements.add(new GuideElements.Crafting(GuideIds.id("crafting/battery/battery_glass")));
           elements.add(new GuideElements.Crafting(GuideIds.id("crafting/battery/battery_terminal")));
           elements.add(new GuideElements.Crafting(GuideIds.id("crafting/battery/battery_energy_port")));
+          elements.add(new GuideElements.Crafting(GuideIds.id("crafting/battery/battery_redstone_port")));
+          elements.add(new GuideElements.Text(Component.translatable("guide.biggerreactorsrework.content.battery_redstone")));
           elements.add(new GuideElements.Crafting(GuideIds.id("crafting/battery/battery_cell")));
           chapters.add(new Chapter("battery_parts",()->new ItemStack(BuiltInRegistries.ITEM.get(GuideIds.id("battery_cell"))),List.copyOf(elements))); }
         { var elements=new ArrayList<GuideElement>();

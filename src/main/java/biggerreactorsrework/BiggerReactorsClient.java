@@ -135,5 +135,7 @@ public final class BiggerReactorsClient {
                 biggerreactorsrework.multiblocks.battery.client.BatteryTerminalScreen::new);
         event.register(biggerreactorsrework.multiblocks.battery.containers.BatteryEnergyPortContainer.INSTANCE,
                 biggerreactorsrework.multiblocks.battery.client.BatteryEnergyPortScreen::new);
+        event.register(biggerreactorsrework.multiblocks.battery.containers.BatteryRedstonePortContainer.INSTANCE,
+                biggerreactorsrework.multiblocks.battery.client.BatteryRedstonePortScreen::new);
     }
 }

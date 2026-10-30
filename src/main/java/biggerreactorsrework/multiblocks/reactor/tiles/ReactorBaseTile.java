@@ -23,9 +23,20 @@ public class ReactorBaseTile extends ModularTile implements IMultiblockTile<Reac
         ITouchingMultiblockTile<ReactorBaseTile, ReactorBaseBlock, ReactorMultiblockController> {
     
     public int index = -1;
+    // Modified 2026-10-30: client appearance identity, separate from menu/request position.
+    public BlockPos appearancePos;
     
     public ReactorBaseTile(BlockEntityType<?> tileEntityTypeIn, BlockPos pos, BlockState state) {
         super(tileEntityTypeIn, pos, state);
+        appearancePos = pos.immutable();
+    }
+
+    public long writeAppearance() {
+        appearancePos = nullableController() == null ? getBlockPos() : controller().appearancePos(getBlockPos());
+        return appearancePos.asLong();
+    }
+    public void readAppearance(java.util.Map<?, ?> data) {
+        if (data.get("appearancePos") instanceof Long position) appearancePos = BlockPos.of(position);
     }
     
     @Override

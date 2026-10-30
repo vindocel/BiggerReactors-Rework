@@ -93,8 +93,9 @@ public final class TurbineRedstonePortTile extends TurbineBaseTile implements Me
     }
     @Override public Component getDisplayName(){return Component.translatable("block.biggerreactorsrework.turbine_redstone_port");}
     @Override public AbstractContainerMenu createMenu(int id,Inventory inv,Player player){return new TurbineRedstonePortContainer(id,worldPosition,player);}
-    @Override public Map<?,?> write(){return Map.of("mode",mode,"behavior",behavior,"low",low,"high",high);}
+    @Override public Map<?,?> write(){return Map.of("mode",mode,"behavior",behavior,"low",low,"high",high,"appearancePos",writeAppearance());}
     @Override public void read(Map<?,?> data){
+        readAppearance(data);
         if(data.get("mode") instanceof Integer m && m>=0&&m<Mode.values().length)mode=m;
         if(data.get("behavior") instanceof Integer b && b>=0&&b<=4)behavior=b;
         if(data.get("low") instanceof Number n)low=n.doubleValue();

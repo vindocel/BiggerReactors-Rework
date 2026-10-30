@@ -32,14 +32,14 @@ public final class ContentGameTests {
     }
 
     /**
-     * 51 crafting recipe files ship with the mod: 47 always load, 3 computer ports
+     * 52 crafting recipe files ship with the mod: 48 always load, 3 computer ports
      * need CC:Tweaked and 1 ludicrite variant needs Thermal Expansion.
      * 9 smelting and 9 blasting recipes always load.
      */
     @GameTest(template = "empty_7x7x7")
     public static void allRecipesLoad(GameTestHelper helper) {
         final var mods = ModList.get();
-        long expectedCrafting = 47 + (mods.isLoaded("computercraft") ? 3 : 0) + (mods.isLoaded("thermal_expansion") ? 1 : 0);
+        long expectedCrafting = 48 + (mods.isLoaded("computercraft") ? 3 : 0) + (mods.isLoaded("thermal_expansion") ? 1 : 0);
         long crafting = countOwn(helper, RecipeType.CRAFTING);
         long smelting = countOwn(helper, RecipeType.SMELTING);
         long blasting = countOwn(helper, RecipeType.BLASTING);

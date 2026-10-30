@@ -57,7 +57,8 @@ public class BatteryMultiblockController extends MultiblockController<BatteryBas
         IRectangularMultiblock<BatteryBaseTile, BatteryBaseBlock, BatteryMultiblockController>,
         IPersistentMultiblock<BatteryBaseTile, BatteryBaseBlock, BatteryMultiblockController>,
         ITouchingMultiblock<BatteryBaseTile, BatteryBaseBlock, BatteryMultiblockController>,
-        IEventMultiblock<BatteryBaseTile, BatteryBaseBlock, BatteryMultiblockController> {
+        IEventMultiblock<BatteryBaseTile, BatteryBaseBlock, BatteryMultiblockController>,
+        biggerreactorsrework.core.multiblock.common.ITickablePartsMultiblock<BatteryBaseTile, BatteryBaseBlock, BatteryMultiblockController> {
 
     /**
      * Ticks without transfer before the terminals go idle, so bursty loads do not flicker them.

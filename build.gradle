@@ -4,8 +4,7 @@ plugins {
     id 'net.neoforged.moddev' version '2.0.148'
 }
 
-// gradle.properties holds the base version of the open update (mod_version=0.1.4); a release build passes the
-// full version from its tag (-Prelease_version=0.1.4-beta.1), so alphas and betas need no version commit.
+// gradle.properties holds the base version; release builds can override it with -Prelease_version.
 var releaseVersion = providers.gradleProperty('release_version').orElse(mod_version).get()
 version = releaseVersion
 group = mod_group_id

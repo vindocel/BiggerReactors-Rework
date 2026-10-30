@@ -41,6 +41,7 @@
     "biggerreactorsrework:battery_glass",
     "biggerreactorsrework:battery_terminal",
     "biggerreactorsrework:battery_energy_port",
+    "biggerreactorsrework:battery_redstone_port",
     "biggerreactorsrework:battery_cell"
   ]
 }

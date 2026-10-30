@@ -83,6 +83,7 @@ public class ReactorRedstonePortState implements GuiSync.IGUIPacket {
 
     @Override
     public void read(@Nonnull Map<?, ?> data) {
+        reactorRedstonePortTile.readAppearance(data);
         selectedTab = ReactorRedstonePortSelection.fromInt((Integer) data.get("selectedTab"));
         triggerPS = ReactorRedstonePortTriggers.fromBool((Boolean) data.get("triggerPS"));
         triggerAB = ReactorRedstonePortTriggers.fromBool((Boolean) data.get("triggerAB"));
@@ -96,6 +97,7 @@ public class ReactorRedstonePortState implements GuiSync.IGUIPacket {
     public Map<?, ?> write() {
         reactorRedstonePortTile.updateState();
         HashMap<String, Object> data = new HashMap<>();
+        data.put("appearancePos", reactorRedstonePortTile.writeAppearance());
 
         data.put("selectedTab", selectedTab.toInt());
         data.put("triggerPS", triggerPS.toBool());
