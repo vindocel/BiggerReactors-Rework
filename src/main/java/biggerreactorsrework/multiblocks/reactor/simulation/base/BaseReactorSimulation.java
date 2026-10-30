@@ -353,9 +353,10 @@ public abstract class BaseReactorSimulation implements IReactorSimulation {
         if (battery != null) {
             battery.load(compound.getCompound("battery"));
         }
-        fuelFertility = compound.getDouble("fuelFertility");
-        fuelHeat.setTemperature(compound.getDouble("fuelHeat"));
-        stackHeat.setTemperature(compound.getDouble("reactorHeat"));
+        // Modified 2026-10-30: invalid temperatures cannot poison subsequent simulation ticks.
+        fuelFertility = biggerreactorsrework.core.util.SavedValues.nonNegative(compound.getDouble("fuelFertility"), 1);
+        fuelHeat.setTemperature(biggerreactorsrework.core.util.SavedValues.nonNegative(compound.getDouble("fuelHeat"), ambientHeat.temperature()));
+        stackHeat.setTemperature(biggerreactorsrework.core.util.SavedValues.nonNegative(compound.getDouble("reactorHeat"), ambientHeat.temperature()));
     }
     
     @Override

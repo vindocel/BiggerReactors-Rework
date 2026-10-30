@@ -26,6 +26,8 @@ public class TurbineFluidPortState implements GuiSync.IGUIPacket {
 
     @Override
     public void read(@Nonnull Map<?, ?> data) {
+        // Modified 2026-10-30: resource ports share the terminal's appearance, not its menu origin.
+        turbineFluidPortTile.readAppearance(data);
         direction = (Boolean) data.get("direction");
     }
 
@@ -34,6 +36,7 @@ public class TurbineFluidPortState implements GuiSync.IGUIPacket {
     public Map<?, ?> write() {
         turbineFluidPortTile.updateState();
         HashMap<String, Object> data = new HashMap<>();
+        data.put("appearancePos", turbineFluidPortTile.writeAppearance());
 
         data.put("direction", direction);
 

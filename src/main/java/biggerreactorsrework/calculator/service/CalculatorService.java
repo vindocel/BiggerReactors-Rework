@@ -40,7 +40,11 @@ public final class CalculatorService {
     private record Job(String session, AtomicBoolean cancelled, Future<?> future) { }
 
     private static final Map<UUID, Job> JOBS = new ConcurrentHashMap<>();
-    private static final Map<UUID, Long> LAST_REQUEST = new ConcurrentHashMap<>();
+    // Modified 2026-10-30: throttle catalog work and reuse snapshots until rules change.
+    private static final RequestThrottle LAST_REQUEST = new RequestThrottle(MIN_INTERVAL_MS);
+    private static final RequestThrottle LAST_CATALOG = new RequestThrottle(MIN_INTERVAL_MS);
+    private static CalculatorCatalog cachedCatalog;
+    private static long cachedRevision = -1;
 
     private CalculatorService() { }
 
@@ -48,13 +52,19 @@ public final class CalculatorService {
         NeoForge.EVENT_BUS.addListener((PlayerEvent.PlayerLoggedOutEvent e) -> {
             cancel(e.getEntity().getUUID());
             LAST_REQUEST.remove(e.getEntity().getUUID());
+            LAST_CATALOG.remove(e.getEntity().getUUID());
         });
-        NeoForge.EVENT_BUS.addListener((ServerStoppingEvent e) -> cancelAll());
+        NeoForge.EVENT_BUS.addListener((ServerStoppingEvent e) -> {
+            invalidate();
+            LAST_REQUEST.clear();
+            LAST_CATALOG.clear();
+        });
     }
 
     /** Data reloaded: running jobs used the old rules, so they stop. */
     public static void invalidate() {
         cancelAll();
+        cachedCatalog = null;
     }
 
     private static void cancelAll() {
@@ -66,17 +76,24 @@ public final class CalculatorService {
         if (job != null) {
             job.cancelled.set(true);
             job.future.cancel(false);
+            POOL.remove((Runnable) job.future);
         }
     }
 
-    /** Captured on every request, so configuration changes are seen at once. */
+    /** Registry reloads and configuration revisions invalidate the snapshot. Server thread only. */
     private static CalculatorCatalog catalog() {
-        return CalculatorCatalog.capture();
+        long revision = biggerreactorsrework.core.config.ConfigManager.revision();
+        if (cachedCatalog == null || revision != cachedRevision) {
+            cachedCatalog = CalculatorCatalog.capture();
+            cachedRevision = revision;
+        }
+        return cachedCatalog;
     }
 
     static void receive(ServerPlayer player, CompoundTag tag) {
         switch (tag.getString("type")) {
             case CalculatorNetwork.CATALOG -> {
+                if (!LAST_CATALOG.acquire(player.getUUID(), System.nanoTime())) return;
                 var reply = new CompoundTag();
                 reply.putString("type", CalculatorNetwork.CATALOG);
                 reply.put("catalog", catalog().toClientTag());
@@ -94,9 +111,7 @@ public final class CalculatorService {
     private static void start(ServerPlayer player, CompoundTag tag) {
         String session = tag.getString("session");
         if (session.isEmpty() || session.length() > MAX_SESSION) return;
-        long now = System.currentTimeMillis();
-        Long last = LAST_REQUEST.put(player.getUUID(), now);
-        if (last != null && now - last < MIN_INTERVAL_MS) {
+        if (!LAST_REQUEST.acquire(player.getUUID(), System.nanoTime())) {
             finish(player, session, failure(CalculationStatus.BUSY));
             return;
         }

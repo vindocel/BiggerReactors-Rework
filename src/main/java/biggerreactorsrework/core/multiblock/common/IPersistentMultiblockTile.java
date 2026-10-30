@@ -69,10 +69,11 @@ public interface IPersistentMultiblockTile<
             // backwards compat with opening older worlds
             // TODO: require this
             if (nbt.contains("last_assembly_state")) {
-                lastAssemblyState = IValidatedMultiblock.AssemblyState.valueOf(nbt.getString("last_assembly_state"));
+                // Modified 2026-10-30: invalid metadata must not prevent reconstruction of valid stored machines.
+                lastAssemblyState = biggerreactorsrework.core.util.SavedValues.enumValue(IValidatedMultiblock.AssemblyState.class, nbt.getString("last_assembly_state"), IValidatedMultiblock.AssemblyState.DISASSEMBLED);
             }
             if (nbt.contains("expected_blocks")) {
-                expectedBlocks = nbt.getInt("expected_blocks");
+                expectedBlocks = Math.max(0, nbt.getInt("expected_blocks"));
             }
             if (nbt.contains("controller_data")) {
                 this.controllerNBT = nbt.getCompound("controller_data");

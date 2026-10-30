@@ -98,6 +98,8 @@ public class HeatExchangerState implements GuiSync.IGUIPacket {
     public String evaporatorExhaustOrigin="";
     @Override
     public void read(@Nonnull Map<?, ?> data) {
+        // Modified 2026-10-30: terminals and resource ports resolve the same local theme.
+        heatExchangerTerminalTile.readAppearance(data);
         condenserIntakeOrigin = data.get("condenserIntakeOrigin") instanceof String v ? v : "";
         evaporatorExhaustOrigin = data.get("evaporatorExhaustOrigin") instanceof String v ? v : "";
 
@@ -129,6 +131,7 @@ public class HeatExchangerState implements GuiSync.IGUIPacket {
     public Map<?, ?> write() {
         this.heatExchangerTerminalTile.updateState();
         HashMap<String, Object> data = new HashMap<>();
+        data.put("appearancePos", heatExchangerTerminalTile.writeAppearance());
         data.put("condenserIntakeOrigin",condenserIntakeOrigin);
         data.put("evaporatorExhaustOrigin",evaporatorExhaustOrigin);
 

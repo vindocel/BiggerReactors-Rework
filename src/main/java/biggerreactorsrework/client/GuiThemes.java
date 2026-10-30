@@ -64,15 +64,16 @@ public final class GuiThemes {
         save();
     }
 
-    // Modified 2026-10-30: terminal/sensor appearance identities are independent of menu positions.
+    // Modified 2026-10-30: every resource port follows its machine's synced appearance identity.
     private static String appearanceKey(BlockPos pos) {
         var level = Minecraft.getInstance().level;
         if (level != null && level.getBlockEntity(pos) instanceof biggerreactorsrework.multiblocks.reactor.tiles.ReactorBaseTile reactor)
             return key(reactor.appearancePos);
         if (level != null && level.getBlockEntity(pos) instanceof biggerreactorsrework.multiblocks.turbine.tiles.TurbineBaseTile turbine)
             return key(turbine.appearancePos);
-        if (level != null && level.getBlockEntity(pos) instanceof biggerreactorsrework.multiblocks.battery.tiles.BatteryBaseTile tile
-                && !(tile instanceof biggerreactorsrework.multiblocks.battery.tiles.BatteryEnergyPortTile))
+        if (level != null && level.getBlockEntity(pos) instanceof biggerreactorsrework.multiblocks.heatexchanger.tiles.HeatExchangerBaseTile exchanger)
+            return key(exchanger.appearancePos);
+        if (level != null && level.getBlockEntity(pos) instanceof biggerreactorsrework.multiblocks.battery.tiles.BatteryBaseTile tile)
             return key(tile.batteryState().appearancePos);
         return key(pos);
     }

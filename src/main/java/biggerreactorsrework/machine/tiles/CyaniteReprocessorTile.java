@@ -182,9 +182,17 @@ public class CyaniteReprocessorTile extends BlockEntity implements MenuProvider,
     /**
      * Energy storage that only accepts energy from outside, with the configured transfer rate.
      */
-    private static final class Battery extends EnergyStorage {
+    private final class Battery extends EnergyStorage {
         Battery() {
             super(Config.CONFIG.CyaniteReprocessor.EnergyTankCapacity, Config.CONFIG.CyaniteReprocessor.TransferRate, 0);
+        }
+
+        // Modified 2026-10-30: persist positive external charging even while idle.
+        @Override
+        public int receiveEnergy(int amount, boolean simulate) {
+            int accepted = super.receiveEnergy(amount, simulate);
+            if (!simulate && accepted > 0) CyaniteReprocessorTile.this.setChanged();
+            return accepted;
         }
 
         boolean consume(int amount) {

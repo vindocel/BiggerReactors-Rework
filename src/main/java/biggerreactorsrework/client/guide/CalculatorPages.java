@@ -44,6 +44,17 @@ final class CalculatorPages {
         return mx >= x && mx < x + w && my >= y && my < y + h;
     }
 
+    // Modified 2026-10-30: keep persistence errors fully readable in narrow book pages.
+    private static int persistenceNotice(GuideScreen screen, GuiGraphics graphics, int x, int bottom, int width) {
+        var library = CalculatorLibrary.get();
+        if (!library.readOnly() && !library.writeFailed()) return 0;
+        var lines = screen.font().split(t(library.readOnly() ? "library.read_only" : "library.write_failed"), width);
+        int height = lines.size() * GuideElements.LINE + 2;
+        for (int i = 0; i < lines.size(); i++)
+            graphics.drawString(screen.font(), lines.get(i), x, bottom - height + i * GuideElements.LINE, CalculatorReport.ERROR, false);
+        return height;
+    }
+
     // ------------------------------------------------------------------ form helpers
 
     /** Whole number typed by the player, null with a reason key otherwise. Group separators of the game language are accepted when consistent. */
@@ -375,10 +386,7 @@ final class CalculatorPages {
         }
 
         private void list(GuideScreen s, GuiGraphics g, int x, int top, int w, int h, int mx, int my, List<CalculationResult> entries, String empty) {
-            if (CalculatorLibrary.get().readOnly()) {
-                s.fittedText(g, t("library.read_only"), x, top + h - 9, w, CalculatorReport.ERROR);
-                h -= 11;
-            }
+            h -= persistenceNotice(s, g, x, top + h, w);
             if (entries.isEmpty()) {
                 s.fittedText(g, t(empty), x, top, w, GuideElements.MUTED);
                 return;
@@ -706,6 +714,7 @@ final class CalculatorPages {
                 if (over(mx, my, bx, y, 18, 18)) s.textTooltip(List.of(t("view." + VIEWS[i].name().toLowerCase(java.util.Locale.ROOT))));
             }
             int top = y + 22, bottom = y + height - BUTTON_H - 4;
+            bottom -= persistenceNotice(s, g, x, bottom, w);
             var lines = new ArrayList<FormattedCharSequence>();
             var colors = new ArrayList<Integer>();
             for (var line : CalculatorReport.lines(r, CalculatorSession.view)) {
@@ -732,7 +741,9 @@ final class CalculatorPages {
             int half = (w - 2) / 2, buttonY = y + height - BUTTON_H;
             var library = CalculatorLibrary.get();
             boolean saved = library.isSaved(r.id()), full = !saved && library.savedFull();
-            s.textButton(g, x, buttonY, half, BUTTON_H, t(saved ? "remove" : full ? "saved_full" : "save"), mx, my, !full);
+            s.textButton(g, x, buttonY, half, BUTTON_H, t(saved ? "remove" : full ? "saved_full" : "save"), mx, my, !full && !library.readOnly());
+            if ((library.writeFailed() || library.readOnly()) && over(mx, my, x, buttonY, half, BUTTON_H))
+                s.textTooltip(List.of(t(library.readOnly() ? "library.read_only" : "library.write_failed")));
             if (full && over(mx, my, x, buttonY, half, BUTTON_H)) s.textTooltip(List.of(t("saved_full.tooltip", CalculatorLibrary.SAVED_LIMIT)));
             s.textButton(g, x + half + 2, buttonY, w - half - 2, BUTTON_H, t("view_layout"), mx, my, r.plant() != null);
         }
@@ -792,8 +803,11 @@ final class CalculatorPages {
             int half = (w - 2) / 2, buttonY = y + height - BUTTON_H;
             if (over(mx, my, x, buttonY, half, BUTTON_H)) {
                 var library = CalculatorLibrary.get();
+                if (library.readOnly()) return true;
                 if (library.isSaved(r.id())) library.removeSaved(r.id());
                 else library.save(r);
+                if (library.writeFailed() && net.minecraft.client.Minecraft.getInstance().player != null)
+                    net.minecraft.client.Minecraft.getInstance().player.displayClientMessage(t("library.write_failed"), true);
                 s.playClick();
                 return true;
             }

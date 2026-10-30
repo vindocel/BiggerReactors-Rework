@@ -5,6 +5,7 @@
 - Added the Battery Redstone Sensor, with separate settings for each sensor: at or above a charge threshold, at or below it, completely full, completely empty, or disabled.
 - Added the sensor's configuration screen, crafting recipe, recipe-book unlock and guide instructions. Its lit texture follows the signal, and it stops emitting when the battery disassembles.
 - Battery charge can now control a connected turbine through its existing Activity / Level redstone input.
+- Added optional OpenComputers support through native cable-connected components for reactor, turbine and heat-exchanger computer ports, replacing the ComputerCraft integration. Component addresses persist across reloads.
 
 ## Improved
 
@@ -14,6 +15,14 @@
 ## Fixed
 
 - Reactor, turbine and battery redstone sensors now follow their machine's light/dark theme, including machines with multiple terminals.
+- Item, fluid and energy port screens now follow the selected theme of their reactor, turbine, heat exchanger or battery instead of using a separate port appearance.
+- Industrial Processors now mark externally received energy for saving even while idle.
+- Machine ports reject malformed interface commands without changing their settings.
+- Computer operations run on the server thread, and computers attached after assembly can immediately access existing control rods.
+- The guide and processing costs now follow the server's synchronized configuration in multiplayer.
+- Energy output distributes small integer remainders across connected consumers instead of leaving them stranded.
+- Fluid and item output ports refresh their connections when a neighbor changes its available capabilities.
+- Invalid saved controls and fluid identifiers no longer prevent otherwise recoverable machine state from loading.
 
 # 1.21.1-0.1.4 (BiggerReactors-Rework)
 

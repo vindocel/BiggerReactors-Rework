@@ -305,7 +305,7 @@ public class FluidTransitionTank extends HeatBody implements IFluidTankHandler, 
         unresolved=nbt.contains("inFluid")?nbt.copy():null;
         activeTransition=null;
         transitionUpdate();
-        if (inAmount+outAmount>0 && ((condenser && "minecraft:lava".equals(nbt.getString("inFluid"))) ||
+        if ((inAmount>0 || outAmount>0) && ((condenser && "minecraft:lava".equals(nbt.getString("inFluid"))) ||
             (!condenser && "biggerreactorsrework:liquid_obsidian".equals(nbt.getString("inFluid")) &&
              "minecraft:lava".equals(nbt.getString("outFluid"))))) return;
         if(nbt.getLong("inAmount")==0 && nbt.getLong("outAmount")==0) {
@@ -314,7 +314,9 @@ public class FluidTransitionTank extends HeatBody implements IFluidTankHandler, 
         if (!nbt.contains("inFluid")) {
             return;
         }
-        ResourceLocation inFluidLocation = ResourceLocation.parse(nbt.getString("inFluid"));
+        // Modified 2026-10-30: quarantine malformed identifiers without losing their stored amounts.
+        ResourceLocation inFluidLocation = ResourceLocation.tryParse(nbt.getString("inFluid"));
+        if (inFluidLocation == null) return;
         if (BuiltInRegistries.FLUID.containsKey(inFluidLocation)) {
             Fluid newInFluid = BuiltInRegistries.FLUID.get(inFluidLocation);
             if (newInFluid == null) {
@@ -337,8 +339,9 @@ public class FluidTransitionTank extends HeatBody implements IFluidTankHandler, 
             }
             List<Fluid> outFluidList = (condenser ? newTransition.liquids : newTransition.gases);
             Fluid newOutFluid = null;
-            ResourceLocation outFluidLocation = ResourceLocation.parse(nbt.getString("outFluid"));
-            if (BuiltInRegistries.FLUID.containsKey(outFluidLocation)) {
+            ResourceLocation outFluidLocation = ResourceLocation.tryParse(nbt.getString("outFluid"));
+            if (outFluidLocation == null && nbt.contains("outFluid")) return;
+            if (outFluidLocation != null && BuiltInRegistries.FLUID.containsKey(outFluidLocation)) {
                 Fluid oldOutFluid = BuiltInRegistries.FLUID.get(outFluidLocation);
                 if (outFluidList.contains(oldOutFluid)) {
                     newOutFluid = oldOutFluid;

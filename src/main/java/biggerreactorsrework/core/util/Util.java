@@ -179,23 +179,20 @@ public class Util {
     }
     
     public static void markRangeDirty(Level world, Vector2i start, Vector2i end) {
-        for (int X = start.x; X < ((end.x + 16) & 0xFFFFFFF0); X += 16) {
-            for (int Z = start.y; Z < ((end.y + 16) & 0xFFFFFFF0); Z += 16) {
-                int chunkX = X >> 4;
-                int chunkZ = Z >> 4;
-                LevelChunk chunk = world.getChunk(chunkX, chunkZ);
-                chunk.setUnsaved(true);
-            }
-        }
+        markLoadedChunksDirty(world, start.x, start.y, end.x, end.y);
     }
     
     public static void markRangeDirty(Level world, Vector3ic start, Vector3ic end) {
-        for (int X = start.x(); X < ((end.x() + 16) & 0xFFFFFFF0); X += 16) {
-            for (int Z = start.z(); Z < ((end.z() + 16) & 0xFFFFFFF0); Z += 16) {
-                int chunkX = X >> 4;
-                int chunkZ = Z >> 4;
-                LevelChunk chunk = world.getChunk(chunkX, chunkZ);
-                chunk.setUnsaved(true);
+        markLoadedChunksDirty(world, start.x(), start.z(), end.x(), end.z());
+    }
+
+    // Modified 2026-10-30: marking persisted machines must never reload unloaded portions of their bounds.
+    private static void markLoadedChunksDirty(Level world, int minX, int minZ, int maxX, int maxZ) {
+        if (!(world.getChunkSource() instanceof ServerChunkCache chunks)) return;
+        for (int x = minX >> 4; x <= (maxX >> 4); x++) {
+            for (int z = minZ >> 4; z <= (maxZ >> 4); z++) {
+                LevelChunk chunk = chunks.getChunkNow(x, z);
+                if (chunk != null) chunk.setUnsaved(true);
             }
         }
     }

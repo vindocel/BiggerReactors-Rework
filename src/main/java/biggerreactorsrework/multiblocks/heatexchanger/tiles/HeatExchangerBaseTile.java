@@ -19,8 +19,19 @@ import javax.annotation.ParametersAreNonnullByDefault;
 public class HeatExchangerBaseTile extends ModularTile implements IRectangularMultiblockTile<HeatExchangerBaseTile, HeatExchangerBaseBlock, HeatExchangerMultiblockController>,
         IPersistentMultiblockTile<HeatExchangerBaseTile, HeatExchangerBaseBlock, HeatExchangerMultiblockController>,
         ITouchingMultiblockTile<HeatExchangerBaseTile, HeatExchangerBaseBlock, HeatExchangerMultiblockController> {
+    // Modified 2026-10-30: terminal and fluid-port screens use one synchronized appearance identity.
+    public BlockPos appearancePos;
     public HeatExchangerBaseTile(BlockEntityType<?> tileEntityTypeIn, BlockPos pos, BlockState state) {
         super(tileEntityTypeIn, pos, state);
+        appearancePos = pos.immutable();
+    }
+
+    public long writeAppearance() {
+        appearancePos = nullableController() == null ? getBlockPos() : controller().appearancePos(getBlockPos());
+        return appearancePos.asLong();
+    }
+    public void readAppearance(java.util.Map<?, ?> data) {
+        if (data.get("appearancePos") instanceof Long position) appearancePos = BlockPos.of(position);
     }
     
     @Nonnull

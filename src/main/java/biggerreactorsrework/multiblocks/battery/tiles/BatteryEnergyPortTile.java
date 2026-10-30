@@ -137,7 +137,8 @@ public class BatteryEnergyPortTile extends BatteryBaseTile implements IEnergyTil
     protected void readNBT(CompoundTag compound) {
         super.readNBT(compound);
         if (compound.contains("direction")) {
-            direction = PortDirection.valueOf(compound.getString("direction"));
+            // Modified 2026-10-30: tolerate malformed direction metadata.
+            direction = biggerreactorsrework.core.util.SavedValues.enumValue(PortDirection.class, compound.getString("direction"), PortDirection.INLET);
         }
     }
 
@@ -174,7 +175,7 @@ public class BatteryEnergyPortTile extends BatteryBaseTile implements IEnergyTil
 
     @Override
     public void runRequest(String requestName, Object requestData) {
-        if (requestName.equals("setDirection") && requestData instanceof Integer value) {
+        if (requestName.equals("setDirection") && requestData instanceof Integer value && value >= 0 && value <= 1) {
             setDirection(value != 0 ? OUTLET : INLET);
             return;
         }

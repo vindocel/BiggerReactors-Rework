@@ -20,6 +20,7 @@ import java.util.*;
  * and a file from a newer version is never overwritten.
  */
 public final class CalculatorLibrary {
+    // Modified 2026-10-30: only acknowledge saved entries after an atomic disk write succeeds.
     public static final int RECENT_LIMIT = 3, SAVED_LIMIT = 50;
     private static final int SCHEMA = 1;
     private static final long MAX_FILE_BYTES = 64L << 20;
@@ -32,6 +33,8 @@ public final class CalculatorLibrary {
     private final Map<String, CompoundTag> stored = new HashMap<>();
     private final Map<String, CalculationResult> parsed = new HashMap<>();
     private boolean readOnly;
+    private boolean writeFailed;
+    public boolean writeFailed() { return writeFailed; }
 
     private CalculatorLibrary(Path file) {
         this.file = file;
@@ -67,6 +70,7 @@ public final class CalculatorLibrary {
     public boolean readOnly() { return readOnly; }
 
     public void addRecent(CalculationResult result) {
+        if (readOnly) return;
         if (recents.contains(result.id())) return;
         keep(result);
         recents.addFirst(result.id());
@@ -76,18 +80,23 @@ public final class CalculatorLibrary {
 
     /** False when the saved list is full; nothing is removed to make room. */
     public boolean save(CalculationResult result) {
+        if (readOnly) return false;
         if (saved.contains(result.id())) return true;
         if (saved.size() >= SAVED_LIMIT) return false;
         keep(result);
         saved.addFirst(result.id());
-        write();
-        return true;
+        if (write()) return true;
+        saved.remove(result.id());
+        release(result.id());
+        return false;
     }
 
     public void removeSaved(String id) {
+        if (readOnly) return;
+        int index = saved.indexOf(id);
         if (saved.remove(id)) {
-            release(id);
-            write();
+            if (write()) release(id);
+            else saved.add(index, id);
         }
     }
 
@@ -157,8 +166,8 @@ public final class CalculatorLibrary {
     }
 
     /** Written to a temporary file first and moved over the old one, so a failure never leaves a broken library. */
-    private void write() {
-        if (readOnly) return;
+    private boolean write() {
+        if (readOnly) return false;
         var tag = new CompoundTag();
         tag.putInt("schema", SCHEMA);
         var recentList = new ListTag();
@@ -171,16 +180,13 @@ public final class CalculatorLibrary {
         stored.forEach(snapshots::put);
         tag.put("snapshots", snapshots);
         try {
-            Files.createDirectories(file.getParent());
-            var temporary = file.resolveSibling(file.getFileName() + ".tmp");
-            NbtIo.writeCompressed(tag, temporary);
-            try {
-                Files.move(temporary, file, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
-            } catch (AtomicMoveNotSupportedException e) {
-                Files.move(temporary, file, StandardCopyOption.REPLACE_EXISTING);
-            }
-        } catch (IOException e) {
+            biggerreactorsrework.core.util.AtomicFiles.replace(file, temporary -> NbtIo.writeCompressed(tag, temporary));
+            writeFailed = false;
+            return true;
+        } catch (IOException | RuntimeException e) {
+            writeFailed = true;
             BiggerReactors.LOGGER.error("Could not save calculator library {}", file, e);
+            return false;
         }
     }
 }

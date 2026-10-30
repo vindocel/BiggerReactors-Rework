@@ -49,7 +49,8 @@ public class FuelTank implements IReactorSimulation.IFuelTank, ISerializable {
     
     @Override
     public long totalStored() {
-        return fuel + waste;
+        // Modified 2026-10-30: retain overfilled stock without wrapping its sum.
+        return fuel > Long.MAX_VALUE - waste ? Long.MAX_VALUE : fuel + waste;
     }
     
     @Override
@@ -129,8 +130,9 @@ public class FuelTank implements IReactorSimulation.IFuelTank, ISerializable {
     
     @Override
     public void load(@Nonnull DataCompound compound) {
-        fuel = compound.getLong("fuel");
-        waste = compound.getLong("waste");
-        partialUsed = compound.getDouble("partialUsed");
+        fuel = Math.max(0, compound.getLong("fuel"));
+        waste = Math.max(0, compound.getLong("waste"));
+        partialUsed = biggerreactorsrework.core.util.SavedValues.nonNegative(compound.getDouble("partialUsed"), 0);
+        if (partialUsed >= 1) partialUsed = 0;
     }
 }

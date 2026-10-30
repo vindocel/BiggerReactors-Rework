@@ -1,6 +1,6 @@
 package biggerreactorsrework;
 
-import biggerreactorsrework.compat.computercraft.ComputerCraftCompat;
+import biggerreactorsrework.compat.opencomputers.OpenComputersCompat;
 import biggerreactorsrework.core.CoreEvents;
 import net.neoforged.fml.ModList;
 import biggerreactorsrework.core.event.ReloadDataEvent;
@@ -45,8 +45,9 @@ public class BiggerReactors {
         if (ModList.get().isLoaded("carryon")) {
             biggerreactorsrework.compat.carryon.CarryOnCompat.init();
         }
-        if (ModList.get().isLoaded("computercraft")) {
-            ComputerCraftCompat.init(modBus);
+        // Modified 2026-10-30: replace the optional computer integration with native OpenComputers.
+        if (ModList.get().isLoaded("opencomputers")) {
+            OpenComputersCompat.init(modBus);
         }
         if (FMLEnvironment.dist.isClient()) {
             BiggerReactorsClient.init(modBus);

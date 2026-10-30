@@ -45,6 +45,12 @@ import static biggerreactorsrework.BiggerReactors.modid;
 
 @NonnullDefault
 public class ConfigManager {
+    // Modified 2026-10-30: synchronize authoritative server rules and invalidate dependent views.
+    private static long revision;
+    public static long revision() { return revision; }
+    private static List<ConfigRegistration> syncedConfigs() {
+        return Stream.concat(commonConfigs.values().stream(), serverConfigs.values().stream()).toList();
+    }
     static final Logger LOGGER = LogManager.getLogger("BiggerReactors-Rework/Config");
     private static class ClassLoadingHelper {
         public static final SimpleChannel NETWORK_CHANNEL = new SimpleChannel(
@@ -149,7 +155,7 @@ public class ConfigManager {
         for (final var value : clientConfigs.values()) {
             value.loadLocalConfigFile(true);
         }
-        if (FMLEnvironment.dist.isDedicatedServer() || server == null || !server.isDedicatedServer()) {
+        if (FMLEnvironment.dist.isDedicatedServer() || !connectedToServer || server != null && !server.isDedicatedServer()) {
             // dedicated servers, disconnected clients, and integrated servers reload common and server configs too
             for (final var value : commonConfigs.values()) {
                 value.loadLocalConfigFile(true);
@@ -157,6 +163,8 @@ public class ConfigManager {
             for (final var value : serverConfigs.values()) {
                 value.loadLocalConfigFile(true);
             }
+            revision++;
+            biggerreactorsrework.calculator.service.CalculatorService.invalidate();
             for (ServerPlayer player : players) {
                 sendConfigToPlayer(player, false);
             }
@@ -197,42 +205,40 @@ public class ConfigManager {
     
     private static void onLoggingOut(ClientPlayerNetworkEvent.LoggingOut event) {
         connectedToServer = false;
-        commonConfigs.values().forEach(ConfigRegistration::unloadRemoteConfig);
+        restoreLocalConfigs();
+    }
+
+    public static void restoreLocalConfigs() {
+        syncedConfigs().forEach(ConfigRegistration::unloadRemoteConfig);
+        revision++;
     }
     
     private static void onPlayerLogin(PlayerEvent.PlayerLoggedInEvent e) {
         var server = e.getEntity().getServer();
         assert server != null;
-        if (!server.isDedicatedServer()) {
-            var serverUUID = e.getEntity().getUUID();
-            var localUUID = Minecraft.getInstance().getUser().getXuid();
-            if (serverUUID.toString().equals(localUUID)) {
-                // ignore local player on integrated server
-                // do have the configs reload the saved tree though
-                for (ConfigRegistration value : commonConfigs.values()) {
-                    value.unloadRemoteConfig();
-                }
-                return;
-            }
-        }
+        if (!server.isDedicatedServer() && server.isSingleplayerOwner(e.getEntity().getGameProfile())) return;
         var player = (ServerPlayer) e.getEntity();
         players.add(player);
         sendConfigToPlayer(player, true);
     }
     
     private static void sendConfigToPlayer(ServerPlayer player, boolean initialLogin) {
+        ClassLoadingHelper.NETWORK_CHANNEL.sendToPlayer(player, synchronizedSnapshot(initialLogin));
+    }
+
+    public static DataCompound synchronizedSnapshot(boolean initialLogin) {
         final var configs = new Object2ObjectOpenHashMap<String, ByteArrayList>();
-        for (ConfigRegistration modConfig : commonConfigs.values()) {
+        for (ConfigRegistration modConfig : syncedConfigs()) {
             var configTree = modConfig.rootConfigSpecNode.generateSyncElement();
             var configROBN = ROBN.parseElement(configTree);
             if (configROBN != null) {
-                configs.put(modConfig.baseFile.toString(), configROBN);
+                configs.put(modConfig.syncId, configROBN);
             }
         }
         DataCompound compound = new DataCompound();
         compound.put("initialLogin", initialLogin);
         compound.put("configs", configs);
-        ClassLoadingHelper.NETWORK_CHANNEL.sendToPlayer(player, compound);
+        return compound;
     }
     
     private static void onPlayerLogout(PlayerEvent.PlayerLoggedOutEvent e) {
@@ -241,20 +247,26 @@ public class ConfigManager {
     }
     
     private static void clientPacketHandler(DataCompound compound, IPayloadContext context) {
+        applyRemoteSnapshot(compound);
+    }
+
+    public static void applyRemoteSnapshot(DataCompound compound) {
         boolean initialLogin = compound.getBoolean("initialLogin");
         final var configs = compound.getMap("configs");
         for (final var entry : configs.entrySet()) {
             final var configName = entry.getKey();
-            final var config = commonConfigs.get(configName);
+            final var config = syncedConfigs().stream().filter(c -> c.syncId.equals(configName)).findFirst().orElse(null);
             if (config == null) {
-                return;
+                continue;
             }
             try {
+                if (!(entry.getValue() instanceof List<?> bytes) || bytes.stream().anyMatch(b -> !(b instanceof Byte))) continue;
                 final var elementTree = ROBN.parseROBN((List<Byte>) entry.getValue());
                 config.loadRemoteConfig(elementTree, !initialLogin);
             } catch (IllegalArgumentException ignored) {
             }
         }
+        revision++;
     }
     
     private static void serverPacketHandler(DataCompound compound, IPayloadContext context) {

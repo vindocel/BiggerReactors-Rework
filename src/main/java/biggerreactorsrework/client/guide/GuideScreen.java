@@ -26,6 +26,20 @@ import org.lwjgl.glfw.GLFW;
  * page after page. Turning a page (arrows, keys, mouse wheel or a contents line) animates the sheet around the spine.
  */
 public class GuideScreen extends Screen {
+    // Modified 2026-10-30: rebuild displayed server limits when configuration is synchronized.
+    private long configRevision = -1;
+
+    @Override
+    public void tick() {
+        super.tick();
+        long revision = biggerreactorsrework.core.config.ConfigManager.revision();
+        if (book != null && revision != configRevision) {
+            book = GuideBook.build(this, GuideContent.chapters(), contentW, contentH);
+            spread = Mth.clamp(spread, 0, book.spreads() - 1);
+            turnFrom = -1;
+            configRevision = revision;
+        }
+    }
     /** The book grows with the window between these sizes, keeping its proportions. */
     private static final int MIN_BOOK_W = 312;
     private static final int MAX_BOOK_W = 470;
@@ -126,6 +140,7 @@ public class GuideScreen extends Screen {
         bookX = (width - bookW) / 2;
         bookY = (height - bookH) / 2;
         book = GuideBook.build(this, GuideContent.chapters(), contentW, contentH);
+        configRevision = biggerreactorsrework.core.config.ConfigManager.revision();
         spread = Mth.clamp(lastSpread, 0, book.spreads() - 1);
         turnFrom = -1;
     }

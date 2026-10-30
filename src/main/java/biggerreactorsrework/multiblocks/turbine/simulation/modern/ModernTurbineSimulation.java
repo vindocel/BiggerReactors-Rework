@@ -348,9 +348,11 @@ public class ModernTurbineSimulation implements ITurbineSimulation {
     public void deserializeNBT(CompoundTag nbt) {
         fluidTank.deserializeNBT(nbt.getCompound("fluidTank"));
         battery.deserializeNBT(nbt.getCompound("battery"));
-        ventState = VentState.fromInt(nbt.getInt("ventState"));
-        rotorEnergy = nbt.getDouble("rotorEnergy");
-        maxFlowRate = nbt.getLong("maxFlowRate");
+        // Modified 2026-10-30: invalid saved controls cannot prevent the machine loading.
+        int vent = nbt.getInt("ventState");
+        ventState = vent >= 0 && vent <= 2 ? VentState.fromInt(vent) : VentState.OVERFLOW;
+        rotorEnergy = biggerreactorsrework.core.util.SavedValues.nonNegative(nbt.getDouble("rotorEnergy"), 0);
+        maxFlowRate = Math.max(0, nbt.getLong("maxFlowRate"));
         coilEngaged = nbt.getBoolean("coilEngaged");
         active = nbt.getBoolean("active");
     }

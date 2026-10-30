@@ -15,6 +15,8 @@ import java.util.List;
 import java.util.Locale;
 
 public class ConfigRegistration {
+    // Modified 2026-10-30: synchronize server rules using stable identifiers and restore local values on exit.
+    public final String syncId;
     
     public final ConfigType configType;
     public final Object rootConfigObject;
@@ -44,6 +46,7 @@ public class ConfigRegistration {
         final var defaultConfigOptions = new ConfigOptionsDefaults(rootLevelDefaultType, false, false, rootLevelReloadableDefault);
         this.rootConfigSpecNode = new SpecObjectNode(rootConfigObject, comment, configType, defaultConfigOptions);
         this.modName = modName;
+        this.syncId = modName + ":" + configType.name().toLowerCase(Locale.ROOT) + ":" + folder + "/" + name;
         this.comment = comment;
         this.fileFormat = format;
         this.baseFile = new File("config/" + folder + "/" + name + "-" + configType.toString().toLowerCase(Locale.US));
@@ -95,7 +98,7 @@ public class ConfigRegistration {
     }
     
     public void loadRemoteConfig(Element elementTree, boolean reload) {
-        if (configType != ConfigType.COMMON) {
+        if (configType != ConfigType.COMMON && configType != ConfigType.SERVER) {
             return;
         }
         preLoadCallbacks.forEach(Runnable::run);
@@ -122,7 +125,7 @@ public class ConfigRegistration {
     }
     
     public void unloadRemoteConfig() {
-        if (configType != ConfigType.COMMON) {
+        if (configType != ConfigType.COMMON && configType != ConfigType.SERVER) {
             return;
         }
         if (savedLocalConfig == null) {

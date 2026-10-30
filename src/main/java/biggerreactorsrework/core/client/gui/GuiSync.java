@@ -139,10 +139,14 @@ public class GuiSync {
     }
 
     private static void serverHandler(DataCompound compound, IPayloadContext ctx) {
+        handleServerRequest(compound, ctx.player());
+    }
+
+    // Modified 2026-10-30: share the exact validated menu dispatch with server-side callers.
+    public static void handleServerRequest(DataCompound compound, net.minecraft.world.entity.player.Player player) {
         if (!(compound.get("request") instanceof String request) || request.isEmpty() || request.length() > MAX_REQUEST_NAME_LENGTH) {
             return;
         }
-        final var player = ctx.player();
         if (!(player.containerMenu instanceof IGUIPacketProvider provider) || !player.containerMenu.stillValid(player) || !matches(compound, player.containerMenu, provider)) {
             return;
         }

@@ -90,6 +90,7 @@ public class ReactorControlRodTile extends ReactorBaseTile implements MenuProvid
     private double insertion = 0;
     
     public void setInsertion(double newLevel) {
+        // Modified 2026-10-30: persist executed control changes and validate saved settings.
         if (!Double.isFinite(newLevel)) {
             return;
         }
@@ -99,7 +100,7 @@ public class ReactorControlRodTile extends ReactorBaseTile implements MenuProvid
         if (newLevel > 100) {
             newLevel = 100;
         }
-        insertion = newLevel;
+        if (insertion != newLevel) { insertion = newLevel; setChanged(); }
     }
     
     public double getInsertion() {
@@ -110,7 +111,7 @@ public class ReactorControlRodTile extends ReactorBaseTile implements MenuProvid
     private String name = "";
     
     public void setName(String name) {
-        this.name = name;
+        if (name.length() <= 128 && !this.name.equals(name)) { this.name = name; setChanged(); }
     }
     
     public String getName() {
@@ -129,10 +130,11 @@ public class ReactorControlRodTile extends ReactorBaseTile implements MenuProvid
     protected void readNBT(CompoundTag compound) {
         super.readNBT(compound);
         if (compound.contains("insertion")) {
-            insertion = compound.getDouble("insertion");
+            insertion = Math.clamp(biggerreactorsrework.core.util.SavedValues.nonNegative(compound.getDouble("insertion"), 0), 0, 100);
         }
         if (compound.contains("name")) {
             name = compound.getString("name");
+            if (name.length() > 128) name = name.substring(0, 128);
         }
     }
 }

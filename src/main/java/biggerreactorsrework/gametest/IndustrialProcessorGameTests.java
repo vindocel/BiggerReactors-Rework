@@ -41,13 +41,14 @@ public final class IndustrialProcessorGameTests {
         h.succeed();
     }
     @GameTest(template="empty_7x7x7")
-    public static void cyaniteAndLegacySaveRemainCompatible(GameTestHelper h) {
+    // Modified 2026-10-30: the consolidated recipe identity is the forward persistence contract.
+    public static void currentCyaniteSavePreservesPaidProgress(GameTestHelper h) {
         var t=machine(h);t.itemHandlerFor(null).insertItem(0,new ItemStack(CyaniteIngot.INSTANCE,2),false);
         for(int i=0;i<40;i++)t.tick();
-        var tag=t.saveWithFullMetadata(h.getLevel().registryAccess());tag.getCompound("cyaniteReprocessorState").remove("outputTank");
+        var tag=t.saveWithFullMetadata(h.getLevel().registryAccess());
         t.loadWithComponents(tag,h.getLevel().registryAccess());
         for(int i=0;i<160;i++)t.tick();
-        h.assertTrue(t.itemHandlerFor(null).getStackInSlot(1).is(BlutoniumIngot.INSTANCE),"legacy cyanite progress or item output lost");
+        h.assertTrue(t.itemHandlerFor(null).getStackInSlot(1).is(BlutoniumIngot.INSTANCE),"current cyanite progress or item output lost");
         h.assertTrue(t.fluidFor(null).getFluidInTank(0).getAmount()==800,"cyanite costs changed");
         h.assertTrue(t.energyFor(null).getEnergyStored()==4800,"legacy FE changed");
         h.assertTrue(t.fluidFor(null).getFluidInTank(1).isEmpty(),"old save fabricated fluid output");h.succeed();

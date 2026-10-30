@@ -243,7 +243,7 @@ Learn the plant inside the game:
 | Integration | What it adds |
 | --- | --- |
 | 📚 JEI, EMI and REI | Both Industrial Processor recipes, moderators, turbine coils and current heat-exchanger fluid conversions. |
-| 💻 CC Tweaked | Supported peripherals for machine monitoring and control. |
+| 💻 OpenComputers | Native cable-connected components for reactor, turbine and heat-exchanger monitoring and control. |
 | 🔎 Jade | Supported machine information in the inspection overlay. |
 | 🧪 Mekanism | The liquid sodium coolant option. |
 | ❄️ Ad Astra | The Cryo Fuel coolant option. |

@@ -40,6 +40,9 @@ import static biggerreactorsrework.core.util.BlockStates.PORT_DIRECTION;
 @MethodsReturnNonnullByDefault
 @ParametersAreNonnullByDefault
 public class HeatExchangerFluidPortTile extends HeatExchangerBaseTile implements IFluidTankHandler, IEventMultiblock.AssemblyStateTransition.OnAssembly, IEventMultiblock.AssemblyStateTransition.OnDisassembly, MenuProvider, IHasUpdatableState<HeatExchangerFluidPortState> {
+    // Modified 2026-10-30: refresh output handlers after neighbor capability changes.
+    private final biggerreactorsrework.core.capability.NeighborCapability<net.neoforged.neoforge.fluids.capability.IFluidHandler> outputCapability =
+            new biggerreactorsrework.core.capability.NeighborCapability<>(this, Capabilities.FluidHandler.BLOCK);
     
     public long lastCheckedTick;
     
@@ -158,6 +161,7 @@ public class HeatExchangerFluidPortTile extends HeatExchangerBaseTile implements
     
     
     public long pushFluid() {
+        neighborChanged();
         if (!connected || inlet) {
             return 0;
         }
@@ -189,7 +193,7 @@ public class HeatExchangerFluidPortTile extends HeatExchangerBaseTile implements
             return;
         }
         assert level != null;
-        final var outputCap = level.getCapability(Capabilities.FluidHandler.BLOCK, worldPosition.relative(outputDirection), outputDirection.getOpposite());
+        final var outputCap = outputCapability.get(outputDirection);
         connected = false;
         if (outputCap != null) {
             connected = true;
@@ -257,6 +261,8 @@ public class HeatExchangerFluidPortTile extends HeatExchangerBaseTile implements
     @Override
     public void runRequest(String requestName, Object requestData) {
         if (requestName.equals("setDirection")) {
+            // Modified 2026-10-30: reject invalid command types and domains before mutation.
+            if (!(requestData instanceof Integer value) || value < 0 || value > 1) return;
             int direction = (Integer) requestData;
             setInletOtherOutlet(direction == 0);
         }

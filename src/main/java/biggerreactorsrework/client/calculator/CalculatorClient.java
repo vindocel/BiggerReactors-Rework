@@ -20,6 +20,9 @@ public final class CalculatorClient {
 
     @Nullable private static CalculatorCatalog catalog;
     private static boolean catalogRequested;
+    // Modified 2026-10-30: retry catalog refreshes which were coalesced by the server's request limit.
+    private static boolean catalogRefreshPending;
+    private static long catalogRequestedAt;
     @Nullable private static String session;
     @Nullable private static CalculatorRequest request;
     private static Phase phase = Phase.IDLE;
@@ -40,12 +43,14 @@ public final class CalculatorClient {
 
     /** Asks for the catalog once per connection; {@link #refreshCatalog()} asks again. */
     public static void requestCatalog() {
-        if (catalogRequested) return;
+        if (catalogRequested && (!catalogRefreshPending || System.nanoTime() - catalogRequestedAt < 1_000_000_000L)) return;
         refreshCatalog();
     }
 
     public static void refreshCatalog() {
         catalogRequested = true;
+        catalogRefreshPending = true;
+        catalogRequestedAt = System.nanoTime();
         var tag = new CompoundTag();
         tag.putString("type", CalculatorNetwork.CATALOG);
         CalculatorNetwork.toServer(tag);
@@ -89,11 +94,16 @@ public final class CalculatorClient {
         failure = null;
         catalog = null;
         catalogRequested = false;
+        catalogRefreshPending = false;
+        catalogRequestedAt = 0;
     }
 
     public static void receive(CompoundTag tag) {
         switch (tag.getString("type")) {
-            case CalculatorNetwork.CATALOG -> catalog = CalculatorCatalog.fromClientTag(tag.getCompound("catalog"));
+            case CalculatorNetwork.CATALOG -> {
+                catalog = CalculatorCatalog.fromClientTag(tag.getCompound("catalog"));
+                catalogRefreshPending = false;
+            }
             case CalculatorNetwork.PROGRESS -> {
                 if (!tag.getString("session").equals(session) || !running()) return;
                 try {

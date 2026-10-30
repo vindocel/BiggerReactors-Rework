@@ -375,7 +375,8 @@ public class ReactorMultiblockController extends MultiblockController<ReactorBas
     @Override
     public void read(CompoundTag compound) {
         if (compound.contains("reactorState")) {
-            reactorActivity = ReactorActivity.valueOf(compound.getString("reactorState").toUpperCase(Locale.US));
+            // Modified 2026-10-30: tolerate invalid saved activity and reject invalid command values.
+            reactorActivity = biggerreactorsrework.core.util.SavedValues.enumValue(ReactorActivity.class, compound.getString("reactorState").toUpperCase(Locale.US), ReactorActivity.INACTIVE);
         }
         if (compound.contains("autoEjectWaste")) {
             autoEjectWaste = compound.getBoolean("autoEjectWaste");
@@ -946,7 +947,7 @@ public class ReactorMultiblockController extends MultiblockController<ReactorBas
         switch (requestName) {
             // Set the reactor to ACTIVE or INACTIVE.
             case "setActive" -> {
-                if (!(requestData instanceof Integer)) {
+                if (!(requestData instanceof Integer value) || value < 0 || value > 1) {
                     return;
                 }
                 setActive(ReactorActivity.fromInt((Integer) requestData));
@@ -954,7 +955,7 @@ public class ReactorMultiblockController extends MultiblockController<ReactorBas
             
             // Enable or disable waste ejection.
             case "setAutoEject" -> {
-                if (!(requestData instanceof Integer)) {
+                if (!(requestData instanceof Integer value) || value < 0 || value > 1) {
                     return;
                 }
                 autoEjectWaste = ((Integer) requestData != 0);
