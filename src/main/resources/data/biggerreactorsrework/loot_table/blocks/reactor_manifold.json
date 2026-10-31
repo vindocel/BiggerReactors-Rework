@@ -10,10 +10,9 @@
           "name": "biggerreactorsrework:reactor_manifold"
         }
       ],
-      "conditions": [
-        {
-          "condition": "minecraft:survives_explosion"
-        }]
+      "condition": {
+        "type": "minecraft:survives_explosion"
+      }
     }
   ]
 }

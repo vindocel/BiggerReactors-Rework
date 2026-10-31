@@ -1,0 +1,7 @@
+{
+  "parent": "biggerreactorsrework:block/assembled_port",
+  "textures": {
+    "front": "biggerreactorsrework:block/reactor/access_port/inlet",
+    "side": "biggerreactorsrework:block/reactor/casing/disassembled"
+  }
+}

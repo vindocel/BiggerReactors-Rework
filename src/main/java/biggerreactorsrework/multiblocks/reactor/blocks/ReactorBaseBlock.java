@@ -1,6 +1,5 @@
 package biggerreactorsrework.multiblocks.reactor.blocks;
 
-import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
@@ -22,7 +21,6 @@ import javax.annotation.ParametersAreNonnullByDefault;
 import static biggerreactorsrework.core.multiblock.IAssemblyStateBlock.ASSEMBLED;
 
 @ParametersAreNonnullByDefault
-@MethodsReturnNonnullByDefault
 public abstract class ReactorBaseBlock extends ModularBlock implements IRectangularMultiblockBlock {
     // Modified 2026-10-27: state-based light for terminals and visible fuel.
     
@@ -70,7 +68,7 @@ public abstract class ReactorBaseBlock extends ModularBlock implements IRectangu
     public InteractionResult onUse(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult) {
         if (hand == InteractionHand.MAIN_HAND && state.hasProperty(ASSEMBLED) && state.getValue(ASSEMBLED)) {
             if (level.getBlockEntity(pos) instanceof MenuProvider menuProvider) {
-                if (!level.isClientSide) {
+                if (!level.isClientSide()) {
                     player.openMenu(menuProvider, pos);
                 }
                 return InteractionResult.SUCCESS;

@@ -1,6 +1,5 @@
 package biggerreactorsrework.core.modular.api;
 
-import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 
@@ -10,7 +9,6 @@ import java.util.LinkedHashMap;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 
-@MethodsReturnNonnullByDefault
 @ParametersAreNonnullByDefault
 public class ModuleRegistry {
     private static final LinkedHashMap<Class<? extends IModularTile>, Function<BlockEntity, TileModule<?>>> tileModuleRegistry = new LinkedHashMap<>();

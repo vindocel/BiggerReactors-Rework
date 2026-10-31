@@ -1,6 +1,5 @@
 package biggerreactorsrework.multiblocks.reactor.blocks;
 
-import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -14,12 +13,11 @@ import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 
 @ParametersAreNonnullByDefault
-@MethodsReturnNonnullByDefault
 public class ReactorTerminal extends ReactorBaseBlock implements IAssemblyStateBlock, IFaceDirectionBlock {
     
     @CreativeTabBlock
     @RegisterBlock(name = "reactor_terminal", tileEntityClass = ReactorTerminalTile.class)
-    public static final ReactorTerminal INSTANCE = new ReactorTerminal();
+    public static final ReactorTerminal INSTANCE = biggerreactorsrework.core.registry.RegistryIds.named("reactor_terminal", () -> new ReactorTerminal());
     
     @Nullable
     @Override

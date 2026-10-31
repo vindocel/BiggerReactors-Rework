@@ -8,7 +8,7 @@
 
 Design your own reactor, turn its heat into steam, drive a turbine and store the power in a multiblock battery.
 
-**BiggerReactors-Rework** brings the BiggerReactors foundation to **Minecraft 1.21.1 on NeoForge**, with **rebuilt liquid cooling, redesigned interfaces, original machine sounds and a new battery multiblock**.
+**BiggerReactors-Rework** brings the BiggerReactors foundation to **Minecraft 26.3 on NeoForge**, with **rebuilt liquid cooling, redesigned interfaces, original machine sounds and a new battery multiblock**.
 
 > 🧬 An independent fork of **BiggerReactors**, carrying forward the legacy of **Big Reactors**. Original authors and contributors are credited below.
 
@@ -105,13 +105,13 @@ Eject cyanite from your reactor and recycle it into blutonium, or supply obsidia
 - ♻️ **2 cyanite ingots + water + FE → 1 blutonium ingot**, preserving the existing recipe and costs.
 - 🟣 **1 obsidian block + 100 mB water + FE → 100 mB Liquid Obsidian**.
 - 📦 Blutonium leaves through the item output; Liquid Obsidian leaves through the fluid output. Only the output needed by the active recipe can block that process.
-- 📚 **JEI, EMI and REI** show both recipes, including the water, energy, time and correct item or fluid result.
+- 📚 **JEI** shows both recipes, including the water, energy, time and correct item or fluid result.
 
 With the default configuration, the obsidian recipe takes **200 ticks (10 seconds at 20 TPS)** and uses **200 FE**. The coolant is manufactured cold; the reactor supplies the heat.
 
 Liquid Obsidian circulates as a reusable coolant. It heats up into **Heated Liquid Obsidian** in the reactor, then cools back into Liquid Obsidian in the heat exchanger. **It no longer becomes lava, and ordinary lava cannot supply this coolant circuit.**
 
-> 🔎 Explore coolant properties and conversions through the in-game guide, machine statistics and JEI/EMI/REI. Use that information to tune your own plant.
+> 🔎 Explore coolant properties and conversions through the in-game guide, machine statistics and JEI. Use that information to tune your own plant.
 
 ### 🖥️ Processor interface
 
@@ -168,6 +168,8 @@ Build your turbine, choose its rotor and coils, and tune the selected steam flow
 ### 🖥️ Turbine controls and statistics
 
 Set the steam flow, coil state and condensate handling. Follow rotor speed, current and potential steam conversion, efficiency and gross FE generation.
+
+On Minecraft 26.3, turbines show a subtle, gently moving white haze behind their windows according to stored steam and actual operating flow. Steam remains visible when it is converted as quickly as it arrives; switched-off turbines show only their stored reserve. Occasional condensation droplets appear beneath exposed ceiling and upper coil surfaces after a few seconds of rotating operation. Assembled reactor, turbine, heat-exchanger and battery ports show connections on the outer and inner faces, with closed chassis sides that fit neatly beside glass.
 
 ![Turbine interface showing rotor speed, FE output, steam flow, efficiency, coil and vent controls with the statistics panel](https://cdn.modrinth.com/data/IXXgM5v4/images/6cb949b6a6eb0fcb812ba5321e2b670ebecdff6d.png)
 
@@ -242,14 +244,16 @@ Learn the plant inside the game:
 
 | Integration | What it adds |
 | --- | --- |
-| 📚 JEI, EMI and REI | Both Industrial Processor recipes, moderators, turbine coils and current heat-exchanger fluid conversions. |
-| 💻 OpenComputers | Native cable-connected components for reactor, turbine and heat-exchanger monitoring and control. |
+| 📚 JEI | Both Industrial Processor recipes, moderators, turbine coils and current heat-exchanger fluid conversions. |
 | 🔎 Jade | Supported machine information in the inspection overlay. |
+| 💻 CC:Tweaked | Native computer ports for reactor, turbine and heat-exchanger telemetry and controls, with direct or wired-modem access. |
 | 🧪 Mekanism | The liquid sodium coolant option. |
 | ❄️ Ad Astra | The Cryo Fuel coolant option. |
 | 🛡️ Carry On | Protects assembled multiblocks from accidental pickup while keeping loose and disassembled parts carryable. |
 
 > 📦 **No additional mod is required.** The base mod runs with Minecraft and NeoForge alone.
+
+OpenComputers support is retained for compatible versions; its 26.3 adapter remains inactive until an updated build is available. The two integrations use the same three computer-port blocks through separate native APIs.
 
 ---
 
@@ -257,8 +261,9 @@ Learn the plant inside the game:
 
 | Requirement | Version |
 | --- | --- |
-| 🎮 Minecraft | **1.21.1** |
-| 🛠️ Loader | **NeoForge 21.1.264+** for Minecraft 1.21.1 |
+| 🎮 Minecraft | **26.3** |
+| 🛠️ Loader | **NeoForge 26.3.0.99+** for Minecraft 26.3 |
+| ☕ Java | **25** |
 | ☕ Java | **21** |
 | 📦 Additional required mods | **None** |
 

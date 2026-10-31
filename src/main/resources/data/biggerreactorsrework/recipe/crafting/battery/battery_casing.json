@@ -7,18 +7,10 @@
     "ICI"
   ],
   "key": {
-    "I": {
-      "item": "biggerreactorsrework:blutonium_ingot"
-    },
-    "C": {
-      "item": "minecraft:copper_ingot"
-    },
-    "G": {
-      "tag": "c:ingots/graphite"
-    },
-    "R": {
-      "item": "minecraft:redstone"
-    }
+    "I": "biggerreactorsrework:blutonium_ingot",
+    "C": "minecraft:copper_ingot",
+    "G": "#c:ingots/graphite",
+    "R": "minecraft:redstone"
   },
   "result": {
     "id": "biggerreactorsrework:battery_casing",

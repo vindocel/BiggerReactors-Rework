@@ -8,14 +8,9 @@ import biggerreactorsrework.multiblocks.reactor.simulation.SimulationDescription
 import biggerreactorsrework.multiblocks.reactor.simulation.cpu.FullPassReactorSimulation;
 import biggerreactorsrework.registries.ReactorModeratorRegistry;
 import net.minecraft.core.BlockPos;
-import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
-import net.neoforged.neoforge.gametest.GameTestHolder;
-import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
 
 /** Operational regressions. */
-@GameTestHolder(BiggerReactors.modid)
-@PrefixGameTestTemplate(false)
 public final class OperationGameTests {
     public static SimulationDescription description(int height) {
         var description = new SimulationDescription();
@@ -42,7 +37,7 @@ public final class OperationGameTests {
     public static void redstoneRejectsMalformedRequests(GameTestHelper helper) {
         BlockPos pos = new BlockPos(2, 2, 2);
         helper.setBlock(pos, ReactorRedstonePort.INSTANCE);
-        var tile = (ReactorRedstonePortTile) helper.getBlockEntity(pos);
+        var tile = (ReactorRedstonePortTile) GameTestSupport.be(helper,pos);
         tile.runRequest("setSelectedTab", "invalid");
         tile.runRequest("setSelectedTab", -1);
         tile.runRequest("setTriggerPS", null);

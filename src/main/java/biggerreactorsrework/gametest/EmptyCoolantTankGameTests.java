@@ -10,12 +10,10 @@ import biggerreactorsrework.util.FluidTransitionTank;
 import net.minecraft.core.component.DataComponentPatch;
 import net.minecraft.gametest.framework.*;
 import net.minecraft.world.level.material.Fluids;
-import net.neoforged.neoforge.fluids.capability.IFluidHandler.FluidAction;
+import biggerreactorsrework.core.transfer.FluidTanks.FluidAction;
 import net.neoforged.neoforge.gametest.*;
 
 /** Empty means unselected even if the last conversion left fractional thermal energy. */
-@GameTestHolder(BiggerReactors.modid)
-@PrefixGameTestTemplate(false)
 public final class EmptyCoolantTankGameTests {
     @GameTest(template="empty_7x7x7")
     public static void lastDrainClearsBothExchangerProfiles(GameTestHelper h) {

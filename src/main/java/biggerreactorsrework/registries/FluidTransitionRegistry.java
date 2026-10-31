@@ -1,8 +1,7 @@
 package biggerreactorsrework.registries;
 
-import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.material.Fluid;
 import biggerreactorsrework.BiggerReactors;
@@ -14,7 +13,6 @@ import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.*;
 
-@MethodsReturnNonnullByDefault
 @ParametersAreNonnullByDefault
 public class FluidTransitionRegistry {
     
@@ -137,12 +135,12 @@ public class FluidTransitionRegistry {
         @ConfigValue
         public RegistryType liquidType = RegistryType.tag;
         @ConfigValue
-        public ResourceLocation liquid = ResourceLocation.parse("dirt");
+        public Identifier liquid = Identifier.parse("dirt");
         
         @ConfigValue
         public RegistryType gasType = RegistryType.tag;
         @ConfigValue
-        public ResourceLocation gas = ResourceLocation.parse("dirt");
+        public Identifier gas = Identifier.parse("dirt");
     
         @ConfigValue(range = "(0,)")
         public double latentHeat;
@@ -168,14 +166,14 @@ public class FluidTransitionRegistry {
         liquidTransitions.clear();
         gasTransitions.clear();
         
-        final List<FluidTransitionJsonData> data = loader.loadAll(ResourceLocation.parse("biggerreactorsrework:transitions"));
+        final List<FluidTransitionJsonData> data = loader.loadAll(Identifier.parse("biggerreactorsrework:transitions"));
         BiggerReactors.LOGGER.info("Loaded " + data.size() + " transitions data entries");
         
         for (FluidTransitionJsonData transitionData : data) {
             final List<Fluid> liquids = new ArrayList<>();
             
             if (transitionData.liquidType == RegistryType.tag) {
-                var fluidTagOptional = BuiltInRegistries.FLUID.getTag(TagKey.create(BuiltInRegistries.FLUID.key(), transitionData.liquid));
+                var fluidTagOptional = BuiltInRegistries.FLUID.get(TagKey.create(BuiltInRegistries.FLUID.key(), transitionData.liquid));
                 fluidTagOptional.ifPresent(holders -> holders.forEach(fluidHolder -> {
                     var fluid = fluidHolder.value();
                     if (fluid.isSource(fluid.defaultFluidState())) {
@@ -184,7 +182,7 @@ public class FluidTransitionRegistry {
                 }));
             } else {
                 if (BuiltInRegistries.FLUID.containsKey(transitionData.liquid)) {
-                    Fluid fluid = BuiltInRegistries.FLUID.get(transitionData.liquid);
+                    Fluid fluid = BuiltInRegistries.FLUID.getValue(transitionData.liquid);
                     liquids.add(fluid);
                 }
                 
@@ -197,7 +195,7 @@ public class FluidTransitionRegistry {
             final List<Fluid> gases = new ArrayList<>();
             
             if (transitionData.gasType == RegistryType.tag) {
-                var fluidTagOptional = BuiltInRegistries.FLUID.getTag(TagKey.create(BuiltInRegistries.FLUID.key(), transitionData.gas));
+                var fluidTagOptional = BuiltInRegistries.FLUID.get(TagKey.create(BuiltInRegistries.FLUID.key(), transitionData.gas));
                 fluidTagOptional.ifPresent(holders -> holders.forEach(fluidHolder -> {
                     var fluid = fluidHolder.value();
                     if (fluid.isSource(fluid.defaultFluidState())) {
@@ -206,7 +204,7 @@ public class FluidTransitionRegistry {
                 }));
             } else {
                 if (BuiltInRegistries.FLUID.containsKey(transitionData.gas)) {
-                    Fluid fluid = BuiltInRegistries.FLUID.get(transitionData.gas);
+                    Fluid fluid = BuiltInRegistries.FLUID.getValue(transitionData.gas);
                     gases.add(fluid);
                 }
                 

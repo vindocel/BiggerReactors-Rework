@@ -10,7 +10,9 @@ import net.minecraft.server.level.ServerLevel;
 import net.neoforged.neoforge.capabilities.BlockCapability;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.capabilities.ICapabilityProvider;
-import net.neoforged.neoforge.energy.IEnergyStorage;
+import biggerreactorsrework.core.transfer.EnergyStore;
+import biggerreactorsrework.core.transfer.Transfer;
+import net.neoforged.neoforge.transfer.energy.EnergyHandler;
 import biggerreactorsrework.core.registry.OnModLoad;
 import biggerreactorsrework.core.util.NonnullDefault;
 import biggerreactorsrework.core.util.Pair;
@@ -108,18 +110,18 @@ public class EnergyHandlerWrappers {
     
     private static class Neo {
         
-        public static final BlockCapability<IEnergyStorage, Direction> FORGE_ENERGY_CAPABILITY = Capabilities.EnergyStorage.BLOCK;
+        public static final BlockCapability<EnergyHandler, Direction> FORGE_ENERGY_CAPABILITY = Capabilities.Energy.BLOCK;
 
         @OnModLoad
         public static void onModLoad() {
-            registerWrapper(FORGE_ENERGY_CAPABILITY, ToWrapper::new, FromWrapper::new, Integer.MIN_VALUE);
+            registerWrapper(FORGE_ENERGY_CAPABILITY, handler -> new ToWrapper(Transfer.energy(handler)), handler -> Transfer.exposeEnergy(new FromWrapper(handler), handler), Integer.MIN_VALUE);
         }
 
         private static class ToWrapper implements IEnergyHandler {
             
-            private final IEnergyStorage forgeStorage;
+            private final EnergyStore forgeStorage;
             
-            ToWrapper(IEnergyStorage forgeStorage) {
+            ToWrapper(EnergyStore forgeStorage) {
                 this.forgeStorage = forgeStorage;
             }
             
@@ -144,7 +146,7 @@ public class EnergyHandlerWrappers {
             }
         }
         
-        private static class FromWrapper implements IEnergyStorage {
+        private static class FromWrapper implements EnergyStore {
             
             private final IEnergyHandler phosHandler;
             

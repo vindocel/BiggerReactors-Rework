@@ -8,7 +8,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 import net.minecraft.world.Containers;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.ItemInteractionResult;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
@@ -21,14 +21,12 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluids;
 import net.neoforged.neoforge.capabilities.Capabilities;
-import net.neoforged.neoforge.energy.EnergyStorage;
-import net.neoforged.neoforge.energy.IEnergyStorage;
-import net.neoforged.neoforge.fluids.FluidUtil;
-import net.neoforged.neoforge.items.IItemHandler;
-import net.neoforged.neoforge.items.ItemHandlerHelper;
+import biggerreactorsrework.core.transfer.SimpleEnergyStore;
+import biggerreactorsrework.core.transfer.EnergyStore;
+import biggerreactorsrework.core.transfer.ItemSlots;
 import net.neoforged.neoforge.fluids.FluidStack;
-import net.neoforged.neoforge.fluids.capability.IFluidHandler;
-import net.neoforged.neoforge.fluids.capability.templates.FluidTank;
+import biggerreactorsrework.core.transfer.FluidTanks;
+import biggerreactorsrework.core.transfer.SimpleTank;
 import biggerreactorsrework.BiggerReactors;
 import biggerreactorsrework.Config;
 import biggerreactorsrework.api.WorkHandler;
@@ -56,17 +54,17 @@ import javax.annotation.Nullable;
  * Each face is configured per material (items, water, energy) and can pull and push items and water by itself.
  */
 // Modified 2026-10-27: industrial processing with independent item/fluid products and legacy saves.
-public class CyaniteReprocessorTile extends BlockEntity implements MenuProvider, IHasUpdatableState<CyaniteReprocessorState> {
+public class CyaniteReprocessorTile extends BlockEntity implements MenuProvider, IHasUpdatableState<CyaniteReprocessorState>, biggerreactorsrework.core.transfer.TransferSnapshots {
 
     @RegisterTile("cyanite_reprocessor")
     public static final BlockEntityType.BlockEntitySupplier<CyaniteReprocessorTile> SUPPLIER = new RegisterTile.Producer<>(CyaniteReprocessorTile::new);
 
     @RegisterCapability
-    private static final CapabilityRegistration ITEM_HANDLER_CAP_REGISTRATION = CapabilityRegistration.tileCap(Capabilities.ItemHandler.BLOCK, CyaniteReprocessorTile.class, (CyaniteReprocessorTile tile, @Nullable Direction side) -> tile.itemHandlerFor(side));
+    private static final CapabilityRegistration ITEM_HANDLER_CAP_REGISTRATION = CapabilityRegistration.tileCap(Capabilities.Item.BLOCK, CyaniteReprocessorTile.class, (CyaniteReprocessorTile tile, @Nullable Direction side) -> biggerreactorsrework.core.transfer.Transfer.exposeItems(tile.itemHandlerFor(side), tile));
     @RegisterCapability
-    private static final CapabilityRegistration ENERGY_CAP_REGISTRATION = CapabilityRegistration.tileCap(Capabilities.EnergyStorage.BLOCK, CyaniteReprocessorTile.class, (CyaniteReprocessorTile tile, @Nullable Direction side) -> tile.energyFor(side));
+    private static final CapabilityRegistration ENERGY_CAP_REGISTRATION = CapabilityRegistration.tileCap(Capabilities.Energy.BLOCK, CyaniteReprocessorTile.class, (CyaniteReprocessorTile tile, @Nullable Direction side) -> biggerreactorsrework.core.transfer.Transfer.exposeEnergy(tile.energyFor(side), tile));
     @RegisterCapability
-    private static final CapabilityRegistration FLUID_HANDLER_CAP_REGISTRATION = CapabilityRegistration.tileCap(Capabilities.FluidHandler.BLOCK, CyaniteReprocessorTile.class, (CyaniteReprocessorTile tile, @Nullable Direction side) -> tile.fluidFor(side));
+    private static final CapabilityRegistration FLUID_HANDLER_CAP_REGISTRATION = CapabilityRegistration.tileCap(Capabilities.Fluid.BLOCK, CyaniteReprocessorTile.class, (CyaniteReprocessorTile tile, @Nullable Direction side) -> biggerreactorsrework.core.transfer.Transfer.exposeFluids(tile.fluidFor(side), tile));
 
     /**
      * Cyanite ingots consumed per blutonium ingot produced.
@@ -92,7 +90,7 @@ public class CyaniteReprocessorTile extends BlockEntity implements MenuProvider,
     /**
      * The water tank.
      */
-    private final FluidTank fluidTank = new FluidTank(Config.CONFIG.CyaniteReprocessor.WaterTankCapacity, this::acceptsFluid) {
+    private final SimpleTank fluidTank = new SimpleTank(Config.CONFIG.CyaniteReprocessor.WaterTankCapacity, this::acceptsFluid) {
         @Override
         protected void onContentsChanged() {
             CyaniteReprocessorTile.this.setChanged();
@@ -101,7 +99,7 @@ public class CyaniteReprocessorTile extends BlockEntity implements MenuProvider,
     /**
      * View of the water tank for water input sides: it only fills.
      */
-    private final IFluidHandler waterInput = new IFluidHandler() {
+    private final FluidTanks waterInput = new FluidTanks() {
         @Override
         public int getTanks() {
             return fluidTank.getTanks();
@@ -149,12 +147,12 @@ public class CyaniteReprocessorTile extends BlockEntity implements MenuProvider,
      * input sides.
      */
     private boolean autoEjectFluid = false;
-    private final FluidTank outputTank = new FluidTank(Config.CONFIG.CyaniteReprocessor.WaterTankCapacity) {
+    private final SimpleTank outputTank = new SimpleTank(Config.CONFIG.CyaniteReprocessor.WaterTankCapacity) {
         @Override protected void onContentsChanged() { CyaniteReprocessorTile.this.setChanged(); }
     };
-    private final IFluidHandler combinedFluids = fluidView(true,true);
-    private IFluidHandler fluidView(boolean input,boolean output) {
-        return new IFluidHandler() {
+    private final FluidTanks combinedFluids = fluidView(true,true);
+    private FluidTanks fluidView(boolean input,boolean output) {
+        return new FluidTanks() {
             public int getTanks(){return 2;}
             public FluidStack getFluidInTank(int tank){return (tank==0?fluidTank:outputTank).getFluid().copy();}
             public int getTankCapacity(int tank){return (tank==0?fluidTank:outputTank).getCapacity();}
@@ -174,6 +172,24 @@ public class CyaniteReprocessorTile extends BlockEntity implements MenuProvider,
      */
     private ItemStack itemPresentLastTick = ItemStack.EMPTY;
 
+    private record TransferState(ItemStack[] items, int energy, FluidStack input, FluidStack output) {
+    }
+
+    @Override
+    public Object transferSnapshot() {
+        return new TransferState(itemHandler.snapshot(), energyStorage.getEnergyStored(), fluidTank.getFluid().copy(), outputTank.getFluid().copy());
+    }
+
+    @Override
+    public void restoreTransferSnapshot(Object snapshot) {
+        if (snapshot instanceof TransferState state) {
+            itemHandler.restore(state.items);
+            energyStorage.set(state.energy);
+            fluidTank.setFluid(state.input);
+            outputTank.setFluid(state.output);
+        }
+    }
+
     public CyaniteReprocessorTile(BlockEntityType<CyaniteReprocessorTile> TYPE, BlockPos pos, BlockState state) {
         super(TYPE, pos, state);
         this.updateState();
@@ -182,7 +198,7 @@ public class CyaniteReprocessorTile extends BlockEntity implements MenuProvider,
     /**
      * Energy storage that only accepts energy from outside, with the configured transfer rate.
      */
-    private final class Battery extends EnergyStorage {
+    private final class Battery extends SimpleEnergyStore {
         Battery() {
             super(Config.CONFIG.CyaniteReprocessor.EnergyTankCapacity, Config.CONFIG.CyaniteReprocessor.TransferRate, 0);
         }
@@ -227,7 +243,7 @@ public class CyaniteReprocessorTile extends BlockEntity implements MenuProvider,
      * Item handler of a world side, following its item route. The {@code null} side sees both slots (information tools).
      */
     @Nullable
-    public IItemHandler itemHandlerFor(@Nullable Direction side) {
+    public ItemSlots itemHandlerFor(@Nullable Direction side) {
         if (side == null) {
             return this.itemHandler.pipeHandler();
         }
@@ -239,7 +255,7 @@ public class CyaniteReprocessorTile extends BlockEntity implements MenuProvider,
      * Water input on the configured faces; the {@code null} side sees the tank.
      */
     @Nullable
-    public IFluidHandler fluidFor(@Nullable Direction side) {
+    public FluidTanks fluidFor(@Nullable Direction side) {
         if (side == null) return combinedFluids;
         SideRoute route = this.route(side, Transmission.FLUID);
         return switch(route) {
@@ -254,7 +270,7 @@ public class CyaniteReprocessorTile extends BlockEntity implements MenuProvider,
      * Energy input on the configured faces; the {@code null} side sees the storage, which never gives energy back.
      */
     @Nullable
-    public IEnergyStorage energyFor(@Nullable Direction side) {
+    public EnergyStore energyFor(@Nullable Direction side) {
         if (side == null || this.route(side, Transmission.ENERGY) == SideRoute.ENERGY_INPUT) {
             return this.energyStorage;
         }
@@ -328,12 +344,20 @@ public class CyaniteReprocessorTile extends BlockEntity implements MenuProvider,
      * Neighbor capability on a world side, if that block is loaded.
      */
     @Nullable
-    private <T> T neighbor(net.neoforged.neoforge.capabilities.BlockCapability<T, Direction> capability, Direction side) {
+    private <T> T neighbor(java.util.function.Function<net.minecraft.core.BlockPos, T> capability, Direction side) {
         BlockPos target = this.worldPosition.relative(side);
         if (this.level == null || !this.level.isLoaded(target)) {
             return null;
         }
-        return this.level.getCapability(capability, target, side.getOpposite());
+        return capability.apply(target);
+    }
+
+    private ItemSlots neighborItems(Direction side) {
+        return this.neighbor(target -> biggerreactorsrework.core.transfer.Transfer.items(this.level, target, side.getOpposite()), side);
+    }
+
+    private FluidTanks neighborFluids(Direction side) {
+        return this.neighbor(target -> biggerreactorsrework.core.transfer.Transfer.fluids(this.level, target, side.getOpposite()), side);
     }
 
     /**
@@ -344,7 +368,7 @@ public class CyaniteReprocessorTile extends BlockEntity implements MenuProvider,
             if (!this.route(face, Transmission.ITEM).insertsItems()) {
                 continue;
             }
-            IItemHandler source = this.neighbor(Capabilities.ItemHandler.BLOCK, face.toDirection(this.facing()));
+            ItemSlots source = this.neighborItems(face.toDirection(this.facing()));
             if (source == null) {
                 continue;
             }
@@ -374,14 +398,14 @@ public class CyaniteReprocessorTile extends BlockEntity implements MenuProvider,
             if (!this.route(face, Transmission.ITEM).extractsItems()) {
                 continue;
             }
-            IItemHandler destination = this.neighbor(Capabilities.ItemHandler.BLOCK, face.toDirection(this.facing()));
+            ItemSlots destination = this.neighborItems(face.toDirection(this.facing()));
             if (destination == null) {
                 continue;
             }
             ItemStack available = this.itemHandler.extractItem(CyaniteReprocessorItemHandler.OUTPUT_SLOT_INDEX, Integer.MAX_VALUE, true);
-            int moved = available.getCount() - ItemHandlerHelper.insertItem(destination, available, true).getCount();
+            int moved = available.getCount() - ItemSlots.insert(destination, available, true).getCount();
             if (moved > 0) {
-                ItemHandlerHelper.insertItem(destination, this.itemHandler.extractItem(CyaniteReprocessorItemHandler.OUTPUT_SLOT_INDEX, moved, false), false);
+                ItemSlots.insert(destination, this.itemHandler.extractItem(CyaniteReprocessorItemHandler.OUTPUT_SLOT_INDEX, moved, false), false);
             }
         }
     }
@@ -394,17 +418,17 @@ public class CyaniteReprocessorTile extends BlockEntity implements MenuProvider,
         for(RelativeFace face:RelativeFace.VALUES) {
             var route=this.route(face,Transmission.FLUID);
             if(route!=SideRoute.FLUID_OUTPUT && route!=SideRoute.FLUID_INPUT_OUTPUT)continue;
-            var target=neighbor(Capabilities.FluidHandler.BLOCK,face.toDirection(facing()));
-            if(target!=null)FluidUtil.tryFluidTransfer(target,outputTank,Config.CONFIG.CyaniteReprocessor.TransferRate,true);
+            var target=neighborFluids(face.toDirection(facing()));
+            if(target!=null)FluidTanks.move(target,outputTank,Config.CONFIG.CyaniteReprocessor.TransferRate);
         }
     }
 
-    private int pullRecipeFluid(IFluidHandler source,int space) {
+    private int pullRecipeFluid(FluidTanks source,int space) {
         var input=itemHandler.getStackInSlot(CyaniteReprocessorItemHandler.INPUT_SLOT_INDEX);
         for(var entry:biggerreactorsrework.machine.recipe.ReprocessingRecipes.all(level)) {
             var recipe=entry.value();
             if(!recipe.matches(new net.minecraft.world.item.crafting.SingleRecipeInput(input),level) || recipe.totalFluid()==0)continue;
-            int moved=FluidUtil.tryFluidTransfer(fluidTank,source,new FluidStack(recipe.fluid(),space),true).getAmount();
+            int moved=FluidTanks.move(fluidTank,source,new FluidStack(recipe.fluid(),space)).getAmount();
             if(moved>0)return moved;
         }
         return 0;
@@ -419,7 +443,7 @@ public class CyaniteReprocessorTile extends BlockEntity implements MenuProvider,
             if (this.route(face, Transmission.FLUID) != SideRoute.FLUID_INPUT && this.route(face, Transmission.FLUID) != SideRoute.FLUID_INPUT_OUTPUT) {
                 continue;
             }
-            IFluidHandler source = this.neighbor(Capabilities.FluidHandler.BLOCK, face.toDirection(this.facing()));
+            FluidTanks source = this.neighborFluids(face.toDirection(this.facing()));
             if (source != null) {
                 pullRecipeFluid(source, space);
             }
@@ -429,32 +453,32 @@ public class CyaniteReprocessorTile extends BlockEntity implements MenuProvider,
     /**
      * Handle right-clicks holding the debug tool or a water bucket.
      *
-     * @return {@link ItemInteractionResult#PASS_TO_DEFAULT_BLOCK_INTERACTION} for other items, so the screen opens.
+     * @return {@link InteractionResult#PASS_TO_DEFAULT_BLOCK_INTERACTION} for other items, so the screen opens.
      */
     @Nonnull
-    public ItemInteractionResult onItemUse(ItemStack stack, Level level, Player player, InteractionHand hand) {
+    public InteractionResult onItemUse(ItemStack stack, Level level, Player player, InteractionHand hand) {
         // Print tile data.
         if (stack.is(DebugTool.INSTANCE)) {
-            if (!level.isClientSide) {
+            if (!level.isClientSide()) {
                 player.sendSystemMessage(Component.literal(String.format("[%s] Progress: %s/%s", BiggerReactors.modid, this.workHandler.getProgress(), this.workHandler.getGoal())));
                 player.sendSystemMessage(Component.literal(String.format("[%s] Energy: %s/%s FE", BiggerReactors.modid, this.energyStorage.getEnergyStored(), this.energyStorage.getMaxEnergyStored())));
                 player.sendSystemMessage(Component.literal(String.format("[%s] Fluid Tank: %s/%s mB", BiggerReactors.modid, this.fluidTank.getFluidAmount(), this.fluidTank.getCapacity())));
             }
-            return ItemInteractionResult.sidedSuccess(level.isClientSide);
+            return InteractionResult.SUCCESS;
         }
 
         // Do water bucket check.
         if (stack.is(Items.WATER_BUCKET)) {
-            if (!level.isClientSide && this.fluidTank.getSpace() >= 1000) {
-                this.fluidTank.fill(new FluidStack(Fluids.WATER, 1000), IFluidHandler.FluidAction.EXECUTE);
+            if (!level.isClientSide() && this.fluidTank.getSpace() >= 1000) {
+                this.fluidTank.fill(new FluidStack(Fluids.WATER, 1000), FluidTanks.FluidAction.EXECUTE);
                 if (!player.hasInfiniteMaterials()) {
                     player.setItemInHand(hand, new ItemStack(Items.BUCKET));
                 }
             }
-            return ItemInteractionResult.sidedSuccess(level.isClientSide);
+            return InteractionResult.SUCCESS;
         }
 
-        return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+        return InteractionResult.TRY_WITH_EMPTY_HAND;
     }
 
     /**
@@ -520,7 +544,7 @@ public class CyaniteReprocessorTile extends BlockEntity implements MenuProvider,
         String condition="no_item";
         if(entry!=null) {
             var recipe=entry.value();int needed=recipe.fluidCostAt(Math.min(workHandler.getProgress(),recipe.duration()-1));
-            boolean space=recipe.producesFluid()?outputTank.fill(recipe.fluidResult(),IFluidHandler.FluidAction.SIMULATE)==recipe.fluidResult().getAmount():itemHandler.insertItem(1,recipe.result(),true).isEmpty();
+            boolean space=recipe.producesFluid()?outputTank.fill(recipe.fluidResult(),FluidTanks.FluidAction.SIMULATE)==recipe.fluidResult().getAmount():itemHandler.insertItem(1,recipe.result(),true).isEmpty();
             condition=!space?"output_full":energyStorage.getEnergyStored()<recipe.energy()?"no_energy":
                 needed>0 && (fluidTank.getFluid().getFluid()!=recipe.fluid() || fluidTank.getFluidAmount()<needed)?"no_water":"working";
         }
@@ -549,35 +573,44 @@ public class CyaniteReprocessorTile extends BlockEntity implements MenuProvider,
                 (double) this.getBlockPos().getZ() + 0.5D) <= 64.0D;
     }
 
+    @Override
+    public void preRemoveSideEffects(BlockPos pos, BlockState state) {
+        if (this.level != null) {
+            this.dropContents(this.level, pos);
+        }
+    }
+
     /**
      * Read NBT data from the world.
      */
     @Override
-    protected void loadAdditional(@Nonnull CompoundTag parentCompound, @Nonnull HolderLookup.Provider registries) {
-        super.loadAdditional(parentCompound, registries);
-        CompoundTag childCompound = parentCompound.getCompound("cyaniteReprocessorState");
+    protected void loadAdditional(net.minecraft.world.level.storage.ValueInput input) {
+        super.loadAdditional(input);
+        HolderLookup.Provider registries = input.lookup();
+        CompoundTag parentCompound = biggerreactorsrework.core.transfer.TagValues.read(input);
+        CompoundTag childCompound = parentCompound.getCompoundOrEmpty("cyaniteReprocessorState");
 
         // Read work.
-        this.workHandler = new WorkHandler(Config.CONFIG.CyaniteReprocessor.TotalWorkTime, Math.max(0, childCompound.getInt("workTime")));
-        activeRecipeId = net.minecraft.resources.ResourceLocation.tryParse(childCompound.getString("recipe"));
-        restoredRecipeSignature = childCompound.getString("recipeSignature");
+        this.workHandler = new WorkHandler(Config.CONFIG.CyaniteReprocessor.TotalWorkTime, Math.max(0, childCompound.getIntOr("workTime", 0)));
+        activeRecipeId = net.minecraft.resources.Identifier.tryParse(childCompound.getStringOr("recipe", ""));
+        restoredRecipeSignature = childCompound.getStringOr("recipeSignature", "");
         // Read items.
-        this.itemHandler.deserializeNBT(registries, childCompound.getCompound("inventory"));
+        this.itemHandler.deserializeNBT(registries, childCompound.getCompoundOrEmpty("inventory"));
         if (this.itemHandler.getSlots() != CyaniteReprocessorItemHandler.SLOTS) {
             this.itemHandler.setSize(CyaniteReprocessorItemHandler.SLOTS);
         }
         // Read energy.
-        this.energyStorage.set(childCompound.getInt("energyStored"));
+        this.energyStorage.set(childCompound.getIntOr("energyStored", 0));
         // Read fluids.
-        this.fluidTank.readFromNBT(registries, childCompound.getCompound("fluidTank"));
-        this.outputTank.readFromNBT(registries, childCompound.getCompound("outputTank"));
-        this.autoEjectFluid = childCompound.getBoolean("autoEjectFluid");
+        this.fluidTank.readFromNBT(registries, childCompound.getCompoundOrEmpty("fluidTank"));
+        this.outputTank.readFromNBT(registries, childCompound.getCompoundOrEmpty("outputTank"));
+        this.autoEjectFluid = childCompound.getBooleanOr("autoEjectFluid", false);
         this.itemPresentLastTick = this.itemHandler.getStackInSlot(CyaniteReprocessorItemHandler.INPUT_SLOT_INDEX).copy();
         // Read sides and automation.
-        this.sides.load(childCompound.getCompound("sides"));
-        this.autoInput = childCompound.getBoolean("autoInput");
-        this.autoEject = childCompound.getBoolean("autoEject");
-        this.autoInputFluid = childCompound.getBoolean("autoInputFluid");
+        this.sides.load(childCompound.getCompoundOrEmpty("sides"));
+        this.autoInput = childCompound.getBooleanOr("autoInput", false);
+        this.autoEject = childCompound.getBooleanOr("autoEject", false);
+        this.autoInputFluid = childCompound.getBooleanOr("autoInputFluid", false);
         this.updateState();
     }
 
@@ -585,8 +618,9 @@ public class CyaniteReprocessorTile extends BlockEntity implements MenuProvider,
      * Save NBT data to the world.
      */
     @Override
-    protected void saveAdditional(@Nonnull CompoundTag parentCompound, @Nonnull HolderLookup.Provider registries) {
-        super.saveAdditional(parentCompound, registries);
+    protected void saveAdditional(net.minecraft.world.level.storage.ValueOutput output) {
+        super.saveAdditional(output);
+        HolderLookup.Provider registries = this.level != null ? this.level.registryAccess() : net.neoforged.neoforge.server.ServerLifecycleHooks.getCurrentServer().registryAccess();
         CompoundTag childCompound = new CompoundTag();
 
         // Write work.
@@ -607,14 +641,14 @@ public class CyaniteReprocessorTile extends BlockEntity implements MenuProvider,
         childCompound.putBoolean("autoEject", this.autoEject);
         childCompound.putBoolean("autoInputFluid", this.autoInputFluid);
 
-        parentCompound.put("cyaniteReprocessorState", childCompound);
+        output.store("cyaniteReprocessorState", CompoundTag.CODEC, childCompound);
     }
 
     /**
      * @return Whether or not the machine can perform work.
      * @see CyaniteReprocessorTile#tick()
      */
-    private net.minecraft.resources.ResourceLocation activeRecipeId;
+    private net.minecraft.resources.Identifier activeRecipeId;
     private String activeRecipeSignature = "";
     private String restoredRecipeSignature = "";
     private biggerreactorsrework.machine.recipe.ReprocessingRecipe fingerprintedRecipe;
@@ -637,7 +671,7 @@ public class CyaniteReprocessorTile extends BlockEntity implements MenuProvider,
     }
 
     private boolean canWork(biggerreactorsrework.machine.recipe.ReprocessingRecipe recipe) {
-        boolean room=recipe.producesFluid() ? outputTank.fill(recipe.fluidResult(),IFluidHandler.FluidAction.SIMULATE)==recipe.fluidResult().getAmount() :
+        boolean room=recipe.producesFluid() ? outputTank.fill(recipe.fluidResult(),FluidTanks.FluidAction.SIMULATE)==recipe.fluidResult().getAmount() :
             itemHandler.insertItem(CyaniteReprocessorItemHandler.OUTPUT_SLOT_INDEX,recipe.result(),true).isEmpty();
         int water=recipe.fluidCostAt(workHandler.getProgress());
         return room && energyStorage.getEnergyStored()>=recipe.energy() && (water==0 ||
@@ -680,23 +714,23 @@ public class CyaniteReprocessorTile extends BlockEntity implements MenuProvider,
         } else {
             var recipe = selected.value();
             String signature = signature(recipe);
-            if (!selected.id().equals(activeRecipeId) || !signature.equals(activeRecipeSignature) || workHandler.getGoal() != recipe.duration()) {
-                int restored = selected.id().equals(activeRecipeId) && signature.equals(restoredRecipeSignature) ? workHandler.getProgress() : 0;
+            if (!selected.id().identifier().equals(activeRecipeId) || !signature.equals(activeRecipeSignature) || workHandler.getGoal() != recipe.duration()) {
+                int restored = selected.id().identifier().equals(activeRecipeId) && signature.equals(restoredRecipeSignature) ? workHandler.getProgress() : 0;
                 workHandler = new WorkHandler(recipe.duration(), Math.min(restored, recipe.duration() - 1));
-                activeRecipeId = selected.id(); activeRecipeSignature = signature; restoredRecipeSignature = "";
+                activeRecipeId = selected.id().identifier(); activeRecipeSignature = signature; restoredRecipeSignature = "";
                 doUpdate = true;
             }
             if (canWork(recipe)) {
                 isActive = true; doUpdate = true;
                 workHandler.increment(1);
                 energyStorage.consume(recipe.energy());
-                fluidTank.drain(recipe.fluidCostAt(workHandler.getProgress()-1), IFluidHandler.FluidAction.EXECUTE);
+                fluidTank.drain(recipe.fluidCostAt(workHandler.getProgress()-1), FluidTanks.FluidAction.EXECUTE);
             } else if (!recipe.producesFluid() && workHandler.getProgress() > 0) {
                 workHandler.decrement(Math.min(2, workHandler.getProgress())); doUpdate = true;
             }
             if (workHandler.isFinished()) {
                 itemHandler.extractItem(CyaniteReprocessorItemHandler.INPUT_SLOT_INDEX, recipe.count(), false);
-                if(recipe.producesFluid())outputTank.fill(recipe.fluidResult(),IFluidHandler.FluidAction.EXECUTE);
+                if(recipe.producesFluid())outputTank.fill(recipe.fluidResult(),FluidTanks.FluidAction.EXECUTE);
                 else itemHandler.insertItem(CyaniteReprocessorItemHandler.OUTPUT_SLOT_INDEX, recipe.result(), false);
                 workHandler.clear();
                 itemPresentLastTick = itemHandler.getStackInSlot(CyaniteReprocessorItemHandler.INPUT_SLOT_INDEX).copy();

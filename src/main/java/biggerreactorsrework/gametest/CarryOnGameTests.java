@@ -30,8 +30,6 @@ import java.util.*;
 import java.util.function.Consumer;
 
 /** Added 2026-10-29: real clicks with Carry On present/absent, including loose pickup and carried placement. */
-@GameTestHolder(BiggerReactors.modid)
-@PrefixGameTestTemplate(false)
 public final class CarryOnGameTests {
     private static final class MenuPlayer extends FakePlayer {
         int opened;

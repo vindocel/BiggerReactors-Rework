@@ -6,18 +6,10 @@
     "CRC"
   ],
   "key": {
-    "C": {
-      "item": "biggerreactorsrework:reactor_casing"
-    },
-    "Y": {
-      "tag": "c:ingots/uranium"
-    },
-    "R": {
-      "item": "minecraft:redstone"
-    },
-    "D": {
-      "item": "minecraft:diamond"
-    }
+    "C": "biggerreactorsrework:reactor_casing",
+    "Y": "#c:ingots/uranium",
+    "R": "minecraft:redstone",
+    "D": "minecraft:diamond"
   },
   "result": {
     "id": "biggerreactorsrework:reactor_terminal"

@@ -1,20 +1,13 @@
 {
   "parent": "block/block",
-  "render_type": "cutout",
   "textures": {
     "particle": "biggerreactorsrework:block/battery/cell/body",
     "b_up": "biggerreactorsrework:block/battery/cell/body/connected_l",
-    "c_up": "biggerreactorsrework:block/battery/cell/energy",
     "b_down": "biggerreactorsrework:block/battery/cell/body/connected_l",
-    "c_down": "biggerreactorsrework:block/battery/cell/energy",
     "b_north": "biggerreactorsrework:block/battery/cell/body/connected_r",
-    "c_north": "biggerreactorsrework:block/battery/cell/energy",
     "b_south": "biggerreactorsrework:block/battery/cell/body/connected_l",
-    "c_south": "biggerreactorsrework:block/battery/cell/energy",
     "b_east": "biggerreactorsrework:block/battery/cell/body/connected_none",
-    "c_east": "biggerreactorsrework:block/battery/cell/energy",
-    "b_west": "biggerreactorsrework:block/battery/cell/body/connected_none",
-    "c_west": "biggerreactorsrework:block/battery/cell/energy"
+    "b_west": "biggerreactorsrework:block/battery/cell/body/connected_none"
   },
   "elements": [
     {
@@ -51,45 +44,6 @@
         },
         "west": {
           "texture": "#b_west",
-          "cullface": "west"
-        }
-      }
-    },
-    {
-      "from": [
-        0,
-        0,
-        0
-      ],
-      "to": [
-        16,
-        16,
-        16
-      ],
-      "shade": false,
-      "faces": {
-        "up": {
-          "texture": "#c_up",
-          "cullface": "up"
-        },
-        "down": {
-          "texture": "#c_down",
-          "cullface": "down"
-        },
-        "north": {
-          "texture": "#c_north",
-          "cullface": "north"
-        },
-        "south": {
-          "texture": "#c_south",
-          "cullface": "south"
-        },
-        "east": {
-          "texture": "#c_east",
-          "cullface": "east"
-        },
-        "west": {
-          "texture": "#c_west",
           "cullface": "west"
         }
       }

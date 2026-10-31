@@ -76,9 +76,11 @@ public interface IReactorSimulation extends ISerializable, IDebuggable {
         long capacity();
         
         long generatedLastTick();
+        
+        void restoreStored(long stored);
     }
     
-    interface ICoolantTank {
+    interface ICoolantTank extends biggerreactorsrework.core.transfer.TransferSnapshots {
         void dumpLiquid();
         
         void dumpVapor();
@@ -126,5 +128,7 @@ public interface IReactorSimulation extends ISerializable, IDebuggable {
         long extractWaste(long amount, boolean simulated);
         
         double burnedLastTick();
+        
+        void restoreStored(long fuel, long waste);
     }
 }

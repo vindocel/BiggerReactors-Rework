@@ -1,6 +1,5 @@
 package biggerreactorsrework.multiblocks.reactor.blocks;
 
-import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -13,11 +12,10 @@ import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 
 @ParametersAreNonnullByDefault
-@MethodsReturnNonnullByDefault
 public class ReactorCasing extends ReactorBaseBlock implements IAssemblyStateBlock, IAxisPositionBlock {
     
     @RegisterBlock(name = "reactor_casing", tileEntityClass = ReactorCasingTile.class)
-    public static final ReactorCasing INSTANCE = new ReactorCasing();
+    public static final ReactorCasing INSTANCE = biggerreactorsrework.core.registry.RegistryIds.named("reactor_casing", () -> new ReactorCasing());
     
     public ReactorCasing() {
         super();

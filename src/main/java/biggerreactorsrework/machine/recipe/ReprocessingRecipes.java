@@ -14,16 +14,16 @@ public final class ReprocessingRecipes {
     private static final DeferredRegister<RecipeType<?>> TYPES = DeferredRegister.create(Registries.RECIPE_TYPE, BiggerReactors.modid);
     private static final DeferredRegister<RecipeSerializer<?>> SERIALIZERS = DeferredRegister.create(Registries.RECIPE_SERIALIZER, BiggerReactors.modid);
     public static final DeferredHolder<RecipeType<?>, RecipeType<ReprocessingRecipe>> TYPE = TYPES.register("cyanite_reprocessing", () -> new RecipeType<>() { public String toString() { return BiggerReactors.modid + ":cyanite_reprocessing"; } });
-    public static final DeferredHolder<RecipeSerializer<?>, ReprocessingRecipe.Serializer> SERIALIZER = SERIALIZERS.register("cyanite_reprocessing", ReprocessingRecipe.Serializer::new);
+    public static final DeferredHolder<RecipeSerializer<?>, RecipeSerializer<ReprocessingRecipe>> SERIALIZER = SERIALIZERS.register("cyanite_reprocessing", () -> new RecipeSerializer<>(ReprocessingRecipe.CODEC, ReprocessingRecipe.STREAM_CODEC));
     public static void register(IEventBus bus) { TYPES.register(bus); SERIALIZERS.register(bus); }
-    private record Snapshot(java.util.Collection<RecipeHolder<?>> source,List<RecipeHolder<ReprocessingRecipe>> sorted) { }
-    private static final java.util.Map<RecipeManager,Snapshot> CACHE = new java.util.WeakHashMap<>();
+    private record Snapshot(RecipeMap source,List<RecipeHolder<ReprocessingRecipe>> sorted) { }
+    private static Snapshot cache;
     public static synchronized List<RecipeHolder<ReprocessingRecipe>> all(Level level) {
         if (level == null) return List.of();
-        var manager=level.getRecipeManager();var source=manager.getRecipes();var cached=CACHE.get(manager);
-        if(cached!=null&&cached.source()==source)return cached.sorted();
-        var sorted=manager.getAllRecipesFor(TYPE.get()).stream().sorted(Comparator.comparing(r -> r.id().toString())).toList();
-        CACHE.put(manager,new Snapshot(source,sorted));return sorted;
+        var source=RecipeAccess.map(level);
+        if(cache!=null&&cache.source()==source)return cache.sorted();
+        var sorted=source.byType(TYPE.get()).stream().sorted(Comparator.comparing(r -> r.id().identifier().toString())).toList();
+        cache=new Snapshot(source,sorted);return sorted;
     }
     private ReprocessingRecipes() { }
 }

@@ -2,8 +2,8 @@ package biggerreactorsrework.multiblocks.battery;
 
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.capabilities.Capabilities;
-import net.neoforged.neoforge.energy.IEnergyStorage;
-import net.neoforged.neoforge.items.ItemStackHandler;
+import biggerreactorsrework.core.transfer.EnergyStore;
+import biggerreactorsrework.core.transfer.SlotStorage;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -12,7 +12,7 @@ import javax.annotation.Nullable;
  * The battery's item slots: the first drains an item into the cells, the second charges an item from them. Both count
  * against the same per-tick limits as the ports.
  */
-public class BatteryItemHandler extends ItemStackHandler {
+public class BatteryItemHandler extends SlotStorage {
     public static final int DISCHARGE_SLOT = 0;
     public static final int CHARGE_SLOT = 1;
     public static final int SLOTS = 2;
@@ -25,13 +25,13 @@ public class BatteryItemHandler extends ItemStackHandler {
     }
     
     @Nullable
-    public static IEnergyStorage energy(ItemStack stack) {
-        return stack.isEmpty() ? null : stack.getCapability(Capabilities.EnergyStorage.ITEM);
+    public static EnergyStore energy(ItemStack stack) {
+        return stack.isEmpty() ? null : biggerreactorsrework.core.transfer.Transfer.energy(net.neoforged.neoforge.transfer.access.ItemAccess.forStack(stack).getCapability(Capabilities.Energy.ITEM));
     }
     
     @Override
     public boolean isItemValid(int slot, @Nonnull ItemStack stack) {
-        IEnergyStorage storage = energy(stack);
+        EnergyStore storage = energy(stack);
         if (storage == null) {
             return false;
         }

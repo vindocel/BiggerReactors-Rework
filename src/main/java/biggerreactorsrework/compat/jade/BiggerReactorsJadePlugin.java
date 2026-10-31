@@ -11,8 +11,8 @@ import biggerreactorsrework.multiblocks.reactor.tiles.ReactorPowerTapTile;
 import biggerreactorsrework.multiblocks.turbine.blocks.TurbinePowerTap;
 import biggerreactorsrework.multiblocks.turbine.tiles.TurbinePowerTapTile;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.resources.ResourceLocation;
-import net.neoforged.neoforge.energy.IEnergyStorage;
+import net.minecraft.resources.Identifier;
+import biggerreactorsrework.core.transfer.EnergyStore;
 import snownee.jade.api.BlockAccessor;
 import snownee.jade.api.IServerDataProvider;
 import snownee.jade.api.IWailaClientRegistration;
@@ -27,7 +27,7 @@ import snownee.jade.api.view.HideThingsExtensionProvider;
  */
 @WailaPlugin
 public class BiggerReactorsJadePlugin implements IWailaPlugin {
-    static final ResourceLocation UID = ResourceLocation.fromNamespaceAndPath(BiggerReactors.modid, "energy_bar");
+    static final Identifier UID = Identifier.fromNamespaceAndPath(BiggerReactors.modid, "energy_bar");
     static final String ENERGY = "energy";
     static final String CAPACITY = "capacity";
 
@@ -58,7 +58,7 @@ public class BiggerReactorsJadePlugin implements IWailaPlugin {
         @Override
         public void appendServerData(CompoundTag data, BlockAccessor accessor) {
             if (accessor.getBlockEntity() instanceof CyaniteReprocessorTile tile) {
-                IEnergyStorage storage = tile.energyFor(null);
+                EnergyStore storage = tile.energyFor(null);
                 data.putLong(ENERGY, storage.getEnergyStored());
                 data.putLong(CAPACITY, storage.getMaxEnergyStored());
             } else if (accessor.getBlockEntity() instanceof BatteryBaseTile tile) {
@@ -75,7 +75,7 @@ public class BiggerReactorsJadePlugin implements IWailaPlugin {
         }
 
         @Override
-        public ResourceLocation getUid() {
+        public Identifier getUid() {
             return UID;
         }
     }

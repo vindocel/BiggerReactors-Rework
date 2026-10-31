@@ -1,6 +1,5 @@
 package biggerreactorsrework.multiblocks.turbine.tiles;
 
-import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -18,7 +17,6 @@ import static biggerreactorsrework.multiblocks.turbine.blocks.TurbineRotorBlade.
 import static biggerreactorsrework.multiblocks.turbine.state.TurbineShaftRotationState.*;
 
 @ParametersAreNonnullByDefault
-@MethodsReturnNonnullByDefault
 public class TurbineRotorShaftTile extends TurbineBaseTile implements IEventMultiblock.AssemblyStateTransition {
     
     @RegisterTile("turbine_rotor_shaft")

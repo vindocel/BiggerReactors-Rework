@@ -1,23 +1,23 @@
 package biggerreactorsrework.client.guide;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.resources.Identifier;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
 import biggerreactorsrework.machine.recipe.ReprocessingRecipe;
 
 /** Native machine process card; follows recipe replacement without a viewer. */
-record GuideReprocessing(ResourceLocation id) implements GuideElement {
+record GuideReprocessing(Identifier id) implements GuideElement {
     public int height(GuideScreen screen,int width){return 100;}
-    public void render(GuideScreen screen,GuiGraphics g,int x,int y,int width,int mx,int my){
+    public void render(GuideScreen screen,GuiGraphicsExtractor g,int x,int y,int width,int mx,int my){
         var level=Minecraft.getInstance().level;
-        var holder=level==null?null:level.getRecipeManager().byKey(id).orElse(null);
+        var holder=level==null?null:biggerreactorsrework.machine.recipe.RecipeAccess.byKey(level,net.minecraft.resources.ResourceKey.create(net.minecraft.core.registries.Registries.RECIPE,id)).orElse(null);
         if(holder==null||!(holder.value() instanceof ReprocessingRecipe recipe)){
             screen.fixedText(g,Component.translatable("guide.biggerreactorsrework.recipe_missing"),x,y,width,GuideElements.MUTED);return;
         }
-        var options=recipe.ingredient().getItems();
-        var input=options.length==0?ItemStack.EMPTY:options[(int)(net.minecraft.Util.getMillis()/1000%options.length)].copyWithCount(recipe.count());
+        var options=biggerreactorsrework.machine.recipe.RecipeAccess.stacks(recipe.ingredient());
+        var input=options.length==0?ItemStack.EMPTY:options[(int)(net.minecraft.util.Util.getMillis()/1000%options.length)].copyWithCount(recipe.count());
         screen.fixedText(g,Component.translatable("guide.biggerreactorsrework.process.machine"),x,y+14,width,GuideElements.MUTED);
         GuideProcesses.flow(screen,g,x,y+30,width,mx,my,input,
                 new ItemStack(biggerreactorsrework.machine.blocks.CyaniteReprocessor.INSTANCE),recipe.result());

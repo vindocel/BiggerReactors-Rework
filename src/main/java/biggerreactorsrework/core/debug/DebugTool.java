@@ -10,10 +10,10 @@ import biggerreactorsrework.core.registry.RegisterItem;
 public class DebugTool extends Item {
     
     @RegisterItem(name = "debug_tool")
-    public static final DebugTool INSTANCE = new DebugTool();
+    public static final DebugTool INSTANCE = biggerreactorsrework.core.registry.RegistryIds.named("debug_tool", () -> new DebugTool());
     
     public DebugTool() {
-        super(new Item.Properties().stacksTo(1));
+        super(biggerreactorsrework.core.registry.RegistryIds.item(new Item.Properties().stacksTo(1)));
     }
     
     @Override

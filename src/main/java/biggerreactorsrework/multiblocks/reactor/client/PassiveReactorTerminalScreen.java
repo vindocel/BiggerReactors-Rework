@@ -1,12 +1,10 @@
 package biggerreactorsrework.multiblocks.reactor.client;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Inventory;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 import biggerreactorsrework.BiggerReactors;
 import biggerreactorsrework.client.CommonRender;
 import biggerreactorsrework.client.GuiArt;
@@ -22,7 +20,6 @@ import biggerreactorsrework.core.client.gui.elements.TooltipElement;
 
 import javax.annotation.Nonnull;
 
-@OnlyIn(Dist.CLIENT)
 public class PassiveReactorTerminalScreen extends ModScreen<ReactorTerminalContainer> {
 
 
@@ -81,7 +78,7 @@ public class PassiveReactorTerminalScreen extends ModScreen<ReactorTerminalConta
     private void initGauges() {
         // (Top) Internal battery:
         RenderedElement<ReactorTerminalContainer> internalBattery = new RenderedElement<>(this, 175, 25, 18, 64, 0, 152, Component.empty());
-        internalBattery.onRender = (@Nonnull GuiGraphics graphics, int mX, int mY) -> CommonRender.renderEnergyGauge(graphics,
+        internalBattery.onRender = (@Nonnull GuiGraphicsExtractor graphics, int mX, int mY) -> CommonRender.renderEnergyGauge(graphics,
                 internalBattery, reactorState.energyStored, reactorState.energyCapacity);
         this.addScreenElement(internalBattery);
     }
@@ -96,7 +93,7 @@ public class PassiveReactorTerminalScreen extends ModScreen<ReactorTerminalConta
         super.containerTick();
         // Check if reactor type changed.
         if (reactorState.reactorType != ReactorType.PASSIVE) {
-            this.getMinecraft().setScreen(new ActiveReactorTerminalScreen(this.menu, this.inventory, this.title));
+            this.getMinecraft().gui.setScreen(new ActiveReactorTerminalScreen(this.menu, this.inventory, this.title));
         }
     }
 
@@ -109,8 +106,8 @@ public class PassiveReactorTerminalScreen extends ModScreen<ReactorTerminalConta
      * @param partialTicks Partial ticks.
      */
     @Override
-    public void render(@Nonnull GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
-        super.render(graphics, mouseX, mouseY, partialTicks);
+    public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTicks) {
+        super.extractRenderState(graphics, mouseX, mouseY, partialTicks);
 
         // Render the other text:
         CommonReactorTerminalScreen.renderStatusText(graphics, this, reactorState.reactorActivity, reactorState.doAutoEject,
@@ -125,7 +122,7 @@ public class PassiveReactorTerminalScreen extends ModScreen<ReactorTerminalConta
      * Draw the panel and its fixed details.
      */
     @Override
-    protected void drawBackground(@Nonnull GuiGraphics graphics, int x, int y) {
+    protected void drawBackground(@Nonnull GuiGraphicsExtractor graphics, int x, int y) {
         GuiArt.panel(graphics, x, y, 200, 152, this.frame());
         GuiArt.fill(graphics, x + 6, y + 36, x + 105, y + 37, GuiArt.SEPARATOR);
         GuiArt.fill(graphics, x + 6, y + 55, x + 105, y + 56, GuiArt.SEPARATOR);

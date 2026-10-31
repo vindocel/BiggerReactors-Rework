@@ -1,6 +1,5 @@
 package biggerreactorsrework.multiblocks.reactor.tiles;
 
-import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
@@ -27,7 +26,6 @@ import biggerreactorsrework.core.util.BlockStates;
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 
-@MethodsReturnNonnullByDefault
 @ParametersAreNonnullByDefault
 public class ReactorRedstonePortTile extends ReactorBaseTile implements MenuProvider, ITickablePartsMultiblock.Tickable, IHasUpdatableState<ReactorRedstonePortState>, IEventMultiblock.AssemblyStateTransition {
     
@@ -206,8 +204,8 @@ public class ReactorRedstonePortTile extends ReactorBaseTile implements MenuProv
             wasPowered = isPowered;
             assert level != null;
             BlockPos updatePos = worldPosition.relative(powerOutputDirection);
-            level.blockUpdated(this.getBlockPos(), this.getBlockState().getBlock());
-            level.blockUpdated(updatePos, level.getBlockState(updatePos).getBlock());
+            level.updateNeighborsAt(this.getBlockPos(), this.getBlockState().getBlock());
+            level.updateNeighborsAt(updatePos, level.getBlockState(updatePos).getBlock());
         }
         if (isLit != shouldLight) {
             isLit = shouldLight;
@@ -324,25 +322,25 @@ public class ReactorRedstonePortTile extends ReactorBaseTile implements MenuProv
     protected void readNBT(CompoundTag compound) {
         super.readNBT(compound);
         if (compound.contains("settingId")) {
-            reactorRedstonePortState.selectedTab = ReactorRedstonePortSelection.fromInt(compound.getInt("settingId"));
+            reactorRedstonePortState.selectedTab = ReactorRedstonePortSelection.fromInt(compound.getIntOr("settingId", 0));
         }
         if (compound.contains("triggerPulseOrSignal")) {
-            reactorRedstonePortState.triggerPS = ReactorRedstonePortTriggers.fromBool(compound.getBoolean("triggerPulseOrSignal"));
+            reactorRedstonePortState.triggerPS = ReactorRedstonePortTriggers.fromBool(compound.getBooleanOr("triggerPulseOrSignal", false));
         }
         if (compound.contains("triggerAboveOrBelow")) {
-            reactorRedstonePortState.triggerAB = ReactorRedstonePortTriggers.fromBool(compound.getBoolean("triggerAboveOrBelow"));
+            reactorRedstonePortState.triggerAB = ReactorRedstonePortTriggers.fromBool(compound.getBooleanOr("triggerAboveOrBelow", false));
         }
         if (compound.contains("mode")) {
-            reactorRedstonePortState.triggerMode = compound.getInt("mode");
+            reactorRedstonePortState.triggerMode = compound.getIntOr("mode", 0);
         }
         if (compound.contains("mainBuffer")) {
-            reactorRedstonePortState.textBufferA = compound.getString("mainBuffer");
+            reactorRedstonePortState.textBufferA = compound.getStringOr("mainBuffer", "");
         }
         if (compound.contains("secondBuffer")) {
-            reactorRedstonePortState.textBufferB = compound.getString("secondBuffer");
+            reactorRedstonePortState.textBufferB = compound.getStringOr("secondBuffer", "");
         }
         if (compound.contains("isPowered")) {
-            wasPowered = isPowered = compound.getBoolean("isPowered");
+            wasPowered = isPowered = compound.getBooleanOr("isPowered", false);
         }
         // Call reverted changes to align uncommitted settings to the active ones.
         revertChanges();

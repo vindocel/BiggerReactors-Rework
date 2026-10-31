@@ -22,7 +22,6 @@ import biggerreactorsrework.multiblocks.battery.tiles.BatteryBaseTile;
 import biggerreactorsrework.multiblocks.battery.tiles.BatteryCellTile;
 import biggerreactorsrework.multiblocks.battery.tiles.BatteryEnergyPortTile;
 import biggerreactorsrework.multiblocks.battery.tiles.BatteryTerminalTile;
-import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
@@ -32,7 +31,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
-import net.neoforged.neoforge.energy.IEnergyStorage;
+import biggerreactorsrework.core.transfer.EnergyStore;
 import org.joml.Vector3i;
 import org.joml.Vector3ic;
 
@@ -51,7 +50,6 @@ import java.util.Set;
  * The running total is kept here and split evenly across the cells before they are saved or dropped and whenever a
  * block joins or leaves, so a broken cell keeps its share and brings it into the next battery.
  */
-@MethodsReturnNonnullByDefault
 @ParametersAreNonnullByDefault
 public class BatteryMultiblockController extends MultiblockController<BatteryBaseTile, BatteryBaseBlock, BatteryMultiblockController> implements
         IRectangularMultiblock<BatteryBaseTile, BatteryBaseBlock, BatteryMultiblockController>,
@@ -307,6 +305,16 @@ public class BatteryMultiblockController extends MultiblockController<BatteryBas
         return stored;
     }
 
+    public long[] transferState() {
+        return new long[]{stored, inputThisTick, outputThisTick};
+    }
+
+    public void restoreTransferState(long[] state) {
+        stored = state[0];
+        inputThisTick = state[1];
+        outputThisTick = state[2];
+    }
+
     public long capacity() {
         return capacity;
     }
@@ -360,7 +368,7 @@ public class BatteryMultiblockController extends MultiblockController<BatteryBas
      * Item energy is counted in ints, so each move is capped.
      */
     private void chargeItems() {
-        IEnergyStorage source = BatteryItemHandler.energy(items.getStackInSlot(BatteryItemHandler.DISCHARGE_SLOT));
+        EnergyStore source = BatteryItemHandler.energy(items.getStackInSlot(BatteryItemHandler.DISCHARGE_SLOT));
         if (source != null && source.canExtract()) {
             int room = (int) Math.min(Integer.MAX_VALUE, insert(Long.MAX_VALUE, true));
             if (room > 0) {
@@ -372,7 +380,7 @@ public class BatteryMultiblockController extends MultiblockController<BatteryBas
 
     /** Modified 2026-10-27: item slots and open-menu equipment share the battery's output budget. */
     public int chargeItem(ItemStack stack) {
-        IEnergyStorage target = BatteryItemHandler.energy(stack);
+        EnergyStore target = BatteryItemHandler.energy(stack);
         if (target == null || !target.canReceive()) return 0;
         int available = (int) Math.min(Integer.MAX_VALUE, extract(Long.MAX_VALUE, true));
         if (available <= 0) return 0;
@@ -466,7 +474,7 @@ public class BatteryMultiblockController extends MultiblockController<BatteryBas
     @Override
     public void read(CompoundTag nbt) {
         if (nbt.contains("items")) {
-            items.deserializeNBT(level.registryAccess(), nbt.getCompound("items"));
+            items.deserializeNBT(level.registryAccess(), nbt.getCompoundOrEmpty("items"));
         }
         updateBlockStates = true;
     }

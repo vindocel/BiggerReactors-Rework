@@ -1,6 +1,5 @@
 package biggerreactorsrework.multiblocks.reactor.blocks;
 
-import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -13,11 +12,10 @@ import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 
 @ParametersAreNonnullByDefault
-@MethodsReturnNonnullByDefault
 public class ReactorComputerPort extends ReactorBaseBlock implements IAssemblyStateBlock, IFaceDirectionBlock {
     
     @RegisterBlock(name = "reactor_computer_port", tileEntityClass = ReactorComputerPortTile.class)
-    public static final ReactorComputerPort INSTANCE = new ReactorComputerPort();
+    public static final ReactorComputerPort INSTANCE = biggerreactorsrework.core.registry.RegistryIds.named("reactor_computer_port", () -> new ReactorComputerPort());
     
     public ReactorComputerPort() {
         super();

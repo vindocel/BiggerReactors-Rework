@@ -1,9 +1,9 @@
 package biggerreactorsrework.client;
 
 import biggerreactorsrework.BiggerReactors;
-import net.minecraft.Util;
-import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Util;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 
 /**
@@ -27,8 +27,8 @@ public final class EnergyBar {
     private static final int FRAMES = 42;
     private static final long FRAME_MS = 100;
 
-    private static final ResourceLocation EMPTY = ResourceLocation.fromNamespaceAndPath(BiggerReactors.modid, "textures/gui/energy/energy_empty.png");
-    private static final ResourceLocation SHIMMER = ResourceLocation.fromNamespaceAndPath(BiggerReactors.modid, "textures/gui/energy/energy_shimmer_sheet.png");
+    private static final Identifier EMPTY = Identifier.fromNamespaceAndPath(BiggerReactors.modid, "textures/gui/energy/energy_empty.png");
+    private static final Identifier SHIMMER = Identifier.fromNamespaceAndPath(BiggerReactors.modid, "textures/gui/energy/energy_shimmer_sheet.png");
 
     /**
      * Fraction of the bar to fill, safe for any stored/capacity pair (negative, zero or larger than an int).
@@ -46,14 +46,14 @@ public final class EnergyBar {
     /**
      * Draws a frame row band: left border, stretched middle, right border, all from texture rows {@code v..v+h}.
      */
-    private static void frameBand(GuiGraphics g, int x, int y, int width, int v, int h) {
+    private static void frameBand(GuiGraphicsExtractor g, int x, int y, int width, int v, int h) {
         final int middle = width - 2 * BORDER;
         GuiTheme.blit(g, EMPTY, x, y, BORDER, h, 0, v, BORDER, h, TEXTURE_WIDTH, FRAME_HEIGHT);
         GuiTheme.blit(g, EMPTY, x + BORDER, y, middle, h, BORDER, v, FILL_WIDTH, h, TEXTURE_WIDTH, FRAME_HEIGHT);
         GuiTheme.blit(g, EMPTY, x + width - BORDER, y, BORDER, h, TEXTURE_WIDTH - BORDER, v, BORDER, h, TEXTURE_WIDTH, FRAME_HEIGHT);
     }
 
-    public static void draw(GuiGraphics g, int x, int y, int width, int height, double fraction) {
+    public static void draw(GuiGraphicsExtractor g, int x, int y, int width, int height, double fraction) {
         final int w = Math.max(TEXTURE_WIDTH, width);
         final int h = Mth.clamp(height, 2 * BORDER, FRAME_HEIGHT);
         frameBand(g, x, y, w, 0, BORDER);
@@ -63,8 +63,8 @@ public final class EnergyBar {
         final int filled = (int) Math.round(area * safeFraction);
         if (filled > 0) {
             final int frame = (int) ((Util.getMillis() / FRAME_MS) % FRAMES);
-            g.blit(SHIMMER, x + BORDER, y + BORDER + area - filled, w - 2 * BORDER, filled,
-                    0, frame * FILL_HEIGHT + FILL_HEIGHT - filled, FILL_WIDTH, filled, FILL_WIDTH, FILL_HEIGHT * FRAMES);
+            g.blit(net.minecraft.client.renderer.RenderPipelines.GUI_TEXTURED, SHIMMER, x + BORDER, y + BORDER + area - filled,
+                    0, frame * FILL_HEIGHT + FILL_HEIGHT - filled, w - 2 * BORDER, filled, FILL_WIDTH, filled, FILL_WIDTH, FILL_HEIGHT * FRAMES);
         }
     }
 }

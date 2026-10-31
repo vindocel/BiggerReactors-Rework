@@ -1,9 +1,7 @@
 {
   "type": "minecraft:crafting_shapeless",
   "ingredients": [
-    {
-      "item": "biggerreactorsrework:cyanite_block"
-    }
+    "biggerreactorsrework:cyanite_block"
   ],
   "result": {
     "id": "biggerreactorsrework:cyanite_ingot",

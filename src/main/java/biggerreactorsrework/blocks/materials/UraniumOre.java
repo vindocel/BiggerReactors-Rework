@@ -8,15 +8,15 @@ import biggerreactorsrework.core.registry.RegisterBlock;
 public class UraniumOre extends DropExperienceBlock {
 
     @RegisterBlock(name = "uranium_ore")
-    public static final UraniumOre INSTANCE = new UraniumOre();
+    public static final UraniumOre INSTANCE = biggerreactorsrework.core.registry.RegistryIds.named("uranium_ore", () -> new UraniumOre());
 
     public UraniumOre() {
         super(ConstantInt.of(0),
-                Properties.of()
+                biggerreactorsrework.core.registry.RegistryIds.block(Properties.of()
                         .sound(SoundType.STONE)
                         .explosionResistance(3.0F)
                         .destroyTime(3.0f)
                         .requiresCorrectToolForDrops()
-        );
+        ));
     }
 }

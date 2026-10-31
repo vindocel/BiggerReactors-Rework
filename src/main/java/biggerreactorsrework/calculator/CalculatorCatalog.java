@@ -143,20 +143,20 @@ public record CalculatorCatalog(List<String> fuels, List<String> moderators, Lis
     /** Client-side view of {@link #toClientTag()}; property maps stay empty on the client. */
     public static CalculatorCatalog fromClientTag(CompoundTag tag) {
         var fuels = new ArrayList<String>();
-        tag.getList("fuels", Tag.TAG_STRING).forEach(t -> fuels.add(t.getAsString()));
+        tag.getListOrEmpty("fuels").forEach(t -> fuels.add(t.asString().orElse("")));
         var moderators = new ArrayList<String>();
-        tag.getList("moderators", Tag.TAG_STRING).forEach(t -> moderators.add(t.getAsString()));
+        tag.getListOrEmpty("moderators").forEach(t -> moderators.add(t.asString().orElse("")));
         var coolants = new ArrayList<Coolant>();
-        for (var t : tag.getList("coolants", Tag.TAG_COMPOUND)) {
+        for (var t : tag.getListOrEmpty("coolants")) {
             var entry = (CompoundTag) t;
             try {
-                coolants.add(new Coolant(entry.getString("id"), Route.valueOf(entry.getString("route"))));
+                coolants.add(new Coolant(entry.getStringOr("id", ""), Route.valueOf(entry.getStringOr("route", ""))));
             } catch (IllegalArgumentException ignored) {
             }
         }
         var coils = new ArrayList<String>();
-        tag.getList("coils", Tag.TAG_STRING).forEach(t -> coils.add(t.getAsString()));
-        return new CalculatorCatalog(List.copyOf(fuels), List.copyOf(moderators), List.copyOf(coolants), List.copyOf(coils), tag.getString("fingerprint"),
+        tag.getListOrEmpty("coils").forEach(t -> coils.add(t.asString().orElse("")));
+        return new CalculatorCatalog(List.copyOf(fuels), List.copyOf(moderators), List.copyOf(coolants), List.copyOf(coils), tag.getStringOr("fingerprint", ""),
                 Map.of(), Map.of(), Map.of(), null);
     }
 }

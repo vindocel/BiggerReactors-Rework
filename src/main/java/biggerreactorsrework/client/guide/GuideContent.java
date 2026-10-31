@@ -44,7 +44,7 @@ final class GuideContent {
         { var elements=new ArrayList<GuideElement>();
           elements.add(new GuideElements.Text(Component.translatable("guide.biggerreactorsrework.content.start")));
           elements.add(new GuideElements.Crafting(GuideIds.id("crafting/guide_book")));
-          chapters.add(new Chapter("start",()->new ItemStack(BuiltInRegistries.ITEM.get(GuideIds.id("reactor_terminal"))),List.copyOf(elements))); }
+          chapters.add(new Chapter("start",()->new ItemStack(BuiltInRegistries.ITEM.getValue(GuideIds.id("reactor_terminal"))),List.copyOf(elements))); }
         { var elements=new ArrayList<GuideElement>();
           elements.add(new GuideElements.Text(Component.translatable("guide.biggerreactorsrework.content.materials")));
           elements.add(new GuideElements.Heading(Component.translatable("guide.biggerreactorsrework.material.uranium")));
@@ -66,9 +66,9 @@ final class GuideContent {
           elements.add(new GuideElements.Text(Component.translatable("guide.biggerreactorsrework.material.ludicrite.text")));
           elements.add(new GuideElements.Crafting(GuideIds.id("crafting/ludicrite_block_nether_star")));
           var level=Minecraft.getInstance().level;
-          if(level!=null && level.getRecipeManager().byKey(GuideIds.id("crafting/ludicrite_block_enderium")).isPresent())
+          if(level!=null && biggerreactorsrework.machine.recipe.RecipeAccess.byKey(level,net.minecraft.resources.ResourceKey.create(net.minecraft.core.registries.Registries.RECIPE,GuideIds.id("crafting/ludicrite_block_enderium"))).isPresent())
               elements.add(new GuideElements.Crafting(GuideIds.id("crafting/ludicrite_block_enderium")));
-          chapters.add(new Chapter("materials",()->new ItemStack(BuiltInRegistries.ITEM.get(GuideIds.id("uranium_ingot"))),List.copyOf(elements))); }
+          chapters.add(new Chapter("materials",()->new ItemStack(BuiltInRegistries.ITEM.getValue(GuideIds.id("uranium_ingot"))),List.copyOf(elements))); }
         { var elements=new ArrayList<GuideElement>();
           elements.add(new GuideElements.Text(Component.translatable("guide.biggerreactorsrework.content.reactor_parts")));
           elements.add(new GuideElements.Crafting(GuideIds.id("crafting/reactor/reactor_casing")));
@@ -80,28 +80,28 @@ final class GuideContent {
           elements.add(new GuideElements.Crafting(GuideIds.id("crafting/reactor/reactor_power_tap")));
           elements.add(new GuideElements.Crafting(GuideIds.id("crafting/reactor/reactor_coolant_port")));
           elements.add(new GuideElements.Crafting(GuideIds.id("crafting/reactor/reactor_redstone_port")));
-          chapters.add(new Chapter("reactor_parts",()->new ItemStack(BuiltInRegistries.ITEM.get(GuideIds.id("reactor_casing"))),List.copyOf(elements))); }
+          chapters.add(new Chapter("reactor_parts",()->new ItemStack(BuiltInRegistries.ITEM.getValue(GuideIds.id("reactor_casing"))),List.copyOf(elements))); }
         { var elements=new ArrayList<GuideElement>();
           elements.add(new GuideElements.Text(Component.translatable("guide.biggerreactorsrework.content.build_reactor")));
           elements.add(limits("reactor",3,3,3,biggerreactorsrework.Config.CONFIG.Reactor.MaxLength,biggerreactorsrework.Config.CONFIG.Reactor.MaxHeight,biggerreactorsrework.Config.CONFIG.Reactor.MaxWidth));
           elements.add(new GuideElements.Text(Component.translatable("guide.biggerreactorsrework.viewer.glass_text")));
           elements.addAll(GuideMultiblock.elements(GuideStructures.reactor(3,false)));
-          chapters.add(new Chapter("build_reactor",()->new ItemStack(BuiltInRegistries.ITEM.get(GuideIds.id("reactor_fuel_rod"))),List.copyOf(elements))); }
+          chapters.add(new Chapter("build_reactor",()->new ItemStack(BuiltInRegistries.ITEM.getValue(GuideIds.id("reactor_fuel_rod"))),List.copyOf(elements))); }
         { var elements=new ArrayList<GuideElement>();
           elements.add(new GuideElements.Text(Component.translatable("guide.biggerreactorsrework.content.reactor_panel")));
-          chapters.add(new Chapter("reactor_panel",()->new ItemStack(BuiltInRegistries.ITEM.get(GuideIds.id("reactor_control_rod"))),List.copyOf(elements))); }
+          chapters.add(new Chapter("reactor_panel",()->new ItemStack(BuiltInRegistries.ITEM.getValue(GuideIds.id("reactor_control_rod"))),List.copyOf(elements))); }
         { var elements=new ArrayList<GuideElement>();
           elements.add(new GuideElements.Text(Component.translatable("guide.biggerreactorsrework.content.moderators")));
           elements.add(propertyTable(true));
           elements.addAll(GuideMultiblock.elements(GuideStructures.reactor(5,false)));
-          chapters.add(new Chapter("moderators",()->new ItemStack(BuiltInRegistries.ITEM.get(GuideIds.id("graphite_block"))),List.copyOf(elements))); }
+          chapters.add(new Chapter("moderators",()->new ItemStack(BuiltInRegistries.ITEM.getValue(GuideIds.id("graphite_block"))),List.copyOf(elements))); }
         { var elements=new ArrayList<GuideElement>();
           elements.add(new GuideElements.Text(Component.translatable("guide.biggerreactorsrework.content.active")));
           elements.add(new GuideElements.Text(Component.translatable("guide.biggerreactorsrework.content.active_output_protection")));
           elements.add(new GuideElements.Heading(Component.translatable("guide.biggerreactorsrework.coolants")));
           elements.add(coolantTable());
           elements.addAll(GuideMultiblock.elements(GuideStructures.reactor(5,true)));
-          chapters.add(new Chapter("active",()->new ItemStack(BuiltInRegistries.ITEM.get(GuideIds.id("reactor_coolant_port"))),List.copyOf(elements))); }
+          chapters.add(new Chapter("active",()->new ItemStack(BuiltInRegistries.ITEM.getValue(GuideIds.id("reactor_coolant_port"))),List.copyOf(elements))); }
         { var elements=new ArrayList<GuideElement>();
           elements.add(limits("turbine",5,4,5,biggerreactorsrework.Config.CONFIG.Turbine.MaxLength,biggerreactorsrework.Config.CONFIG.Turbine.MaxHeight,biggerreactorsrework.Config.CONFIG.Turbine.MaxWidth));
           elements.add(new GuideElements.Text(Component.translatable("guide.biggerreactorsrework.content.turbine_parts")));
@@ -115,12 +115,12 @@ final class GuideContent {
           elements.add(new GuideElements.Crafting(GuideIds.id("crafting/turbine/turbine_power_tap")));
           elements.add(new GuideElements.Crafting(GuideIds.id("crafting/turbine/turbine_redstone_port")));
           elements.add(propertyTable(false));
-          chapters.add(new Chapter("turbine_parts",()->new ItemStack(BuiltInRegistries.ITEM.get(GuideIds.id("turbine_rotor_bearing"))),List.copyOf(elements))); }
+          chapters.add(new Chapter("turbine_parts",()->new ItemStack(BuiltInRegistries.ITEM.getValue(GuideIds.id("turbine_rotor_bearing"))),List.copyOf(elements))); }
         { var elements=new ArrayList<GuideElement>();
           elements.add(new GuideElements.Text(Component.translatable("guide.biggerreactorsrework.content.build_turbine")));
           elements.add(new GuideElements.Text(Component.translatable("guide.biggerreactorsrework.viewer.glass_text")));
           elements.addAll(GuideMultiblock.elements(GuideStructures.turbine()));
-          chapters.add(new Chapter("build_turbine",()->new ItemStack(BuiltInRegistries.ITEM.get(GuideIds.id("turbine_terminal"))),List.copyOf(elements))); }
+          chapters.add(new Chapter("build_turbine",()->new ItemStack(BuiltInRegistries.ITEM.getValue(GuideIds.id("turbine_terminal"))),List.copyOf(elements))); }
         { var elements=new ArrayList<GuideElement>();
           elements.add(limits("battery",3,3,3,biggerreactorsrework.Config.CONFIG.Battery.MaxLength,biggerreactorsrework.Config.CONFIG.Battery.MaxHeight,biggerreactorsrework.Config.CONFIG.Battery.MaxWidth));
           elements.add(new GuideElements.Text(Component.translatable("guide.biggerreactorsrework.content.battery_parts",
@@ -133,12 +133,12 @@ final class GuideContent {
           elements.add(new GuideElements.Crafting(GuideIds.id("crafting/battery/battery_redstone_port")));
           elements.add(new GuideElements.Text(Component.translatable("guide.biggerreactorsrework.content.battery_redstone")));
           elements.add(new GuideElements.Crafting(GuideIds.id("crafting/battery/battery_cell")));
-          chapters.add(new Chapter("battery_parts",()->new ItemStack(BuiltInRegistries.ITEM.get(GuideIds.id("battery_cell"))),List.copyOf(elements))); }
+          chapters.add(new Chapter("battery_parts",()->new ItemStack(BuiltInRegistries.ITEM.getValue(GuideIds.id("battery_cell"))),List.copyOf(elements))); }
         { var elements=new ArrayList<GuideElement>();
           elements.add(new GuideElements.Text(Component.translatable("guide.biggerreactorsrework.content.build_battery")));
           elements.add(new GuideElements.Text(Component.translatable("guide.biggerreactorsrework.viewer.glass_text")));
           elements.addAll(GuideMultiblock.elements(GuideStructures.battery()));
-          chapters.add(new Chapter("build_battery",()->new ItemStack(BuiltInRegistries.ITEM.get(GuideIds.id("battery_terminal"))),List.copyOf(elements))); }
+          chapters.add(new Chapter("build_battery",()->new ItemStack(BuiltInRegistries.ITEM.getValue(GuideIds.id("battery_terminal"))),List.copyOf(elements))); }
         { var elements=new ArrayList<GuideElement>();
           elements.add(limits("exchanger",4,3,3,biggerreactorsrework.Config.CONFIG.HeatExchanger.MaxLength,biggerreactorsrework.Config.CONFIG.HeatExchanger.MaxHeight,biggerreactorsrework.Config.CONFIG.HeatExchanger.MaxWidth));
           elements.add(new GuideElements.Text(Component.translatable("guide.biggerreactorsrework.content.exchanger")));
@@ -152,23 +152,23 @@ final class GuideContent {
           elements.add(new GuideElements.Heading(Component.translatable("guide.biggerreactorsrework.exchanges")));
           elements.add(exchangeTable());
           elements.addAll(GuideMultiblock.elements(GuideStructures.exchanger()));
-          chapters.add(new Chapter("exchanger",()->new ItemStack(BuiltInRegistries.ITEM.get(GuideIds.id("heat_exchanger_terminal"))),List.copyOf(elements))); }
+          chapters.add(new Chapter("exchanger",()->new ItemStack(BuiltInRegistries.ITEM.getValue(GuideIds.id("heat_exchanger_terminal"))),List.copyOf(elements))); }
         { var elements=new ArrayList<GuideElement>();
           elements.add(new GuideElements.Text(Component.translatable("guide.biggerreactorsrework.content.automation")));
-          chapters.add(new Chapter("automation",()->new ItemStack(BuiltInRegistries.ITEM.get(GuideIds.id("turbine_redstone_port"))),List.copyOf(elements))); }
+          chapters.add(new Chapter("automation",()->new ItemStack(BuiltInRegistries.ITEM.getValue(GuideIds.id("turbine_redstone_port"))),List.copyOf(elements))); }
         { var elements=new ArrayList<GuideElement>();
           elements.add(new GuideElements.Text(Component.translatable("guide.biggerreactorsrework.content.efficiency")));
-          chapters.add(new Chapter("efficiency",()->new ItemStack(BuiltInRegistries.ITEM.get(GuideIds.id("turbine_power_tap"))),List.copyOf(elements))); }
+          chapters.add(new Chapter("efficiency",()->new ItemStack(BuiltInRegistries.ITEM.getValue(GuideIds.id("turbine_power_tap"))),List.copyOf(elements))); }
         { var elements=new ArrayList<GuideElement>();
           elements.add(new GuideElements.Text(Component.translatable("guide.biggerreactorsrework.content.troubleshooting")));
-          chapters.add(new Chapter("troubleshooting",()->new ItemStack(BuiltInRegistries.ITEM.get(GuideIds.id("reactor_terminal"))),List.copyOf(elements))); }
+          chapters.add(new Chapter("troubleshooting",()->new ItemStack(BuiltInRegistries.ITEM.getValue(GuideIds.id("reactor_terminal"))),List.copyOf(elements))); }
         return List.copyOf(chapters);
     }
-    private static ItemStack stack(String id){return new ItemStack(BuiltInRegistries.ITEM.get(GuideIds.id(id)));}
+    private static ItemStack stack(String id){return new ItemStack(BuiltInRegistries.ITEM.getValue(GuideIds.id(id)));}
     private static void addReprocessing(List<GuideElement> elements){
         var recipes=ReprocessingRecipes.all(Minecraft.getInstance().level);
         if(recipes.isEmpty())elements.add(new GuideReprocessing(GuideIds.id("cyanite_reprocessing")));
-        else recipes.forEach(holder->elements.add(new GuideReprocessing(holder.id())));
+        else recipes.forEach(holder->elements.add(new GuideReprocessing(holder.id().identifier())));
     }
     private static GuideElements.Table coolantTable() {
         return GuideElements.Table.named(List.of(Component.translatable("guide.biggerreactorsrework.coolants.cold"),Component.translatable("guide.biggerreactorsrework.coolants.hot")),
@@ -227,9 +227,9 @@ final class GuideContent {
     }
     private static GuideReferences.Target materialReference(boolean moderator,List<String> cells){
         for(var entry:materialEntries(moderator))if(materialCells(entry).equals(cells)){
-            var id=net.minecraft.resources.ResourceLocation.tryParse(entry.source());
+            var id=net.minecraft.resources.Identifier.tryParse(entry.source());
             if(id==null||!BuiltInRegistries.BLOCK.containsKey(id))return null;
-            var block=BuiltInRegistries.BLOCK.get(id);var name=Component.literal(entry.name());
+            var block=BuiltInRegistries.BLOCK.getValue(id);var name=Component.literal(entry.name());
             if(block instanceof net.minecraft.world.level.block.LiquidBlock liquid)return new GuideReferences.Target(ItemStack.EMPTY,liquid.fluid,name);
             return new GuideReferences.Target(new ItemStack(block),null,name);
         }

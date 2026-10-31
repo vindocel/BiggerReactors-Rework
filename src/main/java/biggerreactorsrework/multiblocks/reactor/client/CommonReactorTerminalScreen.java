@@ -4,12 +4,10 @@ import biggerreactorsrework.client.GuiTheme;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.entity.player.Inventory;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 import biggerreactorsrework.Config;
 import biggerreactorsrework.client.Biselector;
 import biggerreactorsrework.client.GaugeBar;
@@ -29,7 +27,6 @@ import biggerreactorsrework.core.client.gui.elements.TooltipElement;
 
 import javax.annotation.Nonnull;
 
-@OnlyIn(Dist.CLIENT)
 public class CommonReactorTerminalScreen extends ModScreen<ReactorTerminalContainer> {
 
     // Modified 2026-10-25: server-authoritative burn limits and current bottleneck.
@@ -72,10 +69,10 @@ public class CommonReactorTerminalScreen extends ModScreen<ReactorTerminalContai
     public void init() {
         if (initialState.reactorType == ReactorType.ACTIVE) {
             // Initialize an actively-cooled reactor screen.
-            this.getMinecraft().setScreen(new ActiveReactorTerminalScreen(this.menu, this.inventory, this.title));
+            this.getMinecraft().gui.setScreen(new ActiveReactorTerminalScreen(this.menu, this.inventory, this.title));
         } else {
             // Initialize a passively-cooled reactor screen.
-            this.getMinecraft().setScreen(new PassiveReactorTerminalScreen(this.menu, this.inventory, this.title));
+            this.getMinecraft().gui.setScreen(new PassiveReactorTerminalScreen(this.menu, this.inventory, this.title));
         }
     }
 
@@ -187,17 +184,17 @@ public class CommonReactorTerminalScreen extends ModScreen<ReactorTerminalContai
     public static void initGauges(@Nonnull ModScreen<ReactorTerminalContainer> screen, ReactorState reactorState) {
         // (Top) Fuel mix gauge:
         RenderedElement<ReactorTerminalContainer> fuelMixGauge = new RenderedElement<>(screen, 109, 25, 18, 64, 0, 152, Component.empty());
-        fuelMixGauge.onRender = (@Nonnull GuiGraphics graphics, int mX, int mY) -> CommonReactorTerminalScreen.renderFuelMixGauge(graphics, fuelMixGauge, reactorState.wasteStored, reactorState.fuelStored, reactorState.fuelCapacity);
+        fuelMixGauge.onRender = (@Nonnull GuiGraphicsExtractor graphics, int mX, int mY) -> CommonReactorTerminalScreen.renderFuelMixGauge(graphics, fuelMixGauge, reactorState.wasteStored, reactorState.fuelStored, reactorState.fuelCapacity);
         screen.addScreenElement(fuelMixGauge);
 
         // (Top) Case heat gauge:
         RenderedElement<ReactorTerminalContainer> caseHeatGauge = new RenderedElement<>(screen, 131, 25, 18, 64, 0, 152, Component.empty());
-        caseHeatGauge.onRender = (@Nonnull GuiGraphics graphics, int mX, int mY) -> CommonReactorTerminalScreen.renderHeatGauge(graphics, caseHeatGauge, reactorState.caseHeatStored, Config.CONFIG.Reactor.GUI.HeatDisplayMax);
+        caseHeatGauge.onRender = (@Nonnull GuiGraphicsExtractor graphics, int mX, int mY) -> CommonReactorTerminalScreen.renderHeatGauge(graphics, caseHeatGauge, reactorState.caseHeatStored, Config.CONFIG.Reactor.GUI.HeatDisplayMax);
         screen.addScreenElement(caseHeatGauge);
 
         // (Top) Fuel heat gauge:
         RenderedElement<ReactorTerminalContainer> fuelHeatGauge = new RenderedElement<>(screen, 153, 25, 18, 64, 0, 152, Component.empty());
-        fuelHeatGauge.onRender = (@Nonnull GuiGraphics graphics, int mX, int mY) -> CommonReactorTerminalScreen.renderHeatGauge(graphics, fuelHeatGauge, reactorState.fuelHeatStored, Config.CONFIG.Reactor.GUI.HeatDisplayMax);
+        fuelHeatGauge.onRender = (@Nonnull GuiGraphicsExtractor graphics, int mX, int mY) -> CommonReactorTerminalScreen.renderHeatGauge(graphics, fuelHeatGauge, reactorState.fuelHeatStored, Config.CONFIG.Reactor.GUI.HeatDisplayMax);
         screen.addScreenElement(fuelHeatGauge);
     }
 
@@ -218,7 +215,7 @@ public class CommonReactorTerminalScreen extends ModScreen<ReactorTerminalContai
      * @param heatStored   The heat value to draw.
      * @param heatCapacity The max heat capacity this gauge can display.
      */
-    public static void renderHeatGauge(@Nonnull GuiGraphics graphics, @Nonnull RenderedElement<ReactorTerminalContainer> symbol, double heatStored, double heatCapacity) {
+    public static void renderHeatGauge(@Nonnull GuiGraphicsExtractor graphics, @Nonnull RenderedElement<ReactorTerminalContainer> symbol, double heatStored, double heatCapacity) {
         GaugeBar.drawHeat(graphics, symbol.x, symbol.y, heatStored, heatCapacity);
         // Update tooltip.
         symbol.tooltip = Component.literal(String.format("%.1f/%.1f K", heatStored, heatCapacity));
@@ -233,7 +230,7 @@ public class CommonReactorTerminalScreen extends ModScreen<ReactorTerminalContai
      * @param fuelStored   The fuel value to draw.
      * @param fuelCapacity The max fuel capacity this gauge can display.
      */
-    public static void renderFuelMixGauge(@Nonnull GuiGraphics graphics, @Nonnull RenderedElement<ReactorTerminalContainer> symbol, double wasteStored, double fuelStored, double fuelCapacity) {
+    public static void renderFuelMixGauge(@Nonnull GuiGraphicsExtractor graphics, @Nonnull RenderedElement<ReactorTerminalContainer> symbol, double wasteStored, double fuelStored, double fuelCapacity) {
         GaugeBar.drawFuel(graphics, symbol.x, symbol.y, wasteStored, fuelStored, fuelCapacity);
         // Update tooltip.
         symbol.tooltip = Component.literal(String.format(
@@ -247,8 +244,8 @@ public class CommonReactorTerminalScreen extends ModScreen<ReactorTerminalContai
     /**
      * A readout of the left column, next to its icon; long values slide inside the column.
      */
-    public static void renderReadout(@Nonnull GuiGraphics graphics, @Nonnull ModScreen<ReactorTerminalContainer> screen, String text, int y) {
-        GuiArt.scrollingText(graphics, screen.getFont(), text, screen.getGuiLeft() + 27, screen.getGuiTop() + y, READOUT_WIDTH, GuiTheme.textColor());
+    public static void renderReadout(@Nonnull GuiGraphicsExtractor graphics, @Nonnull ModScreen<ReactorTerminalContainer> screen, String text, int y) {
+        GuiArt.scrollingText(graphics, screen.getFont(), text, screen.getLeftPos() + 27, screen.getTopPos() + y, READOUT_WIDTH, GuiTheme.textColor());
     }
 
     /**
@@ -263,7 +260,7 @@ public class CommonReactorTerminalScreen extends ModScreen<ReactorTerminalContai
      * @param statusRight     Where the status lines next to the toggles must end, relative to the screen.
      * @implNote Output rate is not rendered by this function, since it changes depending on reactor type. Do that yourself.
      */
-    public static void renderStatusText(@Nonnull GuiGraphics graphics, @Nonnull ModScreen<ReactorTerminalContainer> screen, ReactorActivity reactorActivity, boolean doAutoEject, double heatStored, double fuelUsageRate, double reactivityRate, int statusRight) {
+    public static void renderStatusText(@Nonnull GuiGraphicsExtractor graphics, @Nonnull ModScreen<ReactorTerminalContainer> screen, ReactorActivity reactorActivity, boolean doAutoEject, double heatStored, double fuelUsageRate, double reactivityRate, int statusRight) {
         // Render text for reactor temperature (no fancy suffix for Celsius):
         renderReadout(graphics, screen, String.format("%.0f K", heatStored), 23);
 
@@ -276,25 +273,25 @@ public class CommonReactorTerminalScreen extends ModScreen<ReactorTerminalContai
         // Render text for online/offline status:
         if (reactorActivity == ReactorActivity.ACTIVE) {
             // Text for an online reactor:
-            GuiArt.scrollingText(graphics, screen.getFont(), Component.translatable("screen.biggerreactorsrework.reactor_terminal.activity_toggle.online").getString(), screen.getGuiLeft() + 42, screen.getGuiTop() + 102, statusRight - 42, GuiTheme.textColor());
+            GuiArt.scrollingText(graphics, screen.getFont(), Component.translatable("screen.biggerreactorsrework.reactor_terminal.activity_toggle.online").getString(), screen.getLeftPos() + 42, screen.getTopPos() + 102, statusRight - 42, GuiTheme.textColor());
 
         } else {
             // Text for an offline reactor:
-            GuiArt.scrollingText(graphics, screen.getFont(), Component.translatable("screen.biggerreactorsrework.reactor_terminal.activity_toggle.offline").getString(), screen.getGuiLeft() + 42, screen.getGuiTop() + 102, statusRight - 42, GuiTheme.textColor());
+            GuiArt.scrollingText(graphics, screen.getFont(), Component.translatable("screen.biggerreactorsrework.reactor_terminal.activity_toggle.offline").getString(), screen.getLeftPos() + 42, screen.getTopPos() + 102, statusRight - 42, GuiTheme.textColor());
         }
 
         // Render text for auto-eject status:
         if (doAutoEject) {
             // Text for enabled auto-ejection:
-            GuiArt.scrollingText(graphics, screen.getFont(), Component.translatable("screen.biggerreactorsrework.reactor_terminal.auto_eject_toggle.enabled").getString(), screen.getGuiLeft() + 42, screen.getGuiTop() + 118, statusRight - 42, GuiTheme.textColor());
+            GuiArt.scrollingText(graphics, screen.getFont(), Component.translatable("screen.biggerreactorsrework.reactor_terminal.auto_eject_toggle.enabled").getString(), screen.getLeftPos() + 42, screen.getTopPos() + 118, statusRight - 42, GuiTheme.textColor());
         } else {
             // Text for disabled auto-ejection:
-            GuiArt.scrollingText(graphics, screen.getFont(), Component.translatable("screen.biggerreactorsrework.reactor_terminal.auto_eject_toggle.disabled").getString(), screen.getGuiLeft() + 42, screen.getGuiTop() + 118, statusRight - 42, GuiTheme.textColor());
+            GuiArt.scrollingText(graphics, screen.getFont(), Component.translatable("screen.biggerreactorsrework.reactor_terminal.auto_eject_toggle.disabled").getString(), screen.getLeftPos() + 42, screen.getTopPos() + 118, statusRight - 42, GuiTheme.textColor());
         }
 
         // Render text for manual eject button:
         // TODO: Remove with reactor manual eject.
-        //screen.getFont().drawString(mStack, Component.translatable("screen.biggerreactorsrework.reactor_terminal.manual_eject").getString(), screen.getGuiLeft() + 26, screen.getGuiTop() + 134, GuiTheme.textColor());
+        //screen.getFont().text(mStack, Component.translatable("screen.biggerreactorsrework.reactor_terminal.manual_eject").getString(), screen.getLeftPos() + 26, screen.getTopPos() + 134, GuiTheme.textColor());
     }
 
     @Override

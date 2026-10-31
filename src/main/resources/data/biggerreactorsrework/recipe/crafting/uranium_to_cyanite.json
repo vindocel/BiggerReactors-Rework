@@ -1,12 +1,8 @@
 {
   "type": "minecraft:crafting_shapeless",
   "ingredients": [
-    {
-      "tag": "c:dusts/uranium"
-    },
-    {
-      "item": "minecraft:sand"
-    }
+    "#c:dusts/uranium",
+    "minecraft:sand"
   ],
   "result": {
     "id": "biggerreactorsrework:cyanite_dust"

@@ -1,6 +1,5 @@
 package biggerreactorsrework.multiblocks.reactor.tiles;
 
-import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -62,6 +61,20 @@ public class ReactorPowerTapTile extends ReactorBaseTile implements IEnergyTile,
         return Math.max(0, outputCap.insertEnergy(toDistribute, simulate));
     }
     
+    @Override
+    public Object transferSnapshot() {
+        var battery = nullableController() == null ? null : (controller().simulation() == null ? null : controller().simulation().battery());
+        return battery == null ? null : battery.stored();
+    }
+
+    @Override
+    public void restoreTransferSnapshot(Object snapshot) {
+        var battery = nullableController() == null ? null : (controller().simulation() == null ? null : controller().simulation().battery());
+        if (battery != null && snapshot instanceof Long stored) {
+            battery.restoreStored(stored);
+        }
+    }
+
     @Override
     public long insertEnergy(long maxInsert, boolean simulate) {
         return 0;

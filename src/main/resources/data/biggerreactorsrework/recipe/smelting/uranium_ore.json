@@ -1,11 +1,9 @@
 {
-    "type": "minecraft:smelting",
-    "ingredient": [
-        {
-            "item": "biggerreactorsrework:uranium_ore"
-        }
-    ],
-    "result": {"id": "biggerreactorsrework:uranium_ingot"},
-    "experience": 0.35,
-    "cookingtime": 200
+  "type": "minecraft:smelting",
+  "ingredient": "biggerreactorsrework:uranium_ore",
+  "result": {
+    "id": "biggerreactorsrework:uranium_ingot"
+  },
+  "experience": 0.35,
+  "cookingtime": 200
 }

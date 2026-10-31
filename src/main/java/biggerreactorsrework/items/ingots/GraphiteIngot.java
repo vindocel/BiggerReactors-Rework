@@ -8,10 +8,10 @@ import javax.annotation.Nonnull;
 public class GraphiteIngot extends Item {
     
     @RegisterItem(name = "graphite_ingot")
-    public static final GraphiteIngot INSTANCE = new GraphiteIngot(new Properties());
+    public static final GraphiteIngot INSTANCE = biggerreactorsrework.core.registry.RegistryIds.named("graphite_ingot", () -> new GraphiteIngot(new Properties()));
     
     @SuppressWarnings("unused")
     public GraphiteIngot(@Nonnull Properties properties) {
-        super(properties);
+        super(biggerreactorsrework.core.registry.RegistryIds.item(properties));
     }
 }

@@ -1,6 +1,5 @@
 package biggerreactorsrework.multiblocks.reactor.blocks;
 
-import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -14,11 +13,10 @@ import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 
 @ParametersAreNonnullByDefault
-@MethodsReturnNonnullByDefault
 public class ReactorGlass extends ReactorBaseBlock implements IAssemblyStateBlock, IConnectedTexture {
     
     @RegisterBlock(name = "reactor_glass", tileEntityClass = ReactorGlassTile.class)
-    public static final ReactorGlass INSTANCE = new ReactorGlass();
+    public static final ReactorGlass INSTANCE = biggerreactorsrework.core.registry.RegistryIds.named("reactor_glass", () -> new ReactorGlass());
     
     public ReactorGlass() {
         super(false);

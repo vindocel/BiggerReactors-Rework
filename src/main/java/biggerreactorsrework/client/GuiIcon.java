@@ -3,10 +3,8 @@ package biggerreactorsrework.client;
 // Modified 2026-10-26: remove three unused icon declarations.
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.resources.ResourceLocation;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.resources.Identifier;
 import biggerreactorsrework.BiggerReactors;
 
 import javax.annotation.Nonnull;
@@ -14,8 +12,7 @@ import javax.annotation.Nonnull;
 /**
  * One icon of the screens, each in its own file under {@code textures/gui/icons/}, drawn at its real size.
  */
-@OnlyIn(Dist.CLIENT)
-public record GuiIcon(ResourceLocation texture, int width, int height) {
+public record GuiIcon(Identifier texture, int width, int height) {
 
     // Status icons.
     public static final GuiIcon BATTERY = of("battery", 10, 16);
@@ -72,22 +69,17 @@ public record GuiIcon(ResourceLocation texture, int width, int height) {
     public static final GuiIcon REVERT = of("revert", 7, 8);
 
     private static GuiIcon of(String name, int width, int height) {
-        return new GuiIcon(ResourceLocation.fromNamespaceAndPath(BiggerReactors.modid, "textures/gui/icons/" + name + ".png"), width, height);
+        return new GuiIcon(Identifier.fromNamespaceAndPath(BiggerReactors.modid, "textures/gui/icons/" + name + ".png"), width, height);
     }
 
-    public void draw(@Nonnull GuiGraphics graphics, int x, int y) {
-        RenderSystem.enableBlend();
-        RenderSystem.defaultBlendFunc();
-        graphics.blit(this.texture, x, y, 0, 0, this.width, this.height, this.width, this.height);
-        RenderSystem.disableBlend();
+    public void draw(@Nonnull GuiGraphicsExtractor graphics, int x, int y) {
+        graphics.blit(net.minecraft.client.renderer.RenderPipelines.GUI_TEXTURED, this.texture, x, y, 0, 0, this.width, this.height, this.width, this.height);
     }
 
     /**
      * Draw the icon multiplied by a color; used to paint white masks in the color behind them.
      */
-    public void drawTinted(@Nonnull GuiGraphics graphics, int x, int y, int color) {
-        RenderSystem.setShaderColor(((color >> 16) & 0xFF) / 255F, ((color >> 8) & 0xFF) / 255F, (color & 0xFF) / 255F, 1.0F);
-        this.draw(graphics, x, y);
-        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+    public void drawTinted(@Nonnull GuiGraphicsExtractor graphics, int x, int y, int color) {
+        graphics.blit(net.minecraft.client.renderer.RenderPipelines.GUI_TEXTURED, this.texture, x, y, 0, 0, this.width, this.height, this.width, this.height, 0xFF000000 | color);
     }
 }

@@ -1,10 +1,8 @@
 {
   "type": "minecraft:blasting",
-  "ingredient": [
-    {
-      "item": "biggerreactorsrework:ludicrite_dust"
-    }
-  ],
-  "result": {"id": "biggerreactorsrework:ludicrite_ingot"},
+  "ingredient": "biggerreactorsrework:ludicrite_dust",
+  "result": {
+    "id": "biggerreactorsrework:ludicrite_ingot"
+  },
   "cookingtime": 100
 }

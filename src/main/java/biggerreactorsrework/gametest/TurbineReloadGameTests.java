@@ -11,10 +11,119 @@ import net.minecraft.world.level.block.Blocks;
 import net.neoforged.neoforge.gametest.*;
 
 /** Modified 2026-10-26: assemble real turbines from loaded parts with pending inventories. */
-@GameTestHolder(BiggerReactors.modid)
-@PrefixGameTestTemplate(false)
 public final class TurbineReloadGameTests {
+    @GameTest(template="empty_7x7x7",timeoutTicks=120)
+    public static void fullyConsumedSteamFlowStillSynchronizesHaze(GameTestHelper h) {
+        build(h,false,false);
+        h.startSequence().thenWaitUntil(()->assertAssembled(h)).thenExecute(()->{
+            var bearing=(TurbineRotorBearingTile)GameTestSupport.be(h,new BlockPos(3,1,3));
+            var sim=bearing.controller().simulation();
+            var transition=biggerreactorsrework.registries.FluidTransitionRegistry.liquidTransition(net.minecraft.world.level.material.Fluids.WATER);
+            long flow=Math.min(10000,sim.flowRateLimit());
+            h.assertTrue(flow>0,"test turbine has no flow capacity");
+            sim.setNominalFlowRate(flow);sim.setActive(true);
+            for(int i=0;i<25;i++) {
+                sim.fluidTank().dumpLiquid();
+                h.assertTrue(sim.fluidTank().fill(transition.gases.getFirst(),net.minecraft.core.component.DataComponentPatch.EMPTY,flow,false)==flow,"exact steam feed was not accepted");
+                bearing.controller().tick();
+                h.assertTrue(sim.flowLastTick()==flow && sim.fluidTank().vaporAmount()==0,"test did not consume all incoming steam");
+                h.assertTrue(bearing.getUpdateNBT().getFloatOr("steamDensity",0F)==1,"empty-buffer flowing turbine lost haze");
+                h.assertTrue(bearing.getDataNBT().getFloatOr("steamDensity",0F)==1 || !bearing.isRenderBearing,"initial window snapshot omitted through-flow haze");
+            }
+            bearing.controller().tick();
+            h.assertTrue(bearing.currentSteamDensity()==0,"starved empty turbine retained flow haze");
+            sim.fluidTank().fill(transition.gases.getFirst(),net.minecraft.core.component.DataComponentPatch.EMPTY,flow,false);bearing.controller().tick();
+            sim.setActive(false);
+            h.assertTrue(bearing.currentSteamDensity()==0,"stale last-tick conversion kept a stopped empty turbine hazy");
+            sim.fluidTank().fill(transition.gases.getFirst(),net.minecraft.core.component.DataComponentPatch.EMPTY,flow,false);
+            h.assertTrue(bearing.currentSteamDensity()>0,"stopped turbine lost its stored-steam haze");
+        }).thenSucceed();
+    }
+    @GameTest(template="empty_7x7x7",timeoutTicks=120)
+    public static void storedSteamHazeAndDelayedCondensationAreIndependent(GameTestHelper h) {
+        build(h,false,false);
+        h.startSequence().thenWaitUntil(() -> assertAssembled(h)).thenExecute(() -> {
+            var bearing = (TurbineRotorBearingTile) GameTestSupport.be(h,new BlockPos(3,1,3));
+            var sim = bearing.controller().simulation();
+            sim.setActive(false);
+            var transition=biggerreactorsrework.registries.FluidTransitionRegistry.liquidTransition(net.minecraft.world.level.material.Fluids.WATER);
+            var modern=(biggerreactorsrework.multiblocks.turbine.simulation.modern.ModernTurbineSimulation)sim;
+            modern.idealSupply(transition);
+            h.assertTrue(bearing.getUpdateNBT().getFloatOr("steamDensity",0F)>0,"idle stored steam has no haze");
+            h.assertTrue(!bearing.getUpdateNBT().getBooleanOr("condensationReady",false),"idle steam started dripping");
+            sim.setActive(true);sim.setCoilEngaged(false);
+            for(int tick=0;tick<120;tick++) {
+                modern.idealSupply(transition);
+                bearing.controller().tick();
+                if(tick<59)h.assertTrue(!bearing.getUpdateNBT().getBooleanOr("condensationReady",false),"condensation started without warmup");
+            }
+            h.assertTrue(bearing.getUpdateNBT().getBooleanOr("condensationReady",false),"continuous rotation did not warm condensation");
+            sim.setActive(false);bearing.controller().tick();
+            h.assertTrue(bearing.getUpdateNBT().getFloatOr("steamDensity",0F)>0,"switching off erased stored steam haze");
+            h.assertTrue(!bearing.getUpdateNBT().getBooleanOr("condensationReady",false),"coasting turbine continued dripping");
+            h.assertTrue(sim.RPM()>0,"test did not cover a coasting rotor");
+            sim.fluidTank().dumpVapor();
+            h.assertTrue(bearing.getUpdateNBT().getFloatOr("steamDensity",0F)==0,"empty tank retained haze");
+        }).thenSucceed();
+    }
+
+    @GameTest(template="empty_7x7x7",timeoutTicks=20)
+    public static void rotorSpeedIsLimitedUnderExcessSteam(GameTestHelper h) {
+        var sim = new biggerreactorsrework.multiblocks.turbine.simulation.modern.ModernTurbineSimulation();
+        sim.resize(3, 3, 3);
+        sim.setRotorConfiguration(new java.util.ArrayList<>(java.util.List.of(new org.joml.Vector4i(1, 1, 1, 1))));
+        // Low induction drag ensures the steam supply can actually drive the rotor into the governor.
+        sim.setCoilData(1, 0, new biggerreactorsrework.registries.TurbineCoilRegistry.CoilData(1, 1, 0.1));
+        sim.updateInternalValues();
+        sim.setNominalFlowRate(sim.flowRateLimit());
+        sim.setActive(true);
+        var steam = biggerreactorsrework.registries.FluidTransitionRegistry.liquidTransition(net.minecraft.world.level.material.Fluids.WATER);
+        h.assertTrue(steam != null, "missing steam transition");
+        // A legacy save already above the limit must recover before computing generation.
+        var saved = sim.serializeNBT();
+        saved.putDouble("rotorEnergy", sim.rotorMass() * 10000);
+        sim.deserializeNBT(saved);
+        for (boolean coils : new boolean[]{false, true}) {
+            sim.setCoilEngaged(coils);
+            for (int tick = 0; tick < 1000; tick++) {
+                sim.idealSupply(steam);
+                sim.tick();
+                h.assertTrue(sim.RPM() <= 2200 && sim.RPM() >= 0, "rotor exceeded speed limit");
+                h.assertTrue(sim.serializeNBT().getDoubleOr("rotorEnergy", 0D) <= sim.rotorMass() * 2200,
+                        "excess rotor energy accumulated behind the RPM display");
+                if (coils) h.assertTrue(sim.FEGeneratedLastTick() > 0, "generation stopped at the speed limit");
+                sim.battery().extract(Long.MAX_VALUE);
+            }
+            h.assertTrue(sim.RPM() == 2200, "excess steam did not reach the speed limit: " + sim.RPM());
+        }
+        sim.setActive(false);
+        sim.tick();
+        h.assertTrue(sim.RPM() < 2200, "rotor did not slow down without steam");
+        h.succeed();
+    }
+
     private static final BlockPos TERMINAL=new BlockPos(1,3,3);
+    @GameTest(template="empty_7x7x7",timeoutTicks=120)
+    public static void steamWindowsSynchronizeOnlyGlassAndClearOnDisassembly(GameTestHelper h) {
+        build(h,false,false);
+        h.setBlock(1,2,2,biggerreactorsrework.multiblocks.turbine.blocks.TurbineGlass.INSTANCE);
+        h.setBlock(1,2,3,biggerreactorsrework.multiblocks.turbine.blocks.TurbineGlass.INSTANCE);
+        h.startSequence().thenWaitUntil(()->assertAssembled(h)).thenExecute(()->{
+            var a=(TurbineRotorBearingTile)GameTestSupport.be(h,new BlockPos(3,1,3));
+            var b=(TurbineRotorBearingTile)GameTestSupport.be(h,new BlockPos(3,5,3));
+            var bearing=a.isRenderBearing?a:b;
+            var data=bearing.getDataNBT();
+            h.assertTrue(data.getIntArray("steamGlass").orElseThrow().length==6,"window snapshot includes non-glass or loses glass");
+            var snapshot=TurbineRotorBearingTile.SUPPLIER.create(bearing.getBlockPos(),bearing.getBlockState());
+            snapshot.handleDataNBT(data);
+            h.assertTrue(snapshot.steamWindows.stream().mapToDouble(biggerreactorsrework.core.util.FluidSurfaceMesh.Face::area).sum()==2,"client film does not exactly cover the two windows");
+            var removed=new CompoundTag();removed.putBoolean("disassembled",true);
+            snapshot.handleUpdateNBT(removed);
+            h.assertTrue(snapshot.steamWindows.isEmpty(),"disassembly left stale window film");
+            data.remove("steamGlass");snapshot.handleDataNBT(data);
+            h.assertTrue(snapshot.steamWindows.isEmpty(),"absent geometry invented window films");
+        }).thenSucceed();
+    }
     private static CompoundTag contents() {
         var data=new CompoundTag();var fluid=new CompoundTag();
         fluid.putString("inFluid","biggerreactorsrework:steam");fluid.putString("outFluid","minecraft:water");
@@ -37,17 +146,17 @@ public final class TurbineReloadGameTests {
                 if(!(tile instanceof TurbineBaseTile part))continue;
                 part.multiblockModule().readNBT(new CompoundTag());
                 var persistent=new CompoundTag();persistent.putString("last_assembly_state","DISASSEMBLED");
-                if(replicas)persistent.putUUID("machine_origin",origin);
+                if(replicas)persistent.store("machine_origin",net.minecraft.core.UUIDUtil.CODEC,origin);
                 if(replicas || x==1 && y==3 && z==3)persistent.put("controller_data",contents());
                 part.module(IPersistentMultiblockTile.class,IPersistentMultiblockTile.Module.class).readNBT(persistent);
             }
         }
     }
     private static void assertAssembled(GameTestHelper h) {
-        var terminal=(TurbineTerminalTile)h.getBlockEntity(TERMINAL);
+        var terminal=(TurbineTerminalTile)GameTestSupport.be(h,TERMINAL);
         h.assertTrue(terminal.nullableController()!=null,"no controller");
-        var bottom=(TurbineRotorBearingTile)h.getBlockEntity(new BlockPos(3,1,3));
-        var top=(TurbineRotorBearingTile)h.getBlockEntity(new BlockPos(3,5,3));
+        var bottom=(TurbineRotorBearingTile)GameTestSupport.be(h,new BlockPos(3,1,3));
+        var top=(TurbineRotorBearingTile)GameTestSupport.be(h,new BlockPos(3,5,3));
         h.assertTrue(bottom.nullableController()==terminal.nullableController() && top.nullableController()==terminal.nullableController(),
                 "bearings and terminal were split into different controllers");
         h.assertTrue(terminal.controller().assemblyState()==biggerreactorsrework.core.multiblock.validated.IValidatedMultiblock.AssemblyState.ASSEMBLED,
@@ -73,7 +182,7 @@ public final class TurbineReloadGameTests {
             if(tile instanceof TurbineBaseTile part) {
                 part.multiblockModule().readNBT(new CompoundTag());
                 var saved=new CompoundTag();saved.putString("last_assembly_state","DISASSEMBLED");
-                if(origin!=null)saved.putUUID("machine_origin",origin);
+                if(origin!=null)saved.store("machine_origin",net.minecraft.core.UUIDUtil.CODEC,origin);
                 if((x+y+z)%7==0 || x==1 && y==3 && z==5)saved.put("controller_data",contents());
                 part.module(IPersistentMultiblockTile.class,IPersistentMultiblockTile.Module.class).readNBT(saved);
             }
@@ -84,9 +193,9 @@ public final class TurbineReloadGameTests {
         largePhase(h,1,4,origin);
         h.startSequence().thenExecuteAfter(15,()->largePhase(h,5,9,origin))
             .thenWaitUntil(()->{
-                var bottom=(TurbineRotorBearingTile)h.getBlockEntity(new BlockPos(5,1,5));
-                var top=(TurbineRotorBearingTile)h.getBlockEntity(new BlockPos(5,12,5));
-                var terminal=(TurbineTerminalTile)h.getBlockEntity(new BlockPos(1,3,5));
+                var bottom=(TurbineRotorBearingTile)GameTestSupport.be(h,new BlockPos(5,1,5));
+                var top=(TurbineRotorBearingTile)GameTestSupport.be(h,new BlockPos(5,12,5));
+                var terminal=(TurbineTerminalTile)GameTestSupport.be(h,new BlockPos(1,3,5));
                 h.assertTrue(bottom!=null && top!=null && terminal!=null,"missing physical parts");
                 h.assertTrue(bottom.nullableController()==top.nullableController() && bottom.nullableController()==terminal.nullableController(),"large turbine left split controllers after reload");
                 h.assertTrue(terminal.nullableController()!=null && terminal.controller().assemblyState()==biggerreactorsrework.core.multiblock.validated.IValidatedMultiblock.AssemblyState.ASSEMBLED,"large turbine not assembled");
@@ -104,7 +213,7 @@ public final class TurbineReloadGameTests {
             var controllers=new biggerreactorsrework.multiblocks.turbine.TurbineMultiblockController[3];
             for(int i=0;i<3;i++) {
                 var pos=new BlockPos(1+i*2,2,2);h.setBlock(pos,TurbineRotorBearing.INSTANCE);
-                var part=(TurbineBaseTile)h.getBlockEntity(pos);
+                var part=(TurbineBaseTile)GameTestSupport.be(h,pos);
                 controllers[i]=part.createController();controllers[i].attemptAttach(part.multiblockModule(),true);
             }
             var cls=biggerreactorsrework.core.multiblock.MultiblockController.class;
@@ -121,31 +230,31 @@ public final class TurbineReloadGameTests {
     private static void loadSavedRange(GameTestHelper h,int low,int high,int seed) {
         try(var input=TurbineReloadGameTests.class.getResourceAsStream("/data/biggerreactorsrework/structure/saved_turbine_reload.nbt")) {
             var saved=net.minecraft.nbt.NbtIo.readCompressed(java.util.Objects.requireNonNull(input),net.minecraft.nbt.NbtAccounter.unlimitedHeap());
-            var palette=saved.getList("palette",net.minecraft.nbt.Tag.TAG_COMPOUND);
-            var blocks=saved.getList("blocks",net.minecraft.nbt.Tag.TAG_COMPOUND);
+            var palette=saved.getListOrEmpty("palette");
+            var blocks=saved.getListOrEmpty("blocks");
             var base=h.absolutePos(new BlockPos(1,1,1));
             var order=new java.util.ArrayList<Integer>();for(int i=0;i<blocks.size();i++)order.add(i);
             if(seed!=0)java.util.Collections.shuffle(order,new java.util.Random(seed));
             for(int i:order) {
-                var entry=blocks.getCompound(i);var pos=entry.getList("pos",net.minecraft.nbt.Tag.TAG_LONG);
-                int localX=((net.minecraft.nbt.NumericTag)pos.get(0)).getAsInt();
+                var entry=blocks.getCompoundOrEmpty(i);var pos=entry.getListOrEmpty("pos");
+                int localX=pos.getIntOr(0,0);
                 if(localX<low || localX>high)continue;
-                var relative=new BlockPos(localX+1,((net.minecraft.nbt.NumericTag)pos.get(1)).getAsInt()+1,((net.minecraft.nbt.NumericTag)pos.get(2)).getAsInt()+1);
-                var state=net.minecraft.nbt.NbtUtils.readBlockState(net.minecraft.core.registries.BuiltInRegistries.BLOCK.asLookup(),palette.getCompound(entry.getInt("state")));
+                var relative=new BlockPos(localX+1,pos.getIntOr(1,0)+1,pos.getIntOr(2,0)+1);
+                var state=net.minecraft.nbt.NbtUtils.readBlockState(net.minecraft.core.registries.BuiltInRegistries.BLOCK,biggerreactorsrework.calculator.PlantCodec.upgradedState(palette.getCompoundOrEmpty(entry.getIntOr("state", 0))));
                 h.setBlock(relative,state);
                 if(!entry.contains("nbt"))continue;
-                var tile=(TurbineBaseTile)h.getBlockEntity(relative);var data=entry.getCompound("nbt").copy();
-                var touching=data.getCompound("sub").getCompound("touching_multiblock");
-                touching.putInt("minx",touching.getInt("minx")-12+base.getX());touching.putInt("maxx",touching.getInt("maxx")-12+base.getX());
-                touching.putInt("miny",touching.getInt("miny")+base.getY());touching.putInt("maxy",touching.getInt("maxy")+base.getY());
-                touching.putInt("minz",touching.getInt("minz")-18+base.getZ());touching.putInt("maxz",touching.getInt("maxz")-18+base.getZ());
-                tile.loadWithComponents(data,h.getLevel().registryAccess());
+                var tile=(TurbineBaseTile)GameTestSupport.be(h,relative);var data=entry.getCompoundOrEmpty("nbt").copy();
+                var touching=data.getCompoundOrEmpty("sub").getCompoundOrEmpty("touching_multiblock");
+                touching.putInt("minx",touching.getIntOr("minx", 0)-12+base.getX());touching.putInt("maxx",touching.getIntOr("maxx", 0)-12+base.getX());
+                touching.putInt("miny",touching.getIntOr("miny", 0)+base.getY());touching.putInt("maxy",touching.getIntOr("maxy", 0)+base.getY());
+                touching.putInt("minz",touching.getIntOr("minz", 0)-18+base.getZ());touching.putInt("maxz",touching.getIntOr("maxz", 0)-18+base.getZ());
+                GameTestSupport.load(tile,data,h);
             }
         }catch(java.io.IOException error){throw new AssertionError(error);}
     }
     private static void assertSavedAssembled(GameTestHelper h) {
-            var bottom=(TurbineRotorBearingTile)h.getBlockEntity(new BlockPos(5,1,5));
-            var top=(TurbineRotorBearingTile)h.getBlockEntity(new BlockPos(5,12,5));
+            var bottom=(TurbineRotorBearingTile)GameTestSupport.be(h,new BlockPos(5,1,5));
+            var top=(TurbineRotorBearingTile)GameTestSupport.be(h,new BlockPos(5,12,5));
             h.assertTrue(bottom.nullableController()!=null && bottom.nullableController()==top.nullableController(),"saved turbine bearings belong to different controllers");
             h.assertTrue(bottom.controller().assemblyState()==biggerreactorsrework.core.multiblock.validated.IValidatedMultiblock.AssemblyState.ASSEMBLED,"saved turbine did not reassemble");
             h.assertTrue(bottom.controller().simulation().fluidTank().liquidAmount()==4200000,"saved condensed water was lost or duplicated");

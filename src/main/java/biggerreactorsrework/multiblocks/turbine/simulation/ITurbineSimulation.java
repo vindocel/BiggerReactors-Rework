@@ -9,6 +9,7 @@ import org.joml.Vector4i;
 import java.util.ArrayList;
 
 public interface ITurbineSimulation extends NbtSerializable {
+    double MAX_RPM = 2200.0;
     
     void reset();
     

@@ -14,14 +14,12 @@ import net.minecraft.core.component.DataComponentPatch;
 import net.minecraft.gametest.framework.*;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.material.Fluids;
-import net.neoforged.neoforge.fluids.capability.IFluidHandler.FluidAction;
+import biggerreactorsrework.core.transfer.FluidTanks.FluidAction;
 import net.neoforged.neoforge.gametest.*;
 import java.nio.file.*;
 import java.util.*;
 
 /** Modified 2026-10-26: measured bottleneck experiments, actual production physics, no changes to player worlds. */
-@GameTestHolder(BiggerReactors.modid)
-@PrefixGameTestTemplate(false)
 public final class OutputBottleneckStudyGameTests {
     private static final int STAGE=160000,SAMPLE=20000;
     private interface Machine {

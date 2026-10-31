@@ -1,6 +1,5 @@
 package biggerreactorsrework.core.modular.api;
 
-import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -18,7 +17,6 @@ import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 
 
-@MethodsReturnNonnullByDefault
 @ParametersAreNonnullByDefault
 public class BlockModule<InterfaceType extends IModularBlock> {
     

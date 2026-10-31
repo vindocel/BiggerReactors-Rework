@@ -17,7 +17,7 @@ import net.minecraft.world.level.block.state.properties.BooleanProperty;
 public final class BatteryRedstonePort extends BatteryBaseBlock implements IAssemblyStateBlock, IFaceDirectionBlock {
     public static final BooleanProperty IS_LIT = BooleanProperty.create("is_lit");
     @RegisterBlock(name = "battery_redstone_port", tileEntityClass = BatteryRedstonePortTile.class)
-    public static final BatteryRedstonePort INSTANCE = new BatteryRedstonePort();
+    public static final BatteryRedstonePort INSTANCE = biggerreactorsrework.core.registry.RegistryIds.named("battery_redstone_port", () -> new BatteryRedstonePort());
 
     public BatteryRedstonePort() { registerDefaultState(defaultBlockState().setValue(IS_LIT, false)); }
     @Override protected void buildStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {

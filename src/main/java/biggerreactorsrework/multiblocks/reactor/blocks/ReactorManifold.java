@@ -1,14 +1,10 @@
 package biggerreactorsrework.multiblocks.reactor.blocks;
 
-import net.minecraft.MethodsReturnNonnullByDefault;
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 import biggerreactorsrework.Config;
 import biggerreactorsrework.multiblocks.reactor.tiles.ReactorManifoldTile;
 import biggerreactorsrework.core.modular.block.IConnectedTexture;
@@ -18,11 +14,10 @@ import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 
 @ParametersAreNonnullByDefault
-@MethodsReturnNonnullByDefault
 public class ReactorManifold extends ReactorBaseBlock implements IConnectedTexture {
     
     @RegisterBlock(name = "reactor_manifold", tileEntityClass = ReactorManifoldTile.class)
-    public static final ReactorManifold INSTANCE = new ReactorManifold();
+    public static final ReactorManifold INSTANCE = biggerreactorsrework.core.registry.RegistryIds.named("reactor_manifold", () -> new ReactorManifold());
     
     public ReactorManifold() {
         super(false);

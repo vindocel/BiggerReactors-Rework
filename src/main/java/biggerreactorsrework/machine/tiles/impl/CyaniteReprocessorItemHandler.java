@@ -1,14 +1,14 @@
 package biggerreactorsrework.machine.tiles.impl;
 
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.items.IItemHandler;
-import net.neoforged.neoforge.items.ItemStackHandler;
+import biggerreactorsrework.core.transfer.ItemSlots;
+import biggerreactorsrework.core.transfer.SlotStorage;
 import biggerreactorsrework.items.ingots.BlutoniumIngot;
 import biggerreactorsrework.items.ingots.CyaniteIngot;
 
 import javax.annotation.Nonnull;
 
-public class CyaniteReprocessorItemHandler extends ItemStackHandler {
+public class CyaniteReprocessorItemHandler extends SlotStorage {
     
     public static final int INPUT_SLOT_INDEX = 0;
     public static final int OUTPUT_SLOT_INDEX = 1;
@@ -17,9 +17,9 @@ public class CyaniteReprocessorItemHandler extends ItemStackHandler {
     private java.util.function.Predicate<ItemStack> inputFilter = stack -> stack.getItem() == CyaniteIngot.INSTANCE;
     public void inputFilter(java.util.function.Predicate<ItemStack> filter) { inputFilter = filter; }
     private final Runnable onChanged;
-    private final IItemHandler pipeHandler = this.createPipeHandler(true, true);
-    private final IItemHandler inputHandler = this.createPipeHandler(true, false);
-    private final IItemHandler outputHandler = this.createPipeHandler(false, true);
+    private final ItemSlots pipeHandler = this.createPipeHandler(true, true);
+    private final ItemSlots inputHandler = this.createPipeHandler(true, false);
+    private final ItemSlots outputHandler = this.createPipeHandler(false, true);
     
     public CyaniteReprocessorItemHandler(Runnable onChanged) {
         super(SLOTS);
@@ -45,7 +45,7 @@ public class CyaniteReprocessorItemHandler extends ItemStackHandler {
     /**
      * @return The view exposed to pipes and hoppers: insert into the input slot only, extract from the output slot only.
      */
-    public IItemHandler pipeHandler() {
+    public ItemSlots pipeHandler() {
         return this.pipeHandler;
     }
     
@@ -54,16 +54,16 @@ public class CyaniteReprocessorItemHandler extends ItemStackHandler {
      * @param extract Whether the view gives blutonium from the output slot.
      * @return The view for a side with that item route, or null when it does neither.
      */
-    public IItemHandler sideHandler(boolean insert, boolean extract) {
+    public ItemSlots sideHandler(boolean insert, boolean extract) {
         if (insert && extract) {
             return this.pipeHandler;
         }
         return insert ? this.inputHandler : extract ? this.outputHandler : null;
     }
     
-    private IItemHandler createPipeHandler(boolean insert, boolean extract) {
+    private ItemSlots createPipeHandler(boolean insert, boolean extract) {
         final CyaniteReprocessorItemHandler realHandler = this;
-        return new IItemHandler() {
+        return new ItemSlots() {
             @Override
             public int getSlots() {
                 return realHandler.getSlots();

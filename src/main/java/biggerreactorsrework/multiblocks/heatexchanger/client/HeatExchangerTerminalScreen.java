@@ -3,16 +3,14 @@ package biggerreactorsrework.multiblocks.heatexchanger.client;
 import biggerreactorsrework.client.GuiTheme;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 import biggerreactorsrework.BiggerReactors;
 import biggerreactorsrework.Config;
 import biggerreactorsrework.client.CommonRender;
@@ -30,7 +28,6 @@ import biggerreactorsrework.core.client.gui.elements.TooltipElement;
 import javax.annotation.Nonnull;
 import java.util.Objects;
 
-@OnlyIn(Dist.CLIENT)
 public class HeatExchangerTerminalScreen extends ModScreen<HeatExchangerTerminalContainer> {
 
 
@@ -46,10 +43,10 @@ public class HeatExchangerTerminalScreen extends ModScreen<HeatExchangerTerminal
 
         // Initialize heat exchanger state.
         this.heatExchangerState = (HeatExchangerState) this.getMenu().getGuiPacket();
-        this.condenserIntakeFluid = BuiltInRegistries.FLUID.get(ResourceLocation.parse(this.heatExchangerState.condenserIntakeFluid));
-        this.condenserExhaustFluid = BuiltInRegistries.FLUID.get(ResourceLocation.parse(this.heatExchangerState.condenserExhaustFluid));
-        this.evaporatorIntakeFluid = BuiltInRegistries.FLUID.get(ResourceLocation.parse(this.heatExchangerState.evaporatorIntakeFluid));
-        this.evaporatorExhaustFluid = BuiltInRegistries.FLUID.get(ResourceLocation.parse(this.heatExchangerState.evaporatorExhaustFluid));
+        this.condenserIntakeFluid = BuiltInRegistries.FLUID.getValue(Identifier.parse(this.heatExchangerState.condenserIntakeFluid));
+        this.condenserExhaustFluid = BuiltInRegistries.FLUID.getValue(Identifier.parse(this.heatExchangerState.condenserExhaustFluid));
+        this.evaporatorIntakeFluid = BuiltInRegistries.FLUID.getValue(Identifier.parse(this.heatExchangerState.evaporatorIntakeFluid));
+        this.evaporatorExhaustFluid = BuiltInRegistries.FLUID.getValue(Identifier.parse(this.heatExchangerState.evaporatorExhaustFluid));
     }
 
     /**
@@ -110,35 +107,35 @@ public class HeatExchangerTerminalScreen extends ModScreen<HeatExchangerTerminal
     private void initGauges() {
         // (Top) Condenser intake tank:
         RenderedElement<HeatExchangerTerminalContainer> condenserIntakeTank = new RenderedElement<>(this, 10, 36, 18, 64, 0, 144, Component.empty());
-        condenserIntakeTank.onRender = (@Nonnull GuiGraphics graphics, int mX, int mY) -> CommonRender.renderFluidGauge(graphics,
+        condenserIntakeTank.onRender = (@Nonnull GuiGraphicsExtractor graphics, int mX, int mY) -> CommonRender.renderFluidGauge(graphics,
                 condenserIntakeTank, heatExchangerState.condenserIntakeFluidAmount, heatExchangerState.condenserTankSize, biggerreactorsrework.client.CoolantVisuals.stack(heatExchangerState.condenserIntakeFluid,heatExchangerState.condenserIntakeOrigin));
         this.addScreenElement(condenserIntakeTank);
 
         // (Top) Evaporator intake tank:
         RenderedElement<HeatExchangerTerminalContainer> evaporatorIntakeTank = new RenderedElement<>(this, 36, 36, 18, 64, 0, 144, Component.empty());
-        evaporatorIntakeTank.onRender = (@Nonnull GuiGraphics graphics, int mX, int mY) -> CommonRender.renderFluidGauge(graphics,
+        evaporatorIntakeTank.onRender = (@Nonnull GuiGraphicsExtractor graphics, int mX, int mY) -> CommonRender.renderFluidGauge(graphics,
                 evaporatorIntakeTank, heatExchangerState.evaporatorIntakeFluidAmount, heatExchangerState.evaporatorTankSize, this.evaporatorIntakeFluid);
         this.addScreenElement(evaporatorIntakeTank);
 
         // (Top) Condenser heat gauge:
         RenderedElement<HeatExchangerTerminalContainer> condenserHeatGauge = new RenderedElement<>(this, 62, 36, 18, 64, 0, 144, Component.empty());
-        condenserHeatGauge.onRender = (@Nonnull GuiGraphics graphics, int mX, int mY) -> HeatExchangerTerminalScreen.renderHeatGauge(graphics, condenserHeatGauge, heatExchangerState.condenserChannelTemperature, Config.CONFIG.HeatExchanger.gui.HeatDisplayMax);
+        condenserHeatGauge.onRender = (@Nonnull GuiGraphicsExtractor graphics, int mX, int mY) -> HeatExchangerTerminalScreen.renderHeatGauge(graphics, condenserHeatGauge, heatExchangerState.condenserChannelTemperature, Config.CONFIG.HeatExchanger.gui.HeatDisplayMax);
         this.addScreenElement(condenserHeatGauge);
 
         // (Top) Evaporator heat gauge:
         RenderedElement<HeatExchangerTerminalContainer> evaporatorHeatGauge = new RenderedElement<>(this, 88, 36, 18, 64, 0, 144, Component.empty());
-        evaporatorHeatGauge.onRender = (@Nonnull GuiGraphics graphics, int mX, int mY) -> HeatExchangerTerminalScreen.renderHeatGauge(graphics, evaporatorHeatGauge, heatExchangerState.evaporatorChannelTemperature, Config.CONFIG.HeatExchanger.gui.HeatDisplayMax);
+        evaporatorHeatGauge.onRender = (@Nonnull GuiGraphicsExtractor graphics, int mX, int mY) -> HeatExchangerTerminalScreen.renderHeatGauge(graphics, evaporatorHeatGauge, heatExchangerState.evaporatorChannelTemperature, Config.CONFIG.HeatExchanger.gui.HeatDisplayMax);
         this.addScreenElement(evaporatorHeatGauge);
 
         // (Top) Condenser exhaust tank:
         RenderedElement<HeatExchangerTerminalContainer> condenserExhaustTank = new RenderedElement<>(this, 114, 36, 18, 64, 0, 144, Component.empty());
-        condenserExhaustTank.onRender = (@Nonnull GuiGraphics graphics, int mX, int mY) -> CommonRender.renderFluidGauge(graphics,
+        condenserExhaustTank.onRender = (@Nonnull GuiGraphicsExtractor graphics, int mX, int mY) -> CommonRender.renderFluidGauge(graphics,
                 condenserExhaustTank, heatExchangerState.condenserExhaustFluidAmount, heatExchangerState.condenserTankSize, this.condenserExhaustFluid);
         this.addScreenElement(condenserExhaustTank);
 
         // (Top) Evaporator exhaust tank:
         RenderedElement<HeatExchangerTerminalContainer> evaporatorExhaustTank = new RenderedElement<>(this, 140, 36, 18, 64, 0, 144, Component.empty());
-        evaporatorExhaustTank.onRender = (@Nonnull GuiGraphics graphics, int mX, int mY) -> CommonRender.renderFluidGauge(graphics,
+        evaporatorExhaustTank.onRender = (@Nonnull GuiGraphicsExtractor graphics, int mX, int mY) -> CommonRender.renderFluidGauge(graphics,
                 evaporatorExhaustTank, heatExchangerState.evaporatorExhaustFluidAmount, heatExchangerState.evaporatorTankSize, biggerreactorsrework.client.CoolantVisuals.stack(heatExchangerState.evaporatorExhaustFluid,heatExchangerState.evaporatorExhaustOrigin));
         this.addScreenElement(evaporatorExhaustTank);
     }
@@ -150,22 +147,22 @@ public class HeatExchangerTerminalScreen extends ModScreen<HeatExchangerTerminal
     public void containerTick() {
         // Check if condenser intake fluid changed.
         if (!heatExchangerState.condenserIntakeFluid.equals(Objects.requireNonNull(BuiltInRegistries.FLUID.getKey(condenserIntakeFluid)).toString())) {
-            condenserIntakeFluid = BuiltInRegistries.FLUID.get(ResourceLocation.parse(heatExchangerState.condenserIntakeFluid));
+            condenserIntakeFluid = BuiltInRegistries.FLUID.getValue(Identifier.parse(heatExchangerState.condenserIntakeFluid));
         }
 
         // Check if evaporator intake fluid changed.
         if (!heatExchangerState.evaporatorIntakeFluid.equals(Objects.requireNonNull(BuiltInRegistries.FLUID.getKey(evaporatorIntakeFluid)).toString())) {
-            evaporatorIntakeFluid = BuiltInRegistries.FLUID.get(ResourceLocation.parse(heatExchangerState.evaporatorIntakeFluid));
+            evaporatorIntakeFluid = BuiltInRegistries.FLUID.getValue(Identifier.parse(heatExchangerState.evaporatorIntakeFluid));
         }
 
         // Check if condenser exhaust fluid changed.
         if (!heatExchangerState.condenserExhaustFluid.equals(Objects.requireNonNull(BuiltInRegistries.FLUID.getKey(condenserExhaustFluid)).toString())) {
-            condenserExhaustFluid = BuiltInRegistries.FLUID.get(ResourceLocation.parse(heatExchangerState.condenserExhaustFluid));
+            condenserExhaustFluid = BuiltInRegistries.FLUID.getValue(Identifier.parse(heatExchangerState.condenserExhaustFluid));
         }
 
         // Check if evaporator exhaust fluid changed.
         if (!heatExchangerState.evaporatorExhaustFluid.equals(Objects.requireNonNull(BuiltInRegistries.FLUID.getKey(evaporatorExhaustFluid)).toString())) {
-            evaporatorExhaustFluid = BuiltInRegistries.FLUID.get(ResourceLocation.parse(heatExchangerState.evaporatorExhaustFluid));
+            evaporatorExhaustFluid = BuiltInRegistries.FLUID.getValue(Identifier.parse(heatExchangerState.evaporatorExhaustFluid));
         }
     }
 
@@ -177,7 +174,7 @@ public class HeatExchangerTerminalScreen extends ModScreen<HeatExchangerTerminal
      * @param heatStored   The heat value to draw.
      * @param heatCapacity The max heat capacity this gauge can display.
      */
-    public static void renderHeatGauge(@Nonnull GuiGraphics graphics, @Nonnull RenderedElement<HeatExchangerTerminalContainer> symbol, double heatStored, double heatCapacity) {
+    public static void renderHeatGauge(@Nonnull GuiGraphicsExtractor graphics, @Nonnull RenderedElement<HeatExchangerTerminalContainer> symbol, double heatStored, double heatCapacity) {
         GaugeBar.drawHeat(graphics, symbol.x, symbol.y, heatStored, heatCapacity);
         // Update tooltip.
         symbol.tooltip = Component.literal(String.format("%.1f/%.1f K", heatStored, heatCapacity));
@@ -192,27 +189,27 @@ public class HeatExchangerTerminalScreen extends ModScreen<HeatExchangerTerminal
      * @param partialTicks Partial ticks.
      */
     @Override
-    public void render(@Nonnull GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
-        super.render(graphics, mouseX, mouseY, partialTicks);
+    public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTicks) {
+        super.extractRenderState(graphics, mouseX, mouseY, partialTicks);
 
         // Render text for condenser channel temperature:
-        GuiArt.scrollingText(graphics, this.getFont(), String.format("%.0f K", this.heatExchangerState.condenserChannelTemperature), this.getGuiLeft() + 28, this.getGuiTop() + 107, 52, GuiTheme.textColor());
+        GuiArt.scrollingText(graphics, this.getFont(), String.format("%.0f K", this.heatExchangerState.condenserChannelTemperature), this.getLeftPos() + 28, this.getTopPos() + 107, 52, GuiTheme.textColor());
 
         // Render text for evaporator channel temperature:
-        GuiArt.scrollingText(graphics, this.getFont(), String.format("%.0f K", this.heatExchangerState.evaporatorChannelTemperature), this.getGuiLeft() + 28, this.getGuiTop() + 127, 52, GuiTheme.textColor());
+        GuiArt.scrollingText(graphics, this.getFont(), String.format("%.0f K", this.heatExchangerState.evaporatorChannelTemperature), this.getLeftPos() + 28, this.getTopPos() + 127, 52, GuiTheme.textColor());
 
         // Render text for condenser channel flow rate:
-        GuiArt.scrollingText(graphics, this.getFont(), RenderHelper.formatValue((this.heatExchangerState.condenserChannelFlowRate / 1000.0), 1, "B/t", true), this.getGuiLeft() + 105, this.getGuiTop() + 107, 53, GuiTheme.textColor());
+        GuiArt.scrollingText(graphics, this.getFont(), RenderHelper.formatValue((this.heatExchangerState.condenserChannelFlowRate / 1000.0), 1, "B/t", true), this.getLeftPos() + 105, this.getTopPos() + 107, 53, GuiTheme.textColor());
 
         // Render text for evaporator channel flow rate:
-        GuiArt.scrollingText(graphics, this.getFont(), RenderHelper.formatValue((this.heatExchangerState.evaporatorChannelFlowRate / 1000.0), 1, "B/t", true), this.getGuiLeft() + 105, this.getGuiTop() + 127, 53, GuiTheme.textColor());
+        GuiArt.scrollingText(graphics, this.getFont(), RenderHelper.formatValue((this.heatExchangerState.evaporatorChannelFlowRate / 1000.0), 1, "B/t", true), this.getLeftPos() + 105, this.getTopPos() + 127, 53, GuiTheme.textColor());
     }
 
     /**
      * Draw the panel and its fixed details.
      */
     @Override
-    protected void drawBackground(@Nonnull GuiGraphics graphics, int x, int y) {
+    protected void drawBackground(@Nonnull GuiGraphicsExtractor graphics, int x, int y) {
         GuiArt.panel(graphics, x, y, 168, 144, this.frame());
         GuiArt.fill(graphics, x + 10, y + 120, x + 80, y + 121, GuiArt.SEPARATOR);
         GuiArt.fill(graphics, x + 86, y + 120, x + 158, y + 121, GuiArt.SEPARATOR);

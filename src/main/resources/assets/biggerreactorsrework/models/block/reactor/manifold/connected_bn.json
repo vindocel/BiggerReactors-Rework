@@ -1,6 +1,5 @@
 {
-  "parent": "block/cube",
-  "render_type": "cutout",
+  "parent": "block/cube", 
   "textures": {
     "up" : "biggerreactorsrework:block/reactor/manifold/connected_t",
     "down" : "biggerreactorsrework:block/transparent",

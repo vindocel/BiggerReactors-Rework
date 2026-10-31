@@ -147,17 +147,17 @@ public final class CalculatorLibrary {
                 return;
             }
             var tag = NbtIo.readCompressed(file, NbtAccounter.create(MAX_FILE_BYTES));
-            if (tag.getInt("schema") > SCHEMA) {
+            if (tag.getIntOr("schema", 0) > SCHEMA) {
                 readOnly = true;
                 BiggerReactors.LOGGER.warn("Calculator library {} comes from a newer version; left untouched", file);
                 return;
             }
-            var snapshots = tag.getCompound("snapshots");
-            for (String id : snapshots.getAllKeys()) if (id.length() <= 64) stored.put(id, snapshots.getCompound(id));
-            for (var id : tag.getList("recents", Tag.TAG_STRING))
-                if (stored.containsKey(id.getAsString()) && recents.size() < RECENT_LIMIT && !recents.contains(id.getAsString())) recents.addLast(id.getAsString());
-            for (var id : tag.getList("saved", Tag.TAG_STRING))
-                if (stored.containsKey(id.getAsString()) && !saved.contains(id.getAsString())) saved.add(id.getAsString());
+            var snapshots = tag.getCompoundOrEmpty("snapshots");
+            for (String id : snapshots.keySet()) if (id.length() <= 64) stored.put(id, snapshots.getCompoundOrEmpty(id));
+            for (var id : tag.getListOrEmpty("recents"))
+                if (stored.containsKey(id.asString().orElse("")) && recents.size() < RECENT_LIMIT && !recents.contains(id.asString().orElse(""))) recents.addLast(id.asString().orElse(""));
+            for (var id : tag.getListOrEmpty("saved"))
+                if (stored.containsKey(id.asString().orElse("")) && !saved.contains(id.asString().orElse(""))) saved.add(id.asString().orElse(""));
             stored.keySet().removeIf(id -> !recents.contains(id) && !saved.contains(id));
         } catch (IOException | RuntimeException e) {
             readOnly = true;

@@ -5,19 +5,28 @@ import biggerreactorsrework.multiblocks.turbine.blocks.TurbineRotorShaft;
 import biggerreactorsrework.multiblocks.turbine.tiles.TurbineRotorBearingTile;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.LevelRenderer;
-import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.SubmitNodeCollector;
+import net.minecraft.client.renderer.block.BlockModelRenderState;
+import net.minecraft.client.renderer.block.dispatch.BlockStateModelPart;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
+import net.minecraft.client.renderer.blockentity.state.BlockEntityRenderState;
+import net.minecraft.client.renderer.feature.ModelFeatureRenderer;
+import net.minecraft.client.renderer.state.level.CameraRenderState;
+import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.phys.Vec3;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
-import net.neoforged.neoforge.client.model.data.ModelData;
 import org.joml.Matrix4f;
 import org.joml.Vector3i;
 import org.joml.Vector4f;
 import org.joml.Vector4i;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Draws the spinning rotor (shafts and blades) of an assembled turbine from its bearing.
@@ -25,13 +34,62 @@ import org.joml.Vector4i;
  * The transforms are the ones the rotor has always used: an orientation matrix for the rotor axis,
  * a spin about the rotor axis advanced from real frame time at {@code RPM / 10}, and a per-blade placement matrix.
  */
-public class TurbineRotorRenderer implements BlockEntityRenderer<TurbineRotorBearingTile> {
+public class TurbineRotorRenderer implements BlockEntityRenderer<TurbineRotorBearingTile, TurbineRotorRenderer.State> {
+    // Modified 2026-10-31: keep baked parts and static rotor transforms between frames, not world lighting.
+    private final java.util.Map<net.minecraft.client.renderer.block.dispatch.BlockStateModel,List<BlockStateModelPart>> models = new java.util.IdentityHashMap<>();
+    private record Layout(int revision,boolean joke,List<BlockStateModelPart> shafts,List<BlockStateModelPart> blades,List<Part> parts) {}
+    private final java.util.Map<TurbineRotorBearingTile,Layout> layouts = new java.util.WeakHashMap<>();
+
+    private record Part(List<BlockStateModelPart> model, int x, int y, int z, Matrix4f spin, Matrix4f local, int light) {
+    }
+
+    public static final class State extends BlockEntityRenderState {
+        final List<Part> parts = new ArrayList<>();
+        List<biggerreactorsrework.core.util.FluidSurfaceMesh.Face> steamWindows = List.of();
+        float steamDensity;
+        int steamFrame;
+    }
+
+    private List<BlockStateModelPart> model(BlockState state) {
+        var model = Minecraft.getInstance().getModelManager().getBlockStateModelSet().get(state);
+        var cached = models.get(model);
+        if (cached != null) return cached;
+        if (models.size() >= 2) models.clear();
+        List<BlockStateModelPart> parts = new ArrayList<>();
+        model.collectParts(RandomSource.create(42), parts);
+        var baked = List.copyOf(parts);
+        models.put(model,baked);
+        return baked;
+    }
+
+    @Override
+    public State createRenderState() {
+        return new State();
+    }
+
+    @Override
+    public void submit(State state, PoseStack poseStack, SubmitNodeCollector collector, CameraRenderState camera) {
+        for (Part part : state.parts) {
+            poseStack.pushPose();
+            poseStack.translate(part.x, part.y, part.z);
+            poseStack.mulPose(part.spin);
+            poseStack.mulPose(part.local);
+            collector.submitMultiLayerBlockModel(poseStack, part.model, false, BlockModelRenderState.EMPTY_TINTS, part.light, OverlayTexture.NO_OVERLAY, 0);
+            poseStack.popPose();
+        }
+        TurbineSteamRenderer.submit(poseStack, collector, state.steamWindows, state.steamDensity, state.steamFrame);
+    }
+
 
     public TurbineRotorRenderer(BlockEntityRendererProvider.Context context) {
     }
 
     @Override
-    public void render(TurbineRotorBearingTile tile, float partialTick, PoseStack poseStack, MultiBufferSource buffers, int packedLight, int packedOverlay) {
+    public void extractRenderState(TurbineRotorBearingTile tile, State state, float partialTick, Vec3 cameraPosition, ModelFeatureRenderer.CrumblingOverlay breakProgress) {
+        BlockEntityRenderer.super.extractRenderState(tile, state, partialTick, cameraPosition, breakProgress);
+        state.parts.clear();
+        state.steamWindows = List.of();
+        state.steamDensity = 0;
         final var rotationAxis = tile.rotationAxis;
         final var rotorConfiguration = tile.rotorConfiguration;
         final var level = tile.getLevel();
@@ -40,6 +98,12 @@ public class TurbineRotorRenderer implements BlockEntityRenderer<TurbineRotorBea
         }
 
         advanceSpin(tile);
+        TurbineAtmosphereEffects.observe(tile);
+        if (tile.steamDensity > 0) {
+            state.steamWindows = tile.steamWindows;
+            state.steamDensity = tile.steamDensity;
+            state.steamFrame = biggerreactorsrework.core.util.SteamWindowMesh.frame(level.getGameTime() + partialTick);
+        }
 
         final int blade180RotationMultiplier = -rotationAxis.x() | -rotationAxis.y() | rotationAxis.z();
         double initialAngle = 0;
@@ -66,9 +130,20 @@ public class TurbineRotorRenderer implements BlockEntityRenderer<TurbineRotorBea
         spinMatrix.rotate((float) Math.toRadians(tile.renderAngle), 0, 1, 0);
         spinMatrix.translate(-0.5f, -0.5f, -0.5f);
 
-        final BlockState shaftState = TurbineRotorShaft.INSTANCE.defaultBlockState();
-        final BlockState bladeState = TurbineRotorBlade.INSTANCE.defaultBlockState();
+        final List<BlockStateModelPart> shaftState = model(TurbineRotorShaft.INSTANCE.defaultBlockState());
+        final List<BlockStateModelPart> bladeState = model(TurbineRotorBlade.INSTANCE.defaultBlockState());
         final var bearingPos = tile.getBlockPos();
+        var cached = layouts.get(tile);
+        if (cached != null && cached.revision == tile.rotorRevision && cached.joke == TurbineRotorBearingTile.APRIL_FOOLS_JOKE &&
+                cached.shafts == shaftState && cached.blades == bladeState) {
+            var lightPos = new BlockPos.MutableBlockPos();
+            for (var part : cached.parts) {
+                lightPos.set(bearingPos.getX()+part.x,bearingPos.getY()+part.y,bearingPos.getZ()+part.z);
+                state.parts.add(new Part(part.model,part.x,part.y,part.z,spinMatrix,part.local,
+                        net.minecraft.util.LightCoordsUtil.getLightCoords(level,lightPos)));
+            }
+            return;
+        }
         final var localMatrix = new Matrix4f();
         final var mutablePos = new BlockPos.MutableBlockPos();
 
@@ -77,7 +152,7 @@ public class TurbineRotorRenderer implements BlockEntityRenderer<TurbineRotorBea
             worldPos.add(rotationAxis);
 
             localMatrix.identity();
-            drawPart(poseStack, buffers, packedOverlay, shaftState, bearingPos, worldPos, spinMatrix, localMatrix, mutablePos);
+            drawPart(state, shaftState, bearingPos, worldPos, spinMatrix, localMatrix, mutablePos);
 
             int i = 0;
             for (Direction direction : Direction.values()) {
@@ -125,11 +200,12 @@ public class TurbineRotorRenderer implements BlockEntityRenderer<TurbineRotorBea
                     }
                     instancePos.add(worldPos);
 
-                    drawPart(poseStack, buffers, packedOverlay, bladeState, bearingPos, instancePos, spinMatrix, localMatrix, mutablePos);
+                    drawPart(state, bladeState, bearingPos, instancePos, spinMatrix, localMatrix, mutablePos);
                 }
                 i++;
             }
         }
+        layouts.put(tile,new Layout(tile.rotorRevision,TurbineRotorBearingTile.APRIL_FOOLS_JOKE,shaftState,bladeState,List.copyOf(state.parts)));
     }
 
     private static void advanceSpin(TurbineRotorBearingTile tile) {
@@ -145,26 +221,20 @@ public class TurbineRotorRenderer implements BlockEntityRenderer<TurbineRotorBea
         tile.lastRenderNanos = now;
     }
 
-    private static void drawPart(PoseStack poseStack, MultiBufferSource buffers, int packedOverlay, BlockState state,
-                                 BlockPos bearingPos, Vector3i partPos, Matrix4f spinMatrix, Matrix4f localMatrix,
+    private static void drawPart(State out, List<BlockStateModelPart> model, BlockPos bearingPos, Vector3i partPos, Matrix4f spinMatrix, Matrix4f localMatrix,
                                  BlockPos.MutableBlockPos mutablePos) {
         final var level = Minecraft.getInstance().level;
         if (level == null) {
             return;
         }
         mutablePos.set(partPos.x, partPos.y, partPos.z);
-        final int light = LevelRenderer.getLightColor(level, mutablePos);
-        poseStack.pushPose();
-        poseStack.translate(partPos.x - bearingPos.getX(), partPos.y - bearingPos.getY(), partPos.z - bearingPos.getZ());
-        poseStack.mulPose(spinMatrix);
-        poseStack.mulPose(localMatrix);
-        Minecraft.getInstance().getBlockRenderer().renderSingleBlock(state, poseStack, buffers, light, packedOverlay, ModelData.EMPTY, null);
-        poseStack.popPose();
+        out.parts.add(new Part(model, partPos.x - bearingPos.getX(), partPos.y - bearingPos.getY(), partPos.z - bearingPos.getZ(),
+                spinMatrix, new Matrix4f(localMatrix), net.minecraft.util.LightCoordsUtil.getLightCoords(level, mutablePos)));
     }
 
     @Override
-    public boolean shouldRenderOffScreen(TurbineRotorBearingTile tile) {
-        return true;
+    public boolean shouldRenderOffScreen() {
+        return false;
     }
 
     @Override

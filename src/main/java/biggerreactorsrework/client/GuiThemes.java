@@ -86,7 +86,7 @@ public final class GuiThemes {
         } else if (mc.getCurrentServer() != null) {
             world = "server:" + mc.getCurrentServer().ip;
         }
-        String dimension = mc.level == null ? "unknown" : mc.level.dimension().location().toString();
+        String dimension = mc.level == null ? "unknown" : mc.level.dimension().identifier().toString();
         return world + "|" + dimension + "|" + pos.getX() + "," + pos.getY() + "," + pos.getZ();
     }
 

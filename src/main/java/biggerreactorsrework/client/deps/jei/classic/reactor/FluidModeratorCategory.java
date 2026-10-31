@@ -13,14 +13,14 @@ import mezz.jei.api.recipe.IFocusGroup;
 import mezz.jei.api.recipe.RecipeIngredientRole;
 import mezz.jei.api.recipe.RecipeType;
 import mezz.jei.api.recipe.category.IRecipeCategory;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
 
 /** Reworked 2026-10-25: selected coolant conversions replace world-fluid moderation. Modified 2026-10-26: drawn like the moderator pages. */
 public class FluidModeratorCategory implements IRecipeCategory<FluidModeratorCategory.Recipe> {
-    public static final ResourceLocation UID = ResourceLocation.fromNamespaceAndPath(BiggerReactors.modid, "classic/reactor_coolant");
+    public static final Identifier UID = Identifier.fromNamespaceAndPath(BiggerReactors.modid, "classic/reactor_coolant");
     public static final RecipeType<Recipe> RECIPE_TYPE = new RecipeType<>(UID, Recipe.class);
     private final IDrawable icon;
 
@@ -63,7 +63,7 @@ public class FluidModeratorCategory implements IRecipeCategory<FluidModeratorCat
     }
 
     @Override
-    public void draw(Recipe recipe, IRecipeSlotsView slots, GuiGraphics g, double mouseX, double mouseY) {
+    public void draw(Recipe recipe, IRecipeSlotsView slots, GuiGraphicsExtractor g, double mouseX, double mouseY) {
         recipe.card().draw(g);
     }
 

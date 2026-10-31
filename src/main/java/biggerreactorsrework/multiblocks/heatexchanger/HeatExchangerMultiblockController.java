@@ -2,7 +2,6 @@ package biggerreactorsrework.multiblocks.heatexchanger;
 
 // Modified 2026-10-26: protect inventories when joining controllers.
 
-import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
@@ -41,7 +40,6 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import static biggerreactorsrework.core.modular.block.IConnectedTexture.Module.*;
 
-@MethodsReturnNonnullByDefault
 @ParametersAreNonnullByDefault
 public class HeatExchangerMultiblockController extends MultiblockController<HeatExchangerBaseTile, HeatExchangerBaseBlock, HeatExchangerMultiblockController> implements
         IRectangularMultiblock<HeatExchangerBaseTile, HeatExchangerBaseBlock, HeatExchangerMultiblockController>,
@@ -356,7 +354,7 @@ public class HeatExchangerMultiblockController extends MultiblockController<Heat
     private void validationPassed() {
         
         // its in kelvin, 150C and 20C
-        double ambientTemperature = level.dimensionType().ultraWarm() ? 423.15 : 293.15; // TODO config these, also the end
+        double ambientTemperature = level.environmentAttributes().getValue(net.minecraft.world.attribute.EnvironmentAttributes.WATER_EVAPORATES, net.minecraft.world.phys.Vec3.ZERO, null) ? 423.15 : 293.15; // TODO config these, also the end
         ambientHeatBody.setTemperature(ambientTemperature);
         // Modified 2026-10-25: preserve saved operating heat on load/reassembly.
         if(!thermalInitialized){
@@ -540,15 +538,15 @@ public class HeatExchangerMultiblockController extends MultiblockController<Heat
     
     @Override
     public void read(CompoundTag nbt) {
-        condenserTank.deserializeNBT(nbt.getCompound("condenserTank"));
-        evaporatorTank.deserializeNBT(nbt.getCompound("evaporatorTank"));
-        outputPressure.load(nbt.getCompound("outputPressure"));
+        condenserTank.deserializeNBT(nbt.getCompoundOrEmpty("condenserTank"));
+        evaporatorTank.deserializeNBT(nbt.getCompoundOrEmpty("evaporatorTank"));
+        outputPressure.load(nbt.getCompoundOrEmpty("outputPressure"));
         // Modified 2026-10-30: reject nonfinite saved heat without affecting valid channel stocks.
-        double ambient=level.dimensionType().ultraWarm()?423.15:293.15;
-        ambientHeatBody.setTemperature(biggerreactorsrework.core.util.SavedValues.nonNegative(nbt.getDouble("ambientHeatBody"),ambient));
-        airHeatBody.setTemperature(biggerreactorsrework.core.util.SavedValues.nonNegative(nbt.getDouble("airHeatBody"),ambient));
-        condenserHeatBody.setTemperature(biggerreactorsrework.core.util.SavedValues.nonNegative(nbt.getDouble("condenserHeatBody"),ambient));
-        evaporatorHeatBody.setTemperature(biggerreactorsrework.core.util.SavedValues.nonNegative(nbt.getDouble("evaporatorHeatBody"),ambient));
+        double ambient=level.environmentAttributes().getValue(net.minecraft.world.attribute.EnvironmentAttributes.WATER_EVAPORATES, net.minecraft.world.phys.Vec3.ZERO, null)?423.15:293.15;
+        ambientHeatBody.setTemperature(biggerreactorsrework.core.util.SavedValues.nonNegative(nbt.getDoubleOr("ambientHeatBody", 0D),ambient));
+        airHeatBody.setTemperature(biggerreactorsrework.core.util.SavedValues.nonNegative(nbt.getDoubleOr("airHeatBody", 0D),ambient));
+        condenserHeatBody.setTemperature(biggerreactorsrework.core.util.SavedValues.nonNegative(nbt.getDoubleOr("condenserHeatBody", 0D),ambient));
+        evaporatorHeatBody.setTemperature(biggerreactorsrework.core.util.SavedValues.nonNegative(nbt.getDoubleOr("evaporatorHeatBody", 0D),ambient));
         thermalInitialized=java.util.stream.DoubleStream.of(airHeatBody.temperature(),condenserHeatBody.temperature(),evaporatorHeatBody.temperature()).allMatch(t->Double.isFinite(t) && t>0);
     }
 

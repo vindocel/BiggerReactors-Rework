@@ -1,6 +1,5 @@
 package biggerreactorsrework;
 
-import biggerreactorsrework.compat.opencomputers.OpenComputersCompat;
 import biggerreactorsrework.core.CoreEvents;
 import net.neoforged.fml.ModList;
 import biggerreactorsrework.core.event.ReloadDataEvent;
@@ -35,7 +34,6 @@ public class BiggerReactors {
         new Registry(modid, BiggerReactors.class.getPackageName(), modBus, new ReferenceArrayList<>(), new ReferenceArrayList<>());
         biggerreactorsrework.machine.recipe.ReprocessingRecipes.register(modBus);
         modBus.addListener(biggerreactorsrework.registries.MaterialDataMaps::register);
-        modBus.addListener(biggerreactorsrework.data.ModDataGeneration::gather);
         CoreEvents.init();
         biggerreactorsrework.registries.CoolantSync.init();
         modBus.addListener(biggerreactorsrework.calculator.service.CalculatorNetwork::register);
@@ -45,11 +43,19 @@ public class BiggerReactors {
         if (ModList.get().isLoaded("carryon")) {
             biggerreactorsrework.compat.carryon.CarryOnCompat.init();
         }
-        // Modified 2026-10-30: replace the optional computer integration with native OpenComputers.
+        registerGameTests(modBus);
+        // Inactive parts: their classes exist only when turned on in gradle.properties.
+        initIfPresent("biggerreactorsrework.data.ModDataGeneration", "register", modBus);
         if (ModList.get().isLoaded("opencomputers")) {
-            OpenComputersCompat.init(modBus);
+            initIfPresent("biggerreactorsrework.compat.opencomputers.OpenComputersCompat", "init", modBus);
         }
-        if (FMLEnvironment.dist.isClient()) {
+        if (ModList.get().isLoaded("computercraft")) {
+            initIfPresent("biggerreactorsrework.compat.cctweaked.CCTweakedCompat", "init", modBus);
+        }
+        net.neoforged.neoforge.common.NeoForge.EVENT_BUS.addListener((net.neoforged.neoforge.event.OnDatapackSyncEvent event) -> event.sendRecipes(
+                biggerreactorsrework.machine.recipe.ReprocessingRecipes.TYPE.get(),
+                net.minecraft.world.item.crafting.RecipeType.CRAFTING, net.minecraft.world.item.crafting.RecipeType.SMELTING));
+        if (FMLEnvironment.getDist().isClient()) {
             BiggerReactorsClient.init(modBus);
         }
     }
@@ -64,5 +70,31 @@ public class BiggerReactors {
 
     public static String modVersion() {
         return version;
+    }
+
+    private static void initIfPresent(String className, String method, IEventBus modBus) {
+        Class<?> type;
+        try {
+            type = Class.forName(className);
+        } catch (ClassNotFoundException absent) {
+            return;
+        }
+        try {
+            type.getMethod(method, IEventBus.class).invoke(null, modBus);
+        } catch (ReflectiveOperationException e) {
+            throw new IllegalStateException("Could not start " + className, e);
+        }
+    }
+
+    /** The test classes are not part of the distributed jar; only development runs have them. */
+    private static void registerGameTests(IEventBus modBus) {
+        if (!System.getProperty("neoforge.enabledGameTestNamespaces", "").contains(modid)) {
+            return;
+        }
+        try {
+            Class.forName("biggerreactorsrework.gametest.ModGameTests").getMethod("register", IEventBus.class).invoke(null, modBus);
+        } catch (ReflectiveOperationException e) {
+            throw new IllegalStateException("Could not register the GameTests", e);
+        }
     }
 }

@@ -15,7 +15,7 @@ public final class TurbineRedstonePort extends TurbineBaseBlock implements IAsse
     public static final net.minecraft.world.level.block.state.properties.BooleanProperty IS_LIT =
             net.minecraft.world.level.block.state.properties.BooleanProperty.create("is_lit");
     @RegisterBlock(name="turbine_redstone_port",tileEntityClass=TurbineRedstonePortTile.class)
-    public static final TurbineRedstonePort INSTANCE=new TurbineRedstonePort();
+    public static final TurbineRedstonePort INSTANCE=biggerreactorsrework.core.registry.RegistryIds.named("turbine_redstone_port", () -> new TurbineRedstonePort());
     public TurbineRedstonePort() {
         registerDefaultState(defaultBlockState().setValue(IS_LIT, false));
     }

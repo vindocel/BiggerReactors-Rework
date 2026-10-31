@@ -6,18 +6,10 @@
     "CYC"
   ],
   "key": {
-    "C": {
-      "item": "biggerreactorsrework:reactor_casing"
-    },
-    "Y": {
-      "tag": "c:ingots/uranium"
-    },
-    "G": {
-      "tag": "c:ingots/graphite"
-    },
-    "R": {
-      "item": "minecraft:redstone"
-    }
+    "C": "biggerreactorsrework:reactor_casing",
+    "Y": "#c:ingots/uranium",
+    "G": "#c:ingots/graphite",
+    "R": "minecraft:redstone"
   },
   "result": {
     "id": "biggerreactorsrework:reactor_control_rod"

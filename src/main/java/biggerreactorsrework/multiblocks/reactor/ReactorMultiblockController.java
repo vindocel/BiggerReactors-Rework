@@ -376,18 +376,18 @@ public class ReactorMultiblockController extends MultiblockController<ReactorBas
     public void read(CompoundTag compound) {
         if (compound.contains("reactorState")) {
             // Modified 2026-10-30: tolerate invalid saved activity and reject invalid command values.
-            reactorActivity = biggerreactorsrework.core.util.SavedValues.enumValue(ReactorActivity.class, compound.getString("reactorState").toUpperCase(Locale.US), ReactorActivity.INACTIVE);
+            reactorActivity = biggerreactorsrework.core.util.SavedValues.enumValue(ReactorActivity.class, compound.getStringOr("reactorState", "").toUpperCase(Locale.US), ReactorActivity.INACTIVE);
         }
         if (compound.contains("autoEjectWaste")) {
-            autoEjectWaste = compound.getBoolean("autoEjectWaste");
+            autoEjectWaste = compound.getBooleanOr("autoEjectWaste", false);
         }
         
         if (compound.contains("simulationData")) {
             simulation = null;
-            simulationData = new DataCompound(compound.getByteArray("simulationData"));
+            simulationData = new DataCompound(compound.getByteArray("simulationData").orElseGet(() -> new byte[0]));
         }
         if (compound.contains("coolantTankWrapper")) {
-            coolantTankNBT = compound.getCompound("coolantTankWrapper");
+            coolantTankNBT = compound.getCompoundOrEmpty("coolantTankWrapper");
         }
         
         updateBlockStates = true;
@@ -402,10 +402,10 @@ public class ReactorMultiblockController extends MultiblockController<ReactorBas
             if (simulation != null) {
                 var phosCompound = simulation.save();
                 if (phosCompound != null) {
-                    compound.putByteArray("simulationData", phosCompound.toROBN());
+                    compound.putByteArray("simulationData", phosCompound.toROBN().toByteArray());
                 }
             } else if (simulationData != null) {
-                compound.putByteArray("simulationData", simulationData.toROBN());
+                compound.putByteArray("simulationData", simulationData.toROBN().toByteArray());
             }
             if (coolantTank != null) {
                 compound.put("coolantTankWrapper", coolantTank.serializeNBT());

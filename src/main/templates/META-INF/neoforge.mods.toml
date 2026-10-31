@@ -8,7 +8,7 @@ modId="${mod_id}"
 version="${mod_version}"
 displayName="${mod_name}"
 displayURL="https://github.com/vindocel/BiggerReactors-Rework"
-logoFile="logo.png"
+bannerFile="logo.png"
 credits="Fork of BiggerReactors by RogueLogix (https://github.com/BiggerSeries/BiggerReactors, https://www.curseforge.com/members/roguelogix), with contributions from gizmocodes and Ridanisaurus. Derived from the original Big Reactors by ErogenousBeef (https://github.com/erogenousbeef-zz/BigReactors)."
 authors="RogueLogix, gizmocodes, Ridanisaurus; rework by vindocel"
 description='''
@@ -33,11 +33,4 @@ This rework is not affiliated with or endorsed by the original authors.
     versionRange="${minecraft_version_range}"
     ordering="NONE"
     side="BOTH"
-
-# Modified 2026-10-30: validate the native API version only when OpenComputers is installed.
-[[dependencies.${mod_id}]]
-    modId="opencomputers"
-    type="optional"
-    versionRange="[${oc_version},)"
-    ordering="AFTER"
-    side="BOTH"
+${optional_dependencies}

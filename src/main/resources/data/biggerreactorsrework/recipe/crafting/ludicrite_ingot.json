@@ -1,9 +1,7 @@
 {
   "type": "minecraft:crafting_shapeless",
   "ingredients": [
-    {
-      "item": "biggerreactorsrework:ludicrite_block"
-    }
+    "biggerreactorsrework:ludicrite_block"
   ],
   "result": {
     "id": "biggerreactorsrework:ludicrite_ingot",

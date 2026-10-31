@@ -6,15 +6,9 @@
     "CRC"
   ],
   "key": {
-    "C": {
-      "item": "biggerreactorsrework:reactor_casing"
-    },
-    "R": {
-      "item": "minecraft:redstone"
-    },
-    "G": {
-      "item": "minecraft:gold_ingot"
-    }
+    "C": "biggerreactorsrework:reactor_casing",
+    "R": "minecraft:redstone",
+    "G": "minecraft:gold_ingot"
   },
   "result": {
     "id": "biggerreactorsrework:reactor_redstone_port"

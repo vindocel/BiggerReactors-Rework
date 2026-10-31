@@ -1,6 +1,5 @@
 package biggerreactorsrework.multiblocks.reactor.tiles;
 
-import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -9,7 +8,6 @@ import biggerreactorsrework.core.registry.RegisterTile;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 
-@MethodsReturnNonnullByDefault
 @ParametersAreNonnullByDefault
 public class ReactorFuelRodTile extends ReactorBaseTile {
     
@@ -28,8 +26,8 @@ public class ReactorFuelRodTile extends ReactorBaseTile {
     @Override
     protected void readNBT(CompoundTag compound) {
         super.readNBT(compound);
-        fuel = compound.getLong("fuel");
-        waste = compound.getLong("waste");
+        fuel = compound.getLongOr("fuel", 0L);
+        waste = compound.getLongOr("waste", 0L);
     }
     
     @Override

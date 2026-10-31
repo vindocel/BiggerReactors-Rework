@@ -5,7 +5,7 @@ package biggerreactorsrework.core.client.gui;
 import biggerreactorsrework.core.networking.SimpleChannel;
 import biggerreactorsrework.core.registry.OnModLoad;
 import biggerreactorsrework.core.serialization.DataCompound;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
@@ -77,7 +77,7 @@ public class GuiSync {
     }
 
     public static final SimpleChannel INSTANCE = new SimpleChannel(
-            ResourceLocation.fromNamespaceAndPath(modid, "menu_sync"),
+            Identifier.fromNamespaceAndPath(modid, "menu_sync"),
             GuiSync::clientHandler, GuiSync::serverHandler
     );
 

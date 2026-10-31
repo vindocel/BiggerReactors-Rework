@@ -4,7 +4,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.ItemInteractionResult;
+
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
@@ -17,7 +17,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
-import net.minecraft.world.level.block.state.properties.DirectionProperty;
+import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.phys.BlockHitResult;
 import biggerreactorsrework.machine.tiles.CyaniteReprocessorTile;
 import biggerreactorsrework.core.registry.RegisterBlock;
@@ -27,20 +27,20 @@ import javax.annotation.Nullable;
 
 public class CyaniteReprocessor extends Block implements EntityBlock {
 
-    public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
+    public static final EnumProperty<Direction> FACING = BlockStateProperties.HORIZONTAL_FACING;
     public static final BooleanProperty ENABLED = BlockStateProperties.ENABLED;
 
     @RegisterBlock(name = "cyanite_reprocessor", tileEntityClass = CyaniteReprocessorTile.class)
-    public static final CyaniteReprocessor INSTANCE = new CyaniteReprocessor();
+    public static final CyaniteReprocessor INSTANCE = biggerreactorsrework.core.registry.RegistryIds.named("cyanite_reprocessor", () -> new CyaniteReprocessor());
 
     public CyaniteReprocessor() {
-        super(Properties.of()
+        super(biggerreactorsrework.core.registry.RegistryIds.block(Properties.of()
                 // Modified 2026-10-27: light follows the existing processing animation.
                 .lightLevel(biggerreactorsrework.multiblocks.MachineLighting::emission)
                 .sound(SoundType.STONE)
                 .destroyTime(1.0F)
                 .explosionResistance(1.0F)
-                .requiresCorrectToolForDrops());
+                .requiresCorrectToolForDrops()));
         this.registerDefaultState(this.getStateDefinition().any()
                 .setValue(FACING, Direction.NORTH)
                 .setValue(ENABLED, Boolean.FALSE));
@@ -55,7 +55,7 @@ public class CyaniteReprocessor extends Block implements EntityBlock {
     @Nullable
     @Override
     public <T extends BlockEntity> BlockEntityTicker<T> getTicker(@Nonnull Level level, @Nonnull BlockState state, @Nonnull BlockEntityType<T> type) {
-        if (level.isClientSide) {
+        if (level.isClientSide()) {
             return null;
         }
         return (a, b, c, tile) -> {
@@ -80,30 +80,23 @@ public class CyaniteReprocessor extends Block implements EntityBlock {
 
     @Nonnull
     @Override
-    protected ItemInteractionResult useItemOn(@Nonnull ItemStack stack, @Nonnull BlockState state, @Nonnull Level level, @Nonnull BlockPos pos, @Nonnull Player player, @Nonnull InteractionHand hand, @Nonnull BlockHitResult hitResult) {
+    protected InteractionResult useItemOn(@Nonnull ItemStack stack, @Nonnull BlockState state, @Nonnull Level level, @Nonnull BlockPos pos, @Nonnull Player player, @Nonnull InteractionHand hand, @Nonnull BlockHitResult hitResult) {
         if (level.getBlockEntity(pos) instanceof CyaniteReprocessorTile tile) {
             return tile.onItemUse(stack, level, player, hand);
         }
-        return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+        return InteractionResult.TRY_WITH_EMPTY_HAND;
     }
 
     @Nonnull
     @Override
     protected InteractionResult useWithoutItem(@Nonnull BlockState state, @Nonnull Level level, @Nonnull BlockPos pos, @Nonnull Player player, @Nonnull BlockHitResult hitResult) {
         if (level.getBlockEntity(pos) instanceof CyaniteReprocessorTile tile) {
-            if (!level.isClientSide) {
+            if (!level.isClientSide()) {
                 player.openMenu(tile, pos);
             }
-            return InteractionResult.sidedSuccess(level.isClientSide);
+            return InteractionResult.SUCCESS;
         }
         return InteractionResult.PASS;
     }
 
-    @Override
-    protected void onRemove(@Nonnull BlockState state, @Nonnull Level level, @Nonnull BlockPos pos, @Nonnull BlockState newState, boolean isMoving) {
-        if (!state.is(newState.getBlock()) && level.getBlockEntity(pos) instanceof CyaniteReprocessorTile tile) {
-            tile.dropContents(level, pos);
-        }
-        super.onRemove(state, level, pos, newState, isMoving);
-    }
 }

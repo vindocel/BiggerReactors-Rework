@@ -1,0 +1,7 @@
+{
+  "parent": "biggerreactorsrework:block/assembled_port",
+  "textures": {
+    "front": "biggerreactorsrework:block/reactor/power_tap/connected",
+    "side": "biggerreactorsrework:block/reactor/casing/disassembled"
+  }
+}

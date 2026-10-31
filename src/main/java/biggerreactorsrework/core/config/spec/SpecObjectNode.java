@@ -1,7 +1,7 @@
 package biggerreactorsrework.core.config.spec;
 
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import biggerreactorsrework.core.config.ConfigType;
 import biggerreactorsrework.core.config.ConfigValue;
 import biggerreactorsrework.core.parsers.Element;
@@ -25,11 +25,11 @@ public class SpecObjectNode extends SpecNode {
     public final Map<String, SpecNode> subNodes;
     public final List<SpecNode> subNodeList;
     
-    private static final Class<ResourceLocation> RESOURCE_LOCATION_CLASS;
+    private static final Class<Identifier> RESOURCE_LOCATION_CLASS;
     static {
-        Class<ResourceLocation> foundClass = null;
+        Class<Identifier> foundClass = null;
         try {
-            foundClass = ResourceLocation.class;
+            foundClass = Identifier.class;
         } catch (NoClassDefFoundError ignored){
         }
         RESOURCE_LOCATION_CLASS = foundClass;

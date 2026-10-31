@@ -1,6 +1,5 @@
 package biggerreactorsrework.multiblocks.reactor.blocks;
 
-import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -13,11 +12,10 @@ import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 
 @ParametersAreNonnullByDefault
-@MethodsReturnNonnullByDefault
 public class ReactorControlRod extends ReactorBaseBlock implements IAssemblyStateBlock, IFaceDirectionBlock {
     
     @RegisterBlock(name = "reactor_control_rod", tileEntityClass = ReactorControlRodTile.class)
-    public static final ReactorControlRod INSTANCE = new ReactorControlRod();
+    public static final ReactorControlRod INSTANCE = biggerreactorsrework.core.registry.RegistryIds.named("reactor_control_rod", () -> new ReactorControlRod());
     
     @Nullable
     @Override

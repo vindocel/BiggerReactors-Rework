@@ -6,15 +6,9 @@
     "CPC"
   ],
   "key": {
-    "C": {
-      "item": "biggerreactorsrework:reactor_casing"
-    },
-    "V": {
-      "tag": "c:chests/wooden"
-    },
-    "P": {
-      "item": "minecraft:piston"
-    }
+    "C": "biggerreactorsrework:reactor_casing",
+    "V": "#c:chests/wooden",
+    "P": "minecraft:piston"
   },
   "result": {
     "id": "biggerreactorsrework:reactor_access_port"

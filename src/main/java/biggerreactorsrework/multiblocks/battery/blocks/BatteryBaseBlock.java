@@ -5,7 +5,6 @@ import biggerreactorsrework.core.multiblock.IMultiblockBlock;
 import biggerreactorsrework.core.multiblock.rectangular.IRectangularMultiblockBlock;
 import biggerreactorsrework.multiblocks.battery.state.BatteryActivity;
 import biggerreactorsrework.multiblocks.battery.tiles.BatteryBaseTile;
-import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -24,7 +23,6 @@ import javax.annotation.ParametersAreNonnullByDefault;
 import static biggerreactorsrework.core.multiblock.IAssemblyStateBlock.ASSEMBLED;
 
 @ParametersAreNonnullByDefault
-@MethodsReturnNonnullByDefault
 public abstract class BatteryBaseBlock extends ModularBlock implements IMultiblockBlock, EntityBlock, IRectangularMultiblockBlock {
     // Modified 2026-10-27: active terminal light.
     public static final Block.Properties PROPERTIES_SOLID = Block.Properties.of().lightLevel(biggerreactorsrework.multiblocks.MachineLighting::emission).sound(SoundType.METAL).destroyTime(2).explosionResistance(10).isValidSpawn((a, b, c, d) -> false).requiresCorrectToolForDrops();
@@ -72,13 +70,13 @@ public abstract class BatteryBaseBlock extends ModularBlock implements IMultiblo
         if (hand == InteractionHand.MAIN_HAND && state.hasProperty(ASSEMBLED) && state.getValue(ASSEMBLED)) {
             // Ports open their own screen; every other block opens the terminal.
             if (level.getBlockEntity(pos) instanceof MenuProvider menuProvider) {
-                if (!level.isClientSide) {
+                if (!level.isClientSide()) {
                     player.openMenu(menuProvider, pos);
                 }
                 return InteractionResult.SUCCESS;
             }
             if (level.getBlockEntity(pos) instanceof BatteryBaseTile tile) {
-                if (!level.isClientSide && tile.isBatteryAssembled()) {
+                if (!level.isClientSide() && tile.isBatteryAssembled()) {
                     tile.openTerminal(player);
                 }
                 return InteractionResult.SUCCESS;

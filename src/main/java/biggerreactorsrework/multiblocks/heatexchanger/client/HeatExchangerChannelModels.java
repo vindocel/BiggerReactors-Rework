@@ -3,29 +3,25 @@ package biggerreactorsrework.multiblocks.heatexchanger.client;
 import biggerreactorsrework.BiggerReactors;
 import biggerreactorsrework.multiblocks.heatexchanger.blocks.HeatExchangerCondenserChannelBlock;
 import biggerreactorsrework.multiblocks.heatexchanger.blocks.HeatExchangerEvaporatorChannelBlock;
-import com.mojang.math.Transformation;
-import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.block.BlockModelShaper;
-import net.minecraft.client.renderer.block.model.BakedQuad;
-import net.minecraft.client.resources.model.BakedModel;
-import net.minecraft.client.resources.model.ModelResourceLocation;
+import biggerreactorsrework.client.guide.ModelRendering;
+import net.minecraft.client.renderer.block.BlockAndTintGetter;
+import net.minecraft.client.renderer.block.dispatch.BlockStateModel;
+import net.minecraft.client.renderer.block.dispatch.BlockStateModelPart;
+import net.minecraft.client.resources.model.geometry.BakedQuad;
+import net.minecraft.client.resources.model.sprite.Material;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.bus.api.IEventBus;
-import net.minecraft.world.level.block.Blocks;
-import net.neoforged.neoforge.client.ChunkRenderTypeSet;
 import net.neoforged.neoforge.client.event.ModelEvent;
-import net.neoforged.neoforge.client.model.BakedModelWrapper;
-import net.neoforged.neoforge.client.model.IQuadTransformer;
-import net.neoforged.neoforge.client.model.QuadTransformers;
-import net.neoforged.neoforge.client.model.data.ModelData;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import net.neoforged.neoforge.client.model.DelegateBlockStateModel;
+import net.neoforged.neoforge.client.model.quad.BakedNormals;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
+import org.jspecify.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -42,14 +38,14 @@ public final class HeatExchangerChannelModels {
     private HeatExchangerChannelModels() {
     }
 
-    private static final ModelResourceLocation CONNECTION_ERROR = model("block/heat_exchanger/casing/corner");
-    private static final ModelResourceLocation CONDENSER_STRAIGHT = model("block/heat_exchanger/hot_channel/connected_tb");
-    private static final ModelResourceLocation CONDENSER_CORNER = model("block/heat_exchanger/hot_channel/connected_bn");
-    private static final ModelResourceLocation EVAPORATOR_STRAIGHT = model("block/heat_exchanger/cold_channel/connected_tb");
-    private static final ModelResourceLocation EVAPORATOR_CORNER = model("block/heat_exchanger/cold_channel/connected_bn");
+    private static final Identifier CONNECTION_ERROR = model("block/heat_exchanger/casing/corner");
+    private static final Identifier CONDENSER_STRAIGHT = model("block/heat_exchanger/hot_channel/connected_tb");
+    private static final Identifier CONDENSER_CORNER = model("block/heat_exchanger/hot_channel/connected_bn");
+    private static final Identifier EVAPORATOR_STRAIGHT = model("block/heat_exchanger/cold_channel/connected_tb");
+    private static final Identifier EVAPORATOR_CORNER = model("block/heat_exchanger/cold_channel/connected_bn");
 
-    private static ModelResourceLocation model(String path) {
-        return ModelResourceLocation.standalone(ResourceLocation.fromNamespaceAndPath(BiggerReactors.modid, path));
+    private static Identifier model(String path) {
+        return Identifier.fromNamespaceAndPath(BiggerReactors.modid, path);
     }
 
     private static final int TOP_CONNECTED_BIT = 1;
@@ -92,38 +88,34 @@ public final class HeatExchangerChannelModels {
     }
 
     public static void init(IEventBus modBus) {
-        modBus.addListener(HeatExchangerChannelModels::registerAdditional);
+        modBus.addListener(HeatExchangerChannelModels::registerStandalone);
         modBus.addListener(HeatExchangerChannelModels::modifyBakingResult);
     }
 
-    private static void registerAdditional(ModelEvent.RegisterAdditional event) {
-        event.register(CONNECTION_ERROR);
-        event.register(CONDENSER_STRAIGHT);
-        event.register(CONDENSER_CORNER);
-        event.register(EVAPORATOR_STRAIGHT);
-        event.register(EVAPORATOR_CORNER);
+    private static void registerStandalone(ModelEvent.RegisterStandalone event) {
+        ModelRendering.register(event, CONNECTION_ERROR);
+        ModelRendering.register(event, CONDENSER_STRAIGHT);
+        ModelRendering.register(event, CONDENSER_CORNER);
+        ModelRendering.register(event, EVAPORATOR_STRAIGHT);
+        ModelRendering.register(event, EVAPORATOR_CORNER);
     }
 
     private static void modifyBakingResult(ModelEvent.ModifyBakingResult event) {
-        final var models = event.getModels();
+        final var models = event.getBakingResult().blockStateModels();
         replaceStates(models, HeatExchangerCondenserChannelBlock.INSTANCE, true);
         replaceStates(models, HeatExchangerEvaporatorChannelBlock.INSTANCE, false);
     }
 
-    private static void replaceStates(Map<ModelResourceLocation, BakedModel> models, Block block, boolean condenser) {
+    private static void replaceStates(Map<BlockState, BlockStateModel> models, Block block, boolean condenser) {
         for (BlockState state : block.getStateDefinition().getPossibleStates()) {
-            final var selection = select(state, condenser);
-            final var base = models.get(selection.model);
-            if (base == null) {
-                continue;
+            final var original = models.get(state);
+            if (original != null) {
+                models.put(state, new TransformedModel(original, select(state, condenser)));
             }
-            final var stateLocation = BlockModelShaper.stateToModelLocation(state);
-            final var original = models.get(stateLocation);
-            models.put(stateLocation, new TransformedModel(original != null ? original : base, base, selection.rotation));
         }
     }
 
-    private record Selection(ModelResourceLocation model, @Nullable Matrix4f rotation) {
+    private record Selection(Identifier model, @Nullable Matrix4f rotation) {
     }
 
     private static Selection select(BlockState state, boolean condenser) {
@@ -149,7 +141,7 @@ public final class HeatExchangerChannelModels {
                 || flags == (TOP_CONNECTED_BIT | BOTTOM_CONNECTED_BIT)
                 || flags == (NORTH_CONNECTED_BIT | SOUTH_CONNECTED_BIT)
                 || flags == (EAST_CONNECTED_BIT | WEST_CONNECTED_BIT);
-        final ModelResourceLocation model;
+        final Identifier model;
         if (straight) {
             model = condenser ? CONDENSER_STRAIGHT : EVAPORATOR_STRAIGHT;
         } else {
@@ -159,46 +151,74 @@ public final class HeatExchangerChannelModels {
     }
 
     /**
-     * Base model with every quad transformed once at bake time. Rotated quads lose their original cull face,
+     * Base model with every quad transformed once on first use. Rotated quads lose their original cull face,
      * so all of them go to the unculled list; channels sit inside the structure, so this costs nothing visible.
      */
-    private static final class TransformedModel extends BakedModelWrapper<BakedModel> {
-        private final List<BakedQuad> quads;
+    private static final class TransformedModel extends DelegateBlockStateModel {
+        private final Selection selection;
+        private volatile BlockStateModelPart baseUsed;
+        private volatile Transformed part;
 
-        TransformedModel(BakedModel original, BakedModel base, @Nullable Matrix4f rotation) {
+        TransformedModel(BlockStateModel original, Selection selection) {
             // the original state model keeps providing particles and item/display properties
             super(original);
-            final IQuadTransformer transformer = rotation == null ? null : QuadTransformers.applying(new Transformation(rotation));
-            final var random = RandomSource.create(42);
-            final var collected = new ArrayList<BakedQuad>();
-            for (Direction side : Direction.values()) {
-                random.setSeed(42);
-                collected.addAll(base.getQuads(null, side, random, ModelData.EMPTY, null));
-            }
-            random.setSeed(42);
-            collected.addAll(base.getQuads(null, null, random, ModelData.EMPTY, null));
-            if (transformer != null) {
-                collected.replaceAll(transformer::process);
-            }
-            this.quads = List.copyOf(collected);
-            this.renderTypes = base.getRenderTypes(Blocks.AIR.defaultBlockState(), RandomSource.create(42), ModelData.EMPTY);
+            this.selection = selection;
         }
 
-        private final ChunkRenderTypeSet renderTypes;
-
-        @Override
-        public @NotNull ChunkRenderTypeSet getRenderTypes(@NotNull BlockState state, @NotNull RandomSource rand, @NotNull ModelData data) {
-            return renderTypes;
+        private Transformed part() {
+            var base = ModelRendering.model(selection.model);
+            if (part == null || baseUsed != base) {
+                part = new Transformed(transform(base, selection.rotation), base);
+                baseUsed = base;
+            }
+            return part;
         }
 
         @Override
-        public @NotNull List<BakedQuad> getQuads(@Nullable BlockState state, @Nullable Direction side, @NotNull RandomSource rand, @NotNull ModelData extraData, @Nullable RenderType renderType) {
+        public void collectParts(RandomSource random, List<BlockStateModelPart> parts) {
+            parts.add(part());
+        }
+
+        @Override
+        public void collectParts(BlockAndTintGetter level, BlockPos pos, BlockState state, RandomSource random, List<BlockStateModelPart> parts) {
+            parts.add(part());
+        }
+    }
+
+    private static List<BakedQuad> transform(BlockStateModelPart base, @Nullable Matrix4f rotation) {
+        final var collected = new ArrayList<BakedQuad>();
+        for (Direction side : Direction.values()) {
+            collected.addAll(base.getQuads(side));
+        }
+        collected.addAll(base.getQuads(null));
+        if (rotation != null) {
+            collected.replaceAll(quad -> new BakedQuad(rotation.transformPosition(new Vector3f(quad.position(0))),
+                    rotation.transformPosition(new Vector3f(quad.position(1))), rotation.transformPosition(new Vector3f(quad.position(2))),
+                    rotation.transformPosition(new Vector3f(quad.position(3))), quad.packedUV(0), quad.packedUV(1), quad.packedUV(2), quad.packedUV(3),
+                    Direction.rotate(rotation, quad.direction()), quad.materialInfo(), BakedNormals.UNSPECIFIED, quad.bakedColors()));
+        }
+        return List.copyOf(collected);
+    }
+
+    private record Transformed(List<BakedQuad> quads, BlockStateModelPart base) implements BlockStateModelPart {
+        @Override
+        public List<BakedQuad> getQuads(@Nullable Direction side) {
             return side == null ? quads : List.of();
         }
 
         @Override
-        public @NotNull List<BakedQuad> getQuads(@Nullable BlockState state, @Nullable Direction side, @NotNull RandomSource rand) {
-            return side == null ? quads : List.of();
+        public boolean useAmbientOcclusion() {
+            return base.useAmbientOcclusion();
+        }
+
+        @Override
+        public Material.Baked particleMaterial() {
+            return base.particleMaterial();
+        }
+
+        @Override
+        public int materialFlags() {
+            return base.materialFlags();
         }
     }
 }

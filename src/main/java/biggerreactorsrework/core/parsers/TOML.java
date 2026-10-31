@@ -3,7 +3,6 @@ package biggerreactorsrework.core.parsers;
 import com.electronwill.nightconfig.core.Config;
 import com.electronwill.nightconfig.core.io.ParsingException;
 import com.electronwill.nightconfig.toml.TomlParser;
-import net.minecraft.MethodsReturnNonnullByDefault;
 
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
@@ -13,7 +12,6 @@ import java.util.List;
 import java.util.Map;
 
 @ParametersAreNonnullByDefault
-@MethodsReturnNonnullByDefault
 public class TOML {
     
     @Nullable

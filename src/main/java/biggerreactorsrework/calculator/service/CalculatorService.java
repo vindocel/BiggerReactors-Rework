@@ -91,7 +91,7 @@ public final class CalculatorService {
     }
 
     static void receive(ServerPlayer player, CompoundTag tag) {
-        switch (tag.getString("type")) {
+        switch (tag.getStringOr("type", "")) {
             case CalculatorNetwork.CATALOG -> {
                 if (!LAST_CATALOG.acquire(player.getUUID(), System.nanoTime())) return;
                 var reply = new CompoundTag();
@@ -101,7 +101,7 @@ public final class CalculatorService {
             }
             case CalculatorNetwork.CANCEL -> {
                 var job = JOBS.get(player.getUUID());
-                if (job != null && job.session.equals(tag.getString("session"))) cancel(player.getUUID());
+                if (job != null && job.session.equals(tag.getStringOr("session", ""))) cancel(player.getUUID());
             }
             case CalculatorNetwork.START -> start(player, tag);
             default -> { }
@@ -109,13 +109,13 @@ public final class CalculatorService {
     }
 
     private static void start(ServerPlayer player, CompoundTag tag) {
-        String session = tag.getString("session");
+        String session = tag.getStringOr("session", "");
         if (session.isEmpty() || session.length() > MAX_SESSION) return;
         if (!LAST_REQUEST.acquire(player.getUUID(), System.nanoTime())) {
             finish(player, session, failure(CalculationStatus.BUSY));
             return;
         }
-        var request = CalculatorRequest.fromTag(tag.getCompound("request"));
+        var request = CalculatorRequest.fromTag(tag.getCompoundOrEmpty("request"));
         if (request == null) {
             finish(player, session, failure(CalculationStatus.INVALID_INPUT));
             return;
@@ -135,7 +135,7 @@ public final class CalculatorService {
         }
         cancel(player.getUUID());
         var cancelled = new AtomicBoolean();
-        var server = player.server;
+        var server = player.level().getServer();
         var id = player.getUUID();
         long[] lastProgress = {0};
         PlantSearch.Progress progress = (phase, done, total) -> {

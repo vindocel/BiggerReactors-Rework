@@ -5,7 +5,6 @@ import biggerreactorsrework.core.multiblock.MultiblockRegistry;
 import biggerreactorsrework.core.threading.Queues;
 import biggerreactorsrework.core.util.Util;
 import com.mojang.blaze3d.systems.RenderSystem;
-import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.packs.resources.ResourceManager;
@@ -27,7 +26,6 @@ import javax.annotation.ParametersAreNonnullByDefault;
  * Game-bus hooks shared by the internal framework: data reload notification, the server tick counter,
  * main-thread work queues and deferred block state updates.
  */
-@MethodsReturnNonnullByDefault
 @ParametersAreNonnullByDefault
 public final class CoreEvents {
 
@@ -43,7 +41,7 @@ public final class CoreEvents {
 
     public static void init() {
         NeoForge.EVENT_BUS.register(CoreEvents.class);
-        if (FMLLoader.getDist().isClient()) {
+        if (FMLLoader.getCurrent().getDist().isClient()) {
             NeoForge.EVENT_BUS.addListener(CoreEvents::onClientTick);
         }
     }
@@ -69,7 +67,7 @@ public final class CoreEvents {
         if (server == null) {
             return;
         }
-        if (FMLLoader.getDist().isClient()) {
+        if (FMLLoader.getCurrent().getDist().isClient()) {
             // ignore client thread
             // prevents double reloads, and reaching across sides
             if (RenderSystem.isOnRenderThread()) {

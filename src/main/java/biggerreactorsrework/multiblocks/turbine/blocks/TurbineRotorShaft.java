@@ -1,6 +1,5 @@
 package biggerreactorsrework.multiblocks.turbine.blocks;
 
-import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.block.Block;
@@ -18,11 +17,10 @@ import javax.annotation.ParametersAreNonnullByDefault;
 import static biggerreactorsrework.multiblocks.turbine.state.TurbineShaftRotationState.Y;
 
 @ParametersAreNonnullByDefault
-@MethodsReturnNonnullByDefault
 public class TurbineRotorShaft extends TurbineBaseBlock implements IAssemblyStateBlock {
     
     @RegisterBlock(name = "turbine_rotor_shaft", tileEntityClass = TurbineRotorShaftTile.class)
-    public static final TurbineRotorShaft INSTANCE = new TurbineRotorShaft();
+    public static final TurbineRotorShaft INSTANCE = biggerreactorsrework.core.registry.RegistryIds.named("turbine_rotor_shaft", () -> new TurbineRotorShaft());
     
     public TurbineRotorShaft() {
         super(false);

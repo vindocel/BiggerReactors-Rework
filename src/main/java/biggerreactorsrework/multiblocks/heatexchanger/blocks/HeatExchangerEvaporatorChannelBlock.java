@@ -1,7 +1,6 @@
 package biggerreactorsrework.multiblocks.heatexchanger.blocks;
 
 
-import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.block.Block;
@@ -15,11 +14,10 @@ import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 
 @ParametersAreNonnullByDefault
-@MethodsReturnNonnullByDefault
 public class HeatExchangerEvaporatorChannelBlock extends HeatExchangerBaseBlock implements IConnectedTexture {
     
     @RegisterBlock(name = "heat_exchanger_evaporator_channel", tileEntityClass = HeatExchangerChannelTile.class)
-    public static final HeatExchangerEvaporatorChannelBlock INSTANCE = new HeatExchangerEvaporatorChannelBlock();
+    public static final HeatExchangerEvaporatorChannelBlock INSTANCE = biggerreactorsrework.core.registry.RegistryIds.named("heat_exchanger_evaporator_channel", () -> new HeatExchangerEvaporatorChannelBlock());
     
     public HeatExchangerEvaporatorChannelBlock() {
         super(PROPERTIES_GLASS);
@@ -38,7 +36,7 @@ public class HeatExchangerEvaporatorChannelBlock extends HeatExchangerBaseBlock 
     }
     
     @Override
-    public boolean propagatesSkylightDown(BlockState state, BlockGetter reader, BlockPos pos) {
+    public boolean propagatesSkylightDown(BlockState state) {
         return true;
     }
     

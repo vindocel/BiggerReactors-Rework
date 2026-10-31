@@ -7,6 +7,8 @@ public interface ITurbineBattery extends NbtSerializable {
     long extract(long toExtract);
     
     long stored();
+
+    void restoreStored(long stored);
     
     long capacity();
 }

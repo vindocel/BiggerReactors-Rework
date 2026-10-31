@@ -1,13 +1,10 @@
 package biggerreactorsrework.core.client.gui.elements;
 
-import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.core.Holder;
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 import biggerreactorsrework.core.client.gui.screens.ModScreen;
 import biggerreactorsrework.core.client.gui.ScreenCallbacks;
 
@@ -20,8 +17,7 @@ import javax.annotation.Nullable;
  *
  * @param <T> Elements must be parented to a screen implementing {@link net.minecraft.world.inventory.AbstractContainerMenu AbstractContainerMenu}.
  */
-@OnlyIn(Dist.CLIENT)
-public class InteractiveElement<T extends AbstractContainerMenu> extends RenderedElement<T> implements GuiEventListener {
+public class InteractiveElement<T extends AbstractContainerMenu> extends RenderedElement<T> {
 
     /**
      * Used to enable or disable interactions.

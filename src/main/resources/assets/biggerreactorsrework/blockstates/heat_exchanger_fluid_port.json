@@ -1,16 +1,108 @@
 {
   "variants": {
-    "condenser=true,port_direction=true": {
+    "condenser=true,port_direction=true,assembled=false": {
       "model": "biggerreactorsrework:block/heat_exchanger/fluid_port/condenser_inlet"
     },
-    "condenser=true,port_direction=false": {
+    "condenser=true,port_direction=true,assembled=true,facing=north": {
+      "model": "biggerreactorsrework:block/heat_exchanger/fluid_port/condenser_inlet_assembled"
+    },
+    "condenser=true,port_direction=true,assembled=true,facing=south": {
+      "model": "biggerreactorsrework:block/heat_exchanger/fluid_port/condenser_inlet_assembled",
+      "y": 180
+    },
+    "condenser=true,port_direction=true,assembled=true,facing=east": {
+      "model": "biggerreactorsrework:block/heat_exchanger/fluid_port/condenser_inlet_assembled",
+      "y": 90
+    },
+    "condenser=true,port_direction=true,assembled=true,facing=west": {
+      "model": "biggerreactorsrework:block/heat_exchanger/fluid_port/condenser_inlet_assembled",
+      "y": 270
+    },
+    "condenser=true,port_direction=true,assembled=true,facing=up": {
+      "model": "biggerreactorsrework:block/heat_exchanger/fluid_port/condenser_inlet_assembled",
+      "x": 270
+    },
+    "condenser=true,port_direction=true,assembled=true,facing=down": {
+      "model": "biggerreactorsrework:block/heat_exchanger/fluid_port/condenser_inlet_assembled",
+      "x": 90
+    },
+    "condenser=true,port_direction=false,assembled=false": {
       "model": "biggerreactorsrework:block/heat_exchanger/fluid_port/condenser_outlet"
     },
-    "condenser=false,port_direction=true": {
+    "condenser=true,port_direction=false,assembled=true,facing=north": {
+      "model": "biggerreactorsrework:block/heat_exchanger/fluid_port/condenser_outlet_assembled"
+    },
+    "condenser=true,port_direction=false,assembled=true,facing=south": {
+      "model": "biggerreactorsrework:block/heat_exchanger/fluid_port/condenser_outlet_assembled",
+      "y": 180
+    },
+    "condenser=true,port_direction=false,assembled=true,facing=east": {
+      "model": "biggerreactorsrework:block/heat_exchanger/fluid_port/condenser_outlet_assembled",
+      "y": 90
+    },
+    "condenser=true,port_direction=false,assembled=true,facing=west": {
+      "model": "biggerreactorsrework:block/heat_exchanger/fluid_port/condenser_outlet_assembled",
+      "y": 270
+    },
+    "condenser=true,port_direction=false,assembled=true,facing=up": {
+      "model": "biggerreactorsrework:block/heat_exchanger/fluid_port/condenser_outlet_assembled",
+      "x": 270
+    },
+    "condenser=true,port_direction=false,assembled=true,facing=down": {
+      "model": "biggerreactorsrework:block/heat_exchanger/fluid_port/condenser_outlet_assembled",
+      "x": 90
+    },
+    "condenser=false,port_direction=true,assembled=false": {
       "model": "biggerreactorsrework:block/heat_exchanger/fluid_port/evaporator_inlet"
     },
-    "condenser=false,port_direction=false": {
+    "condenser=false,port_direction=true,assembled=true,facing=north": {
+      "model": "biggerreactorsrework:block/heat_exchanger/fluid_port/evaporator_inlet_assembled"
+    },
+    "condenser=false,port_direction=true,assembled=true,facing=south": {
+      "model": "biggerreactorsrework:block/heat_exchanger/fluid_port/evaporator_inlet_assembled",
+      "y": 180
+    },
+    "condenser=false,port_direction=true,assembled=true,facing=east": {
+      "model": "biggerreactorsrework:block/heat_exchanger/fluid_port/evaporator_inlet_assembled",
+      "y": 90
+    },
+    "condenser=false,port_direction=true,assembled=true,facing=west": {
+      "model": "biggerreactorsrework:block/heat_exchanger/fluid_port/evaporator_inlet_assembled",
+      "y": 270
+    },
+    "condenser=false,port_direction=true,assembled=true,facing=up": {
+      "model": "biggerreactorsrework:block/heat_exchanger/fluid_port/evaporator_inlet_assembled",
+      "x": 270
+    },
+    "condenser=false,port_direction=true,assembled=true,facing=down": {
+      "model": "biggerreactorsrework:block/heat_exchanger/fluid_port/evaporator_inlet_assembled",
+      "x": 90
+    },
+    "condenser=false,port_direction=false,assembled=false": {
       "model": "biggerreactorsrework:block/heat_exchanger/fluid_port/evaporator_outlet"
+    },
+    "condenser=false,port_direction=false,assembled=true,facing=north": {
+      "model": "biggerreactorsrework:block/heat_exchanger/fluid_port/evaporator_outlet_assembled"
+    },
+    "condenser=false,port_direction=false,assembled=true,facing=south": {
+      "model": "biggerreactorsrework:block/heat_exchanger/fluid_port/evaporator_outlet_assembled",
+      "y": 180
+    },
+    "condenser=false,port_direction=false,assembled=true,facing=east": {
+      "model": "biggerreactorsrework:block/heat_exchanger/fluid_port/evaporator_outlet_assembled",
+      "y": 90
+    },
+    "condenser=false,port_direction=false,assembled=true,facing=west": {
+      "model": "biggerreactorsrework:block/heat_exchanger/fluid_port/evaporator_outlet_assembled",
+      "y": 270
+    },
+    "condenser=false,port_direction=false,assembled=true,facing=up": {
+      "model": "biggerreactorsrework:block/heat_exchanger/fluid_port/evaporator_outlet_assembled",
+      "x": 270
+    },
+    "condenser=false,port_direction=false,assembled=true,facing=down": {
+      "model": "biggerreactorsrework:block/heat_exchanger/fluid_port/evaporator_outlet_assembled",
+      "x": 90
     }
   }
 }

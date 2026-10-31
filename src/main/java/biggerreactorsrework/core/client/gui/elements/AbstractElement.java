@@ -1,10 +1,6 @@
 package biggerreactorsrework.core.client.gui.elements;
 
-import net.minecraft.client.gui.components.events.GuiEventListener;
-import net.minecraft.client.renderer.texture.Tickable;
 import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 import biggerreactorsrework.core.client.gui.screens.ModScreen;
 import biggerreactorsrework.core.client.gui.ScreenCallbacks;
 
@@ -16,8 +12,7 @@ import javax.annotation.Nonnull;
  *
  * @param <T> Elements must be parented to a screen implementing {@link net.minecraft.world.inventory.AbstractContainerMenu AbstractContainerMenu}.
  */
-@OnlyIn(Dist.CLIENT)
-public abstract class AbstractElement<T extends AbstractContainerMenu> implements Tickable, GuiEventListener {
+public abstract class AbstractElement<T extends AbstractContainerMenu> {
 
     /**
      * The parent screen of this element.
@@ -63,10 +58,40 @@ public abstract class AbstractElement<T extends AbstractContainerMenu> implement
         this.height = height;
     }
 
+    public void mouseMoved(double mouseX, double mouseY) {
+    }
+
+    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        return false;
+    }
+
+    public boolean mouseReleased(double mouseX, double mouseY, int button) {
+        return false;
+    }
+
+    public boolean mouseDragged(double mouseX, double mouseY, int button, double dragX, double dragY) {
+        return false;
+    }
+
+    public boolean mouseScrolled(double mouseX, double mouseY, double delta, double idfk) {
+        return false;
+    }
+
+    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+        return false;
+    }
+
+    public boolean keyReleased(int keyCode, int scanCode, int modifiers) {
+        return false;
+    }
+
+    public boolean charTyped(char codePoint, int modifiers) {
+        return false;
+    }
+
     /**
      * Tick/update this element.
      */
-    @Override
     public void tick() {
         // Check conditions, and trigger.
         if (this.onTick != null) {
@@ -95,8 +120,8 @@ public abstract class AbstractElement<T extends AbstractContainerMenu> implement
      */
     public boolean isMouseOver(double mouseX, double mouseY) {
         // Get actual x and y positions.
-        int relativeX = this.parent.getGuiLeft() + this.x;
-        int relativeY = this.parent.getGuiTop() + this.y;
+        int relativeX = this.parent.getLeftPos() + this.x;
+        int relativeY = this.parent.getTopPos() + this.y;
         // Check the mouse.
         return ((mouseX > relativeX) && (mouseX < relativeX + this.width)
                 && (mouseY > relativeY) && (mouseY < relativeY + this.height));

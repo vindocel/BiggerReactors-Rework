@@ -6,12 +6,8 @@
     "IGI"
   ],
   "key": {
-    "I": {
-      "item": "minecraft:iron_ingot"
-    },
-    "G": {
-      "tag": "c:glass_blocks"
-    }
+    "I": "minecraft:iron_ingot",
+    "G": "#c:glass_blocks"
   },
   "result": {
     "id": "biggerreactorsrework:reactor_manifold",

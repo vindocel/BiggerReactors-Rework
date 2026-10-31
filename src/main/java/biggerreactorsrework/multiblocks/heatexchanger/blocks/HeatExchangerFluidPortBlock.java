@@ -1,7 +1,6 @@
 package biggerreactorsrework.multiblocks.heatexchanger.blocks;
 
 
-import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -24,7 +23,6 @@ import javax.annotation.ParametersAreNonnullByDefault;
 
 import static biggerreactorsrework.core.util.BlockStates.PORT_DIRECTION;
 
-@MethodsReturnNonnullByDefault
 @ParametersAreNonnullByDefault
 public class HeatExchangerFluidPortBlock extends HeatExchangerBaseBlock implements IAssemblyStateBlock, IFaceDirectionBlock {
     
@@ -38,7 +36,7 @@ public class HeatExchangerFluidPortBlock extends HeatExchangerBaseBlock implemen
     }
     
     @RegisterBlock(name = "heat_exchanger_fluid_port", tileEntityClass = HeatExchangerFluidPortTile.class)
-    public static final HeatExchangerFluidPortBlock INSTANCE = new HeatExchangerFluidPortBlock();
+    public static final HeatExchangerFluidPortBlock INSTANCE = biggerreactorsrework.core.registry.RegistryIds.named("heat_exchanger_fluid_port", () -> new HeatExchangerFluidPortBlock());
     
     @Override
     protected void buildStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {

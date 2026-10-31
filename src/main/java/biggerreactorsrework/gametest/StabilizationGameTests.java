@@ -27,8 +27,6 @@ import net.neoforged.neoforge.common.util.FakePlayerFactory;
 import net.neoforged.neoforge.gametest.*;
 import java.util.List;
 
-@GameTestHolder(BiggerReactors.modid)
-@PrefixGameTestTemplate(false)
 public final class StabilizationGameTests {
     @GameTest(template = "empty_7x7x7")
     public static void markingMachineDataDirtyDoesNotLoadRemoteChunks(GameTestHelper h) {
@@ -50,7 +48,7 @@ public final class StabilizationGameTests {
         h.setBlock(1,2,2,ReactorTerminal.INSTANCE);
         h.setBlock(3,2,2,ReactorAccessPort.INSTANCE);
         h.startSequence().thenWaitUntil(() -> {
-            var tile=(ReactorAccessPortTile)h.getBlockEntity(new BlockPos(3,2,2));
+            var tile=(ReactorAccessPortTile)GameTestSupport.be(h,new BlockPos(3,2,2));
             h.assertTrue(tile.nullableController()!=null && tile.controller().simulation()!=null,"reactor not assembled");
         }).thenExecute(() -> {
             var pos=h.absolutePos(new BlockPos(3,2,2));
@@ -88,9 +86,9 @@ public final class StabilizationGameTests {
     @GameTest(template = "empty_7x7x7")
     public static void idleProcessorChargingMarksChunkAndRoundTripsCurrentState(GameTestHelper h) {
         var pos=new BlockPos(2,2,2);h.setBlock(pos,CyaniteReprocessor.INSTANCE);
-        var tile=(CyaniteReprocessorTile)h.getBlockEntity(pos);tile.tick();
+        var tile=(CyaniteReprocessorTile)GameTestSupport.be(h,pos);tile.tick();
         var chunk=h.getLevel().getChunkAt(h.absolutePos(pos));
-        chunk.setUnsaved(false);
+        chunk.tryMarkSaved();
         var energy=tile.energyFor(null);
         int offered=Math.min(500,energy.getMaxEnergyStored());
         int accepted=energy.receiveEnergy(offered,true);
@@ -100,7 +98,7 @@ public final class StabilizationGameTests {
         h.assertTrue(chunk.isUnsaved(),"idle processor charge was not marked for disk saving");
         var saved=tile.saveWithFullMetadata(h.getLevel().registryAccess());
         var restored=CyaniteReprocessorTile.SUPPLIER.create(tile.getBlockPos(),tile.getBlockState());
-        restored.setLevel(h.getLevel());restored.loadWithComponents(saved,h.getLevel().registryAccess());
+        restored.setLevel(h.getLevel());GameTestSupport.load(restored,saved,h);
         h.assertTrue(restored.energyFor(null).getEnergyStored()==accepted,"current processor charge was lost");
         h.succeed();
     }
@@ -109,9 +107,9 @@ public final class StabilizationGameTests {
     public static void cachedNeighborTracksSideChangesWithoutBlockReplacement(GameTestHelper h) {
         var ownerPos=new BlockPos(2,2,2);var neighborPos=ownerPos.east();
         h.setBlock(ownerPos,CyaniteReprocessor.INSTANCE);h.setBlock(neighborPos,CyaniteReprocessor.INSTANCE);
-        var owner=(CyaniteReprocessorTile)h.getBlockEntity(ownerPos);
-        var neighbor=(CyaniteReprocessorTile)h.getBlockEntity(neighborPos);
-        var cache=new NeighborCapability<>(owner,Capabilities.FluidHandler.BLOCK);
+        var owner=(CyaniteReprocessorTile)GameTestSupport.be(h,ownerPos);
+        var neighbor=(CyaniteReprocessorTile)GameTestSupport.be(h,neighborPos);
+        var cache=NeighborCapability.fluids(owner);
         neighbor.runRequest("sideClearAll",null);
         h.assertTrue(cache.get(Direction.EAST)==null,"disabled neighbor exposed fluid capability");
         neighbor.runRequest("sideBatch",Transmission.FLUID.ordinal()*2);
@@ -152,18 +150,18 @@ public final class StabilizationGameTests {
         h.assertTrue(fuel.fuel()==0 && fuel.waste()==25,"invalid fuel state was not isolated");
         var bad=new CompoundTag();bad.putLong("inAmount",125);bad.putString("inFluid","INVALID FLUID!");
         var tank=new FluidTransitionTank(false);tank.deserializeNBT(bad);
-        h.assertTrue(tank.hasUnresolvedProfile() && tank.serializeNBT().getLong("inAmount")==125,"malformed fluid identifier lost stored stock");
+        h.assertTrue(tank.hasUnresolvedProfile() && tank.serializeNBT().getLongOr("inAmount", 0L)==125,"malformed fluid identifier lost stored stock");
         var turbine=new ModernTurbineSimulation();bad=new CompoundTag();bad.putInt("ventState",999);bad.putDouble("rotorEnergy",Double.NaN);
         turbine.deserializeNBT(bad);
-        h.assertTrue(turbine.serializeNBT().getDouble("rotorEnergy")==0,"nonfinite rotor state was retained");
+        h.assertTrue(turbine.serializeNBT().getDoubleOr("rotorEnergy", 0D)==0,"nonfinite rotor state was retained");
         h.setBlock(1,1,1,ReactorCoolantPort.INSTANCE);
         h.setBlock(2,1,1,biggerreactorsrework.multiblocks.turbine.blocks.TurbineFluidPort.INSTANCE);
         h.setBlock(3,1,1,biggerreactorsrework.multiblocks.heatexchanger.blocks.HeatExchangerFluidPortBlock.INSTANCE);
         h.setBlock(4,1,1,biggerreactorsrework.multiblocks.battery.blocks.BatteryEnergyPort.INSTANCE);
-        var coolant=(ReactorCoolantPortTile)h.getBlockEntity(new BlockPos(1,1,1));
-        var turbinePort=(biggerreactorsrework.multiblocks.turbine.tiles.TurbineFluidPortTile)h.getBlockEntity(new BlockPos(2,1,1));
-        var exchangerPort=(biggerreactorsrework.multiblocks.heatexchanger.tiles.HeatExchangerFluidPortTile)h.getBlockEntity(new BlockPos(3,1,1));
-        var batteryPort=(biggerreactorsrework.multiblocks.battery.tiles.BatteryEnergyPortTile)h.getBlockEntity(new BlockPos(4,1,1));
+        var coolant=(ReactorCoolantPortTile)GameTestSupport.be(h,new BlockPos(1,1,1));
+        var turbinePort=(biggerreactorsrework.multiblocks.turbine.tiles.TurbineFluidPortTile)GameTestSupport.be(h,new BlockPos(2,1,1));
+        var exchangerPort=(biggerreactorsrework.multiblocks.heatexchanger.tiles.HeatExchangerFluidPortTile)GameTestSupport.be(h,new BlockPos(3,1,1));
+        var batteryPort=(biggerreactorsrework.multiblocks.battery.tiles.BatteryEnergyPortTile)GameTestSupport.be(h,new BlockPos(4,1,1));
         for(Object invalid:new Object[]{"wrong type",1L,-1,2}) {
             coolant.runRequest("setDirection",invalid);turbinePort.runRequest("setDirection",invalid);
             exchangerPort.runRequest("setDirection",invalid);batteryPort.runRequest("setDirection",invalid);

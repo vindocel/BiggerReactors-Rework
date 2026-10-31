@@ -1,19 +1,14 @@
 package biggerreactorsrework.client;
 
-import com.mojang.blaze3d.platform.GlStateManager;
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.*;
-import net.minecraft.client.renderer.GameRenderer;
+import static com.mojang.blaze3d.platform.InputConstants.*;
 import net.minecraft.util.StringUtil;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 import biggerreactorsrework.BiggerReactors;
 import biggerreactorsrework.core.client.gui.screens.ModScreen;
 import biggerreactorsrework.core.client.gui.RenderHelper;
@@ -21,9 +16,6 @@ import biggerreactorsrework.core.client.gui.elements.InteractiveElement;
 
 import javax.annotation.Nonnull;
 
-import static org.lwjgl.glfw.GLFW.*;
-
-@OnlyIn(Dist.CLIENT)
 public class TextBox<T extends AbstractContainerMenu> extends InteractiveElement<T> {
 
     /**
@@ -107,7 +99,7 @@ public class TextBox<T extends AbstractContainerMenu> extends InteractiveElement
      * @param mouseY The y position of the mouse.
      */
     @Override
-    public void render(@Nonnull GuiGraphics graphics, int mouseX, int mouseY) {
+    public void render(@Nonnull GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
         // Check conditions.
         if (this.renderEnable) {
             // Draw the text box frame.
@@ -115,7 +107,7 @@ public class TextBox<T extends AbstractContainerMenu> extends InteractiveElement
 
             // Draw the text.
             // TODO: Allow for larger text entry by allowing text scrolling.
-            graphics.drawString(this.fontRenderer, this.textBuffer.toString(), (this.x + 3), (this.y + 4), 16777215, false);
+            graphics.text(this.fontRenderer, this.textBuffer.toString(), (this.x + 3), (this.y + 4), 0xFFFFFFFF, false);
 
             // Trigger user-defined render logic.
             if (this.onRender != null) {
@@ -123,8 +115,8 @@ public class TextBox<T extends AbstractContainerMenu> extends InteractiveElement
             }
 
             // Draw cursor and selection box.
-            renderCursor(this.parent.getGuiLeft() + this.x, this.parent.getGuiTop() + this.y);
-            renderSelection(this.parent.getGuiLeft() + this.x, this.parent.getGuiTop() + this.y);
+            renderCursor(graphics, this.x, this.y);
+            renderSelection(graphics, this.x, this.y);
 
             // Reset color.
             RenderHelper.clearRenderColor();
@@ -134,7 +126,7 @@ public class TextBox<T extends AbstractContainerMenu> extends InteractiveElement
     /**
      * Draw the cursor.
      */
-    private void renderCursor(int x, int y) {
+    private void renderCursor(GuiGraphicsExtractor graphics, int x, int y) {
         // Increment animation timer and reset if necessary.
         this.cursorAnimationTime++;
         if (cursorAnimationTime > cursorAnimationTimeTotal) {
@@ -152,30 +144,13 @@ public class TextBox<T extends AbstractContainerMenu> extends InteractiveElement
             cursorRenderPos = (this.fontRenderer.width(this.textBuffer.substring(0, this.cursorPos)) + (x + 2));
         }
 
-        // Set up tessellator and buffer.
-        Tesselator tessellator = Tesselator.getInstance();
-        RenderHelper.setRenderColor(255.0F, 255.0F, 255.0F, 255.0F);
-        // TODO: does this need replaced?
-//        RenderSystem.disableTexture();
-
-        // Set positions.
-        RenderSystem.setShader(GameRenderer::getPositionShader);
-        BufferBuilder renderBuffer = tessellator.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION);
-        renderBuffer.addVertex((cursorRenderPos + 1), (y + 3), 0.0F);
-        renderBuffer.addVertex(cursorRenderPos, (y + 3), 0.0F);
-        renderBuffer.addVertex(cursorRenderPos, (y + 13), 0.0F);
-        renderBuffer.addVertex((cursorRenderPos + 1), (y + 13), 0.0F);
-
-        // Draw and reset.
-        BufferUploader.drawWithShader(renderBuffer.buildOrThrow());
-//        RenderSystem.enableTexture();
-        RenderHelper.clearRenderColor();
+        graphics.fill(cursorRenderPos, y + 3, cursorRenderPos + 1, y + 13, 0xFFFFFFFF);
     }
 
     /**
      * Draw the highlight box on the selected text.
      */
-    private void renderSelection(int x, int y) {
+    private void renderSelection(GuiGraphicsExtractor graphics, int x, int y) {
         // Check conditions.
         if (!this.renderEnable || this.cursorPos == this.selectionPos) {
             return;
@@ -198,26 +173,7 @@ public class TextBox<T extends AbstractContainerMenu> extends InteractiveElement
         // Right edge of the box.
         int rightRenderPos = (this.selectionPos > this.cursorPos) ? selectionRenderPos : cursorRenderPos;
 
-        // Set up tessellator and buffer.
-        Tesselator tessellator = Tesselator.getInstance();
-        RenderHelper.setRenderColor(0.0F, 0.0F, 255.0F, 255.0F);
-//        RenderSystem.disableTexture();
-        RenderSystem.enableColorLogicOp();
-        RenderSystem.logicOp(GlStateManager.LogicOp.OR_REVERSE);
-
-        // Set positions.
-        RenderSystem.setShader(GameRenderer::getPositionShader);
-        BufferBuilder renderBuffer = tessellator.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION);
-        renderBuffer.addVertex(rightRenderPos, (y + 2), 0.0F);
-        renderBuffer.addVertex(leftRenderPos, (y + 2), 0.0F);
-        renderBuffer.addVertex(leftRenderPos, (y + 14), 0.0F);
-        renderBuffer.addVertex(rightRenderPos, (y + 14), 0.0F);
-
-        // Draw and reset.
-        BufferUploader.drawWithShader(renderBuffer.buildOrThrow());
-        RenderSystem.disableColorLogicOp();
-//        RenderSystem.enableTexture();
-        RenderHelper.clearRenderColor();
+        graphics.textHighlight(leftRenderPos, y + 2, rightRenderPos, y + 14, true);
     }
 
     /**
@@ -229,8 +185,8 @@ public class TextBox<T extends AbstractContainerMenu> extends InteractiveElement
      */
     public boolean isMouseOver(double mouseX, double mouseY) {
         // Get actual x and y positions.
-        int relativeX = this.parent.getGuiLeft() + this.x;
-        int relativeY = this.parent.getGuiTop() + this.y;
+        int relativeX = this.parent.getLeftPos() + this.x;
+        int relativeY = this.parent.getTopPos() + this.y;
         // Check the mouse.
         return ((mouseX > relativeX) && (mouseX < relativeX + (this.width + 6))
                 && (mouseY > relativeY) && (mouseY < relativeY + this.height));
@@ -267,59 +223,59 @@ public class TextBox<T extends AbstractContainerMenu> extends InteractiveElement
         // Check conditions.
         if (this.actionEnable && this.focusEnable) {
             // Check for Ctrl+A (select all text).
-            if (Screen.isSelectAll(keyCode)) {
+            if (new net.minecraft.client.input.KeyEvent(keyCode, scanCode, modifiers).isSelectAll()) {
                 this.cursorPos = textBuffer.length();
                 this.selectionPos = 0;
                 return true;
             }
             // Check for Ctrl-C (copy text in selection).
-            if (Screen.isCopy(keyCode)) {
+            if (new net.minecraft.client.input.KeyEvent(keyCode, scanCode, modifiers).isCopy()) {
                 this.parent.getMinecraft().keyboardHandler.setClipboard(this.getSelection());
                 return true;
             }
             // Check for Ctrl-X (cut text in selection).
-            if (Screen.isCut(keyCode)) {
+            if (new net.minecraft.client.input.KeyEvent(keyCode, scanCode, modifiers).isCut()) {
                 this.parent.getMinecraft().keyboardHandler.setClipboard(this.getSelection());
                 this.deleteSelection();
                 return true;
             }
             // Check for Ctrl-V (paste text in selection).
-            if (Screen.isPaste(keyCode)) {
+            if (new net.minecraft.client.input.KeyEvent(keyCode, scanCode, modifiers).isPaste()) {
                 this.write(this.parent.getMinecraft().keyboardHandler.getClipboard());
                 return true;
             }
             // Handle other characters:
             switch (keyCode) {
-                case GLFW_KEY_ESCAPE: {
+                case KEY_ESCAPE: {
                     // Return false, so that the parent may close the screen.
                     return false;
                 }
-                case GLFW_KEY_BACKSPACE: {
+                case KEY_BACKSPACE: {
                     // Delete the character.
                     this.deleteCharacter();
                     // Check for shift (delete word).
-                    if ((Screen.hasControlDown())) {
+                    if ((net.minecraft.client.Minecraft.getInstance().hasControlDown())) {
                         // Continue to delete until the next break character.
                         this.deleteWord();
                     }
                     break;
                 }
-                case GLFW_KEY_LEFT: {
+                case KEY_LEFT: {
                     // Move cursor left.
                     this.shiftCursorLeft();
                     break;
                 }
-                case GLFW_KEY_RIGHT: {
+                case KEY_RIGHT: {
                     // Move cursor right.
                     this.shiftCursorRight();
                     break;
                 }
-                case GLFW_KEY_HOME: {
+                case KEY_HOME: {
                     // Move cursor to beginning.
                     this.cursorPos = 0;
                     break;
                 }
-                case GLFW_KEY_END: {
+                case KEY_END: {
                     // Move cursor to end.
                     this.cursorPos = this.textBuffer.length();
                     break;
@@ -359,14 +315,14 @@ public class TextBox<T extends AbstractContainerMenu> extends InteractiveElement
         // Check if we can shift left.
         if (this.cursorPos > 0) {
             // Check which method to shift with.
-            if (Screen.hasShiftDown() && Screen.hasControlDown()) {
+            if (net.minecraft.client.Minecraft.getInstance().hasShiftDown() && net.minecraft.client.Minecraft.getInstance().hasControlDown()) {
                 // Select and move by word (cursor position moves out of sync with selection position).
                 this.cursorPos = this.findBreakCharacter(this.cursorPos, true);
-            } else if (Screen.hasControlDown()) {
+            } else if (net.minecraft.client.Minecraft.getInstance().hasControlDown()) {
                 // Move by word (cursor position moves in sync with selection position).
                 this.cursorPos = this.findBreakCharacter(this.cursorPos, true);
                 this.selectionPos = this.cursorPos;
-            } else if (Screen.hasShiftDown()) {
+            } else if (net.minecraft.client.Minecraft.getInstance().hasShiftDown()) {
                 // Select and move by character (cursor position moves out of sync with selection position).
                 this.cursorPos--;
             } else {
@@ -384,14 +340,14 @@ public class TextBox<T extends AbstractContainerMenu> extends InteractiveElement
         // Check if we can shift right.
         if (this.cursorPos < this.textBuffer.length()) {
             // Check which method to shift with.
-            if (Screen.hasShiftDown() && Screen.hasControlDown()) {
+            if (net.minecraft.client.Minecraft.getInstance().hasShiftDown() && net.minecraft.client.Minecraft.getInstance().hasControlDown()) {
                 // Select and move by word (cursor position moves out of sync with selection position).
                 this.cursorPos = this.findBreakCharacter(this.cursorPos, false);
-            } else if (Screen.hasControlDown()) {
+            } else if (net.minecraft.client.Minecraft.getInstance().hasControlDown()) {
                 // Move by word (cursor position moves in sync with selection position).
                 this.cursorPos = this.findBreakCharacter(this.cursorPos, false);
                 this.selectionPos = this.cursorPos;
-            } else if (Screen.hasShiftDown()) {
+            } else if (net.minecraft.client.Minecraft.getInstance().hasShiftDown()) {
                 // Select and move by character (cursor position moves out of sync with selection position).
                 this.cursorPos++;
             } else {
@@ -456,13 +412,13 @@ public class TextBox<T extends AbstractContainerMenu> extends InteractiveElement
      */
     public boolean isBreakCharacter(int codePoint) {
         switch (codePoint) {
-            case GLFW_KEY_SPACE:
-            case GLFW_KEY_PERIOD:
-            case GLFW_KEY_COMMA:
-                //case GLFW_KEY_COLON:
-            case GLFW_KEY_SEMICOLON:
-            case GLFW_KEY_SLASH:
-            case GLFW_KEY_BACKSLASH: {
+            case KEY_SPACE:
+            case KEY_PERIOD:
+            case KEY_COMMA:
+                //case KEY_COLON:
+            case KEY_SEMICOLON:
+            case KEY_SLASH:
+            case KEY_BACKSLASH: {
                 return true;
             }
             default:
@@ -524,7 +480,7 @@ public class TextBox<T extends AbstractContainerMenu> extends InteractiveElement
             // Loop until we find a whitespace.
             for (int i = this.cursorPos; i > 0; --i) {
                 // Is this a space?
-                if (this.textBuffer.codePointAt(i - 1) == GLFW_KEY_SPACE) {
+                if (this.textBuffer.codePointAt(i - 1) == KEY_SPACE) {
                     // Found the space.
                     return;
                 }

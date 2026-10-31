@@ -1,5 +1,4 @@
 {
-  "neoforge:conditions": [ { "type": "neoforge:item_exists", "item": "biggerreactorsrework:cyanite_reprocessor" } ],
   "type": "minecraft:block",
   "pools": [
     {
@@ -11,10 +10,9 @@
           "name": "biggerreactorsrework:cyanite_reprocessor"
         }
       ],
-      "conditions": [
-        {
-          "condition": "minecraft:survives_explosion"
-        }]
+      "condition": {
+        "type": "minecraft:survives_explosion"
+      }
     }
   ]
 }

@@ -4,7 +4,6 @@ import biggerreactorsrework.core.modular.block.IConnectedTexture;
 import biggerreactorsrework.core.multiblock.IAssemblyStateBlock;
 import biggerreactorsrework.core.registry.RegisterBlock;
 import biggerreactorsrework.multiblocks.battery.tiles.BatteryCellTile;
-import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
@@ -29,13 +28,12 @@ import java.util.List;
  * into the dropped item, and placing the item restores it.
  */
 @ParametersAreNonnullByDefault
-@MethodsReturnNonnullByDefault
-public class BatteryCell extends BatteryBaseBlock implements IAssemblyStateBlock, IConnectedTexture {
+public class BatteryCell extends BatteryBaseBlock implements IAssemblyStateBlock, IConnectedTexture, biggerreactorsrework.core.modular.block.BlockTooltip {
     
     public static final BooleanProperty CHARGED = BooleanProperty.create("charged");
     
     @RegisterBlock(name = "battery_cell", tileEntityClass = BatteryCellTile.class)
-    public static final BatteryCell INSTANCE = new BatteryCell();
+    public static final BatteryCell INSTANCE = biggerreactorsrework.core.registry.RegistryIds.named("battery_cell", () -> new BatteryCell());
     
     public BatteryCell() {
         super();
@@ -67,15 +65,14 @@ public class BatteryCell extends BatteryBaseBlock implements IAssemblyStateBlock
     
     public static long storedEnergy(ItemStack stack) {
         CustomData data = stack.get(DataComponents.CUSTOM_DATA);
-        return data == null ? 0 : Math.max(0, data.copyTag().getLong(BatteryCellTile.ENERGY_KEY));
+        return data == null ? 0 : Math.max(0, data.copyTag().getLongOr(BatteryCellTile.ENERGY_KEY, 0L));
     }
     
     @Override
-    public void appendHoverText(ItemStack stack, Item.TooltipContext context, List<Component> tooltip, TooltipFlag flag) {
-        super.appendHoverText(stack, context, tooltip, flag);
+    public void appendTooltip(ItemStack stack, java.util.function.Consumer<Component> tooltip) {
         long energy = storedEnergy(stack);
         if (energy > 0) {
-            tooltip.add(Component.translatable("tooltip.biggerreactorsrework.battery_cell.energy", formatEnergy(energy)));
+            tooltip.accept(Component.translatable("tooltip.biggerreactorsrework.battery_cell.energy", formatEnergy(energy)));
         }
     }
     

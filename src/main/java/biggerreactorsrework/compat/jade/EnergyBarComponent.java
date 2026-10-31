@@ -3,7 +3,7 @@ package biggerreactorsrework.compat.jade;
 import biggerreactorsrework.core.client.gui.RenderHelper;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import snownee.jade.api.BlockAccessor;
 import snownee.jade.api.IBlockComponentProvider;
 import snownee.jade.api.ITooltip;
@@ -21,14 +21,14 @@ enum EnergyBarComponent implements IBlockComponentProvider {
         if (!data.contains(BiggerReactorsJadePlugin.ENERGY)) {
             return;
         }
-        long energy = Math.max(0, data.getLong(BiggerReactorsJadePlugin.ENERGY));
-        long capacity = Math.max(1, data.getLong(BiggerReactorsJadePlugin.CAPACITY));
+        long energy = Math.max(0, data.getLongOr(BiggerReactorsJadePlugin.ENERGY, 0L));
+        long capacity = Math.max(1, data.getLongOr(BiggerReactorsJadePlugin.CAPACITY, 0L));
         tooltip.add(EnergyBarElement.of(energy / (double) capacity, Component.literal(
                 RenderHelper.formatValue(energy, "FE") + " / " + RenderHelper.formatValue(capacity, "FE"))));
     }
 
     @Override
-    public ResourceLocation getUid() {
+    public Identifier getUid() {
         return BiggerReactorsJadePlugin.UID;
     }
 }

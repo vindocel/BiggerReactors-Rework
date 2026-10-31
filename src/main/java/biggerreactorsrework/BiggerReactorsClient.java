@@ -18,7 +18,7 @@ import biggerreactorsrework.multiblocks.heatexchanger.client.HeatExchangerChanne
 import biggerreactorsrework.multiblocks.turbine.client.TurbineRotorRenderer;
 import biggerreactorsrework.multiblocks.turbine.tiles.TurbineRotorBearingTile;
 import biggerreactorsrework.core.registry.Registry;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.client.extensions.common.IClientFluidTypeExtensions;
 import net.neoforged.neoforge.client.extensions.common.RegisterClientExtensionsEvent;
@@ -44,6 +44,8 @@ public final class BiggerReactorsClient {
     static void init(IEventBus modBus) {
         // Modified 2026-10-28: positional loops and per-machine local volume.
         biggerreactorsrework.client.sound.MachineSoundManager.init();
+        net.neoforged.neoforge.common.NeoForge.EVENT_BUS.addListener(
+                biggerreactorsrework.multiblocks.turbine.client.TurbineAtmosphereEffects::tick);
         modBus.addListener(biggerreactorsrework.client.HeatedFluidSprites::register);
         biggerreactorsrework.client.GuiSettingsEvents.register();
         net.neoforged.neoforge.common.NeoForge.EVENT_BUS.addListener(
@@ -51,15 +53,17 @@ public final class BiggerReactorsClient {
                     biggerreactorsrework.registries.CoolantSync.clearClient();
                     biggerreactorsrework.client.calculator.CalculatorClient.disconnected();
                 });
-        modBus.addListener((net.neoforged.neoforge.client.event.RegisterShadersEvent event) -> {
-            try {
-                event.registerShader(new net.minecraft.client.renderer.ShaderInstance(event.getResourceProvider(),
-                        ResourceLocation.fromNamespaceAndPath(BiggerReactors.modid, "dark_gui"),
-                        com.mojang.blaze3d.vertex.DefaultVertexFormat.POSITION_TEX), biggerreactorsrework.client.GuiTheme::setShader);
-            } catch (java.io.IOException e) {
-                throw new java.io.UncheckedIOException("Could not load the machine GUI theme shader", e);
+        modBus.addListener((net.neoforged.neoforge.client.event.RegisterRenderPipelinesEvent event) -> event.registerPipeline(biggerreactorsrework.client.GuiTheme.DARK_PIPELINE));
+        modBus.addListener(BiggerReactorsClient::registerFluidModels);
+        net.neoforged.neoforge.common.NeoForge.EVENT_BUS.addListener((net.neoforged.neoforge.event.entity.player.ItemTooltipEvent event) -> {
+            if (event.getItemStack().getItem() instanceof net.minecraft.world.item.BlockItem item && item.getBlock() instanceof biggerreactorsrework.core.modular.block.BlockTooltip block) {
+                block.appendTooltip(event.getItemStack(), event.getToolTip()::add);
             }
         });
+        modBus.addListener((net.neoforged.neoforge.client.event.RegisterSpecialModelRendererEvent event) ->
+                event.register(biggerreactorsrework.client.guide.GuideBookRenderer.ID, biggerreactorsrework.client.guide.GuideBookRenderer.Unbaked.MAP_CODEC));
+        modBus.addListener((net.neoforged.neoforge.client.event.RegisterPictureInPictureRenderersEvent event) ->
+                biggerreactorsrework.client.guide.GuidePictures.register(event));
         modBus.addListener(biggerreactorsrework.compat.DarkModeCompat::onInterModEnqueue);
         modBus.addListener(BiggerReactorsClient::registerScreens);
         modBus.addListener(BiggerReactorsClient::registerRenderers);
@@ -70,9 +74,10 @@ public final class BiggerReactorsClient {
         modBus.addListener((net.neoforged.fml.event.lifecycle.FMLClientSetupEvent event) -> event.enqueueWork(() ->
                 biggerreactorsrework.items.tools.GuideBookItem.open = biggerreactorsrework.client.guide.GuideBookAnimation::requestOpen));
         net.neoforged.neoforge.common.NeoForge.EVENT_BUS.addListener(biggerreactorsrework.client.guide.GuideBookAnimation::onClientTick);
-        modBus.addListener((net.neoforged.neoforge.client.event.ModelEvent.RegisterAdditional event) -> {
-            biggerreactorsrework.client.guide.GuideBookRenderer.models().forEach(id -> event.register(net.minecraft.client.resources.model.ModelResourceLocation.standalone(id)));
-        });
+        net.neoforged.neoforge.common.NeoForge.EVENT_BUS.addListener((net.neoforged.neoforge.client.event.RecipesReceivedEvent event) ->
+                biggerreactorsrework.machine.recipe.RecipeAccess.setClientRecipes(event.getRecipeMap()));
+        modBus.addListener((net.neoforged.neoforge.client.event.ModelEvent.RegisterStandalone event) ->
+                biggerreactorsrework.client.guide.GuideBookRenderer.models().forEach(id -> biggerreactorsrework.client.guide.ModelRendering.register(event, id)));
     }
 
     private static void registerRenderers(EntityRenderersEvent.RegisterRenderers event) {
@@ -83,41 +88,21 @@ public final class BiggerReactorsClient {
     }
     
     private static void registerClientExtensions(RegisterClientExtensionsEvent event) {
-        event.registerItem(new net.neoforged.neoforge.client.extensions.common.IClientItemExtensions() {
-            private final biggerreactorsrework.client.guide.GuideBookRenderer renderer = new biggerreactorsrework.client.guide.GuideBookRenderer();
-            @Override public net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer getCustomRenderer() { return renderer; }
-        }, biggerreactorsrework.items.tools.GuideBookItem.INSTANCE);
+    }
+
+    private static void registerFluidModels(net.neoforged.neoforge.client.event.RegisterFluidModelsEvent event) {
+        var obsidianStill = Identifier.fromNamespaceAndPath(BiggerReactors.modid, "block/fluid/liquid_obsidian_still");
+        var obsidianFlowing = Identifier.fromNamespaceAndPath(BiggerReactors.modid, "block/fluid/liquid_obsidian_flowing");
         for (var info : Registry.FLUID_CLIENT_INFO) {
-            event.registerFluidType(new IClientFluidTypeExtensions() {
-                @Override
-                public ResourceLocation getStillTexture() {
-                    return info.type()==biggerreactorsrework.fluids.HeatedCoolant.INSTANCE.getFluidType()?ResourceLocation.fromNamespaceAndPath(BiggerReactors.modid,"block/fluid/liquid_obsidian_still"):info.stillTexture();
-                }
-                @Override public ResourceLocation getStillTexture(net.neoforged.neoforge.fluids.FluidStack stack) {
-                    return stack.getFluid()==biggerreactorsrework.fluids.HeatedCoolant.INSTANCE?biggerreactorsrework.client.HeatedFluidSprites.texture(stack,false):getStillTexture();
-                }
-                @Override public ResourceLocation getFlowingTexture(net.neoforged.neoforge.fluids.FluidStack stack) {
-                    return stack.getFluid()==biggerreactorsrework.fluids.HeatedCoolant.INSTANCE?biggerreactorsrework.client.HeatedFluidSprites.texture(stack,true):getFlowingTexture();
-                }
-                
-                @Override
-                public ResourceLocation getFlowingTexture() {
-                    return info.flowingTexture();
-                }
-                
-                @Override
-                public ResourceLocation getOverlayTexture() {
-                    return info.overlayTexture();
-                }
-                
-                @Override
-                public int getTintColor() {
-                    return info.tintColor();
-                }
-            }, info.type());
+            boolean heated = info.type() == biggerreactorsrework.fluids.HeatedCoolant.INSTANCE.getFluidType();
+            var model = new net.minecraft.client.renderer.block.FluidModel.Unbaked(
+                    new net.minecraft.client.resources.model.sprite.Material(heated ? obsidianStill : info.stillTexture(), true),
+                    new net.minecraft.client.resources.model.sprite.Material(heated ? obsidianFlowing : info.flowingTexture(), true),
+                    null, net.neoforged.neoforge.client.fluid.FluidTintSources.constant(info.tintColor()));
+            net.minecraft.core.registries.BuiltInRegistries.FLUID.stream().filter(fluid -> fluid.getFluidType() == info.type()).forEach(fluid -> event.register(model, fluid));
         }
     }
-    
+
     private static void registerScreens(RegisterMenuScreensEvent event) {
         event.register(ReactorTerminalContainer.INSTANCE, CommonReactorTerminalScreen::new);
         event.register(ReactorCoolantPortContainer.INSTANCE, ReactorCoolantPortScreen::new);

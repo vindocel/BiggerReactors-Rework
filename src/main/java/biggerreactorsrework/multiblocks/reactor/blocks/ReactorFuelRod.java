@@ -1,7 +1,5 @@
 package biggerreactorsrework.multiblocks.reactor.blocks;
 
-import net.minecraft.MethodsReturnNonnullByDefault;
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.block.Block;
@@ -9,8 +7,6 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 import biggerreactorsrework.multiblocks.reactor.tiles.ReactorFuelRodTile;
 import biggerreactorsrework.core.registry.RegisterBlock;
 
@@ -18,14 +14,13 @@ import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 
 @ParametersAreNonnullByDefault
-@MethodsReturnNonnullByDefault
 public class ReactorFuelRod extends ReactorBaseBlock {
     
     public static IntegerProperty FUEL_HEIGHT_PROPERTY = IntegerProperty.create("fuel_level", 0, 16);
     public static IntegerProperty WASTE_HEIGHT_PROPERTY = IntegerProperty.create("waste_level", 0, 16);
     
     @RegisterBlock(name = "reactor_fuel_rod", tileEntityClass = ReactorFuelRodTile.class)
-    public static final ReactorFuelRod INSTANCE = new ReactorFuelRod();
+    public static final ReactorFuelRod INSTANCE = biggerreactorsrework.core.registry.RegistryIds.named("reactor_fuel_rod", () -> new ReactorFuelRod());
     
     public ReactorFuelRod() {
         super(false);

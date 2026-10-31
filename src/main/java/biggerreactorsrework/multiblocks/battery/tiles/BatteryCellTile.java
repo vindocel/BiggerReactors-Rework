@@ -1,7 +1,6 @@
 package biggerreactorsrework.multiblocks.battery.tiles;
 
 import biggerreactorsrework.core.registry.RegisterTile;
-import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -13,7 +12,6 @@ import javax.annotation.ParametersAreNonnullByDefault;
  * Holds this cell's share of the battery's energy.
  */
 @ParametersAreNonnullByDefault
-@MethodsReturnNonnullByDefault
 public class BatteryCellTile extends BatteryBaseTile {
     
     /**
@@ -56,7 +54,7 @@ public class BatteryCellTile extends BatteryBaseTile {
     @Override
     protected void readNBT(CompoundTag compound) {
         super.readNBT(compound);
-        energy = Math.max(0, compound.getLong(ENERGY_KEY));
+        energy = Math.max(0, compound.getLongOr(ENERGY_KEY, 0L));
     }
     
     @Override

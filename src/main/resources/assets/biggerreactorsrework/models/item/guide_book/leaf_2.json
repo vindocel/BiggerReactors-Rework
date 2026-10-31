@@ -4,8 +4,8 @@
     128
   ],
   "textures": {
-    "0": "biggerreactorsrework:item/guide_book",
-    "particle": "biggerreactorsrework:item/guide_book"
+    "0": "biggerreactorsrework:block/guide_book",
+    "particle": "biggerreactorsrework:block/guide_book"
   },
   "elements": [
     {

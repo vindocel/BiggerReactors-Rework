@@ -20,6 +20,22 @@ import javax.annotation.ParametersAreNonnullByDefault;
 public class ReactorTransitionTank extends FluidTransitionTank {
     
     private final IReactorSimulation.ICoolantTank internalTank;
+
+    private record TransferState(Object fluids, Object simulation) {}
+
+    @Override
+    public Object transferSnapshot() {
+        pullUpdate();
+        return new TransferState(super.transferSnapshot(), internalTank.transferSnapshot());
+    }
+
+    @Override
+    public void restoreTransferSnapshot(Object snapshot) {
+        if (!(snapshot instanceof TransferState state)) return;
+        // Restore the fluid profile first: transitionUpdate may clear the internal thermal remainder.
+        super.restoreTransferSnapshot(state.fluids);
+        internalTank.restoreTransferSnapshot(state.simulation);
+    }
     
     @Override
     public long transitionedLastTick() {

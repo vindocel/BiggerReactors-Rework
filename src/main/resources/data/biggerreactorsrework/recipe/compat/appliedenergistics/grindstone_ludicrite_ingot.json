@@ -7,9 +7,7 @@
         }
     ],
     "ingredients": {
-        "middle": {
-            "item": "biggerreactorsrework:ludicrite_ingot"
-        }
+        "middle": "biggerreactorsrework:ludicrite_ingot"
     },
     "mode": "inscribe",
     "result": {

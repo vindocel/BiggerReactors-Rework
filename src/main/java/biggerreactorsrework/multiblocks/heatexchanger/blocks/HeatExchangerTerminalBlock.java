@@ -1,7 +1,6 @@
 package biggerreactorsrework.multiblocks.heatexchanger.blocks;
 
 
-import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -13,12 +12,11 @@ import biggerreactorsrework.core.registry.RegisterBlock;
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 
-@MethodsReturnNonnullByDefault
 @ParametersAreNonnullByDefault
 public class HeatExchangerTerminalBlock extends HeatExchangerBaseBlock implements IAssemblyStateBlock, IFaceDirectionBlock {
     
     @RegisterBlock(name = "heat_exchanger_terminal", tileEntityClass = HeatExchangerTerminalTile.class)
-    public static final HeatExchangerTerminalBlock INSTANCE = new HeatExchangerTerminalBlock();
+    public static final HeatExchangerTerminalBlock INSTANCE = biggerreactorsrework.core.registry.RegistryIds.named("heat_exchanger_terminal", () -> new HeatExchangerTerminalBlock());
     
     @Nullable
     @Override

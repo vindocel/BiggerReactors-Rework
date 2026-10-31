@@ -6,7 +6,7 @@ import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.packs.resources.Resource;
@@ -54,7 +54,7 @@ public class ConfigManager {
     static final Logger LOGGER = LogManager.getLogger("BiggerReactors-Rework/Config");
     private static class ClassLoadingHelper {
         public static final SimpleChannel NETWORK_CHANNEL = new SimpleChannel(
-                ResourceLocation.fromNamespaceAndPath(modid, "configsync"),
+                Identifier.fromNamespaceAndPath(modid, "configsync"),
                 ConfigManager::clientPacketHandler,
                 ConfigManager::serverPacketHandler
         );
@@ -155,7 +155,7 @@ public class ConfigManager {
         for (final var value : clientConfigs.values()) {
             value.loadLocalConfigFile(true);
         }
-        if (FMLEnvironment.dist.isDedicatedServer() || !connectedToServer || server != null && !server.isDedicatedServer()) {
+        if (FMLEnvironment.getDist().isDedicatedServer() || !connectedToServer || server != null && !server.isDedicatedServer()) {
             // dedicated servers, disconnected clients, and integrated servers reload common and server configs too
             for (final var value : commonConfigs.values()) {
                 value.loadLocalConfigFile(true);
@@ -184,7 +184,7 @@ public class ConfigManager {
         NeoForge.EVENT_BUS.addListener(ConfigManager::onPlayerLogout);
         NeoForge.EVENT_BUS.addListener(ConfigManager::onServerAboutToStart);
         NeoForge.EVENT_BUS.addListener(ConfigManager::onServerStopped);
-        if (FMLEnvironment.dist.isClient()) {
+        if (FMLEnvironment.getDist().isClient()) {
             NeoForge.EVENT_BUS.addListener(ConfigManager::onLoggingIn);
             NeoForge.EVENT_BUS.addListener(ConfigManager::onLoggingOut);
         }
@@ -214,9 +214,9 @@ public class ConfigManager {
     }
     
     private static void onPlayerLogin(PlayerEvent.PlayerLoggedInEvent e) {
-        var server = e.getEntity().getServer();
+        var server = e.getEntity().level().getServer();
         assert server != null;
-        if (!server.isDedicatedServer() && server.isSingleplayerOwner(e.getEntity().getGameProfile())) return;
+        if (!server.isDedicatedServer() && server.isSingleplayerOwner(e.getEntity().nameAndId())) return;
         var player = (ServerPlayer) e.getEntity();
         players.add(player);
         sendConfigToPlayer(player, true);

@@ -11,12 +11,10 @@ import biggerreactorsrework.util.FluidTransitionTank;
 import net.minecraft.core.component.DataComponentPatch;
 import net.minecraft.gametest.framework.*;
 import net.minecraft.world.level.material.Fluids;
-import net.neoforged.neoforge.fluids.capability.IFluidHandler.FluidAction;
+import biggerreactorsrework.core.transfer.FluidTanks.FluidAction;
 import net.neoforged.neoforge.gametest.*;
 
 /** Modified 2026-10-26: real tanks and simulation, including transfer order and retained heat. */
-@GameTestHolder(BiggerReactors.modid)
-@PrefixGameTestTemplate(false)
 public final class OutputBackpressureGameTests {
     private static TimeSlicedReactorSimulation reactor() {
         var d=OperationGameTests.description(3);

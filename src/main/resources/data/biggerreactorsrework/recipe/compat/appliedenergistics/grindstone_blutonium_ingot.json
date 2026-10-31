@@ -7,9 +7,7 @@
         }
     ],
     "ingredients": {
-        "middle": {
-            "item": "biggerreactorsrework:blutonium_ingot"
-        }
+        "middle": "biggerreactorsrework:blutonium_ingot"
     },
     "mode": "inscribe",
     "result": {

@@ -14,8 +14,6 @@ import net.minecraft.world.level.material.Fluids;
 import net.neoforged.neoforge.gametest.*;
 import static biggerreactorsrework.core.multiblock.IAssemblyStateBlock.ASSEMBLED;
 
-@GameTestHolder(BiggerReactors.modid)
-@PrefixGameTestTemplate(false)
 public final class HeatExchangerCoolingGameTests {
     /** Added 2026-10-26: sparse stocks and abrupt drains must still cover the full pipe path. */
     @GameTest(template="empty_7x7x7")
@@ -24,13 +22,13 @@ public final class HeatExchangerCoolingGameTests {
         tank.fill(Fluids.WATER,DataComponentPatch.EMPTY,2,false);tank.absorbRF(-secondaryHeat(1));
         var half=biggerreactorsrework.core.fluids.FluidRenderSnapshot.capture(tank);
         h.assertTrue(half.inputFill()==.5 && half.outputFill()==.5,"small stocks disappeared during render quantization");
-        tank.drain(1,net.neoforged.neoforge.fluids.capability.IFluidHandler.FluidAction.EXECUTE);
+        tank.drain(1,biggerreactorsrework.core.transfer.FluidTanks.FluidAction.EXECUTE);
         var cold=biggerreactorsrework.core.fluids.FluidRenderSnapshot.capture(tank);
         h.assertTrue(cold.inputFill()==1 && cold.outputFill()==0,"remaining input did not occupy space freed by output");
         tank.absorbRF(-secondaryHeat(1));
         var hot=biggerreactorsrework.core.fluids.FluidRenderSnapshot.capture(tank);
         h.assertTrue(hot.inputFill()==0 && hot.outputFill()==1,"remaining output did not fill the circuit");
-        tank.drain(1,net.neoforged.neoforge.fluids.capability.IFluidHandler.FluidAction.EXECUTE);
+        tank.drain(1,biggerreactorsrework.core.transfer.FluidTanks.FluidAction.EXECUTE);
         var empty=biggerreactorsrework.core.fluids.FluidRenderSnapshot.capture(tank);
         h.assertTrue(empty.inputFill()==0 && empty.outputFill()==0,"empty circuit retained phantom fluid");
         for(double[] stocks:new double[][]{{.8,.2},{.08,.2},{0,.2},{.08,0},{.000001,.000002},{1,1}})
@@ -82,7 +80,7 @@ public final class HeatExchangerCoolingGameTests {
         var pos=new BlockPos(1,1,0);
         h.startSequence().thenWaitUntil(()->h.assertTrue(h.getBlockState(pos).getValue(ASSEMBLED),"exchanger not assembled"))
             .thenExecute(()->{
-                var c=((HeatExchangerBaseTile)h.getBlockEntity(pos)).controller();
+                var c=((HeatExchangerBaseTile)GameTestSupport.be(h,pos)).controller();
                 c.condenserHeatBody.setTemperature(900);c.evaporatorHeatBody.setTemperature(450);c.airHeatBody.setTemperature(500);
                 var saved=c.write();c.read(saved);c.onReassembled();
                 h.assertTrue(c.condenserHeatBody.temperature()==900,"reassembly discarded primary heat");
@@ -93,7 +91,7 @@ public final class HeatExchangerCoolingGameTests {
                 h.assertTrue(channel.coolantPathLength==c.evaporatorChannels.size(),"render bar does not cover the whole circuit");
                 var indices=new java.util.HashSet<Integer>();for(var part:c.evaporatorChannels)indices.add(part.coolantPathIndex);
                 h.assertTrue(indices.size()==c.evaporatorChannels.size(),"two channels share the same position in the render bar");
-                var inlet=(biggerreactorsrework.multiblocks.heatexchanger.tiles.HeatExchangerFluidPortTile)h.getBlockEntity(new BlockPos(0,1,2));
+                var inlet=(biggerreactorsrework.multiblocks.heatexchanger.tiles.HeatExchangerFluidPortTile)GameTestSupport.be(h,new BlockPos(0,1,2));
                 var old=new java.util.HashMap<BlockPos,Integer>();for(var part:c.evaporatorChannels)old.put(part.getBlockPos(),part.coolantPathIndex);
                 c.setInletPort(inlet,!inlet.isInlet());
                 for(var part:c.evaporatorChannels)h.assertTrue(part.coolantPathIndex==c.evaporatorChannels.size()-1-old.get(part.getBlockPos()),"changing inlet did not reverse the measuring bar");

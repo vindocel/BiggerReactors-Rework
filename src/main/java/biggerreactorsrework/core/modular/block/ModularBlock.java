@@ -2,11 +2,10 @@ package biggerreactorsrework.core.modular.block;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
-import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.ItemInteractionResult;
+
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -28,7 +27,6 @@ import java.util.Collections;
 import java.util.List;
 
 @ParametersAreNonnullByDefault
-@MethodsReturnNonnullByDefault
 @SuppressWarnings("unused")
 public class ModularBlock extends Block implements IModularBlock {
     
@@ -70,7 +68,7 @@ public class ModularBlock extends Block implements IModularBlock {
     }
     
     public ModularBlock(Properties properties) {
-        super(properties);
+        super(biggerreactorsrework.core.registry.RegistryIds.block(properties));
         BlockState state = buildDefaultState(defaultBlockState());
         for (var module : moduleList) {
             state = module.buildDefaultState(state);
@@ -94,9 +92,9 @@ public class ModularBlock extends Block implements IModularBlock {
     protected void buildStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
     }
     
-    @SuppressWarnings("deprecation")
     @Override
-    public final void neighborChanged(BlockState state, Level worldIn, BlockPos pos, Block blockIn, BlockPos fromPos, boolean isMoving) {
+    protected final void neighborChanged(BlockState state, Level worldIn, BlockPos pos, Block blockIn, @Nullable net.minecraft.world.level.redstone.Orientation orientation, boolean isMoving) {
+        BlockPos fromPos = pos;
         onNeighborChange(state, worldIn, pos, blockIn, fromPos, isMoving);
         for (var module : moduleList) {
             module.onNeighborChange(state, worldIn, pos, blockIn, fromPos, isMoving);
@@ -119,18 +117,12 @@ public class ModularBlock extends Block implements IModularBlock {
     
     /**
      * Single entry point for block interaction, called once per hand like the pre-1.20.5 {@code use}.
-     * {@code PASS} maps to {@link ItemInteractionResult#SKIP_DEFAULT_BLOCK_INTERACTION} so the held item still gets
+     * {@code PASS} lets the held item still get
      * its normal use and {@code useWithoutItem} does not dispatch the modules a second time.
      */
     @Override
-    protected final ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult) {
-        return switch (dispatchUse(state, level, pos, player, hand, hitResult)) {
-            case SUCCESS, SUCCESS_NO_ITEM_USED -> ItemInteractionResult.sidedSuccess(level.isClientSide);
-            case CONSUME -> ItemInteractionResult.CONSUME;
-            case CONSUME_PARTIAL -> ItemInteractionResult.CONSUME_PARTIAL;
-            case FAIL -> ItemInteractionResult.FAIL;
-            case PASS -> ItemInteractionResult.SKIP_DEFAULT_BLOCK_INTERACTION;
-        };
+    protected final InteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult) {
+        return dispatchUse(state, level, pos, player, hand, hitResult);
     }
 
     private InteractionResult dispatchUse(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult) {

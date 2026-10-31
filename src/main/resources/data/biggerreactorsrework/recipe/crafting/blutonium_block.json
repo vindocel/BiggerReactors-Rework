@@ -6,9 +6,7 @@
     "III"
   ],
   "key": {
-    "I": {
-      "item": "biggerreactorsrework:blutonium_ingot"
-    }
+    "I": "biggerreactorsrework:blutonium_ingot"
   },
   "result": {
     "id": "biggerreactorsrework:blutonium_block"

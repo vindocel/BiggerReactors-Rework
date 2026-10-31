@@ -1,0 +1,7 @@
+{
+  "parent": "biggerreactorsrework:block/assembled_port",
+  "textures": {
+    "front": "biggerreactorsrework:block/turbine/redstone_port/lit",
+    "side": "biggerreactorsrework:block/turbine/casing/disassembled"
+  }
+}

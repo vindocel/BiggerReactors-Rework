@@ -2,6 +2,5 @@
   "parent": "block/cube_all",
   "textures": {
     "all" : "biggerreactorsrework:block/reactor/glass/connected_none"
-  },
-  "render_type": "cutout"
+  }
 }

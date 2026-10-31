@@ -1,6 +1,5 @@
 package biggerreactorsrework.multiblocks.reactor.blocks;
 
-import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -23,11 +22,10 @@ import javax.annotation.ParametersAreNonnullByDefault;
 import static biggerreactorsrework.multiblocks.reactor.blocks.ReactorAccessPort.PortDirection.*;
 
 @ParametersAreNonnullByDefault
-@MethodsReturnNonnullByDefault
 public class ReactorCoolantPort extends ReactorBaseBlock implements IAssemblyStateBlock, IFaceDirectionBlock {
 
     @RegisterBlock(name = "reactor_coolant_port", tileEntityClass = ReactorCoolantPortTile.class)
-    public static final ReactorCoolantPort INSTANCE = new ReactorCoolantPort();
+    public static final ReactorCoolantPort INSTANCE = biggerreactorsrework.core.registry.RegistryIds.named("reactor_coolant_port", () -> new ReactorCoolantPort());
     
     public ReactorCoolantPort() {
         super();

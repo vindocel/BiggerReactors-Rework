@@ -209,7 +209,7 @@ public final class MultiblockTileModule<
     }
     
     public void attachToNeighborsLater() {
-        if (Objects.requireNonNull(iface.getLevel()).isClientSide) {
+        if (Objects.requireNonNull(iface.getLevel()).isClientSide()) {
             return;
         }
         Queues.serverThread.enqueueUntracked(this::attachToNeighborsNow);
@@ -218,7 +218,7 @@ public final class MultiblockTileModule<
     public void attachToNeighborsNow() {
         final var level = iface.getLevel();
         assert level != null;
-        if (level.isClientSide) {
+        if (level.isClientSide()) {
             return;
         }
         if (iface.isRemoved()) {

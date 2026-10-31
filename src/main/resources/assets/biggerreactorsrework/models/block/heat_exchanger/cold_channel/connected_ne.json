@@ -1,6 +1,5 @@
 {
-  "credit": "Made with Blockbench",
-  "render_type": "cutout",
+  "credit": "Made with Blockbench", 
   "textures": {
     "1": "biggerreactorsrework:block/heat_exchanger/cold_channel/straight",
     "2": "biggerreactorsrework:block/heat_exchanger/cold_channel/90",

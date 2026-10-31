@@ -8,15 +8,12 @@ import biggerreactorsrework.client.SelectorColors;
 import biggerreactorsrework.core.client.gui.screens.ModScreen;
 import biggerreactorsrework.multiblocks.battery.containers.BatteryEnergyPortContainer;
 import biggerreactorsrework.multiblocks.battery.state.BatteryEnergyPortState;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 
 import javax.annotation.Nonnull;
 
-@OnlyIn(Dist.CLIENT)
 public class BatteryEnergyPortScreen extends ModScreen<BatteryEnergyPortContainer> {
     
     private static final int WIDTH = 160;
@@ -43,14 +40,14 @@ public class BatteryEnergyPortScreen extends ModScreen<BatteryEnergyPortContaine
     }
     
     @Override
-    public void render(@Nonnull GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
-        super.render(graphics, mouseX, mouseY, partialTicks);
+    public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTicks) {
+        super.extractRenderState(graphics, mouseX, mouseY, partialTicks);
         String direction = portState.direction ? "input" : "output";
         GuiArt.scrollingText(graphics, this.getFont(), Component.translatable("screen.biggerreactorsrework.battery_energy_port.direction_toggle." + direction).getString(),
-                this.getGuiLeft() + 42, this.getGuiTop() + 22, WIDTH - 42 - 8, GuiTheme.textColor());
+                this.getLeftPos() + 42, this.getTopPos() + 22, WIDTH - 42 - 8, GuiTheme.textColor());
         String connection = portState.connected ? "connected" : "disconnected";
         GuiArt.scrollingText(graphics, this.getFont(), Component.translatable("screen.biggerreactorsrework.battery_energy_port." + connection).getString(),
-                this.getGuiLeft() + 8, this.getGuiTop() + 38, WIDTH - 16, GuiTheme.textColor());
+                this.getLeftPos() + 8, this.getTopPos() + 38, WIDTH - 16, GuiTheme.textColor());
     }
     
     @Override

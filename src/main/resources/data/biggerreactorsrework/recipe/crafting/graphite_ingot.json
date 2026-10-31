@@ -1,9 +1,7 @@
 {
   "type": "minecraft:crafting_shapeless",
   "ingredients": [
-    {
-      "item": "biggerreactorsrework:graphite_block"
-    }
+    "biggerreactorsrework:graphite_block"
   ],
   "result": {
     "id": "biggerreactorsrework:graphite_ingot",

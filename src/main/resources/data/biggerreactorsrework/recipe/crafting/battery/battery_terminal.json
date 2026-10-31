@@ -7,18 +7,10 @@
     "CPC"
   ],
   "key": {
-    "C": {
-      "item": "biggerreactorsrework:battery_casing"
-    },
-    "P": {
-      "item": "minecraft:glass_pane"
-    },
-    "R": {
-      "item": "minecraft:comparator"
-    },
-    "D": {
-      "item": "biggerreactorsrework:ludicrite_ingot"
-    }
+    "C": "biggerreactorsrework:battery_casing",
+    "P": "minecraft:glass_pane",
+    "R": "minecraft:comparator",
+    "D": "biggerreactorsrework:ludicrite_ingot"
   },
   "result": {
     "id": "biggerreactorsrework:battery_terminal"

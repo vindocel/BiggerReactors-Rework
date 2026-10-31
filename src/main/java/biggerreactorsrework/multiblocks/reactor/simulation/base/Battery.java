@@ -53,6 +53,11 @@ public class Battery extends HeatBody implements IReactorSimulation.IBattery, IS
     }
     
     @Override
+    public void restoreStored(long stored) {
+        this.stored = stored;
+    }
+
+    @Override
     public long stored() {
         return stored;
     }

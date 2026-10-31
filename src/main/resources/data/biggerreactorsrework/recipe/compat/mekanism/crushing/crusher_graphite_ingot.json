@@ -2,6 +2,9 @@
     "type": "mekanism:crushing",
     "neoforge:conditions": [
         {
+            "type": "neoforge:never"
+        },
+        {
             "modid": "mekanism",
             "type": "neoforge:mod_loaded"
         }

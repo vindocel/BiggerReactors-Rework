@@ -8,6 +8,5 @@
     "east": "biggerreactorsrework:block/reactor/fuel_rod/side",
     "west": "biggerreactorsrework:block/reactor/fuel_rod/side",
     "particle": "biggerreactorsrework:block/reactor/fuel_rod/end"
-  },
-  "render_type": "cutout"
+  }
 }

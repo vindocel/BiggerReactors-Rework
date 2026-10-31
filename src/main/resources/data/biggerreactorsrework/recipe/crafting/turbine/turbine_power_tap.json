@@ -6,12 +6,8 @@
     "CRC"
   ],
   "key": {
-    "C" : {
-      "item": "biggerreactorsrework:turbine_casing"
-    },
-    "R": {
-      "item": "minecraft:redstone"
-    }
+    "C": "biggerreactorsrework:turbine_casing",
+    "R": "minecraft:redstone"
   },
   "result": {
     "id": "biggerreactorsrework:turbine_power_tap"

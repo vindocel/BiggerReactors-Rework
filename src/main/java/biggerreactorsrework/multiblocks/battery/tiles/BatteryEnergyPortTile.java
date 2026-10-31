@@ -12,7 +12,6 @@ import biggerreactorsrework.multiblocks.battery.blocks.BatteryEnergyPort;
 import biggerreactorsrework.multiblocks.battery.blocks.BatteryEnergyPort.PortDirection;
 import biggerreactorsrework.multiblocks.battery.containers.BatteryEnergyPortContainer;
 import biggerreactorsrework.multiblocks.battery.state.BatteryEnergyPortState;
-import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
@@ -30,7 +29,6 @@ import javax.annotation.ParametersAreNonnullByDefault;
 import static biggerreactorsrework.multiblocks.battery.blocks.BatteryEnergyPort.PortDirection.*;
 
 @ParametersAreNonnullByDefault
-@MethodsReturnNonnullByDefault
 public class BatteryEnergyPortTile extends BatteryBaseTile implements IEnergyTile, IEnergyHandler, IEventMultiblock.AssemblyStateTransition, MenuProvider, IHasUpdatableState<BatteryEnergyPortState> {
 
     @RegisterTile("battery_energy_port")
@@ -71,6 +69,18 @@ public class BatteryEnergyPortTile extends BatteryBaseTile implements IEnergyTil
     @Override
     public IEnergyHandler energyHandler(Direction direction) {
         return this;
+    }
+
+    @Override
+    public Object transferSnapshot() {
+        return nullableController() == null ? null : controller().transferState();
+    }
+
+    @Override
+    public void restoreTransferSnapshot(Object snapshot) {
+        if (nullableController() != null && snapshot instanceof long[] state) {
+            controller().restoreTransferState(state);
+        }
     }
 
     @Override
@@ -138,7 +148,7 @@ public class BatteryEnergyPortTile extends BatteryBaseTile implements IEnergyTil
         super.readNBT(compound);
         if (compound.contains("direction")) {
             // Modified 2026-10-30: tolerate malformed direction metadata.
-            direction = biggerreactorsrework.core.util.SavedValues.enumValue(PortDirection.class, compound.getString("direction"), PortDirection.INLET);
+            direction = biggerreactorsrework.core.util.SavedValues.enumValue(PortDirection.class, compound.getStringOr("direction", ""), PortDirection.INLET);
         }
     }
 

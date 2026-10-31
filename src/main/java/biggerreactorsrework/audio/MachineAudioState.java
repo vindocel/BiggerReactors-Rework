@@ -20,12 +20,12 @@ public record MachineAudioState(int kind, BlockPos min, BlockPos max, boolean ru
 
     public static MachineAudioState load(CompoundTag tag) {
         if (!tag.contains("kind") || !tag.contains("min") || !tag.contains("max")) return EMPTY;
-        int kind = tag.getInt("kind");
-        double rpm = tag.getDouble("rpm");
-        var min = BlockPos.of(tag.getLong("min"));
-        var max = BlockPos.of(tag.getLong("max"));
+        int kind = tag.getIntOr("kind", 0);
+        double rpm = tag.getDoubleOr("rpm", 0D);
+        var min = BlockPos.of(tag.getLongOr("min", 0L));
+        var max = BlockPos.of(tag.getLongOr("max", 0L));
         if (kind < REACTOR || kind > TURBINE || !Double.isFinite(rpm) || rpm < 0
                 || min.getX() > max.getX() || min.getY() > max.getY() || min.getZ() > max.getZ()) return EMPTY;
-        return new MachineAudioState(kind, min, max, tag.getBoolean("running"), rpm);
+        return new MachineAudioState(kind, min, max, tag.getBooleanOr("running", false), rpm);
     }
 }

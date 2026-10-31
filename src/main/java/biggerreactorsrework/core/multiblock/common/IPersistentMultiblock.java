@@ -57,8 +57,8 @@ public interface IPersistentMultiblock<
         private static boolean storedData(Object value) {
             var keys=java.util.Set.of("fuel","waste","liquidAmount","gasAmount","inAmount","outAmount","storedPower");
             if(value instanceof CompoundTag tag) {
-                for(String key:tag.getAllKeys()) {
-                    if(keys.contains(key) && tag.get(key) instanceof net.minecraft.nbt.NumericTag n && n.getAsDouble()>0)return true;
+                for(String key:tag.keySet()) {
+                    if(keys.contains(key) && tag.get(key) instanceof net.minecraft.nbt.NumericTag n && n.asDouble().orElse(0D)>0)return true;
                     if(key.equals("Items") && tag.get(key) instanceof net.minecraft.nbt.ListTag list && !list.isEmpty())return true;
                     if(key.equals("simulationData") && tag.get(key) instanceof net.minecraft.nbt.ByteArrayTag array) {
                         try {if(storedData(new biggerreactorsrework.core.serialization.DataCompound(array.getAsByteArray()).toROBNMap()))return true;}

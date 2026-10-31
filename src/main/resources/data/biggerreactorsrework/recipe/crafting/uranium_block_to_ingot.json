@@ -1,9 +1,7 @@
 {
   "type": "minecraft:crafting_shapeless",
   "ingredients": [
-    {
-      "item": "biggerreactorsrework:uranium_block"
-    }
+    "biggerreactorsrework:uranium_block"
   ],
   "result": {
     "id": "biggerreactorsrework:uranium_ingot",

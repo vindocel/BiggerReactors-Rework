@@ -14,7 +14,6 @@ import biggerreactorsrework.core.multiblock.validated.IValidatedMultiblock;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.SimpleMenuProvider;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
@@ -22,7 +21,6 @@ import net.minecraft.world.level.block.state.BlockState;
 import javax.annotation.ParametersAreNonnullByDefault;
 
 @ParametersAreNonnullByDefault
-@MethodsReturnNonnullByDefault
 public class BatteryBaseTile extends ModularTile implements IMultiblockTile<BatteryBaseTile, BatteryBaseBlock, BatteryMultiblockController>,
         IRectangularMultiblockTile<BatteryBaseTile, BatteryBaseBlock, BatteryMultiblockController>,
         IPersistentMultiblockTile<BatteryBaseTile, BatteryBaseBlock, BatteryMultiblockController>,

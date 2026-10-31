@@ -9,7 +9,7 @@ import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.fml.ModLoadingContext;
 import net.neoforged.neoforge.network.PacketDistributor;
@@ -39,7 +39,7 @@ public class SimpleChannel {
     private static void register(final RegisterPayloadHandlersEvent event) {
         final var registrar = event.registrar(PROTOCOL_VERSION);
         for (var channel : channelsToRegister) {
-            registrar.playBidirectional(channel.type, channel.codec, channel::handle);
+            registrar.playBidirectional(channel.type, channel.codec, channel::handle, channel::handle);
         }
     }
 
@@ -55,7 +55,7 @@ public class SimpleChannel {
     @Nullable
     private final BiConsumer<DataCompound, IPayloadContext> serverCallback;
 
-    public SimpleChannel(ResourceLocation id, @Nullable BiConsumer<DataCompound, IPayloadContext> clientCallback, @Nullable BiConsumer<DataCompound, IPayloadContext> serverCallback) {
+    public SimpleChannel(Identifier id, @Nullable BiConsumer<DataCompound, IPayloadContext> clientCallback, @Nullable BiConsumer<DataCompound, IPayloadContext> serverCallback) {
         this.type = new CustomPacketPayload.Type<>(id);
         this.codec = StreamCodec.of(
                 (buf, packet) -> buf.writeByteArray(packet.compound.toROBN().toByteArray()),
@@ -75,7 +75,7 @@ public class SimpleChannel {
     }
 
     public void sendToServer(DataCompound compound) {
-        PacketDistributor.sendToServer(new CompoundPacket(type, compound));
+        net.neoforged.neoforge.client.network.ClientPacketDistributor.sendToServer(new CompoundPacket(type, compound));
     }
 
     public void sendToPlayer(ServerPlayer serverPlayer, DataCompound compound) {

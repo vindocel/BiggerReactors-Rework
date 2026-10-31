@@ -1,6 +1,6 @@
 package biggerreactorsrework.client.guide;
 
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 
 /**
  * One block of a guide chapter, laid out top to bottom in the scrolling page. Coordinates are absolute; the
@@ -10,7 +10,7 @@ interface GuideElement {
     /** Height for the given page width. */
     int height(GuideScreen screen, int width);
 
-    void render(GuideScreen screen, GuiGraphics g, int x, int y, int width, int mouseX, int mouseY);
+    void render(GuideScreen screen, GuiGraphicsExtractor g, int x, int y, int width, int mouseX, int mouseY);
 
     /** Before any page of the frame is drawn (x, y: its top-left corner), for hover state shared between pages. */
     default void prepare(GuideScreen screen, int x, int y, int width, int mouseX, int mouseY) {

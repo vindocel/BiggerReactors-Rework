@@ -1,14 +1,12 @@
 package biggerreactorsrework.core.client.gui.elements;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.inventory.tooltip.DefaultTooltipPositioner;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 import biggerreactorsrework.core.client.gui.screens.ModScreen;
 import biggerreactorsrework.core.client.gui.api.ITooltip;
 
@@ -24,7 +22,6 @@ import java.util.stream.Collectors;
  *
  * @param <T> Elements must be parented to a screen implementing {@link net.minecraft.world.inventory.AbstractContainerMenu AbstractContainerMenu}.
  */
-@OnlyIn(Dist.CLIENT)
 public class TooltipElement<T extends AbstractContainerMenu> extends AbstractElement<T> implements ITooltip {
 
     /**
@@ -61,11 +58,11 @@ public class TooltipElement<T extends AbstractContainerMenu> extends AbstractEle
      * @param mouseY    The y position of the mouse.
      */
     @Override
-    public void renderTooltip(@Nonnull GuiGraphics graphics, int mouseX, int mouseY) {
+    public void renderTooltip(@Nonnull GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
         // Check conditions, and render tooltip.
         if (this.tooltipEnable && this.tooltip != null && this.isMouseOver(mouseX, mouseY)) {
             final List<FormattedCharSequence> list = Arrays.stream(tooltip.getString().split("\\n")).map(Component::literal).map(MutableComponent::getVisualOrderText).collect(Collectors.toList());
-            graphics.renderTooltip(this.parent.getFont(), list, mouseX, mouseY);
+            graphics.setTooltipForNextFrame(this.parent.getFont(), list, mouseX, mouseY);
         }
     }
 
@@ -87,12 +84,10 @@ public class TooltipElement<T extends AbstractContainerMenu> extends AbstractEle
     
     boolean focused = false;
     
-    @Override
     public void setFocused(boolean shouldFocus) {
         this.focused = shouldFocus;
     }
     
-    @Override
     public boolean isFocused() {
         return focused;
     }

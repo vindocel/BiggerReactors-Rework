@@ -1,28 +1,26 @@
 package biggerreactorsrework.core.fluids;
 
-import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.component.DataComponentPatch;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
 import net.neoforged.neoforge.fluids.FluidStack;
-import net.neoforged.neoforge.fluids.capability.IFluidHandler;
+import biggerreactorsrework.core.transfer.FluidTanks;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 
 @ParametersAreNonnullByDefault
-@MethodsReturnNonnullByDefault
 public class FluidHandlerWrapper implements IFluidTankHandler {
 
-    public static IFluidTankHandler wrap(IFluidHandler handler) {
+    public static IFluidTankHandler wrap(FluidTanks handler) {
         if (handler instanceof IFluidTankHandler) {
             return (IFluidTankHandler) handler;
         }
         return new FluidHandlerWrapper(handler);
     }
 
-    final IFluidHandler handler;
+    final FluidTanks handler;
 
-    private FluidHandlerWrapper(IFluidHandler handler) {
+    private FluidHandlerWrapper(FluidTanks handler) {
         this.handler = handler;
     }
 

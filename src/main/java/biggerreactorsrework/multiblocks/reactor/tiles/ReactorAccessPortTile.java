@@ -5,7 +5,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Inventory;
@@ -17,7 +17,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.capabilities.Capabilities;
-import net.neoforged.neoforge.items.IItemHandler;
+import biggerreactorsrework.core.transfer.ItemSlots;
 import biggerreactorsrework.Config;
 import biggerreactorsrework.blocks.materials.MaterialBlock;
 import biggerreactorsrework.items.ingots.BlutoniumIngot;
@@ -42,19 +42,19 @@ import javax.annotation.Nullable;
 import static biggerreactorsrework.multiblocks.reactor.blocks.ReactorAccessPort.PortDirection.*;
 
 @NonnullDefault
-public class ReactorAccessPortTile extends ReactorBaseTile implements IItemHandler, MenuProvider, IHasUpdatableState<ReactorAccessPortState>, IEventMultiblock.AssemblyStateTransition {
+public class ReactorAccessPortTile extends ReactorBaseTile implements ItemSlots, biggerreactorsrework.core.transfer.TransferSnapshots, MenuProvider, IHasUpdatableState<ReactorAccessPortState>, IEventMultiblock.AssemblyStateTransition {
     // Modified 2026-10-30: refresh cached neighbors when their capability is invalidated.
-    private final biggerreactorsrework.core.capability.NeighborCapability<IItemHandler> outputCapability =
-            new biggerreactorsrework.core.capability.NeighborCapability<>(this, Capabilities.ItemHandler.BLOCK);
+    private final biggerreactorsrework.core.capability.NeighborCapability<ItemSlots, ?> outputCapability =
+            biggerreactorsrework.core.capability.NeighborCapability.items(this);
     
     @RegisterTile("reactor_access_port")
     public static final BlockEntityType.BlockEntitySupplier<ReactorAccessPortTile> SUPPLIER = new RegisterTile.Producer<>(ReactorAccessPortTile::new);
     
     @RegisterCapability
-    private static final CapabilityRegistration ITEM_HANDLER_CAP_REGISTRATION = CapabilityRegistration.tileCap(Capabilities.ItemHandler.BLOCK, ReactorAccessPortTile.class);
+    private static final CapabilityRegistration ITEM_HANDLER_CAP_REGISTRATION = CapabilityRegistration.tileItems(ReactorAccessPortTile.class);
     
-    private static final TagKey<Item> uraniumIngotTag = TagKey.create(BuiltInRegistries.ITEM.key(), ResourceLocation.parse("c:ingots/uranium"));
-    private static final TagKey<Item> uraniumBlockTag = TagKey.create(BuiltInRegistries.ITEM.key(), ResourceLocation.parse("c:storage_blocks/uranium"));
+    private static final TagKey<Item> uraniumIngotTag = TagKey.create(BuiltInRegistries.ITEM.key(), Identifier.parse("c:ingots/uranium"));
+    private static final TagKey<Item> uraniumBlockTag = TagKey.create(BuiltInRegistries.ITEM.key(), Identifier.parse("c:storage_blocks/uranium"));
     
     public static final int FUEL_SLOT = 0;
     public static final int WASTE_SLOT = 1;
@@ -79,10 +79,10 @@ public class ReactorAccessPortTile extends ReactorBaseTile implements IItemHandl
     @Override
     protected void readNBT(CompoundTag compound) {
         if (compound.contains("direction")) {
-            direction = biggerreactorsrework.core.util.SavedValues.enumValue(ReactorAccessPort.PortDirection.class, compound.getString("direction"), ReactorAccessPort.PortDirection.INLET);
+            direction = biggerreactorsrework.core.util.SavedValues.enumValue(ReactorAccessPort.PortDirection.class, compound.getStringOr("direction", ""), ReactorAccessPort.PortDirection.INLET);
         }
         if (compound.contains("fuelMode")) {
-            fuelMode = compound.getBoolean("fuelMode");
+            fuelMode = compound.getBooleanOr("fuelMode", false);
         }
     }
     
@@ -112,6 +112,20 @@ public class ReactorAccessPortTile extends ReactorBaseTile implements IItemHandl
         neighborChanged();
     }
     
+    @Override
+    public Object transferSnapshot() {
+        var reactorSim = nullableController() == null ? null : controller().simulation();
+        return reactorSim == null ? null : new long[]{reactorSim.fuelTank().fuel(), reactorSim.fuelTank().waste()};
+    }
+
+    @Override
+    public void restoreTransferSnapshot(Object snapshot) {
+        var reactorSim = nullableController() == null ? null : controller().simulation();
+        if (reactorSim != null && snapshot instanceof long[] stock) {
+            reactorSim.fuelTank().restoreStored(stock[0], stock[1]);
+        }
+    }
+
     @Override
     public int getSlots() {
         return 3;
@@ -262,7 +276,7 @@ public class ReactorAccessPortTile extends ReactorBaseTile implements IItemHandl
     Direction itemOutputDirection;
     boolean connected;
     @Nullable
-    IItemHandler itemOutput = null;
+    ItemSlots itemOutput = null;
     public final ReactorAccessPortState reactorAccessPortState = new ReactorAccessPortState(this);
     
     @SuppressWarnings("DuplicatedCode")

@@ -1,10 +1,56 @@
 {
   "variants": {
-    "portdirection=inlet": {
+    "portdirection=inlet,assembled=false": {
       "model": "biggerreactorsrework:block/reactor/access_port/inlet"
     },
-    "portdirection=outlet": {
+    "portdirection=inlet,assembled=true,facing=north": {
+      "model": "biggerreactorsrework:block/reactor/access_port/inlet_assembled"
+    },
+    "portdirection=inlet,assembled=true,facing=south": {
+      "model": "biggerreactorsrework:block/reactor/access_port/inlet_assembled",
+      "y": 180
+    },
+    "portdirection=inlet,assembled=true,facing=east": {
+      "model": "biggerreactorsrework:block/reactor/access_port/inlet_assembled",
+      "y": 90
+    },
+    "portdirection=inlet,assembled=true,facing=west": {
+      "model": "biggerreactorsrework:block/reactor/access_port/inlet_assembled",
+      "y": 270
+    },
+    "portdirection=inlet,assembled=true,facing=up": {
+      "model": "biggerreactorsrework:block/reactor/access_port/inlet_assembled",
+      "x": 270
+    },
+    "portdirection=inlet,assembled=true,facing=down": {
+      "model": "biggerreactorsrework:block/reactor/access_port/inlet_assembled",
+      "x": 90
+    },
+    "portdirection=outlet,assembled=false": {
       "model": "biggerreactorsrework:block/reactor/access_port/outlet"
+    },
+    "portdirection=outlet,assembled=true,facing=north": {
+      "model": "biggerreactorsrework:block/reactor/access_port/outlet_assembled"
+    },
+    "portdirection=outlet,assembled=true,facing=south": {
+      "model": "biggerreactorsrework:block/reactor/access_port/outlet_assembled",
+      "y": 180
+    },
+    "portdirection=outlet,assembled=true,facing=east": {
+      "model": "biggerreactorsrework:block/reactor/access_port/outlet_assembled",
+      "y": 90
+    },
+    "portdirection=outlet,assembled=true,facing=west": {
+      "model": "biggerreactorsrework:block/reactor/access_port/outlet_assembled",
+      "y": 270
+    },
+    "portdirection=outlet,assembled=true,facing=up": {
+      "model": "biggerreactorsrework:block/reactor/access_port/outlet_assembled",
+      "x": 270
+    },
+    "portdirection=outlet,assembled=true,facing=down": {
+      "model": "biggerreactorsrework:block/reactor/access_port/outlet_assembled",
+      "x": 90
     }
   }
 }

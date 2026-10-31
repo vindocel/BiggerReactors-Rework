@@ -2,6 +2,9 @@
     "type": "thermal:pulverizer",
     "neoforge:conditions": [
         {
+            "type": "neoforge:never"
+        },
+        {
             "modid": "thermal_expansion",
             "type": "neoforge:mod_loaded"
         }

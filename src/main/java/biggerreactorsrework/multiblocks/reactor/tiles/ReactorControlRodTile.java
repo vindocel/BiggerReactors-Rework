@@ -1,7 +1,6 @@
 package biggerreactorsrework.multiblocks.reactor.tiles;
 
 import com.mojang.datafixers.util.Pair;
-import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -20,7 +19,6 @@ import biggerreactorsrework.core.registry.RegisterTile;
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 
-@MethodsReturnNonnullByDefault
 @ParametersAreNonnullByDefault
 public class ReactorControlRodTile extends ReactorBaseTile implements MenuProvider, IHasUpdatableState<ReactorControlRodState> {
     
@@ -130,10 +128,10 @@ public class ReactorControlRodTile extends ReactorBaseTile implements MenuProvid
     protected void readNBT(CompoundTag compound) {
         super.readNBT(compound);
         if (compound.contains("insertion")) {
-            insertion = Math.clamp(biggerreactorsrework.core.util.SavedValues.nonNegative(compound.getDouble("insertion"), 0), 0, 100);
+            insertion = Math.clamp(biggerreactorsrework.core.util.SavedValues.nonNegative(compound.getDoubleOr("insertion", 0D), 0), 0, 100);
         }
         if (compound.contains("name")) {
-            name = compound.getString("name");
+            name = compound.getStringOr("name", "");
             if (name.length() > 128) name = name.substring(0, 128);
         }
     }

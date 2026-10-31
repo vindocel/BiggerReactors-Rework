@@ -10,10 +10,9 @@
           "name": "biggerreactorsrework:turbine_glass"
         }
       ],
-      "conditions": [
-        {
-          "condition": "minecraft:survives_explosion"
-        }]
+      "condition": {
+        "type": "minecraft:survives_explosion"
+      }
     }
   ]
 }

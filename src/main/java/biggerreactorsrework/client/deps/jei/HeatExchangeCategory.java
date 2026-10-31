@@ -13,7 +13,7 @@ import mezz.jei.api.recipe.IFocusGroup;
 import mezz.jei.api.recipe.RecipeIngredientRole;
 import mezz.jei.api.recipe.RecipeType;
 import mezz.jei.api.recipe.category.IRecipeCategory;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
 
@@ -62,7 +62,7 @@ public final class HeatExchangeCategory implements IRecipeCategory<RecipeViewerD
     }
 
     @Override
-    public void draw(RecipeViewerData.HeatExchange recipe, IRecipeSlotsView slots, GuiGraphics g, double mouseX, double mouseY) {
+    public void draw(RecipeViewerData.HeatExchange recipe, IRecipeSlotsView slots, GuiGraphicsExtractor g, double mouseX, double mouseY) {
         recipe.card().draw(g);
     }
 

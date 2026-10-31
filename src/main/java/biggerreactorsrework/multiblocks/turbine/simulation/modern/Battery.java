@@ -28,6 +28,11 @@ public class Battery implements ITurbineBattery {
     }
     
     @Override
+    public void restoreStored(long stored) {
+        this.stored = stored;
+    }
+
+    @Override
     public long stored() {
         return stored;
     }
@@ -52,7 +57,7 @@ public class Battery implements ITurbineBattery {
     
     @Override
     public void deserializeNBT(CompoundTag nbt) {
-        stored = Math.max(0, nbt.getLong("storedPower"));
+        stored = Math.max(0, nbt.getLongOr("storedPower", 0L));
         if (capacityConfigured) stored = Math.min(stored, capacity);
     }
 }

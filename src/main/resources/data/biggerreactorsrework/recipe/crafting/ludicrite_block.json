@@ -6,9 +6,7 @@
     "III"
   ],
   "key": {
-    "I": {
-      "item": "biggerreactorsrework:ludicrite_ingot"
-    }
+    "I": "biggerreactorsrework:ludicrite_ingot"
   },
   "result": {
     "id": "biggerreactorsrework:ludicrite_block"

@@ -1,6 +1,5 @@
 {
-  "parent": "block/block",
-  "render_type": "cutout",
+  "parent": "block/block", 
   "textures": {
     "particle": "biggerreactorsrework:block/battery/cell/body",
     "b_up": "biggerreactorsrework:block/battery/cell/body/connected_b",

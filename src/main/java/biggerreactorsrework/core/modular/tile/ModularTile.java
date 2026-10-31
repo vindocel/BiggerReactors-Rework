@@ -11,6 +11,9 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
+import biggerreactorsrework.core.transfer.TagValues;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.level.LevelEvent;
 import net.neoforged.neoforge.event.server.ServerStoppedEvent;
@@ -35,8 +38,8 @@ public class ModularTile extends BlockEntity implements IModularTile, IDebuggabl
     // Modified 2026-10-28: audio snapshots are synchronized, not persisted simulation data.
     public biggerreactorsrework.audio.MachineAudioState machineAudio = biggerreactorsrework.audio.MachineAudioState.EMPTY;
     private void readMachineAudio(CompoundTag tag) {
-        if (tag.contains("machine_audio")) machineAudio = biggerreactorsrework.audio.MachineAudioState.load(tag.getCompound("machine_audio"));
-        if (level != null && level.isClientSide && biggerreactorsrework.audio.MachineAudio.supported(this))
+        if (tag.contains("machine_audio")) machineAudio = biggerreactorsrework.audio.MachineAudioState.load(tag.getCompoundOrEmpty("machine_audio"));
+        if (level != null && level.isClientSide() && biggerreactorsrework.audio.MachineAudio.supported(this))
             biggerreactorsrework.audio.MachineAudio.clientUpdate.accept(this);
     }
     private boolean writeMachineAudio(CompoundTag tag) {
@@ -112,7 +115,7 @@ public class ModularTile extends BlockEntity implements IModularTile, IDebuggabl
         removed = false;
         moduleList.forEach(TileModule::onAdded);
         onAdded();
-        if (level.isClientSide && biggerreactorsrework.audio.MachineAudio.supported(this))
+        if (level.isClientSide() && biggerreactorsrework.audio.MachineAudio.supported(this))
             biggerreactorsrework.audio.MachineAudio.clientUpdate.accept(this);
         var worldUnloadTiles = (level.isClientSide() ? clientWorldUnloadEventTiles : serverWorldUnloadEventTiles).computeIfAbsent(level, __ -> new ObjectArrayList<>());
         index = worldUnloadTiles.size();
@@ -163,18 +166,19 @@ public class ModularTile extends BlockEntity implements IModularTile, IDebuggabl
     }
     
     @Override
-    protected final void loadAdditional(CompoundTag compound, HolderLookup.Provider registries) {
-        super.loadAdditional(compound, registries);
-        nbtRegistries = registries;
+    protected final void loadAdditional(ValueInput input) {
+        super.loadAdditional(input);
+        nbtRegistries = input.lookup();
+        CompoundTag compound = TagValues.read(input);
         if (compound.contains("local")) {
-            CompoundTag local = compound.getCompound("local");
+            CompoundTag local = compound.getCompoundOrEmpty("local");
             readNBT(local);
         }
-        CompoundTag subNBTs = compound.getCompound("sub");
+        CompoundTag subNBTs = compound.getCompoundOrEmpty("sub");
         for (var module : moduleList) {
             String key = module.saveKey();
             if (key != null && subNBTs.contains(key)) {
-                CompoundTag nbt = subNBTs.getCompound(key);
+                CompoundTag nbt = subNBTs.getCompoundOrEmpty(key);
                 module.readNBT(nbt);
             }
         }
@@ -202,16 +206,15 @@ public class ModularTile extends BlockEntity implements IModularTile, IDebuggabl
     }
     
     @Override
-    protected final void saveAdditional(CompoundTag nbt, HolderLookup.Provider registries) {
-        nbtRegistries = registries;
+    protected final void saveAdditional(ValueOutput output) {
         CompoundTag subNBTs = subNBTs(TileModule::writeNBT);
         if (subNBTs != null) {
-            nbt.put("sub", subNBTs);
+            output.store("sub", CompoundTag.CODEC, subNBTs);
         }
-        
+
         CompoundTag localNBT = writeNBT();
         if (!localNBT.isEmpty()) {
-            nbt.put("local", localNBT);
+            output.store("local", CompoundTag.CODEC, localNBT);
         }
     }
     
@@ -240,26 +243,29 @@ public class ModularTile extends BlockEntity implements IModularTile, IDebuggabl
     }
     
     @Override
-    public final void handleUpdateTag(CompoundTag compound, HolderLookup.Provider registries) {
-        super.handleUpdateTag(compound, registries);
-        nbtRegistries = registries;
+    public final void handleUpdateTag(ValueInput input) {
+        nbtRegistries = input.lookup();
+        applyUpdateTag(TagValues.read(input));
+    }
+
+    protected final void applyUpdateTag(CompoundTag compound) {
         readMachineAudio(compound);
         if (compound.contains("local")) {
-            CompoundTag local = compound.getCompound("local");
+            CompoundTag local = compound.getCompoundOrEmpty("local");
             handleDataNBT(local);
         }
-        CompoundTag subNBTs = compound.getCompound("sub");
+        CompoundTag subNBTs = compound.getCompoundOrEmpty("sub");
         for (var module : moduleList) {
             String key = module.saveKey();
             if (key != null) {
                 CompoundTag nbt = EMPTY_TAG;
                 if (subNBTs.contains(key)) {
-                    nbt = subNBTs.getCompound(key);
+                    nbt = subNBTs.getCompoundOrEmpty(key);
                 }
                 module.handleDataNBT(nbt);
                 if (nbt == EMPTY_TAG && !nbt.isEmpty()) {
                     MODULE_LOGGER.warn("Module " + key + " wrote to NBT in read!");
-                    for (var str : EMPTY_TAG.getAllKeys().toArray(new String[0])) {
+                    for (var str : EMPTY_TAG.keySet().toArray(new String[0])) {
                         EMPTY_TAG.remove(str);
                     }
                 }
@@ -293,24 +299,24 @@ public class ModularTile extends BlockEntity implements IModularTile, IDebuggabl
     }
     
     @Override
-    public final void onDataPacket(Connection net, ClientboundBlockEntityDataPacket pkt, HolderLookup.Provider registries) {
-        nbtRegistries = registries;
-        readMachineAudio(pkt.getTag());
+    public final void onDataPacket(Connection net, ValueInput input) {
+        nbtRegistries = input.lookup();
+        CompoundTag compound = TagValues.read(input);
+        readMachineAudio(compound);
         assert level != null;
         // getters are client only, so, cant grab it on the server even if i want to
-        if (!level.isClientSide) {
+        if (!level.isClientSide()) {
             return;
         }
-        CompoundTag compound = pkt.getTag();
         if (compound.contains("local")) {
-            CompoundTag local = compound.getCompound("local");
+            CompoundTag local = compound.getCompoundOrEmpty("local");
             handleUpdateNBT(local);
         }
-        CompoundTag subNBTs = compound.getCompound("sub");
+        CompoundTag subNBTs = compound.getCompoundOrEmpty("sub");
         for (var module : moduleList) {
             String key = module.saveKey();
             if (key != null && subNBTs.contains(key)) {
-                CompoundTag nbt = subNBTs.getCompound(key);
+                CompoundTag nbt = subNBTs.getCompoundOrEmpty(key);
                 module.handleUpdateNBT(nbt);
             }
         }

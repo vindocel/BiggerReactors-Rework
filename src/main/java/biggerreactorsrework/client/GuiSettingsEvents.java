@@ -38,11 +38,9 @@ public final class GuiSettingsEvents {
             boolean statisticsFront = screen.statisticsInFront();
             for (int layer = 0; layer < 2; layer++) {
                 boolean statistics = (layer == 1) == statisticsFront;
-                g.pose().pushPose();
-                g.pose().translate(0, 0, layer * 100);
+                g.nextStratum();
                 if (statistics) screen.statisticsWindow().render(g, event.getMouseX(), event.getMouseY());
                 else screen.settingsWindow().render(g, event.getMouseX(), event.getMouseY());
-                g.pose().popPose();
             }
         }
     }
@@ -94,8 +92,8 @@ public final class GuiSettingsEvents {
         boolean statisticsFront = screen.statisticsInFront();
         for (int i = 0; i < 2; i++) {
             boolean statistics = (i == 0) == statisticsFront;
-            boolean handled = statistics ? screen.statisticsWindow().key(event.getKeyCode())
-                    : screen.settingsWindow().keyPressed(event.getKeyCode(), event.getModifiers());
+            boolean handled = statistics ? screen.statisticsWindow().key(event.getKeyEvent().key())
+                    : screen.settingsWindow().keyPressed(event.getKeyEvent().key(), event.getKeyEvent().modifiers());
             if (handled) {
                 event.setCanceled(true);
                 return;
@@ -113,7 +111,7 @@ public final class GuiSettingsEvents {
 
     /** Tooltips of the screen under a popup are hidden only where the popup covers it. */
     private static void tooltip(RenderTooltipEvent.Pre event) {
-        if (!(Minecraft.getInstance().screen instanceof ModScreen<?> screen)) return;
+        if (!(Minecraft.getInstance().gui.screen() instanceof ModScreen<?> screen)) return;
         if (screen.statisticsWindow().rendering() || screen.settingsWindow().rendering()) return;
         if (screen.statisticsWindow().covers(event.getX(), event.getY()) || screen.settingsWindow().covers(event.getX(), event.getY())) {
             event.setCanceled(true);

@@ -1,7 +1,6 @@
 package biggerreactorsrework.multiblocks.reactor.tiles;
 
 import net.minecraft.core.component.DataComponentPatch;
-import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
@@ -35,18 +34,17 @@ import javax.annotation.ParametersAreNonnullByDefault;
 
 import static biggerreactorsrework.multiblocks.reactor.blocks.ReactorAccessPort.PortDirection.*;
 
-@MethodsReturnNonnullByDefault
 @ParametersAreNonnullByDefault
 public class ReactorCoolantPortTile extends ReactorBaseTile implements IFluidTankHandler, MenuProvider, IHasUpdatableState<ReactorCoolantPortState>, IEventMultiblock.AssemblyStateTransition {
     // Modified 2026-10-30: refresh output handlers on capability invalidation, including absent neighbors.
-    private final biggerreactorsrework.core.capability.NeighborCapability<net.neoforged.neoforge.fluids.capability.IFluidHandler> outputCapability =
-            new biggerreactorsrework.core.capability.NeighborCapability<>(this, Capabilities.FluidHandler.BLOCK);
+    private final biggerreactorsrework.core.capability.NeighborCapability<biggerreactorsrework.core.transfer.FluidTanks, ?> outputCapability =
+            biggerreactorsrework.core.capability.NeighborCapability.fluids(this);
     
     @RegisterTile("reactor_coolant_port")
     public static final BlockEntityType.BlockEntitySupplier<ReactorCoolantPortTile> SUPPLIER = new RegisterTile.Producer<>(ReactorCoolantPortTile::new);
     
     @RegisterCapability
-    private static final CapabilityRegistration FLUID_HANDLER_CAP_REGISTRATION = CapabilityRegistration.tileCap(Capabilities.FluidHandler.BLOCK, ReactorCoolantPortTile.class);
+    private static final CapabilityRegistration FLUID_HANDLER_CAP_REGISTRATION = CapabilityRegistration.tileFluids(ReactorCoolantPortTile.class);
     
     public ReactorCoolantPortTile(BlockEntityType<?> TYPE, BlockPos pos, BlockState state) {
         super(TYPE, pos, state);
@@ -56,6 +54,18 @@ public class ReactorCoolantPortTile extends ReactorBaseTile implements IFluidTan
     @Nullable
     private ReactorTransitionTank transitionTank;
     
+    @Override
+    public Object transferSnapshot() {
+        return transitionTank == null ? null : transitionTank.transferSnapshot();
+    }
+
+    @Override
+    public void restoreTransferSnapshot(Object snapshot) {
+        if (transitionTank != null) {
+            transitionTank.restoreTransferSnapshot(snapshot);
+        }
+    }
+
     @Override
     public int tankCount() {
         if (transitionTank == null) {
@@ -173,7 +183,7 @@ public class ReactorCoolantPortTile extends ReactorBaseTile implements IFluidTan
     @Override
     protected void readNBT(CompoundTag compound) {
         if (compound.contains("direction")) {
-            direction = biggerreactorsrework.core.util.SavedValues.enumValue(ReactorAccessPort.PortDirection.class, compound.getString("direction"), ReactorAccessPort.PortDirection.INLET);
+            direction = biggerreactorsrework.core.util.SavedValues.enumValue(ReactorAccessPort.PortDirection.class, compound.getStringOr("direction", ""), ReactorAccessPort.PortDirection.INLET);
         }
     }
     

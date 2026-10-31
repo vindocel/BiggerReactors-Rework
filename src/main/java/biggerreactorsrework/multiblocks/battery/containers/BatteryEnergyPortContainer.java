@@ -47,7 +47,7 @@ public class BatteryEnergyPortContainer extends AbstractContainerMenu implements
     @Override
     public void executeRequest(String requestName, Object requestData) {
         assert tileEntity.getLevel() != null;
-        if (tileEntity.getLevel().isClientSide) {
+        if (tileEntity.getLevel().isClientSide()) {
             runRequest(requestName, requestData);
             return;
         }

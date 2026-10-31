@@ -1,7 +1,6 @@
 package biggerreactorsrework.multiblocks.heatexchanger.blocks;
 
 
-import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -14,12 +13,11 @@ import biggerreactorsrework.core.registry.RegisterBlock;
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 
-@MethodsReturnNonnullByDefault
 @ParametersAreNonnullByDefault
 public class HeatExchangerGlassBlock extends HeatExchangerBaseBlock implements IAssemblyStateBlock, IConnectedTexture {
     
     @RegisterBlock(name = "heat_exchanger_glass", tileEntityClass = HeatExchangerGlassTile.class)
-    public static final HeatExchangerGlassBlock INSTANCE = new HeatExchangerGlassBlock();
+    public static final HeatExchangerGlassBlock INSTANCE = biggerreactorsrework.core.registry.RegistryIds.named("heat_exchanger_glass", () -> new HeatExchangerGlassBlock());
     
     public HeatExchangerGlassBlock() {
         super(PROPERTIES_GLASS);
@@ -38,7 +36,7 @@ public class HeatExchangerGlassBlock extends HeatExchangerBaseBlock implements I
     }
     
     @Override
-    public boolean propagatesSkylightDown(BlockState state, BlockGetter reader, BlockPos pos) {
+    public boolean propagatesSkylightDown(BlockState state) {
         return true;
     }
 }

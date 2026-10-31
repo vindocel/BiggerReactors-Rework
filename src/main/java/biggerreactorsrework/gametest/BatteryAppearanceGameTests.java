@@ -6,14 +6,9 @@ import biggerreactorsrework.multiblocks.battery.containers.BatteryTerminalContai
 import biggerreactorsrework.multiblocks.battery.state.BatteryState;
 import biggerreactorsrework.multiblocks.battery.tiles.BatteryBaseTile;
 import net.minecraft.core.BlockPos;
-import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
-import net.neoforged.neoforge.gametest.GameTestHolder;
-import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
 
 /** Added 2026-10-29: terminal and body menus retain their origins but share one synced appearance identity. */
-@GameTestHolder(BiggerReactors.modid)
-@PrefixGameTestTemplate(false)
 public final class BatteryAppearanceGameTests {
     @GameTest(template = "empty_7x7x7", timeoutTicks = 160)
     public static void allBatteryEntryPointsShareTheTerminalAppearance(GameTestHelper h) {
@@ -30,12 +25,12 @@ public final class BatteryAppearanceGameTests {
         h.setBlock(2, 2, 3, BatteryEnergyPort.INSTANCE);
         var sensorPos = new BlockPos(2, 1, 2);
         h.setBlock(sensorPos, BatteryRedstonePort.INSTANCE);
-        h.startSequence().thenWaitUntil(() -> h.assertTrue(((BatteryBaseTile) h.getBlockEntity(terminal)).isBatteryAssembled(), "battery not ready"))
+        h.startSequence().thenWaitUntil(() -> h.assertTrue(((BatteryBaseTile) GameTestSupport.be(h,terminal)).isBatteryAssembled(), "battery not ready"))
                 .thenExecute(() -> {
                     var player = net.neoforged.neoforge.common.util.FakePlayerFactory.getMinecraft(h.getLevel());
                     var expected = h.absolutePos(terminal);
                     for (var relative : java.util.List.of(terminal, secondTerminal, body, glass)) {
-                        var tile = (BatteryBaseTile) h.getBlockEntity(relative);
+                        var tile = (BatteryBaseTile) GameTestSupport.be(h,relative);
                         var menu = new BatteryTerminalContainer(42, tile.getBlockPos(), player);
                         var packet = (BatteryState) menu.getGuiPacket();
                         var data = packet.write();
@@ -46,8 +41,8 @@ public final class BatteryAppearanceGameTests {
                         received.read(data);
                         h.assertTrue(received.appearanceReady && received.appearancePos.equals(expected), "appearance identity was lost in synchronization");
                     }
-                    h.assertTrue(h.getBlockEntity(new BlockPos(2, 2, 1)) instanceof net.minecraft.world.MenuProvider, "energy port lost its own menu");
-                    var sensor = (biggerreactorsrework.multiblocks.battery.tiles.BatteryRedstonePortTile) h.getBlockEntity(sensorPos);
+                    h.assertTrue(GameTestSupport.be(h,new BlockPos(2, 2, 1)) instanceof net.minecraft.world.MenuProvider, "energy port lost its own menu");
+                    var sensor = (biggerreactorsrework.multiblocks.battery.tiles.BatteryRedstonePortTile) GameTestSupport.be(h,sensorPos);
                     var sensorMenu = new biggerreactorsrework.multiblocks.battery.containers.BatteryRedstonePortContainer(43, sensor.getBlockPos(), player);
                     var snapshot = sensorMenu.getGuiPacket().write();
                     h.assertTrue(expected.asLong() == (Long) snapshot.get("appearancePos"), "sensor uses a different appearance identity");

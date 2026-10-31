@@ -1,11 +1,8 @@
 package biggerreactorsrework.client;
 
-import net.minecraft.client.gui.GuiGraphics;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 
 /** Added 2026-10-30: crisp, dedicated redstone-control symbols; other machine icons stay unchanged. */
-@OnlyIn(Dist.CLIENT)
 public final class RedstoneIcon {
     private enum Symbol { DISABLED, ABOVE, BELOW, CONFIRM, REVERT, ENTER }
     public static final RedstoneIcon DISABLED = new RedstoneIcon(Symbol.DISABLED);
@@ -23,7 +20,7 @@ public final class RedstoneIcon {
     public static RedstoneIcon image(GuiIcon image) { return new RedstoneIcon(image); }
 
     /** Only illustrated status icons retain the existing tab scale. Symbols use whole GUI pixels. */
-    public void tab(GuiGraphics graphics, int earX, int y, boolean left) {
+    public void tab(GuiGraphicsExtractor graphics, int earX, int y, boolean left) {
         if (image != null) {
             GuiArt.tabIcon(graphics, earX, y, left, image.width(), image.height(), () -> image.draw(graphics, 0, 0));
         } else {
@@ -31,7 +28,7 @@ public final class RedstoneIcon {
                     y + GuiFrame.TAB_BUTTON_TOP + (GuiFrame.TAB_BUTTON - SIZE) / 2);
         }
     }
-    public void button(GuiGraphics graphics, int x, int y, int width, int height, boolean hovered, boolean disabled, GuiFrame frame) {
+    public void button(GuiGraphicsExtractor graphics, int x, int y, int width, int height, boolean hovered, boolean disabled, GuiFrame frame) {
         GuiArt.buttonBackground(graphics, x, y, width, height, hovered, false, disabled, frame);
         if (image != null) image.draw(graphics, x + (width - image.width()) / 2, y + (height - image.height()) / 2);
         else {
@@ -41,7 +38,7 @@ public final class RedstoneIcon {
                     disabled ? 0xFF92948E : 0xFFF4F4EC, compact);
         }
     }
-    public void draw(GuiGraphics graphics, int x, int y) {
+    public void draw(GuiGraphicsExtractor graphics, int x, int y) {
         if (image != null) image.draw(graphics, x, y);
         else paint(graphics, x, y, 0xFFF4F4EC);
     }
@@ -75,10 +72,10 @@ public final class RedstoneIcon {
             default -> false;
         };
     }
-    private void paint(GuiGraphics graphics, int x, int y, int color) {
+    private void paint(GuiGraphicsExtractor graphics, int x, int y, int color) {
         paint(graphics, x, y, color, false);
     }
-    private void paint(GuiGraphics graphics, int x, int y, int color, boolean compact) {
+    private void paint(GuiGraphicsExtractor graphics, int x, int y, int color, boolean compact) {
         // Shadow and foreground are drawn separately, so neighbouring pixels never erase one another.
         int first = compact ? 0 : 1, last = compact ? 7 : 10;
         for (int pass = 0; pass < 2; pass++) for (int row = first; row <= last; row++) {

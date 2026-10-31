@@ -17,8 +17,6 @@ import net.neoforged.neoforge.gametest.*;
 import java.util.List;
 
 /** Added 2026-10-30: terminal and sensor snapshots share appearance, without moving menu/network origins. */
-@GameTestHolder(BiggerReactors.modid)
-@PrefixGameTestTemplate(false)
 public final class SensorAppearanceGameTests {
     private static final BlockPos FIRST = new BlockPos(0,1,2), SECOND = new BlockPos(4,2,2);
     private static final BlockPos SENSOR = new BlockPos(0,2,1), OTHER_SENSOR = new BlockPos(0,2,3);
@@ -26,7 +24,7 @@ public final class SensorAppearanceGameTests {
     private static void check(GameTestHelper h, BlockPos expected, List<BlockPos> positions) {
         var player = net.neoforged.neoforge.common.util.FakePlayerFactory.getMinecraft(h.getLevel());
         for (var relative : positions) {
-            var tile = h.getBlockEntity(relative);
+            var tile = GameTestSupport.be(h,relative);
             var pos = tile.getBlockPos();
             GuiSync.IGUIPacketProvider menu;
             if (tile instanceof ReactorTerminalTile) menu = new ReactorTerminalContainer(42, pos, player);

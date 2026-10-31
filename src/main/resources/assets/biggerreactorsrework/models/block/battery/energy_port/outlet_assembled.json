@@ -1,0 +1,7 @@
+{
+  "parent": "biggerreactorsrework:block/assembled_port",
+  "textures": {
+    "front": "biggerreactorsrework:block/battery/energy_port/outlet",
+    "side": "biggerreactorsrework:block/battery/casing/disassembled"
+  }
+}

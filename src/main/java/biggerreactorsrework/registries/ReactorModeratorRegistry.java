@@ -7,7 +7,7 @@ import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.BucketItem;
@@ -128,7 +128,7 @@ public class ReactorModeratorRegistry {
         RegistryType type = RegistryType.tag;
     
         @ConfigValue
-        ResourceLocation location = ResourceLocation.parse("dirt");
+        Identifier location = Identifier.parse("dirt");
     
         @ConfigValue(range = "[0, 1]")
         double absorption;
@@ -149,7 +149,7 @@ public class ReactorModeratorRegistry {
         BiggerReactors.LOGGER.info("Loading reactor moderators");
         registry.clear();
         
-        List<ReactorModeratorJsonData> data = dataLoader.loadAll(ResourceLocation.parse("biggerreactorsrework:ebcr/moderators"));
+        List<ReactorModeratorJsonData> data = dataLoader.loadAll(Identifier.parse("biggerreactorsrework:ebcr/moderators"));
         BiggerReactors.LOGGER.info("Loaded " + data.size() + " moderator data entries");
         
         for (ReactorModeratorJsonData moderatorData : data) {
@@ -158,7 +158,7 @@ public class ReactorModeratorRegistry {
     
             switch (moderatorData.type) {
                 case tag -> {
-                    var blockTagOptional = BuiltInRegistries.BLOCK.getTag(TagKey.create(BuiltInRegistries.BLOCK.key(), moderatorData.location));
+                    var blockTagOptional = BuiltInRegistries.BLOCK.get(TagKey.create(BuiltInRegistries.BLOCK.key(), moderatorData.location));
                     blockTagOptional.ifPresent(holders -> holders.forEach(blockHolder -> {
                         var element = blockHolder.value();
                         registry.put(element, properties);
@@ -168,12 +168,12 @@ public class ReactorModeratorRegistry {
                 case registry -> {
                     // cant check against air, because air is a valid thing to load
                     if (BuiltInRegistries.BLOCK.containsKey(moderatorData.location)) {
-                        registry.put(BuiltInRegistries.BLOCK.get(moderatorData.location), properties);
+                        registry.put(BuiltInRegistries.BLOCK.getValue(moderatorData.location), properties);
                         BiggerReactors.LOGGER.debug("Loaded moderator " + moderatorData.location);
                     }
                 }
                 case fluidtag -> {
-                    var fluidTagOptional = BuiltInRegistries.FLUID.getTag(TagKey.create(BuiltInRegistries.FLUID.key(), moderatorData.location));
+                    var fluidTagOptional = BuiltInRegistries.FLUID.get(TagKey.create(BuiltInRegistries.FLUID.key(), moderatorData.location));
                     fluidTagOptional.ifPresent(holders -> holders.forEach(fluidHolder -> {
                         var element = fluidHolder.value();
                         Block elementBlock = element.defaultFluidState().createLegacyBlock().getBlock();
@@ -184,7 +184,7 @@ public class ReactorModeratorRegistry {
                 case fluid -> {
                     // cant check against air, because air is a valid thing to load
                     if (BuiltInRegistries.FLUID.containsKey(moderatorData.location)) {
-                        Fluid fluid = BuiltInRegistries.FLUID.get(moderatorData.location);
+                        Fluid fluid = BuiltInRegistries.FLUID.getValue(moderatorData.location);
                         assert fluid != null;
                         Block block = fluid.defaultFluidState().createLegacyBlock().getBlock();
                         registry.put(block, properties);
@@ -202,14 +202,14 @@ public class ReactorModeratorRegistry {
     
     public static class Client {
         
-        private static final SimpleChannel CHANNEL = new SimpleChannel(ResourceLocation.fromNamespaceAndPath(BiggerReactors.modid, "moderator_sync_channel"), Client::readSync, null);
+        private static final SimpleChannel CHANNEL = new SimpleChannel(Identifier.fromNamespaceAndPath(BiggerReactors.modid, "moderator_sync_channel"), Client::readSync, null);
         private static final ObjectOpenHashSet<Block> moderatorBlocks = new ObjectOpenHashSet<>();
         private static final Object2ObjectOpenHashMap<Block, ModeratorProperties> moderatorProperties = new Object2ObjectOpenHashMap<>();
         
         @OnModLoad
         private static void onModLoad() {
             NeoForge.EVENT_BUS.addListener(Client::datapackEvent);
-            if (FMLEnvironment.dist.isClient()) {
+            if (FMLEnvironment.getDist().isClient()) {
                 NeoForge.EVENT_BUS.addListener(Client::toolTipEvent);
             }
         }
@@ -262,9 +262,9 @@ public class ReactorModeratorRegistry {
             for (int i = 0; i < list.size(); i++) {
                 var blockLocation = list.get(i);
                 var properties = propertiesList.get(i);
-                var id=ResourceLocation.tryParse(blockLocation);
+                var id=Identifier.tryParse(blockLocation);
                 if(id==null||!BuiltInRegistries.BLOCK.containsKey(id))continue;
-                final var block = BuiltInRegistries.BLOCK.get(id);
+                final var block = BuiltInRegistries.BLOCK.getValue(id);
                 if (block == null) {
                     return;
                 }

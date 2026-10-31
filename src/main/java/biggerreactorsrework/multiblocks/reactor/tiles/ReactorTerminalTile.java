@@ -1,6 +1,5 @@
 package biggerreactorsrework.multiblocks.reactor.tiles;
 
-import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.MenuProvider;
@@ -18,7 +17,6 @@ import biggerreactorsrework.core.registry.RegisterTile;
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 
-@MethodsReturnNonnullByDefault
 @ParametersAreNonnullByDefault
 public class ReactorTerminalTile extends ReactorBaseTile implements MenuProvider, IHasUpdatableState<ReactorState> {
     
@@ -37,8 +35,8 @@ public class ReactorTerminalTile extends ReactorBaseTile implements MenuProvider
         tag.putDouble("renderColdFill",renderColdFill);tag.putDouble("renderHotFill",renderHotFill);return tag;
     }
     @Override protected void readNBT(net.minecraft.nbt.CompoundTag tag){
-        super.readNBT(tag);renderCold=tag.getString("renderCold");renderHot=tag.getString("renderHot");renderOrigin=tag.getString("renderOrigin");
-        renderColdFill=tag.getDouble("renderColdFill");renderHotFill=tag.getDouble("renderHotFill");
+        super.readNBT(tag);renderCold=tag.getStringOr("renderCold", "");renderHot=tag.getStringOr("renderHot", "");renderOrigin=tag.getStringOr("renderOrigin", "");
+        renderColdFill=tag.getDoubleOr("renderColdFill", 0D);renderHotFill=tag.getDoubleOr("renderHotFill", 0D);
     }
     @Override protected net.minecraft.nbt.CompoundTag getUpdateNBT(){return writeNBT();}
     @Override protected void handleUpdateNBT(net.minecraft.nbt.CompoundTag tag){readNBT(tag);}

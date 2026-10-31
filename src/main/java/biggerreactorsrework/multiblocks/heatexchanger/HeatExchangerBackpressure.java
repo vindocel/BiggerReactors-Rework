@@ -29,7 +29,7 @@ public final class HeatExchangerBackpressure {
         tag.putDouble("limit",pressure.limit());return tag;
     }
     public void load(CompoundTag tag) {
-        pressure.load(Map.of("history",Arrays.stream(tag.getLongArray("history")).mapToDouble(Double::longBitsToDouble).boxed().toList(),
-                "cursor",tag.getInt("cursor"),"limit",tag.getDouble("limit")));
+        pressure.load(Map.of("history",Arrays.stream(tag.getLongArray("history").orElseGet(() -> new long[0])).mapToDouble(Double::longBitsToDouble).boxed().toList(),
+                "cursor",tag.getIntOr("cursor", 0),"limit",tag.getDoubleOr("limit", 0D)));
     }
 }

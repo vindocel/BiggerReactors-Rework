@@ -6,9 +6,7 @@
     "III"
   ],
   "key": {
-    "I": {
-      "tag": "c:ingots/uranium"
-    }
+    "I": "#c:ingots/uranium"
   },
   "result": {
     "id": "biggerreactorsrework:uranium_block"

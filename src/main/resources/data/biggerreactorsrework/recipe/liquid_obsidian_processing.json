@@ -1,8 +1,6 @@
 {
   "type": "biggerreactorsrework:cyanite_reprocessing",
-  "ingredient": {
-    "item": "minecraft:obsidian"
-  },
+  "ingredient": "minecraft:obsidian",
   "input_count": 1,
   "fluid": "minecraft:water",
   "fluid_result": {

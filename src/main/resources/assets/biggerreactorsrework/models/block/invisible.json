@@ -1,4 +1,6 @@
 {
-  "elements": [
-  ]
+  "elements": [],
+  "textures": {
+    "particle": "biggerreactorsrework:block/fluid/steam_still"
+  }
 }

@@ -1,28 +1,22 @@
 {
-    "type": "minecraft:crafting_shaped",
-    "neoforge:conditions": [
-        {
-            "modid": "thermal_expansion",
-            "type": "neoforge:mod_loaded"
-        }
-    ],
-    "pattern": [
-        "BRB",
-        "E E",
-        "BRB"
-    ],
-    "key": {
-        "B": {
-            "item": "biggerreactorsrework:blutonium_ingot"
-        },
-        "R": {
-            "item": "minecraft:blaze_rod"
-        },
-        "E": {
-            "item": "thermal:enderium_block"
-        }
-    },
-    "result": {
-        "id": "biggerreactorsrework:ludicrite_block"
+  "type": "minecraft:crafting_shaped",
+  "neoforge:conditions": [
+    {
+      "modid": "thermal_expansion",
+      "type": "neoforge:mod_loaded"
     }
+  ],
+  "pattern": [
+    "BRB",
+    "E E",
+    "BRB"
+  ],
+  "key": {
+    "B": "biggerreactorsrework:blutonium_ingot",
+    "R": "minecraft:blaze_rod",
+    "E": "thermal:enderium_block"
+  },
+  "result": {
+    "id": "biggerreactorsrework:ludicrite_block"
+  }
 }

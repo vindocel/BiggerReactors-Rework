@@ -6,7 +6,7 @@ import biggerreactorsrework.core.registry.RegisterContainer;
 import biggerreactorsrework.multiblocks.battery.BatteryItemHandler;
 import biggerreactorsrework.multiblocks.battery.tiles.BatteryBaseTile;
 import net.minecraft.core.BlockPos;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
@@ -17,8 +17,8 @@ import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.items.IItemHandler;
-import net.neoforged.neoforge.items.SlotItemHandler;
+import biggerreactorsrework.core.transfer.ItemSlots;
+import biggerreactorsrework.core.transfer.SlotsSlot;
 
 import javax.annotation.Nonnull;
 
@@ -52,7 +52,7 @@ public class BatteryTerminalContainer extends AbstractContainerMenu implements G
     private static final int ARMOR_SLOTS = 4;
 
     private static final EquipmentSlot[] ARMOR_ORDER = {EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET};
-    private static final ResourceLocation[] ARMOR_ICONS = {InventoryMenu.EMPTY_ARMOR_SLOT_HELMET, InventoryMenu.EMPTY_ARMOR_SLOT_CHESTPLATE,
+    private static final Identifier[] ARMOR_ICONS = {InventoryMenu.EMPTY_ARMOR_SLOT_HELMET, InventoryMenu.EMPTY_ARMOR_SLOT_CHESTPLATE,
             InventoryMenu.EMPTY_ARMOR_SLOT_LEGGINGS, InventoryMenu.EMPTY_ARMOR_SLOT_BOOTS};
 
     private final BatteryBaseTile tileEntity;
@@ -66,11 +66,11 @@ public class BatteryTerminalContainer extends AbstractContainerMenu implements G
         this.getGuiPacket();
 
         // The client only needs the placement rules; the menu sync fills its slots.
-        IItemHandler items = !player.level().isClientSide() && tileEntity.nullableController() != null
+        ItemSlots items = !player.level().isClientSide() && tileEntity.nullableController() != null
                 ? tileEntity.controller().items : new BatteryItemHandler(() -> {
         });
-        this.addSlot(new SlotItemHandler(items, BatteryItemHandler.DISCHARGE_SLOT, DISCHARGE_X, DISCHARGE_Y));
-        this.addSlot(new SlotItemHandler(items, BatteryItemHandler.CHARGE_SLOT, CHARGE_X, CHARGE_Y));
+        this.addSlot(new SlotsSlot(items, BatteryItemHandler.DISCHARGE_SLOT, DISCHARGE_X, DISCHARGE_Y));
+        this.addSlot(new SlotsSlot(items, BatteryItemHandler.CHARGE_SLOT, CHARGE_X, CHARGE_Y));
 
         Inventory inventory = player.getInventory();
         for (int row = 0; row < 3; row++) {
@@ -85,7 +85,7 @@ public class BatteryTerminalContainer extends AbstractContainerMenu implements G
         for (int i = 0; i < ARMOR_ORDER.length; i++) {
             EquipmentSlot slot = ARMOR_ORDER[i];
             this.addSlot(new ArmorSlot(inventory, player, slot, 36 + slot.getIndex(), ARMOR_X, ARMOR_Y + i * 18)
-                    .setBackground(InventoryMenu.BLOCK_ATLAS, ARMOR_ICONS[i]));
+                    .setBackground(ARMOR_ICONS[i]));
         }
         this.addSlot(new Slot(inventory, 40, ARMOR_X, OFFHAND_Y) {
             @Override
@@ -93,7 +93,7 @@ public class BatteryTerminalContainer extends AbstractContainerMenu implements G
                 player.onEquipItem(EquipmentSlot.OFFHAND, oldStack, newStack);
                 super.setByPlayer(newStack, oldStack);
             }
-        }.setBackground(InventoryMenu.BLOCK_ATLAS, InventoryMenu.EMPTY_ARMOR_SLOT_SHIELD));
+        }.setBackground(InventoryMenu.EMPTY_ARMOR_SLOT_SHIELD));
     }
 
     /**
@@ -145,7 +145,7 @@ public class BatteryTerminalContainer extends AbstractContainerMenu implements G
     @Override
     public void broadcastChanges() {
         long tick = biggerreactorsrework.core.CoreEvents.tickNumber();
-        if (!owner.level().isClientSide && owner.containerMenu == this && stillValid(owner) && chargedAtTick != tick) {
+        if (!owner.level().isClientSide() && owner.containerMenu == this && stillValid(owner) && chargedAtTick != tick) {
             chargedAtTick = tick;
             var controller = tileEntity.nullableController();
             if (controller != null) {
@@ -161,13 +161,13 @@ public class BatteryTerminalContainer extends AbstractContainerMenu implements G
     @Override
     public boolean stillValid(@Nonnull Player player) {
         return !tileEntity.isRemoved() && tileEntity.isBatteryAssembled()
-                && player.distanceToSqr(tileEntity.getBlockPos().getCenter()) <= 64.0;
+                && player.distanceToSqr(net.minecraft.world.phys.Vec3.atCenterOf(tileEntity.getBlockPos())) <= 64.0;
     }
 
     @Override
     public void executeRequest(String requestName, Object requestData) {
         assert tileEntity.getLevel() != null;
-        if (tileEntity.getLevel().isClientSide) {
+        if (tileEntity.getLevel().isClientSide()) {
             runRequest(requestName, requestData);
             return;
         }

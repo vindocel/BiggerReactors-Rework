@@ -61,9 +61,9 @@ public interface ITouchingMultiblockTile<
     
         @Override
         public void readNBT(CompoundTag nbt) {
-            assembled = nbt.getBoolean("assembled");
-            min.set(nbt.getInt("minx"), nbt.getInt("miny"), nbt.getInt("minz"));
-            max.set(nbt.getInt("maxx"), nbt.getInt("maxy"), nbt.getInt("maxz"));
+            assembled = nbt.getBooleanOr("assembled", false);
+            min.set(nbt.getIntOr("minx", 0), nbt.getIntOr("miny", 0), nbt.getIntOr("minz", 0));
+            max.set(nbt.getIntOr("maxx", 0), nbt.getIntOr("maxy", 0), nbt.getIntOr("maxz", 0));
         }
         
         @Override

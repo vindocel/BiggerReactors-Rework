@@ -13,17 +13,15 @@ import net.minecraft.gametest.framework.*;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.material.Fluids;
 import net.neoforged.neoforge.fluids.FluidStack;
-import net.neoforged.neoforge.fluids.capability.IFluidHandler.FluidAction;
+import biggerreactorsrework.core.transfer.FluidTanks.FluidAction;
 import net.neoforged.neoforge.gametest.*;
 
 /** Actual machine processing and tank contracts. */
-@GameTestHolder(BiggerReactors.modid)
-@PrefixGameTestTemplate(false)
 public final class ProcessingGameTests {
     @GameTest(template="empty_7x7x7")
     public static void reprocessingSurvivesSave(GameTestHelper h) {
         var pos=new BlockPos(2,2,2);h.setBlock(pos,CyaniteReprocessor.INSTANCE);
-        var tile=(CyaniteReprocessorTile)h.getBlockEntity(pos);tile.tick();
+        var tile=(CyaniteReprocessorTile)GameTestSupport.be(h,pos);tile.tick();
         var recipe=ReprocessingRecipes.all(h.getLevel()).getFirst().value();
         var items=tile.itemHandlerFor(null);items.insertItem(0,new ItemStack(CyaniteIngot.INSTANCE,recipe.count()+1),false);
         int energy=recipe.energy()*recipe.duration(),water=recipe.water()*recipe.duration();
@@ -31,9 +29,9 @@ public final class ProcessingGameTests {
         tile.fluidFor(null).fill(new FluidStack(recipe.fluid(),water),FluidAction.EXECUTE);
         for(int i=0;i<recipe.duration()/2;i++)tile.tick();
         var saved=tile.saveWithoutMetadata(h.getLevel().registryAccess());
-        int progress=saved.getCompound("cyaniteReprocessorState").getInt("workTime");
+        int progress=saved.getCompoundOrEmpty("cyaniteReprocessorState").getIntOr("workTime",0);
         h.assertTrue(progress>0,"machine made no progress");
-        tile.loadWithComponents(saved,h.getLevel().registryAccess());
+        GameTestSupport.load(tile,saved,h);
         for(int i=progress;i<recipe.duration();i++)tile.tick();
         h.assertTrue(items.getStackInSlot(0).getCount()==1,"wrong input count or work lost on load");
         h.assertTrue(items.getStackInSlot(1).is(BlutoniumIngot.INSTANCE)&&items.getStackInSlot(1).getCount()==1,"wrong output");

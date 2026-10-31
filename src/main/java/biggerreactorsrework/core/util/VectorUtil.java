@@ -78,7 +78,7 @@ public class VectorUtil {
     }
     
     public static Vector2i fromChunkPos(ChunkPos chunkPos, Vector2i vector) {
-        return vector.set(chunkPos.x, chunkPos.z);
+        return vector.set(chunkPos.x(), chunkPos.z());
     }
     
     public static Vector2i fromChunkPos(long chunkPos) {
@@ -106,7 +106,7 @@ public class VectorUtil {
     }
     
     public static long blockPosToChunkPosLong(Vector3ic blockpos) {
-        return ChunkPos.asLong(SectionPos.blockToSectionCoord(blockpos.x()), SectionPos.blockToSectionCoord(blockpos.z()));
+        return ChunkPos.pack(SectionPos.blockToSectionCoord(blockpos.x()), SectionPos.blockToSectionCoord(blockpos.z()));
     }
     
     public static String asString(Vector3ic vector) {

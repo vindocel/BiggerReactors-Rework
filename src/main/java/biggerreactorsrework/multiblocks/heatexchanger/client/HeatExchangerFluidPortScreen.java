@@ -3,13 +3,11 @@ package biggerreactorsrework.multiblocks.heatexchanger.client;
 import biggerreactorsrework.client.GuiTheme;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.entity.player.Inventory;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 import biggerreactorsrework.BiggerReactors;
 import biggerreactorsrework.client.Biselector;
 import biggerreactorsrework.client.SelectorColors;
@@ -24,7 +22,6 @@ import biggerreactorsrework.core.client.gui.screens.ModScreen;
 
 import javax.annotation.Nonnull;
 
-@OnlyIn(Dist.CLIENT)
 public class HeatExchangerFluidPortScreen extends ModScreen<HeatExchangerFluidPortContainer> {
 
 
@@ -102,29 +99,29 @@ public class HeatExchangerFluidPortScreen extends ModScreen<HeatExchangerFluidPo
      * @param partialTicks Partial ticks.
      */
     @Override
-    public void render(@Nonnull GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
-        super.render(graphics, mouseX, mouseY, partialTicks);
+    public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTicks) {
+        super.extractRenderState(graphics, mouseX, mouseY, partialTicks);
 
         // Render text to show what channel this is connected to.
         if (heatExchangerFluidPortState.condenser) {
             // Text for when connected to a condenser:
-            graphics.drawString(this.getFont(), Component.translatable("screen.biggerreactorsrework.heat_exchanger_fluid_port.channel_type.condenser").getString(), this.getGuiLeft() + 8, this.getGuiTop() + 22, GuiTheme.textColor(), false);
+            graphics.text(this.getFont(), Component.translatable("screen.biggerreactorsrework.heat_exchanger_fluid_port.channel_type.condenser").getString(), this.getLeftPos() + 8, this.getTopPos() + 22, GuiTheme.textColor(), false);
         } else {
             // Text for when connected to an evaporator.
-            graphics.drawString(this.getFont(), Component.translatable("screen.biggerreactorsrework.heat_exchanger_fluid_port.channel_type.evaporator").getString(), this.getGuiLeft() + 8, this.getGuiTop() + 22, GuiTheme.textColor(), false);
+            graphics.text(this.getFont(), Component.translatable("screen.biggerreactorsrework.heat_exchanger_fluid_port.channel_type.evaporator").getString(), this.getLeftPos() + 8, this.getTopPos() + 22, GuiTheme.textColor(), false);
         }
 
         // Render text for input/output direction:
         if (heatExchangerFluidPortState.direction) {
             // Text for an inlet:
-            graphics.drawString(this.getFont(), Component.translatable("screen.biggerreactorsrework.heat_exchanger_fluid_port.direction_toggle.input").getString(), this.getGuiLeft() + 42, this.getGuiTop() + 37, GuiTheme.textColor(), false);
+            graphics.text(this.getFont(), Component.translatable("screen.biggerreactorsrework.heat_exchanger_fluid_port.direction_toggle.input").getString(), this.getLeftPos() + 42, this.getTopPos() + 37, GuiTheme.textColor(), false);
         } else {
             // Text for an outlet:
-            graphics.drawString(this.getFont(), Component.translatable("screen.biggerreactorsrework.heat_exchanger_fluid_port.direction_toggle.output").getString(), this.getGuiLeft() + 42, this.getGuiTop() + 37, GuiTheme.textColor(), false);
+            graphics.text(this.getFont(), Component.translatable("screen.biggerreactorsrework.heat_exchanger_fluid_port.direction_toggle.output").getString(), this.getLeftPos() + 42, this.getTopPos() + 37, GuiTheme.textColor(), false);
         }
 
         // Render text for manual tank eject:
-        graphics.drawString(this.getFont(), Component.translatable("screen.biggerreactorsrework.heat_exchanger_fluid_port.manual_dump").getString(), this.getGuiLeft() + 26, this.getGuiTop() + 53, GuiTheme.textColor(), false);
+        graphics.text(this.getFont(), Component.translatable("screen.biggerreactorsrework.heat_exchanger_fluid_port.manual_dump").getString(), this.getLeftPos() + 26, this.getTopPos() + 53, GuiTheme.textColor(), false);
     }
 
     @Override

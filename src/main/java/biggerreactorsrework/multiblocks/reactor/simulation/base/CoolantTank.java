@@ -12,6 +12,22 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 public class CoolantTank extends HeatBody implements IReactorSimulation.ICoolantTank, ReactorModeratorRegistry.IModeratorProperties, ISerializable {
+    private record TransferState(long liquid, long vapor, double thermalRemainder, double[] pressureHistory) {}
+
+    @Override
+    public Object transferSnapshot() {
+        return new TransferState(liquidAmount, vaporAmount, thermalRemainder, outputPressure.history());
+    }
+
+    @Override
+    public void restoreTransferSnapshot(Object snapshot) {
+        if (!(snapshot instanceof TransferState state)) return;
+        liquidAmount = state.liquid;
+        vaporAmount = state.vapor;
+        thermalRemainder = state.thermalRemainder;
+        outputPressure.restoreHistory(state.pressureHistory);
+    }
+
     // Modified 2026-10-26: applies only to this active-reactor tank.
     public final biggerreactorsrework.core.util.OutputBackpressure outputPressure=new biggerreactorsrework.core.util.OutputBackpressure();
     public void updateOutputPressure(){outputPressure.tick(vaporAmount,perSideCapacity);}

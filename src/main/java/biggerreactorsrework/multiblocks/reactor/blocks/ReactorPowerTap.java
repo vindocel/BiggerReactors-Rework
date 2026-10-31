@@ -1,6 +1,5 @@
 package biggerreactorsrework.multiblocks.reactor.blocks;
 
-import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.level.Level;
@@ -22,11 +21,10 @@ import java.util.Locale;
 import static biggerreactorsrework.multiblocks.reactor.blocks.ReactorPowerTap.ConnectionState.CONNECTION_STATE_ENUM_PROPERTY;
 
 @ParametersAreNonnullByDefault
-@MethodsReturnNonnullByDefault
 public class ReactorPowerTap extends ReactorBaseBlock implements IAssemblyStateBlock, IFaceDirectionBlock {
     
     @RegisterBlock(name = "reactor_power_tap", tileEntityClass = ReactorPowerTapTile.class)
-    public static final ReactorPowerTap INSTANCE = new ReactorPowerTap();
+    public static final ReactorPowerTap INSTANCE = biggerreactorsrework.core.registry.RegistryIds.named("reactor_power_tap", () -> new ReactorPowerTap());
     
     public ReactorPowerTap() {
         super();

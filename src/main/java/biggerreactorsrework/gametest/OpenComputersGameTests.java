@@ -12,7 +12,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.gametest.framework.*;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.block.Blocks;
 import net.neoforged.fml.ModList;
 import net.neoforged.neoforge.gametest.*;
@@ -95,9 +95,9 @@ public final class OpenComputersGameTests {
                 var tile=h.getBlockEntity(pos); var registries=h.getLevel().registryAccess();
                 var saved=tile.saveWithFullMetadata(registries);
                 var opaque=new net.minecraft.nbt.CompoundTag(); opaque.putString("opaque_test_address","retained-without-optional-mod");
-                var local=saved.getCompound("local"); local.put("computerComponent",opaque); saved.put("local",local);
+                var local=saved.getCompoundOrEmpty("local"); local.put("computerComponent",opaque); saved.put("local",local);
                 tile.loadWithComponents(saved,registries);
-                h.assertTrue(tile.saveWithFullMetadata(registries).getCompound("local").getCompound("computerComponent").equals(opaque),
+                h.assertTrue(tile.saveWithFullMetadata(registries).getCompoundOrEmpty("local").getCompoundOrEmpty("computerComponent").equals(opaque),
                         "port discarded optional component data while OpenComputers was absent");
                 h.assertTrue(((ComputerPortState.Port)tile).computerPortState().component()==null,"optional API loaded in baseline");
             }
@@ -105,7 +105,7 @@ public final class OpenComputersGameTests {
         }
         for(int i=0;i<blocks.length;i++) {
             h.setBlock(1,1,1+i*2,blocks[i]);
-            h.setBlock(2,1,1+i*2,BuiltInRegistries.BLOCK.get(ResourceLocation.fromNamespaceAndPath("opencomputers","cable")));
+            h.setBlock(2,1,1+i*2,BuiltInRegistries.BLOCK.getValue(Identifier.fromNamespaceAndPath("opencomputers","cable")));
         }
         h.startSequence().thenIdle(5).thenExecute(() -> Probe.lifetime(h)).thenSucceed();
     }

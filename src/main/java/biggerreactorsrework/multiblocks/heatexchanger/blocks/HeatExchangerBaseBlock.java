@@ -1,6 +1,5 @@
 package biggerreactorsrework.multiblocks.heatexchanger.blocks;
 
-import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
@@ -19,9 +18,8 @@ import javax.annotation.ParametersAreNonnullByDefault;
 
 import static biggerreactorsrework.core.multiblock.IAssemblyStateBlock.ASSEMBLED;
 
-@MethodsReturnNonnullByDefault
 @ParametersAreNonnullByDefault
-public abstract class HeatExchangerBaseBlock extends ModularBlock implements IRectangularMultiblockBlock, EntityBlock {
+public abstract class HeatExchangerBaseBlock extends ModularBlock implements IRectangularMultiblockBlock, EntityBlock, biggerreactorsrework.core.modular.block.BlockTooltip {
     // Modified 2026-10-27: assembled terminal and hot-channel light.
     
     public static final Properties PROPERTIES_SOLID = Properties.of().lightLevel(biggerreactorsrework.multiblocks.MachineLighting::emission).sound(SoundType.METAL).destroyTime(2).explosionResistance(10).isValidSpawn((a, b, c, d) -> false);
@@ -37,11 +35,9 @@ public abstract class HeatExchangerBaseBlock extends ModularBlock implements IRe
 
     // Modified 2026-10-25: explain useful placement before the player builds the circuits.
     @Override
-    public void appendHoverText(net.minecraft.world.item.ItemStack stack,net.minecraft.world.item.Item.TooltipContext context,
-                                java.util.List<net.minecraft.network.chat.Component> tooltip,net.minecraft.world.item.TooltipFlag flag) {
-        super.appendHoverText(stack,context,tooltip,flag);
+    public void appendTooltip(net.minecraft.world.item.ItemStack stack,java.util.function.Consumer<net.minecraft.network.chat.Component> tooltip) {
         if(this instanceof HeatExchangerCondenserChannelBlock || this instanceof HeatExchangerEvaporatorChannelBlock)
-            for(int i=1;i<=3;i++)tooltip.add(net.minecraft.network.chat.Component.translatable("tooltip.biggerreactorsrework.channel_contact."+i).withStyle(net.minecraft.ChatFormatting.GRAY));
+            for(int i=1;i<=3;i++)tooltip.accept(net.minecraft.network.chat.Component.translatable("tooltip.biggerreactorsrework.channel_contact."+i).withStyle(net.minecraft.ChatFormatting.GRAY));
     }
     
     @Override
@@ -63,7 +59,7 @@ public abstract class HeatExchangerBaseBlock extends ModularBlock implements IRe
     public InteractionResult onUse(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult) {
         if (hand == InteractionHand.MAIN_HAND && state.hasProperty(ASSEMBLED) && state.getValue(ASSEMBLED)) {
             if (level.getBlockEntity(pos) instanceof MenuProvider menuProvider) {
-                if (!level.isClientSide) {
+                if (!level.isClientSide()) {
                     player.openMenu(menuProvider, pos);
                 }
                 return InteractionResult.SUCCESS;

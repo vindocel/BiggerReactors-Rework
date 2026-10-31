@@ -5,17 +5,31 @@ import biggerreactorsrework.client.FluidBoxRenderer;
 import biggerreactorsrework.core.util.FluidPath;
 import biggerreactorsrework.multiblocks.heatexchanger.tiles.*;
 import com.mojang.blaze3d.vertex.PoseStack;
-import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.blockentity.*;
+import net.minecraft.client.renderer.blockentity.state.BlockEntityRenderState;
+import net.minecraft.client.renderer.feature.ModelFeatureRenderer;
+import net.minecraft.client.renderer.state.level.CameraRenderState;
+import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.world.phys.Vec3;
 
 /** Shared measuring bar along the full circuit, including bends. Modified 2026-10-25. */
-public final class HeatExchangerFluidRenderer implements BlockEntityRenderer<HeatExchangerChannelTile> {
+public final class HeatExchangerFluidRenderer implements BlockEntityRenderer<HeatExchangerChannelTile,HeatExchangerFluidRenderer.State> {
+    public static final class State extends BlockEntityRenderState {
+        final java.util.List<FluidBoxRenderer.Volume> volumes=new java.util.ArrayList<>();
+    }
+    @Override public State createRenderState(){return new State();}
+    @Override public void submit(State state,PoseStack pose,SubmitNodeCollector collector,CameraRenderState camera){
+        FluidBoxRenderer.draw(pose,collector,state.volumes,state.lightCoords,OverlayTexture.NO_OVERLAY);
+    }
     public HeatExchangerFluidRenderer(BlockEntityRendererProvider.Context context) { }
-    public void render(HeatExchangerChannelTile tile,float partial,PoseStack pose,MultiBufferSource buffers,int light,int overlay) {
+    @Override public void extractRenderState(HeatExchangerChannelTile tile,State state,float partial,Vec3 camera,ModelFeatureRenderer.CrumblingOverlay progress) {
+        BlockEntityRenderer.super.extractRenderState(tile,state,partial,camera,progress);
+        state.volumes.clear();
         var root=tile.renderTerminal();if(root==null || tile.coolantPathLength<=0)return;
         var view=tile.CONDENSER?root.primaryView:root.secondaryView;
         // Modified 2026-10-27: one exterior mesh for both phases and all bend pieces.
-        var volumes=new java.util.ArrayList<FluidBoxRenderer.Volume>();
+        var volumes=state.volumes;
         for(boolean product:new boolean[]{false,true}) {
             var span=FluidPath.span(view.inputFill(),view.outputFill(),tile.coolantPathIndex,tile.coolantPathLength,product);
             var stack=CoolantVisuals.stack(product?view.output():view.input(),product?view.outputOrigin():view.inputOrigin());
@@ -28,7 +42,6 @@ public final class HeatExchangerFluidRenderer implements BlockEntityRenderer<Hea
                 volumes.add(new FluidBoxRenderer.Volume(stack,geometry,hidden));
             }
         }
-        FluidBoxRenderer.draw(pose,buffers,volumes,light,overlay);
     }
     private static boolean touches(biggerreactorsrework.core.util.FluidSurfaceMesh.Box box,net.minecraft.core.Direction face) {
         int axis=switch(face.getAxis()){case X->0;case Y->1;case Z->2;};

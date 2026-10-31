@@ -7,9 +7,7 @@
         }
     ],
     "ingredients": {
-        "middle": {
-            "item": "biggerreactorsrework:uranium_ingot"
-        }
+        "middle": "biggerreactorsrework:uranium_ingot"
     },
     "mode": "inscribe",
     "result": {

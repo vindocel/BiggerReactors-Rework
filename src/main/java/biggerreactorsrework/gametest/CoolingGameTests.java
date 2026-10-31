@@ -15,8 +15,6 @@ import net.minecraft.world.level.material.Fluids;
 import net.neoforged.neoforge.gametest.*;
 
 /** Real registered fluids and production simulation; no client or optional mod required. */
-@GameTestHolder(BiggerReactors.modid)
-@PrefixGameTestTemplate(false)
 public final class CoolingGameTests {
     private static TimeSlicedReactorSimulation reactor(int sides,boolean strongSolid) {
         var d=OperationGameTests.description(3);

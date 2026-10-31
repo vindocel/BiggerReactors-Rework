@@ -114,6 +114,12 @@ public class FuelTank implements IReactorSimulation.IFuelTank, ISerializable {
     }
     
     @Override
+    public void restoreStored(long fuel, long waste) {
+        this.fuel = fuel;
+        this.waste = waste;
+    }
+
+    @Override
     public double burnedLastTick() {
         return burnedLastTick;
     }

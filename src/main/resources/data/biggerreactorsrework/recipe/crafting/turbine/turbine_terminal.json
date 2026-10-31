@@ -6,15 +6,9 @@
     "C C"
   ],
   "key": {
-    "C" : {
-      "item": "biggerreactorsrework:turbine_casing"
-    },
-    "B": {
-      "item": "biggerreactorsrework:blutonium_ingot"
-    },
-    "D": {
-      "item": "minecraft:diamond"
-    }
+    "C": "biggerreactorsrework:turbine_casing",
+    "B": "biggerreactorsrework:blutonium_ingot",
+    "D": "minecraft:diamond"
   },
   "result": {
     "id": "biggerreactorsrework:turbine_terminal"

@@ -10,7 +10,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 import javax.annotation.Nullable;
 import java.text.NumberFormat;
@@ -59,20 +59,20 @@ final class CalculatorReport {
     }
 
     static Component blockName(String id) {
-        var key = ResourceLocation.tryParse(id);
-        if (key != null && BuiltInRegistries.BLOCK.containsKey(key)) return BuiltInRegistries.BLOCK.get(key).getName();
+        var key = Identifier.tryParse(id);
+        if (key != null && BuiltInRegistries.BLOCK.containsKey(key)) return BuiltInRegistries.BLOCK.getValue(key).getName();
         return Component.literal(id);
     }
 
     static Component fluidName(String id) {
-        var key = ResourceLocation.tryParse(id);
-        if (key != null && BuiltInRegistries.FLUID.containsKey(key)) return BuiltInRegistries.FLUID.get(key).getFluidType().getDescription();
+        var key = Identifier.tryParse(id);
+        if (key != null && BuiltInRegistries.FLUID.containsKey(key)) return BuiltInRegistries.FLUID.getValue(key).getFluidType().getDescription();
         return Component.literal(id);
     }
 
     static Component itemName(String id) {
-        var key = ResourceLocation.tryParse(id);
-        if (key != null && BuiltInRegistries.ITEM.containsKey(key)) return BuiltInRegistries.ITEM.get(key).getDescription();
+        var key = Identifier.tryParse(id);
+        if (key != null && BuiltInRegistries.ITEM.containsKey(key)) return BuiltInRegistries.ITEM.getValue(key).getName(BuiltInRegistries.ITEM.getValue(key).getDefaultInstance());
         return Component.literal(id);
     }
 

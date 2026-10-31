@@ -1,22 +1,87 @@
 {
-    "textures": {
-        "0": "biggerreactorsrework:block/fluid/liquid_uranium_flowing",
-        "1": "biggerreactorsrework:block/fluid/liquid_uranium_still"
-    },
-    "elements": [
-        {
-            "from": [0.02, 0, 0.02],
-            "to": [15.98, 12.98, 15.98],
-            "rotation": {"angle": 0, "axis": "y", "origin": [4, 8, 4]},
-            "faces": {
-                "north": {"uv": [0, 0, 16, 13], "texture": "#0"},
-                "east": {"uv": [0, 0, 16, 13], "texture": "#0"},
-                "south": {"uv": [0, 0, 16, 13], "texture": "#0"},
-                "west": {"uv": [0, 0, 16, 13], "texture": "#0"},
-                "up": {"uv": [0, 0, 16, 16], "texture": "#1"},
-                "down": {"uv": [0, 0, 16, 16], "texture": "#1"}
-            }
+  "textures": {
+    "0": "biggerreactorsrework:block/fluid/liquid_uranium_flowing",
+    "1": "biggerreactorsrework:block/fluid/liquid_uranium_still",
+    "particle": "#1"
+  },
+  "elements": [
+    {
+      "from": [
+        0.02,
+        0,
+        0.02
+      ],
+      "to": [
+        15.98,
+        12.98,
+        15.98
+      ],
+      "rotation": {
+        "angle": 0,
+        "axis": "y",
+        "origin": [
+          4,
+          8,
+          4
+        ]
+      },
+      "faces": {
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            13
+          ],
+          "texture": "#0"
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            16,
+            13
+          ],
+          "texture": "#0"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            13
+          ],
+          "texture": "#0"
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            16,
+            13
+          ],
+          "texture": "#0"
+        },
+        "up": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#1"
+        },
+        "down": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#1"
         }
-    ],
-    "display": {}
+      }
+    }
+  ],
+  "display": {}
 }

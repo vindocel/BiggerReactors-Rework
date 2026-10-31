@@ -5,12 +5,8 @@
     "GCG"
   ],
   "key": {
-    "G": {
-      "item": "minecraft:glass"
-    },
-    "C": {
-      "item": "biggerreactorsrework:battery_casing"
-    }
+    "G": "minecraft:glass",
+    "C": "biggerreactorsrework:battery_casing"
   },
   "result": {
     "id": "biggerreactorsrework:battery_glass"

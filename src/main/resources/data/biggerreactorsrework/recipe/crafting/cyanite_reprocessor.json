@@ -1,29 +1,18 @@
 {
-  "neoforge:conditions": [ { "type": "neoforge:item_exists", "item": "biggerreactorsrework:cyanite_reprocessor" } ],
-    "type": "minecraft:crafting_shaped",
-    "pattern": [
-        "CIC",
-        "PFP",
-        "CRC"
-    ],
-    "key": {
-        "C": {
-            "item": "biggerreactorsrework:reactor_casing"
-        },
-        "I": {
-            "item": "minecraft:iron_ingot"
-        },
-        "F": {
-            "item": "biggerreactorsrework:reactor_fuel_rod"
-        },
-        "P": {
-            "item": "minecraft:piston"
-        },
-        "R": {
-            "item": "minecraft:redstone"
-        }
-    },
-    "result": {
-        "id": "biggerreactorsrework:cyanite_reprocessor"
-    }
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "CIC",
+    "PFP",
+    "CRC"
+  ],
+  "key": {
+    "C": "biggerreactorsrework:reactor_casing",
+    "I": "minecraft:iron_ingot",
+    "F": "biggerreactorsrework:reactor_fuel_rod",
+    "P": "minecraft:piston",
+    "R": "minecraft:redstone"
+  },
+  "result": {
+    "id": "biggerreactorsrework:cyanite_reprocessor"
+  }
 }

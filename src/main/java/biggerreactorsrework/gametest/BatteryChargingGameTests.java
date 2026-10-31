@@ -14,11 +14,9 @@ import net.minecraft.world.item.*;
 import net.minecraft.world.item.component.CustomData;
 import net.neoforged.neoforge.gametest.*;
 import net.neoforged.neoforge.capabilities.*;
-import net.neoforged.neoforge.energy.IEnergyStorage;
+import biggerreactorsrework.core.transfer.EnergyStore;
 
 /** Modified 2026-10-27: native item capabilities, real menus and the shared battery budget. Test-only registration. */
-@GameTestHolder(BiggerReactors.modid)
-@PrefixGameTestTemplate(false)
 public final class BatteryChargingGameTests {
     @OnModLoad
     private static void register() {
@@ -26,14 +24,16 @@ public final class BatteryChargingGameTests {
             net.neoforged.fml.ModLoadingContext.get().getActiveContainer().getEventBus().addListener(BatteryChargingGameTests::capabilities);
     }
     private static void capabilities(RegisterCapabilitiesEvent event) {
-        event.registerItem(Capabilities.EnergyStorage.ITEM,(stack,context)->new IEnergyStorage() {
-            public int getEnergyStored(){return stack.getOrDefault(DataComponents.CUSTOM_DATA,CustomData.EMPTY).copyTag().getInt("testFE");}
-            public int getMaxEnergyStored(){return 10000;}
-            public boolean canReceive(){return true;}
-            public boolean canExtract(){return true;}
-            private void set(int value){var tag=stack.getOrDefault(DataComponents.CUSTOM_DATA,CustomData.EMPTY).copyTag();tag.putInt("testFE",value);stack.set(DataComponents.CUSTOM_DATA,CustomData.of(tag));}
-            public int receiveEnergy(int max,boolean simulate){int n=Math.min(max,10000-getEnergyStored());if(!simulate)set(getEnergyStored()+n);return n;}
-            public int extractEnergy(int max,boolean simulate){int n=Math.min(max,getEnergyStored());if(!simulate)set(getEnergyStored()-n);return n;}
+        event.registerItem(Capabilities.Energy.ITEM,(stack,access)->new net.neoforged.neoforge.transfer.energy.EnergyHandler() {
+            private int stored(){return access.getResource().getOrDefault(DataComponents.CUSTOM_DATA,CustomData.EMPTY).copyTag().getIntOr("testFE",0);}
+            private boolean set(int value,net.neoforged.neoforge.transfer.transaction.TransactionContext transaction){
+                var tag=new net.minecraft.nbt.CompoundTag();tag.putInt("testFE",value);
+                return access.exchange(access.getResource().with(DataComponents.CUSTOM_DATA,CustomData.of(tag)),1,transaction)==1;
+            }
+            public long getAmountAsLong(){return stored();}
+            public long getCapacityAsLong(){return 10000;}
+            public int insert(int max,net.neoforged.neoforge.transfer.transaction.TransactionContext transaction){int n=Math.min(max,10000-stored());return n>0&&set(stored()+n,transaction)?n:0;}
+            public int extract(int max,net.neoforged.neoforge.transfer.transaction.TransactionContext transaction){int n=Math.min(max,stored());return n>0&&set(stored()-n,transaction)?n:0;}
         },Items.DIAMOND_HELMET,Items.SHIELD);
     }
     private static void set(Object target,String name,long value) {
@@ -46,9 +46,9 @@ public final class BatteryChargingGameTests {
             h.setBlock(x,y,z,x==2&&y==2&&z==2?BatteryCell.INSTANCE:BatteryCasing.INSTANCE);
         h.setBlock(1,2,2,BatteryTerminal.INSTANCE);
         h.setBlock(2,2,1,BatteryEnergyPort.INSTANCE);h.setBlock(2,2,3,BatteryEnergyPort.INSTANCE);
-        h.startSequence().thenWaitUntil(()->h.assertTrue(((BatteryTerminalTile)h.getBlockEntity(new BlockPos(1,2,2))).isBatteryAssembled(),"battery not ready"))
+        h.startSequence().thenWaitUntil(()->h.assertTrue(((BatteryTerminalTile)GameTestSupport.be(h,new BlockPos(1,2,2))).isBatteryAssembled(),"battery not ready"))
           .thenExecute(()->{
-            var tile=(BatteryTerminalTile)h.getBlockEntity(new BlockPos(1,2,2));var c=tile.controller();
+            var tile=(BatteryTerminalTile)GameTestSupport.be(h,new BlockPos(1,2,2));var c=tile.controller();
             var player=net.neoforged.neoforge.common.util.FakePlayerFactory.getMinecraft(h.getLevel());
             var pos=h.absolutePos(new BlockPos(2,2,2));player.setPos(pos.getX(),pos.getY(),pos.getZ());
             var helmet=new ItemStack(Items.DIAMOND_HELMET);var shield=new ItemStack(Items.SHIELD);

@@ -10,14 +10,13 @@ import biggerreactorsrework.registries.FluidTransitionRegistry;
 import biggerreactorsrework.registries.ReactorModeratorRegistry;
 import biggerreactorsrework.registries.TurbineCoilRegistry;
 import net.minecraft.ChatFormatting;
-import net.minecraft.Util;
+import net.minecraft.util.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.FastColor;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.AirBlock;
@@ -98,7 +97,7 @@ public final class RecipeViewerData {
             result.add(new HeatExchange(coolant.output().copy(),coolant.input().copy(),coolant.temperature(),false,coolant.profile()));
         return List.copyOf(result);
     }
-    public static ResourceLocation heatExchangeId(HeatExchange recipe) {
+    public static Identifier heatExchangeId(HeatExchange recipe) {
         return net.minecraft.core.registries.BuiltInRegistries.FLUID.getKey((recipe.evaporation()?recipe.input():recipe.output()).getFluid());
     }
 
@@ -125,7 +124,7 @@ public final class RecipeViewerData {
             return height() - 18;
         }
 
-        public void draw(GuiGraphics g) {
+        public void draw(GuiGraphicsExtractor g) {
             Font font = Minecraft.getInstance().font;
             GuiArt.slot(g, 0, inputY(), 18);
             GuiArt.slot(g, 0, outputY(), 18);
@@ -263,20 +262,20 @@ public final class RecipeViewerData {
             return (height(stats) - 18) / 2;
         }
 
-        public static void draw(GuiGraphics g, List<Stat> stats) {
+        public static void draw(GuiGraphicsExtractor g, List<Stat> stats) {
             GuiArt.slot(g, 0, slotY(stats), 18);
             drawRows(g, stats, 0, WIDTH);
         }
 
         /** The rows only, from {@code top}, with the values ending at {@code width}. */
-        public static void drawRows(GuiGraphics g, List<Stat> stats, int top, int width) {
+        public static void drawRows(GuiGraphicsExtractor g, List<Stat> stats, int top, int width) {
             Font font = Minecraft.getInstance().font;
             int text = GuiTheme.textColor();
             for (int i = 0; i < stats.size(); i++) {
                 Stat stat = stats.get(i);
                 int y = top + i * ROW + 2;
                 GuiArt.scrollingText(g, font, Component.translatable(KEY + stat.name()).getString(), LABEL_X, y, MARK_X - LABEL_X - 2, text);
-                g.drawString(font, mark(stat), MARK_X, y, color(stat), false);
+                g.text(font, mark(stat), MARK_X, y, color(stat), false);
                 int barY = y + 1;
                 // Modified 2026-10-27: neutral property-bar chrome follows the active drawing theme.
                 g.fill(BAR_X - 1, barY - 1, BAR_X + BAR_WIDTH + 1, barY + BAR_HEIGHT + 1, GuiTheme.chromeColor(BAR_FRAME));
@@ -286,9 +285,9 @@ public final class RecipeViewerData {
                     fill = Math.max(1, fill);
                 }
                 g.fill(BAR_X, barY, BAR_X + fill, barY + BAR_HEIGHT, color(stat));
-                g.fill(BAR_X, barY, BAR_X + fill, barY + 1, FastColor.ARGB32.lerp(0.35f, color(stat), GuiArt.WHITE));
+                g.fill(BAR_X, barY, BAR_X + fill, barY + 1, net.minecraft.util.ARGB.srgbLerp(0.35f, color(stat), GuiArt.WHITE));
                 String value = display(stat);
-                g.drawString(font, value, width - font.width(value), y, text, false);
+                g.text(font, value, width - font.width(value), y, text, false);
             }
         }
 
@@ -328,13 +327,13 @@ public final class RecipeViewerData {
                     lines.add(Component.translatable(KEY + "average").withStyle(ChatFormatting.YELLOW));
                 }
             }
-            if (I18n.exists(key + ".pro")) {
+            if (net.minecraft.locale.Language.getInstance().has(key + ".pro")) {
                 lines.add(Component.translatable(key + ".pro").withStyle(ChatFormatting.GREEN));
             }
-            if (I18n.exists(key + ".con")) {
+            if (net.minecraft.locale.Language.getInstance().has(key + ".con")) {
                 lines.add(Component.translatable(key + ".con").withStyle(ChatFormatting.RED));
             }
-            if (I18n.exists(key + ".note")) {
+            if (net.minecraft.locale.Language.getInstance().has(key + ".note")) {
                 lines.add(Component.translatable(key + ".note").withStyle(ChatFormatting.GOLD));
             }
             return lines;
@@ -352,7 +351,7 @@ public final class RecipeViewerData {
                 return TRADE_OFF;
             }
             double rank = stat.rank();
-            return rank < 0.5 ? FastColor.ARGB32.lerp((float) (rank * 2), LOW, MIDDLE) : FastColor.ARGB32.lerp((float) (rank * 2 - 1), MIDDLE, HIGH);
+            return rank < 0.5 ? net.minecraft.util.ARGB.srgbLerp((float) (rank * 2), LOW, MIDDLE) : net.minecraft.util.ARGB.srgbLerp((float) (rank * 2 - 1), MIDDLE, HIGH);
         }
 
         private static String display(Stat stat) {
@@ -406,9 +405,9 @@ public final class RecipeViewerData {
             return (long) Config.CONFIG.CyaniteReprocessor.WaterConsumptionPerTick * ticks();
         }
 
-        public static void draw(GuiGraphics g) { draw(g, null); }
+        public static void draw(GuiGraphicsExtractor g) { draw(g, null); }
 
-        public static void draw(GuiGraphics g, biggerreactorsrework.machine.recipe.ReprocessingRecipe recipe) {
+        public static void draw(GuiGraphicsExtractor g, biggerreactorsrework.machine.recipe.ReprocessingRecipe recipe) {
             long energy = recipe == null ? energy() : (long)recipe.energy()*recipe.duration();
             long water = recipe == null ? water() : recipe.totalFluid();
             int ticks = recipe == null ? ticks() : recipe.duration();

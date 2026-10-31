@@ -3,11 +3,51 @@
     "assembled=false": {
       "model": "biggerreactorsrework:block/turbine/power_tap/disassembled"
     },
-    "assembled=true,connectionstate=disconnected": {
-      "model": "biggerreactorsrework:block/turbine/power_tap/disconnected"
+    "assembled=true,connectionstate=disconnected,facing=north": {
+      "model": "biggerreactorsrework:block/turbine/power_tap/disconnected_assembled"
     },
-    "assembled=true,connectionstate=connected": {
-      "model": "biggerreactorsrework:block/turbine/power_tap/connected"
+    "assembled=true,connectionstate=disconnected,facing=south": {
+      "model": "biggerreactorsrework:block/turbine/power_tap/disconnected_assembled",
+      "y": 180
+    },
+    "assembled=true,connectionstate=disconnected,facing=east": {
+      "model": "biggerreactorsrework:block/turbine/power_tap/disconnected_assembled",
+      "y": 90
+    },
+    "assembled=true,connectionstate=disconnected,facing=west": {
+      "model": "biggerreactorsrework:block/turbine/power_tap/disconnected_assembled",
+      "y": 270
+    },
+    "assembled=true,connectionstate=disconnected,facing=up": {
+      "model": "biggerreactorsrework:block/turbine/power_tap/disconnected_assembled",
+      "x": 270
+    },
+    "assembled=true,connectionstate=disconnected,facing=down": {
+      "model": "biggerreactorsrework:block/turbine/power_tap/disconnected_assembled",
+      "x": 90
+    },
+    "assembled=true,connectionstate=connected,facing=north": {
+      "model": "biggerreactorsrework:block/turbine/power_tap/connected_assembled"
+    },
+    "assembled=true,connectionstate=connected,facing=south": {
+      "model": "biggerreactorsrework:block/turbine/power_tap/connected_assembled",
+      "y": 180
+    },
+    "assembled=true,connectionstate=connected,facing=east": {
+      "model": "biggerreactorsrework:block/turbine/power_tap/connected_assembled",
+      "y": 90
+    },
+    "assembled=true,connectionstate=connected,facing=west": {
+      "model": "biggerreactorsrework:block/turbine/power_tap/connected_assembled",
+      "y": 270
+    },
+    "assembled=true,connectionstate=connected,facing=up": {
+      "model": "biggerreactorsrework:block/turbine/power_tap/connected_assembled",
+      "x": 270
+    },
+    "assembled=true,connectionstate=connected,facing=down": {
+      "model": "biggerreactorsrework:block/turbine/power_tap/connected_assembled",
+      "x": 90
     }
   }
 }

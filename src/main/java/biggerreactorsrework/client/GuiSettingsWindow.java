@@ -2,12 +2,11 @@ package biggerreactorsrework.client;
 
 import biggerreactorsrework.core.client.gui.screens.ModScreen;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Mth;
-import org.lwjgl.glfw.GLFW;
 
 /** Shared, draggable appearance popup. Input is intercepted before machine controls and inventory slots. */
 public final class GuiSettingsWindow {
@@ -67,7 +66,7 @@ public final class GuiSettingsWindow {
     private int closeY() { return y() + 6; }
 
     /** The tab belongs to the machine background, below item counts and auxiliary windows. */
-    public void renderTab(GuiGraphics g, int mouseX, int mouseY) {
+    public void renderTab(GuiGraphicsExtractor g, int mouseX, int mouseY) {
         if (!screen.hasAppearanceSettings()) return;
         int tabX = screen.settingsTabX(), tabY = screen.settingsTabY();
         screen.getFrame().ear(g, tabX, tabY, screen.hasStatistics() ? GuiStatisticsWindow.TAB_PITCH + GuiFrame.TAB_SIZE : GuiFrame.TAB_SIZE, true);
@@ -77,15 +76,14 @@ public final class GuiSettingsWindow {
                 tabY + GuiFrame.TAB_BUTTON_TOP + (GuiFrame.TAB_BUTTON - GuiIcon.SETTINGS.height()) / 2 + 1);
     }
 
-    public void render(GuiGraphics g, int mouseX, int mouseY) {
+    public void render(GuiGraphicsExtractor g, int mouseX, int mouseY) {
         if (!screen.hasAppearanceSettings()) return;
         rendering = true;
-        g.pose().pushPose();
-        g.flush();
-        g.pose().translate(0, 0, 800);
+        g.pose().pushMatrix();
+        g.pose().translate(0, 0);
         try {
             if (!open) {
-                if (onTab(mouseX, mouseY)) g.renderTooltip(screen.getFont(), text("title"), mouseX, mouseY);
+                if (onTab(mouseX, mouseY)) g.setTooltipForNextFrame(screen.getFont(), text("title"), mouseX, mouseY);
                 return;
             }
             int x = x(), y = y();
@@ -93,7 +91,7 @@ public final class GuiSettingsWindow {
             GuiArt.scrollingText(g, screen.getFont(), text("title").getString(), x + 8, y + 8, WIDTH - 38, GuiTheme.textColor());
             GuiArt.button(g, closeX(), closeY(), CLOSE_WIDTH, CLOSE_HEIGHT,
                     focus == 3 || inside(mouseX, mouseY, closeX(), closeY(), CLOSE_WIDTH, CLOSE_HEIGHT), GuiIcon.CLOSE, screen.getFrame());
-            g.drawString(screen.getFont(), text("background"), x + 12, y + 28, GuiTheme.textColor(), false);
+            g.text(screen.getFont(), text("background"), x + 12, y + 28, GuiTheme.textColor(), false);
             boolean dark = GuiThemes.dark(screen.machinePos());
             choice(g, x + 12, y + 42, GuiTheme.LIGHT_PANEL, !dark, "light", 0, mouseX, mouseY);
             choice(g, x + 100, y + 42, GuiTheme.DARK_PANEL, dark, "dark", 1, mouseX, mouseY);
@@ -104,17 +102,16 @@ public final class GuiSettingsWindow {
             GuiArt.scrollingText(g, screen.getFont(), text("all").getString(), x + 32, y + 83, WIDTH - 48, 0xFFFFFFFF);
             if (focus == 2) GuiArt.ring(g, x + 12, y + 78, 18, 0xFFACDC42);
             if (inside(mouseX, mouseY, x + 12, y + 78, WIDTH - 24, 18)) {
-                g.renderTooltip(screen.getFont(), text(all ? "all.on" : "all.off"), mouseX, mouseY);
+                g.setTooltipForNextFrame(screen.getFont(), text(all ? "all.on" : "all.off"), mouseX, mouseY);
             }
             if (hasSound()) volume(g, x, y, mouseX, mouseY);
         } finally {
-            g.flush();
-            g.pose().popPose();
+            g.pose().popMatrix();
             rendering = false;
         }
     }
 
-    private void choice(GuiGraphics g, int x, int y, int color, boolean selected, String label, int index, int mx, int my) {
+    private void choice(GuiGraphicsExtractor g, int x, int y, int color, boolean selected, String label, int index, int mx, int my) {
         GuiArt.buttonBackground(g, x, y, 78, 22, inside(mx, my, x, y, 78, 22), selected, false, screen.getFrame());
         g.fill(x + 4, y + 4, x + 18, y + 18, color);
         if (selected) GuiIcon.CONFIRM.draw(g, x + 8, y + 7);
@@ -122,23 +119,23 @@ public final class GuiSettingsWindow {
         if (focus == index) GuiArt.ring(g, x + 3, y + 3, 16, 0xFFACDC42);
     }
 
-    private void volume(GuiGraphics g, int x, int y, int mx, int my) {
+    private void volume(GuiGraphicsExtractor g, int x, int y, int mx, int my) {
         int value = GuiThemes.volume(screen.machinePos());
         Component level = value == 0 ? text("volume.mute") : Component.literal(value + "%");
-        g.drawString(screen.getFont(), Component.translatable("screen.biggerreactorsrework.settings.volume", level), x + 12, y + 105, GuiTheme.textColor(), false);
+        g.text(screen.getFont(), Component.translatable("screen.biggerreactorsrework.settings.volume", level), x + 12, y + 105, GuiTheme.textColor(), false);
         for (int i = 0; i < 12; i++) {
             int bx = x + 12 + i * 14;
             boolean selected = i > 0 && i < 11 && value >= i * 10;
             GuiArt.buttonBackground(g, bx, y + 122, 12, 18, inside(mx, my, bx, y + 122, 12, 18), selected, false, screen.getFrame());
             if (i == 0 || i == 11) {
-                g.drawString(screen.getFont(), i == 0 ? "−" : "+", bx + 3, y + 127, 0xFFFFFFFF, false);
+                g.text(screen.getFont(), i == 0 ? "−" : "+", bx + 3, y + 127, 0xFFFFFFFF, false);
                 if (focus == (i == 0 ? 4 : 5)) GuiArt.ring(g, bx, y + 122, 12, 18, 0xFFACDC42);
             } else g.fill(bx + 3, y + 126, bx + 9, y + 136, selected ? 0xFF36CFEE : 0xFF44545B);
         }
         if (inside(mx, my, x + 12, y + 103, 166, 37)) {
             String help = inside(mx, my, x + 12, y + 122, 12, 18) ? "volume.decrease"
                     : inside(mx, my, x + 166, y + 122, 12, 18) ? "volume.increase" : "volume.help";
-            g.renderTooltip(screen.getFont(), text(help), mx, my);
+            g.setTooltipForNextFrame(screen.getFont(), text(help), mx, my);
         }
     }
 
@@ -150,7 +147,7 @@ public final class GuiSettingsWindow {
     public boolean mousePressed(double mx, double my, int button) {
         if (!contains(mx, my)) return false;
         consumeRelease = true;
-        if (button != 0) return true;
+        if (button != com.mojang.blaze3d.platform.InputConstants.MOUSE_BUTTON_LEFT) return true;
         if (onTab(mx, my)) {
             open = !open;
             dragging = false;
@@ -217,14 +214,14 @@ public final class GuiSettingsWindow {
 
     public boolean keyPressed(int keyCode, int modifiers) {
         if (!open) return false;
-        if (keyCode == GLFW.GLFW_KEY_ESCAPE) { open = false; dragging = false; volumeDragging = false; }
-        else if (keyCode == GLFW.GLFW_KEY_TAB) focus = Math.floorMod(focus + ((modifiers & GLFW.GLFW_MOD_SHIFT) == 0 ? 1 : -1), choices());
-        else if (hasSound() && focus >= 4 && (keyCode == GLFW.GLFW_KEY_LEFT || keyCode == GLFW.GLFW_KEY_RIGHT)) {
-            GuiThemes.setVolume(screen.machinePos(), GuiThemes.volume(screen.machinePos()) + (keyCode == GLFW.GLFW_KEY_LEFT ? -10 : 10));
+        if (keyCode == com.mojang.blaze3d.platform.InputConstants.KEY_ESCAPE) { open = false; dragging = false; volumeDragging = false; }
+        else if (keyCode == com.mojang.blaze3d.platform.InputConstants.KEY_TAB) focus = Math.floorMod(focus + ((modifiers & 1) == 0 ? 1 : -1), choices());
+        else if (hasSound() && focus >= 4 && (keyCode == com.mojang.blaze3d.platform.InputConstants.KEY_LEFT || keyCode == com.mojang.blaze3d.platform.InputConstants.KEY_RIGHT)) {
+            GuiThemes.setVolume(screen.machinePos(), GuiThemes.volume(screen.machinePos()) + (keyCode == com.mojang.blaze3d.platform.InputConstants.KEY_LEFT ? -10 : 10));
         }
-        else if (keyCode == GLFW.GLFW_KEY_LEFT || keyCode == GLFW.GLFW_KEY_UP) focus = Math.floorMod(focus - 1, choices());
-        else if (keyCode == GLFW.GLFW_KEY_RIGHT || keyCode == GLFW.GLFW_KEY_DOWN) focus = (focus + 1) % choices();
-        else if (keyCode == GLFW.GLFW_KEY_ENTER || keyCode == GLFW.GLFW_KEY_KP_ENTER || keyCode == GLFW.GLFW_KEY_SPACE) activate(focus);
+        else if (keyCode == com.mojang.blaze3d.platform.InputConstants.KEY_LEFT || keyCode == com.mojang.blaze3d.platform.InputConstants.KEY_UP) focus = Math.floorMod(focus - 1, choices());
+        else if (keyCode == com.mojang.blaze3d.platform.InputConstants.KEY_RIGHT || keyCode == com.mojang.blaze3d.platform.InputConstants.KEY_DOWN) focus = (focus + 1) % choices();
+        else if (keyCode == com.mojang.blaze3d.platform.InputConstants.KEY_RETURN || keyCode == com.mojang.blaze3d.platform.InputConstants.KEY_NUMPADENTER || keyCode == com.mojang.blaze3d.platform.InputConstants.KEY_SPACE) activate(focus);
         return true;
     }
 

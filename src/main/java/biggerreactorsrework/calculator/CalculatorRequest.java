@@ -1,7 +1,7 @@
 package biggerreactorsrework.calculator;
 
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 import javax.annotation.Nullable;
 
@@ -27,13 +27,13 @@ public record CalculatorRequest(long target, String fuel, boolean liquid, String
     /** Null when the tag is malformed or out of range. */
     @Nullable
     public static CalculatorRequest fromTag(CompoundTag tag) {
-        long target = tag.getLong("target");
-        String material = tag.getString("material"), coil = tag.getString("coil"), fingerprint = tag.getString("fingerprint");
-        String fuel = tag.getString("fuel");
+        long target = tag.getLongOr("target", 0L);
+        String material = tag.getStringOr("material", ""), coil = tag.getStringOr("coil", ""), fingerprint = tag.getStringOr("fingerprint", "");
+        String fuel = tag.getStringOr("fuel", "");
         if (target <= 0 || target > MAX_TARGET || material.length() > MAX_ID || coil.length() > MAX_ID || fuel.length() > MAX_ID || fingerprint.length() > 64) return null;
-        if (ResourceLocation.tryParse(material) == null || ResourceLocation.tryParse(fuel) == null) return null;
-        boolean liquid = tag.getBoolean("liquid");
-        if (liquid && ResourceLocation.tryParse(coil) == null) return null;
+        if (Identifier.tryParse(material) == null || Identifier.tryParse(fuel) == null) return null;
+        boolean liquid = tag.getBooleanOr("liquid", false);
+        if (liquid && Identifier.tryParse(coil) == null) return null;
         return new CalculatorRequest(target, fuel, liquid, material, liquid ? coil : "", fingerprint);
     }
 }

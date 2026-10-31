@@ -7,7 +7,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.MenuType;
@@ -74,11 +74,11 @@ public class Registry {
     private final WorkQueue itemRegistrationQueue = new WorkQueue();
     private RegisterEvent.RegisterHelper<Item> itemRegistryEvent;
     
-    private final ResourceLocation creativeTabResourceLocation;
+    private final Identifier creativeTabResourceLocation;
     private final Component creativeTabTitle;
     private Item itemGroupItem = Items.STONE;
-    private List<ResourceLocation> tabsBefore;
-    private List<ResourceLocation> tabsAfter;
+    private List<Identifier> tabsBefore;
+    private List<Identifier> tabsAfter;
     private final ObjectArrayList<Item> creativeTabItems = new ObjectArrayList<>();
     
     private final WorkQueue fluidRegistrationQueue = new WorkQueue();
@@ -105,7 +105,7 @@ public class Registry {
     /**
      * Textures and tint of every registered fluid type, consumed by the client to register its render extensions.
      */
-    public record FluidClientInfo(FluidType type, ResourceLocation stillTexture, ResourceLocation flowingTexture, ResourceLocation overlayTexture, int tintColor) {
+    public record FluidClientInfo(FluidType type, Identifier stillTexture, Identifier flowingTexture, Identifier overlayTexture, int tintColor) {
     }
     
     public static final List<FluidClientInfo> FLUID_CLIENT_INFO = new ObjectArrayList<>();
@@ -124,15 +124,15 @@ public class Registry {
      * @param modNamespace registry namespace, also the mod id whose scan data is read
      * @param rootPackage  only annotations on classes inside this package are handled
      */
-    public Registry(String modNamespace, String rootPackage, IEventBus modBus, @Nonnull List<ResourceLocation> tabsBefore, @Nonnull List<ResourceLocation> tabsAfter) {
+    public Registry(String modNamespace, String rootPackage, IEventBus modBus, @Nonnull List<Identifier> tabsBefore, @Nonnull List<Identifier> tabsAfter) {
         String callerPackage = rootPackage;
-        ModFileScanData modFileScanData = FMLLoader.getLoadingModList().getModFileById(modNamespace).getFile().getScanResult();
+        ModFileScanData modFileScanData = FMLLoader.getCurrent().getLoadingModList().getModFileById(modNamespace).getFile().getScanResult();
 
         LOGGER = LogManager.getLogger("BiggerReactors-Rework/Registry");
         
-        creativeTabResourceLocation = ResourceLocation.fromNamespaceAndPath(modNamespace, "creative_tab");
+        creativeTabResourceLocation = Identifier.fromNamespaceAndPath(modNamespace, "creative_tab");
         creativeTabTitle = Component.translatable("item_group." + modNamespace);
-        tabsBefore.add(CreativeModeTabs.SPAWN_EGGS.location());
+        tabsBefore.add(CreativeModeTabs.SPAWN_EGGS.identifier());
         this.tabsBefore = tabsBefore;
         this.tabsAfter = tabsAfter;
         
@@ -161,7 +161,7 @@ public class Registry {
         
         final var ignoredTypes = new ObjectArrayList<String>();
         
-        if (!FMLEnvironment.dist.isClient()) {
+        if (!FMLEnvironment.getDist().isClient()) {
             final var clientOnlyAnnotationClassName = ClientOnly.class.getName();
             for (ModFileScanData.AnnotationData annotation : modFileScanData.getAnnotations()) {
                 // sided checks must be done before classload, as that itself may be problematic
@@ -189,7 +189,7 @@ public class Registry {
         modBus.addListener(this::commonSetupEventHandler);
         modBus.addListener(this::registerCapabilitiesEventHandler);
         
-        if (FMLEnvironment.dist == Dist.CLIENT) {
+        if (FMLEnvironment.getDist() == Dist.CLIENT) {
             modBus.addListener(this::clientSetupEventHandler);
         }
     }
@@ -406,7 +406,7 @@ public class Registry {
                 tileBlocks.computeIfAbsent(annotation.tileEntityClass(), k -> new LinkedList<>()).add(block);
             }
             
-            blockRegistryEvent.register(ResourceLocation.parse(registryName), block);
+            blockRegistryEvent.register(Identifier.parse(registryName), block);
             
             if (LOGGER.isDebugEnabled()) {
                 LOGGER.debug("Block registered: " + registryName);
@@ -415,11 +415,11 @@ public class Registry {
             if (annotation.registerItem()) {
                 boolean creativeTabBlock = field.isAnnotationPresent(CreativeTabBlock.class);
                 itemRegistrationQueue.enqueue(() -> {
-                    var item = new BlockItem(block, new Item.Properties());
+                    var item = new BlockItem(block, new Item.Properties().setId(net.minecraft.resources.ResourceKey.create(net.minecraft.core.registries.Registries.ITEM, Identifier.parse(registryName))).useBlockDescriptionPrefix());
                     if (annotation.creativeTab()) {
                         creativeTabItems.add(item);
                     }
-                    itemRegistryEvent.register(ResourceLocation.parse(registryName), item);
+                    itemRegistryEvent.register(Identifier.parse(registryName), item);
                     if (creativeTabBlock) {
                         if (LOGGER.isDebugEnabled()) {
                             LOGGER.debug("Creative tab item set as " + registryName + " for mod " + modNamespace);
@@ -499,7 +499,7 @@ public class Registry {
                 creativeTabItems.add(item);
             }
             
-            itemRegistryEvent.register(ResourceLocation.parse(registryName), item);
+            itemRegistryEvent.register(Identifier.parse(registryName), item);
             
             if (LOGGER.isDebugEnabled()) {
                 LOGGER.debug("Item registered: " + registryName);
@@ -536,7 +536,7 @@ public class Registry {
             }
             
             final String baseRegistryName = modid + ":" + name;
-            final var baseResourceLocation = ResourceLocation.parse(baseRegistryName);
+            final var baseResourceLocation = Identifier.parse(baseRegistryName);
             
             ModFluid[] fluids = new ModFluid[2];
             Item[] bucketArray = new Item[1];
@@ -558,9 +558,9 @@ public class Registry {
                 }
             };
             FLUID_CLIENT_INFO.add(new FluidClientInfo(fluidType,
-                    ResourceLocation.fromNamespaceAndPath(modid, "block/fluid/" + name + "_still"),
-                    ResourceLocation.fromNamespaceAndPath(modid, "block/fluid/" + name + "_flowing"),
-                    ResourceLocation.fromNamespaceAndPath(modid, "block/fluid/" + name + "_overlay"),
+                    Identifier.fromNamespaceAndPath(modid, "block/fluid/" + name + "_still"),
+                    Identifier.fromNamespaceAndPath(modid, "block/fluid/" + name + "_flowing"),
+                    Identifier.fromNamespaceAndPath(modid, "block/fluid/" + name + "_overlay"),
                     annotation.color()));
             
             BaseFlowingFluid.Properties properties = new BaseFlowingFluid.Properties(() -> fluidType, stillSupplier, flowingSupplier);
@@ -585,7 +585,7 @@ public class Registry {
             
             fluids[0] = stillInstance;
             fluids[1] = flowingInstance;
-            blockArray[0] = new LiquidBlock(stillInstance, Block.Properties.of().noCollission().explosionResistance(100.0F).noLootTable());
+            blockArray[0] = new LiquidBlock(stillInstance, Block.Properties.of().setId(net.minecraft.resources.ResourceKey.create(net.minecraft.core.registries.Registries.BLOCK, baseResourceLocation)).noCollision().explosionResistance(100.0F).noLootTable());
             
             for (Field declaredField : fluidClazz.getDeclaredFields()) {
                 if (declaredField.isAnnotationPresent(RegisterFluid.Instance.class)) {
@@ -613,7 +613,7 @@ public class Registry {
             }
             
             fluidRegistryEvent.register(baseResourceLocation, still);
-            fluidRegistryEvent.register(ResourceLocation.parse(baseRegistryName + "_flowing"), flowing);
+            fluidRegistryEvent.register(Identifier.parse(baseRegistryName + "_flowing"), flowing);
             if (LOGGER.isDebugEnabled()) {
                 LOGGER.debug("Fluid registered: " + baseResourceLocation);
             }
@@ -627,10 +627,10 @@ public class Registry {
             
             if (annotation.registerBucket()) {
                 itemRegistrationQueue.enqueue(() -> {
-                    BucketItem bucket = new BucketItem(fluids[0], new Item.Properties().craftRemainder(Items.BUCKET).stacksTo(1));
+                    BucketItem bucket = new BucketItem(fluids[0], new Item.Properties().setId(net.minecraft.resources.ResourceKey.create(net.minecraft.core.registries.Registries.ITEM, Identifier.parse(baseRegistryName + "_bucket"))).craftRemainder(Items.BUCKET).stacksTo(1));
                     creativeTabItems.add(bucket);
                     bucketArray[0] = bucket;
-                    itemRegistryEvent.register(ResourceLocation.parse(baseRegistryName + "_bucket"), bucket);
+                    itemRegistryEvent.register(Identifier.parse(baseRegistryName + "_bucket"), bucket);
                     if (LOGGER.isDebugEnabled()) {
                         LOGGER.debug("Bucket registered: " + baseResourceLocation);
                     }
@@ -744,7 +744,7 @@ public class Registry {
             if (type == null) {
                 return;
             }
-            containerRegistryEvent.register(ResourceLocation.parse(registryName), type);
+            containerRegistryEvent.register(Identifier.parse(registryName), type);
             if (LOGGER.isDebugEnabled()) {
                 LOGGER.debug("Container registered: " + registryName);
             }
@@ -840,7 +840,7 @@ public class Registry {
             
             // fuck you java, its the correct size here
             @SuppressWarnings({"ConstantConditions", "ToArrayCallWithZeroLengthArrayArgument"})
-            BlockEntityType<?> type = BlockEntityType.Builder.of(producer, blocks.toArray(new Block[blocks.size()])).build(null);
+            BlockEntityType<?> type = new BlockEntityType<>(producer, blocks.toArray(new Block[blocks.size()]));
             
             try {
                 tileProducerTYPEField.set(producer, type);
@@ -848,7 +848,7 @@ public class Registry {
                 throw new IllegalStateException("Tile entity type unable to be saved for " + memberName + " in " + declaringClass.getSimpleName());
             }
             
-            tileRegistryEvent.register(ResourceLocation.parse(registryName), type);
+            tileRegistryEvent.register(Identifier.parse(registryName), type);
             if (LOGGER.isDebugEnabled()) {
                 LOGGER.debug("TileEntity registered: " + registryName);
             }

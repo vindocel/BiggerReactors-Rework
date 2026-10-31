@@ -51,7 +51,7 @@ public class TurbineTerminalContainer extends AbstractContainerMenu implements G
     @Override
     public void executeRequest(String requestName, Object requestData) {
         assert tileEntity.getLevel() != null;
-        if (tileEntity.getLevel().isClientSide) {
+        if (tileEntity.getLevel().isClientSide()) {
             runRequest(requestName, requestData);
             return;
         }

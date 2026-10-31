@@ -8,10 +8,10 @@ import javax.annotation.Nonnull;
 public class UraniumDust extends Item {
     
     @RegisterItem(name = "uranium_dust")
-    public static final UraniumDust INSTANCE = new UraniumDust(new Properties());
+    public static final UraniumDust INSTANCE = biggerreactorsrework.core.registry.RegistryIds.named("uranium_dust", () -> new UraniumDust(new Properties()));
     
     @SuppressWarnings("unused")
     public UraniumDust(@Nonnull Properties properties) {
-        super(properties);
+        super(biggerreactorsrework.core.registry.RegistryIds.item(properties));
     }
 }

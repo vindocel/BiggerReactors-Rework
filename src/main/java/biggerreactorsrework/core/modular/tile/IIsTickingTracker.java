@@ -82,7 +82,7 @@ public interface IIsTickingTracker {
                     levelTrackers = new Long2ObjectOpenHashMap<>();
                     trackers.put(serverLevel, levelTrackers);
                 }
-                chunkTracker = levelTrackers.get(ChunkPos.asLong(tile.getBlockPos()));
+                chunkTracker = levelTrackers.get(ChunkPos.pack(tile.getBlockPos()));
                 if (chunkTracker == null) {
                     chunkTracker = new ChunkTracker();
                     var tickingSet = isTickingMap.get(serverLevel);
@@ -90,8 +90,8 @@ public interface IIsTickingTracker {
                         tickingSet = new LongOpenHashSet();
                         isTickingMap.put(serverLevel, tickingSet);
                     }
-                    chunkTracker.isTicking = tickingSet.contains(ChunkPos.asLong(tile.getBlockPos()));
-                    levelTrackers.put(ChunkPos.asLong(tile.getBlockPos()), chunkTracker);
+                    chunkTracker.isTicking = tickingSet.contains(ChunkPos.pack(tile.getBlockPos()));
+                    levelTrackers.put(ChunkPos.pack(tile.getBlockPos()), chunkTracker);
                 }
                 chunkTracker.modules.add(this);
                 if (chunkTracker.isTicking) {
@@ -117,7 +117,7 @@ public interface IIsTickingTracker {
             // stop ticking isn't sent here because the tile also receives an onRemoved
             chunkTracker.modules.remove(this);
             if (chunkTracker.modules.size() == 0) {
-                levelTrackers.remove(ChunkPos.asLong(((BlockEntity) iface).getBlockPos()));
+                levelTrackers.remove(ChunkPos.pack(((BlockEntity) iface).getBlockPos()));
                 if (levelTrackers.isEmpty()) {
                     trackers.remove(serverLevel);
                 }

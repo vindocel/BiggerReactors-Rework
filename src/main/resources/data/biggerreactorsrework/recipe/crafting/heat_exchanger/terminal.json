@@ -6,15 +6,9 @@
     "CDC"
   ],
   "key": {
-    "C": {
-      "item": "biggerreactorsrework:heat_exchanger_casing"
-    },
-    "L": {
-      "tag": "c:ingots/ludicrite"
-    },
-    "D": {
-      "item": "minecraft:diamond"
-    }
+    "C": "biggerreactorsrework:heat_exchanger_casing",
+    "L": "#c:ingots/ludicrite",
+    "D": "minecraft:diamond"
   },
   "result": {
     "id": "biggerreactorsrework:heat_exchanger_terminal"

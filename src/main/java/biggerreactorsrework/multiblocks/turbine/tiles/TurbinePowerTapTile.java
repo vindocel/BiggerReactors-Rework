@@ -1,6 +1,5 @@
 package biggerreactorsrework.multiblocks.turbine.tiles;
 
-import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -19,7 +18,6 @@ import javax.annotation.ParametersAreNonnullByDefault;
 import static biggerreactorsrework.multiblocks.turbine.blocks.TurbinePowerTap.ConnectionState.*;
 
 @ParametersAreNonnullByDefault
-@MethodsReturnNonnullByDefault
 public class TurbinePowerTapTile extends TurbineBaseTile implements IEnergyTile, IEnergyHandler, IEventMultiblock.AssemblyStateTransition {
     
     @RegisterTile("turbine_power_tap")
@@ -60,6 +58,20 @@ public class TurbinePowerTapTile extends TurbineBaseTile implements IEnergyTile,
         return Math.max(0, outputCap.insertEnergy(toDistribute, simulate));
     }
     
+    @Override
+    public Object transferSnapshot() {
+        var battery = nullableController() == null ? null : controller().simulation().battery();
+        return battery == null ? null : battery.stored();
+    }
+
+    @Override
+    public void restoreTransferSnapshot(Object snapshot) {
+        var battery = nullableController() == null ? null : controller().simulation().battery();
+        if (battery != null && snapshot instanceof Long stored) {
+            battery.restoreStored(stored);
+        }
+    }
+
     @Override
     public long insertEnergy(long maxInsert, boolean simulate) {
         return 0;

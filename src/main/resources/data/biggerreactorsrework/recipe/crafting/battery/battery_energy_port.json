@@ -7,15 +7,9 @@
     "CRC"
   ],
   "key": {
-    "C": {
-      "item": "biggerreactorsrework:battery_casing"
-    },
-    "R": {
-      "item": "minecraft:redstone_block"
-    },
-    "L": {
-      "item": "minecraft:lightning_rod"
-    }
+    "C": "biggerreactorsrework:battery_casing",
+    "R": "minecraft:redstone_block",
+    "L": "minecraft:lightning_rod"
   },
   "result": {
     "id": "biggerreactorsrework:battery_energy_port"

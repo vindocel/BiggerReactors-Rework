@@ -8,6 +8,5 @@
     "east" : "biggerreactorsrework:block/transparent",
     "west" : "biggerreactorsrework:block/reactor/glass/connected_tbr",
     "particle": "biggerreactorsrework:block/reactor/glass/connected_none"
-  },
-  "render_type": "cutout"
+  }
 }

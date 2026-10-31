@@ -28,7 +28,7 @@ public interface IEnergyTile extends IModularTile {
         @Nullable
         final var level = thisTile.getLevel();
         assert level != null;
-        return new CachedWrappedBlockCapability<>(EnergyHandlerWrappers::findCapability, (ServerLevel) level, thisTile.getBlockPos().offset(direction.getNormal()), direction.getOpposite(), () -> !thisTile.isRemoved(), () -> onNeighborEnergyCapabilityInvalidated(direction));
+        return new CachedWrappedBlockCapability<>(EnergyHandlerWrappers::findCapability, (ServerLevel) level, thisTile.getBlockPos().offset(direction.getUnitVec3i()), direction.getOpposite(), () -> !thisTile.isRemoved(), () -> onNeighborEnergyCapabilityInvalidated(direction));
     }
     
     @API

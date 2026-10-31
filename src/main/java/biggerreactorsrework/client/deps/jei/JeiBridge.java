@@ -1,8 +1,8 @@
 package biggerreactorsrework.client.deps.jei;
 
-import mezz.jei.api.recipe.RecipeType;
+import mezz.jei.api.recipe.types.IRecipeType;
 import mezz.jei.api.runtime.IJeiRuntime;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,12 +22,12 @@ public final class JeiBridge {
         return runtime != null;
     }
 
-    public static void show(ResourceLocation... categories) {
+    public static void show(Identifier... categories) {
         if (runtime == null) {
             return;
         }
-        List<RecipeType<?>> types = new ArrayList<>();
-        for (ResourceLocation id : categories) {
+        List<IRecipeType<?>> types = new ArrayList<>();
+        for (Identifier id : categories) {
             runtime.getRecipeManager().getRecipeType(id).ifPresent(types::add);
         }
         if (!types.isEmpty()) {

@@ -2,15 +2,10 @@ package biggerreactorsrework.gametest;
 
 import biggerreactorsrework.BiggerReactors;
 import biggerreactorsrework.util.GuideStructures;
-import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
-import net.neoforged.neoforge.gametest.GameTestHolder;
-import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
 import static biggerreactorsrework.core.multiblock.IAssemblyStateBlock.ASSEMBLED;
 
 /** The exact examples rendered in the guide must assemble. */
-@GameTestHolder(BiggerReactors.modid)
-@PrefixGameTestTemplate(false)
 public final class GuideGameTests {
     private static void build(GameTestHelper h, GuideStructures.Example example) {
         example.parts().forEach(h::setBlock);

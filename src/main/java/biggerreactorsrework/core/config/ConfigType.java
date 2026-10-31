@@ -17,7 +17,7 @@ public enum ConfigType {
     
     private static boolean isFMLClient() {
         try {
-            return FMLEnvironment.dist == null || FMLEnvironment.dist.isClient();
+            return FMLEnvironment.getDist().isClient();
             // in case its loaded without FML present, treat it as client
         } catch (NoClassDefFoundError e) {
             return true;

@@ -6,18 +6,10 @@
     "IGI"
   ],
   "key": {
-    "I": {
-      "item": "minecraft:iron_ingot"
-    },
-    "G": {
-      "tag": "c:ingots/graphite"
-    },
-    "Q": {
-      "item": "minecraft:quartz"
-    },
-    "C": {
-      "tag": "c:ingots/cyanite"
-    }
+    "I": "minecraft:iron_ingot",
+    "G": "#c:ingots/graphite",
+    "Q": "minecraft:quartz",
+    "C": "#c:ingots/cyanite"
   },
   "result": {
     "id": "biggerreactorsrework:turbine_casing",

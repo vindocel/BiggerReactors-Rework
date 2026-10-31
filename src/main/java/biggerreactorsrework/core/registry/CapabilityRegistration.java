@@ -4,7 +4,16 @@ import it.unimi.dsi.fastutil.objects.ReferenceArrayList;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.neoforged.neoforge.capabilities.BlockCapability;
 import net.neoforged.neoforge.capabilities.ICapabilityProvider;
+import biggerreactorsrework.core.transfer.FluidTanks;
+import biggerreactorsrework.core.transfer.ItemSlots;
+import biggerreactorsrework.core.transfer.Transfer;
+import biggerreactorsrework.core.transfer.TransferSnapshots;
 import biggerreactorsrework.core.util.Pair;
+import net.minecraft.core.Direction;
+import net.neoforged.neoforge.capabilities.Capabilities;
+import net.neoforged.neoforge.transfer.ResourceHandler;
+import net.neoforged.neoforge.transfer.fluid.FluidResource;
+import net.neoforged.neoforge.transfer.item.ItemResource;
 
 import java.util.List;
 import java.util.function.Function;
@@ -21,6 +30,14 @@ public class CapabilityRegistration {
         return new TileCapRegistration<>(capability, tileClass, provider);
     }
     
+    public static <O extends ItemSlots & TransferSnapshots> CapabilityRegistration tileItems(Class<O> tileClass) {
+        return new TileCapRegistration<O, ResourceHandler<ItemResource>, Direction>(Capabilities.Item.BLOCK, tileClass, (tile, side) -> Transfer.exposeItems(tile, tile));
+    }
+
+    public static <O extends FluidTanks & TransferSnapshots> CapabilityRegistration tileFluids(Class<O> tileClass) {
+        return new TileCapRegistration<O, ResourceHandler<FluidResource>, Direction>(Capabilities.Fluid.BLOCK, tileClass, (tile, side) -> Transfer.exposeFluids(tile, tile));
+    }
+
     public static <O, T, C> CapabilityRegistration tileCap(BlockCapability<T, C> capability, Class<O> tileClass, Function<O, T> capabilityProvider) {
         return tileCap(capability, tileClass, (O o, C c) -> capabilityProvider.apply(o));
     }

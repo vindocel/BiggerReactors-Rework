@@ -3,43 +3,38 @@ package biggerreactorsrework.gametest;
 import biggerreactorsrework.BiggerReactors;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.storage.loot.LootTable;
 import net.neoforged.fml.ModList;
-import net.neoforged.neoforge.gametest.GameTestHolder;
-import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
 
 /**
  * Checks that the migrated datapack content (recipes, loot tables) parses on 1.21.1.
  */
-@GameTestHolder(BiggerReactors.modid)
-@PrefixGameTestTemplate(false)
 public final class ContentGameTests {
     private ContentGameTests() {
     }
 
     private static long countOwn(GameTestHelper helper, RecipeType<?> type) {
         //noinspection unchecked,rawtypes
-        return helper.getLevel().getRecipeManager().getAllRecipesFor((RecipeType) type).stream()
-                .map(holder -> ((RecipeHolder<?>) holder).id())
-                .filter(id -> ((ResourceLocation) id).getNamespace().equals(BiggerReactors.modid))
+        return helper.getLevel().getServer().getRecipeManager().recipeMap().values().stream()
+                .filter(holder -> holder.value().getType() == type)
+                .filter(holder -> holder.id().identifier().getNamespace().equals(BiggerReactors.modid))
                 .count();
     }
 
     /**
      * 52 crafting recipe files ship with the mod: 48 always load, 3 computer ports
-     * need OpenComputers and 1 ludicrite variant needs Thermal Expansion (modified 2026-10-30).
+     * need CC:Tweaked or OpenComputers and 1 ludicrite variant needs Thermal Expansion (modified 2026-10-31).
      * 9 smelting and 9 blasting recipes always load.
      */
     @GameTest(template = "empty_7x7x7")
     public static void allRecipesLoad(GameTestHelper helper) {
         final var mods = ModList.get();
-        long expectedCrafting = 48 + (mods.isLoaded("opencomputers") ? 3 : 0) + (mods.isLoaded("thermal_expansion") ? 1 : 0);
+        long expectedCrafting = 48 + (mods.isLoaded("opencomputers") || mods.isLoaded("computercraft") ? 3 : 0) + (mods.isLoaded("thermal_expansion") ? 1 : 0);
         long crafting = countOwn(helper, RecipeType.CRAFTING);
         long smelting = countOwn(helper, RecipeType.SMELTING);
         long blasting = countOwn(helper, RecipeType.BLASTING);
@@ -50,8 +45,8 @@ public final class ContentGameTests {
     }
 
     private static long countOwnOfType(GameTestHelper helper, String recipeType) {
-        return helper.getLevel().getRecipeManager().getRecipes().stream()
-                .filter(holder -> holder.id().getNamespace().equals(BiggerReactors.modid))
+        return helper.getLevel().getServer().getRecipeManager().recipeMap().values().stream()
+                .filter(holder -> holder.id().identifier().getNamespace().equals(BiggerReactors.modid))
                 .filter(holder -> {
                     final var key = BuiltInRegistries.RECIPE_TYPE.getKey(holder.value().getType());
                     return key != null && key.toString().equals(recipeType);
@@ -88,10 +83,10 @@ public final class ContentGameTests {
                 continue;
             }
             final var lootKey = block.getLootTable();
-            if (lootKey == null || lootKey.location().getPath().equals("empty")) {
+            if (lootKey.isEmpty() || lootKey.get().identifier().getPath().equals("empty")) {
                 continue;
             }
-            final var table = registries.getLootTable(ResourceKey.create(Registries.LOOT_TABLE, lootKey.location()));
+            final var table = registries.getLootTable(ResourceKey.create(Registries.LOOT_TABLE, lootKey.get().identifier()));
             if (table == LootTable.EMPTY) {
                 // fluid blocks have no drops; everything else must have a table
                 if (!(block instanceof net.minecraft.world.level.block.LiquidBlock)) {

@@ -1,25 +1,29 @@
 package biggerreactorsrework.core.fluids;
 
-import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.component.DataComponentPatch;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
 import net.neoforged.neoforge.fluids.FluidStack;
-import net.neoforged.neoforge.fluids.capability.IFluidHandler;
+import biggerreactorsrework.core.transfer.FluidTanks;
+import biggerreactorsrework.core.transfer.TransferSnapshots;
 
 import javax.annotation.Nonnull;
 import javax.annotation.ParametersAreNonnullByDefault;
 
 /**
- * Long-capacity tank view exposed as a NeoForge {@link IFluidHandler}.
+ * Long-capacity tank view exposed as a {@link FluidTanks}.
  * Amounts larger than {@link Integer#MAX_VALUE} are clamped only at the NeoForge boundary.
  */
 @ParametersAreNonnullByDefault
-@MethodsReturnNonnullByDefault
-public interface IFluidTankHandler extends IFluidHandler {
+public interface IFluidTankHandler extends FluidTanks, TransferSnapshots {
 
-    default IFluidHandler fluidHandlerCapability() {
-        return this;
+    @Override
+    default Object transferSnapshot() {
+        return null;
+    }
+
+    @Override
+    default void restoreTransferSnapshot(Object snapshot) {
     }
 
     @Override

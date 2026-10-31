@@ -21,14 +21,12 @@ import java.util.List;
 import java.util.Map;
 
 /** Added 2026-10-30: charge boundaries, independent ports, persistence and actual turbine automation. */
-@GameTestHolder(BiggerReactors.modid)
-@PrefixGameTestTemplate(false)
 public final class BatteryRedstoneGameTests {
     private static void charge(GameTestHelper h, double fraction) {
         for (int x = 1; x <= 3; x++) for (int y = 1; y <= 3; y++) for (int z = 1; z <= 3; z++)
-            ((BatteryCellTile) h.getBlockEntity(new BlockPos(x, y, z))).loadEnergyFromItem(Math.round(Config.CONFIG.Battery.CellCapacity * fraction));
+            ((BatteryCellTile) GameTestSupport.be(h,new BlockPos(x, y, z))).loadEnergyFromItem(Math.round(Config.CONFIG.Battery.CellCapacity * fraction));
     }
-    private static BatteryRedstonePortTile tile(GameTestHelper h, BlockPos pos) { return (BatteryRedstonePortTile) h.getBlockEntity(pos); }
+    private static BatteryRedstonePortTile tile(GameTestHelper h, BlockPos pos) { return (BatteryRedstonePortTile) GameTestSupport.be(h,pos); }
     private static void ready(GameTestHelper h, BlockPos pos) {
         h.assertTrue(h.getBlockState(pos).getValue(IAssemblyStateBlock.ASSEMBLED), "machine not ready");
     }
@@ -56,9 +54,9 @@ public final class BatteryRedstoneGameTests {
                 net.minecraft.world.item.Items.REDSTONE, net.minecraft.world.item.Items.GOLD_INGOT, net.minecraft.world.item.Items.REDSTONE,
                 casing, net.minecraft.world.item.Items.REDSTONE, casing)) items.add(new net.minecraft.world.item.ItemStack(item));
         var input = net.minecraft.world.item.crafting.CraftingInput.of(3, 3, items);
-        var recipe = h.getLevel().getRecipeManager().getRecipeFor(net.minecraft.world.item.crafting.RecipeType.CRAFTING, input, h.getLevel());
+        var recipe = h.getLevel().getServer().getRecipeManager().getRecipeFor(net.minecraft.world.item.crafting.RecipeType.CRAFTING, input, h.getLevel());
         h.assertTrue(recipe.isPresent(), "sensor craft did not match its 3x3 ingredients");
-        var result = recipe.orElseThrow().value().assemble(input, h.getLevel().registryAccess());
+        var result = recipe.orElseThrow().value().assemble(input);
         h.assertTrue(result.is(BatteryRedstonePort.INSTANCE.asItem()) && result.getCount() == 1, "craft returned the wrong block or count");
         h.assertTrue(BatteryRedstonePort.INSTANCE.defaultBlockState().is(net.minecraft.tags.BlockTags.MINEABLE_WITH_PICKAXE), "sensor missing pickaxe tag");
         h.assertTrue(BatteryRedstonePort.INSTANCE.defaultBlockState().is(net.minecraft.tags.BlockTags.NEEDS_IRON_TOOL), "sensor missing tool tier tag");
@@ -101,16 +99,16 @@ public final class BatteryRedstoneGameTests {
         h.setBlock(commandPos, TurbineRedstonePort.INSTANCE);
         h.startSequence().thenWaitUntil(() -> { ready(h, sensorPos); ready(h, commandPos); }).thenExecute(() -> {
             config(h, tile(h, sensorPos), Mode.BELOW, 90);
-            var input = (TurbineRedstonePortTile) h.getBlockEntity(commandPos);
+            var input = (TurbineRedstonePortTile) GameTestSupport.be(h,commandPos);
             h.assertTrue(input.configure(Map.of("mode", 1, "behavior", 0, "low", 0d, "high", 0d)), "turbine command rejected");
         }).thenIdle(4).thenExecute(() -> {
-            h.assertTrue(((TurbineRedstonePortTile) h.getBlockEntity(commandPos)).controller().simulation().active(), "low battery did not start turbine");
+            h.assertTrue(((TurbineRedstonePortTile) GameTestSupport.be(h,commandPos)).controller().simulation().active(), "low battery did not start turbine");
             charge(h, .95);
         }).thenIdle(4).thenExecute(() -> {
-            h.assertFalse(((TurbineRedstonePortTile) h.getBlockEntity(commandPos)).controller().simulation().active(), "high battery did not stop turbine");
+            h.assertFalse(((TurbineRedstonePortTile) GameTestSupport.be(h,commandPos)).controller().simulation().active(), "high battery did not stop turbine");
             charge(h, .85);
         }).thenIdle(4).thenExecute(() -> {
-            h.assertTrue(((TurbineRedstonePortTile) h.getBlockEntity(commandPos)).controller().simulation().active(), "falling battery did not restart turbine");
+            h.assertTrue(((TurbineRedstonePortTile) GameTestSupport.be(h,commandPos)).controller().simulation().active(), "falling battery did not restart turbine");
         }).thenSucceed();
     }
 
@@ -129,7 +127,7 @@ public final class BatteryRedstoneGameTests {
             h.assertTrue(sensor.mode() == Mode.ABOVE && sensor.threshold() == 42.5, "invalid packet mutated configuration");
             var saved = sensor.saveWithFullMetadata(h.getLevel().registryAccess());
             var restored = BatteryRedstonePortTile.SUPPLIER.create(sensor.getBlockPos(), sensor.getBlockState());
-            restored.loadWithComponents(saved, h.getLevel().registryAccess());
+            GameTestSupport.load(restored,saved,h);
             h.assertTrue(restored.mode() == Mode.ABOVE && restored.threshold() == 42.5, "configuration lost on save/load");
             restored.read(sensor.write());
             h.assertTrue(restored.settingsReady && restored.mode() == Mode.ABOVE && restored.threshold() == 42.5, "menu snapshot lost configuration");

@@ -7,15 +7,9 @@
     "BRB"
   ],
   "key": {
-    "B": {
-      "item": "biggerreactorsrework:ludicrite_ingot"
-    },
-    "R": {
-      "item": "minecraft:redstone_block"
-    },
-    "D": {
-      "item": "minecraft:diamond_block"
-    }
+    "B": "biggerreactorsrework:ludicrite_ingot",
+    "R": "minecraft:redstone_block",
+    "D": "minecraft:diamond_block"
   },
   "result": {
     "id": "biggerreactorsrework:battery_cell"

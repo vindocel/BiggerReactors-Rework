@@ -1,6 +1,5 @@
 package biggerreactorsrework.multiblocks.turbine.blocks;
 
-import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -14,11 +13,10 @@ import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 
 @ParametersAreNonnullByDefault
-@MethodsReturnNonnullByDefault
 public class TurbineGlass extends TurbineBaseBlock implements IAssemblyStateBlock, IConnectedTexture {
     
     @RegisterBlock(name = "turbine_glass", tileEntityClass = TurbineGlassTile.class)
-    public static final TurbineGlass INSTANCE = new TurbineGlass();
+    public static final TurbineGlass INSTANCE = biggerreactorsrework.core.registry.RegistryIds.named("turbine_glass", () -> new TurbineGlass());
     
     public TurbineGlass() {
         super(false);

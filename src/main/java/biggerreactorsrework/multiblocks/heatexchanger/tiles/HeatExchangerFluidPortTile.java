@@ -1,7 +1,6 @@
 package biggerreactorsrework.multiblocks.heatexchanger.tiles;
 
 import net.minecraft.core.component.DataComponentPatch;
-import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
@@ -16,7 +15,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
 import net.neoforged.neoforge.capabilities.Capabilities;
-import net.neoforged.neoforge.fluids.capability.templates.FluidTank;
+import biggerreactorsrework.core.transfer.SimpleTank;
 import biggerreactorsrework.multiblocks.heatexchanger.blocks.HeatExchangerFluidPortBlock;
 import biggerreactorsrework.multiblocks.heatexchanger.containers.HeatExchangerFluidPortContainer;
 import biggerreactorsrework.multiblocks.heatexchanger.state.HeatExchangerFluidPortState;
@@ -37,12 +36,11 @@ import static biggerreactorsrework.multiblocks.heatexchanger.blocks.HeatExchange
 import static biggerreactorsrework.core.util.BlockStates.PORT_DIRECTION;
 
 
-@MethodsReturnNonnullByDefault
 @ParametersAreNonnullByDefault
 public class HeatExchangerFluidPortTile extends HeatExchangerBaseTile implements IFluidTankHandler, IEventMultiblock.AssemblyStateTransition.OnAssembly, IEventMultiblock.AssemblyStateTransition.OnDisassembly, MenuProvider, IHasUpdatableState<HeatExchangerFluidPortState> {
     // Modified 2026-10-30: refresh output handlers after neighbor capability changes.
-    private final biggerreactorsrework.core.capability.NeighborCapability<net.neoforged.neoforge.fluids.capability.IFluidHandler> outputCapability =
-            new biggerreactorsrework.core.capability.NeighborCapability<>(this, Capabilities.FluidHandler.BLOCK);
+    private final biggerreactorsrework.core.capability.NeighborCapability<biggerreactorsrework.core.transfer.FluidTanks, ?> outputCapability =
+            biggerreactorsrework.core.capability.NeighborCapability.fluids(this);
     
     public long lastCheckedTick;
     
@@ -50,7 +48,7 @@ public class HeatExchangerFluidPortTile extends HeatExchangerBaseTile implements
     public static final BlockEntityType.BlockEntitySupplier<HeatExchangerFluidPortTile> SUPPLIER = new RegisterTile.Producer<>(HeatExchangerFluidPortTile::new);
     
     @RegisterCapability
-    private static final CapabilityRegistration FLUID_HANDLER_CAP_REGISTRATION = CapabilityRegistration.tileCap(Capabilities.FluidHandler.BLOCK, HeatExchangerFluidPortTile.class);
+    private static final CapabilityRegistration FLUID_HANDLER_CAP_REGISTRATION = CapabilityRegistration.tileFluids(HeatExchangerFluidPortTile.class);
     
     public HeatExchangerFluidPortTile(BlockEntityType<?> tileEntityTypeIn, BlockPos pos, BlockState state) {
         super(tileEntityTypeIn, pos, state);
@@ -92,6 +90,18 @@ public class HeatExchangerFluidPortTile extends HeatExchangerBaseTile implements
         return condenser;
     }
     
+    @Override
+    public Object transferSnapshot() {
+        return HETank == null ? null : HETank.transferSnapshot();
+    }
+
+    @Override
+    public void restoreTransferSnapshot(Object snapshot) {
+        if (HETank != null) {
+            HETank.restoreTransferSnapshot(snapshot);
+        }
+    }
+
     @Override
     public int tankCount() {
         if (HETank == null) {
@@ -183,7 +193,7 @@ public class HeatExchangerFluidPortTile extends HeatExchangerBaseTile implements
     private boolean connected = false;
     Direction outputDirection = null;
     IFluidTankHandler handler = null;
-    FluidTank EMPTY_TANK = new FluidTank(0);
+    SimpleTank EMPTY_TANK = new SimpleTank(0);
     
     @SuppressWarnings("DuplicatedCode")
     public void neighborChanged() {
@@ -204,7 +214,7 @@ public class HeatExchangerFluidPortTile extends HeatExchangerBaseTile implements
     @Override
     protected void readNBT(CompoundTag compound) {
         super.readNBT(compound);
-        inlet = compound.getBoolean("inlet");
+        inlet = compound.getBooleanOr("inlet", false);
     }
     
     

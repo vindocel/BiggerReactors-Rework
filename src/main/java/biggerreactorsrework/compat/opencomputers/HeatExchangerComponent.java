@@ -2,7 +2,7 @@ package biggerreactorsrework.compat.opencomputers;
 
 // Added 2026-10-30: native OpenComputers callbacks; all live state stays on the server thread.
 import biggerreactorsrework.multiblocks.heatexchanger.tiles.HeatExchangerComputerPortTile;
-import biggerreactorsrework.compat.opencomputers.access.HeatExchangerAccess;
+import biggerreactorsrework.compat.computer.access.HeatExchangerAccess;
 import li.cil.oc.api.machine.*;
 
 public final class HeatExchangerComponent extends PortComponent {

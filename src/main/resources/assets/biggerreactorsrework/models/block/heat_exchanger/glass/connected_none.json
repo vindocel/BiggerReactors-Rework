@@ -1,6 +1,5 @@
 {
-  "parent": "block/cube_all",
-  "render_type": "cutout",
+  "parent": "block/cube_all", 
   "textures": {
     "all" : "biggerreactorsrework:block/heat_exchanger/glass/glass"
   }

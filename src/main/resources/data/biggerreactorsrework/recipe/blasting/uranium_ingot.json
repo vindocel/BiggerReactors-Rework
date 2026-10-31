@@ -1,10 +1,8 @@
 {
   "type": "minecraft:blasting",
-  "ingredient": [
-    {
-      "item": "biggerreactorsrework:uranium_dust"
-    }
-  ],
-  "result": {"id": "biggerreactorsrework:uranium_ingot"},
+  "ingredient": "biggerreactorsrework:uranium_dust",
+  "result": {
+    "id": "biggerreactorsrework:uranium_ingot"
+  },
   "cookingtime": 100
 }

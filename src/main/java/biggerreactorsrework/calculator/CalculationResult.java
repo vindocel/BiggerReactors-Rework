@@ -66,32 +66,32 @@ public record CalculationResult(String id, long createdAt, CalculatorRequest req
     public static CalculationResult fromTag(CompoundTag tag) {
         if (newerSchema(tag)) return null;
         try {
-            var request = CalculatorRequest.fromTag(tag.getCompound("request"));
+            var request = CalculatorRequest.fromTag(tag.getCompoundOrEmpty("request"));
             if (request == null) return null;
-            String id = tag.getString("id");
+            String id = tag.getStringOr("id", "");
             if (id.isEmpty() || id.length() > 64) return null;
             var missing = new TreeSet<String>();
             PlantLayout plant = null;
-            if (tag.contains("plant", Tag.TAG_COMPOUND)) {
-                plant = PlantCodec.decode(tag.getCompound("plant"), missing);
+            if (tag.contains("plant")) {
+                plant = PlantCodec.decode(tag.getCompoundOrEmpty("plant"), missing);
                 if (plant == null) return null;
             }
-            var numbers = tag.getCompound("values");
+            var numbers = tag.getCompoundOrEmpty("values");
             if (numbers.size() > 256) return null;
             var values = new LinkedHashMap<String, Double>();
-            for (String key : numbers.getAllKeys()) {
-                double v = numbers.getDouble(key);
+            for (String key : numbers.keySet()) {
+                double v = numbers.getDoubleOr(key, 0D);
                 if (Double.isFinite(v) && key.length() <= 64) values.put(key, v);
             }
-            return new CalculationResult(id, tag.getLong("created"), request, Route.valueOf(tag.getString("route")),
-                    CalculationStatus.valueOf(tag.getString("status")), tag.getString("fingerprint"), tag.getInt("engine"),
-                    tag.getString("mod"), plant, Collections.unmodifiableMap(values), Collections.unmodifiableSet(missing));
+            return new CalculationResult(id, tag.getLongOr("created", 0L), request, Route.valueOf(tag.getStringOr("route", "")),
+                    CalculationStatus.valueOf(tag.getStringOr("status", "")), tag.getStringOr("fingerprint", ""), tag.getIntOr("engine", 0),
+                    tag.getStringOr("mod", ""), plant, Collections.unmodifiableMap(values), Collections.unmodifiableSet(missing));
         } catch (IllegalArgumentException e) {
             return null;
         }
     }
 
     public static boolean newerSchema(CompoundTag tag) {
-        return tag.getInt("schema") > SCHEMA;
+        return tag.getIntOr("schema", 0) > SCHEMA;
     }
 }

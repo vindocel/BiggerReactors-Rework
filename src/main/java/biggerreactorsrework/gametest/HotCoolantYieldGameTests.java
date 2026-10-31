@@ -9,15 +9,13 @@ import biggerreactorsrework.util.FluidTransitionTank;
 import net.minecraft.core.component.DataComponentPatch;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.gametest.framework.*;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.material.Fluids;
-import net.neoforged.neoforge.fluids.capability.IFluidHandler.FluidAction;
+import biggerreactorsrework.core.transfer.FluidTanks.FluidAction;
 import net.neoforged.neoforge.gametest.*;
 import java.util.*;
 
 /** Modified 2026-10-27: equal hot volumes, not nuclear burn, define the approved steam yield. */
-@GameTestHolder(BiggerReactors.modid)
-@PrefixGameTestTemplate(false)
 public final class HotCoolantYieldGameTests {
     private static FluidTransitionTank primary(FluidTransitionRegistry.FluidTransition profile) {
         var tank=new FluidTransitionTank(true);tank.perSideCapacity=10000;
@@ -26,7 +24,7 @@ public final class HotCoolantYieldGameTests {
     @GameTest(template="empty_7x7x7")
     public static void equalHotVolumeProducesTwentyPercentMoreSteam(GameTestHelper h) {
         var obs=FluidTransitionRegistry.liquidTransition(LiquidObsidian.INSTANCE);
-        var cryoId=ResourceLocation.parse("ad_astra:cryo_fuel");
+        var cryoId=Identifier.parse("ad_astra:cryo_fuel");
         // Core run verifies the native obsidian budget; optional run compares the real Cryo profile.
         var hot=primary(obs);var water=new FluidTransitionTank(false);water.perSideCapacity=20000;
         water.fill(Fluids.WATER,DataComponentPatch.EMPTY,20000,false);
@@ -34,7 +32,7 @@ public final class HotCoolantYieldGameTests {
         h.assertTrue(hot.fluidAmountInTank(1)==1000 && hot.fluidAmountInTank(0)==0,"hot batch volume not conserved");
         h.assertTrue(heat==36000 && water.fluidAmountInTank(1)==9000,"1000 mB hot obsidian must yield 9000 mB ideal steam");
         if(BuiltInRegistries.FLUID.containsKey(cryoId)) {
-            var cryo=FluidTransitionRegistry.liquidTransition(BuiltInRegistries.FLUID.get(cryoId));
+            var cryo=FluidTransitionRegistry.liquidTransition(BuiltInRegistries.FLUID.getValue(cryoId));
             var coldWater=new FluidTransitionTank(false);coldWater.perSideCapacity=20000;coldWater.fill(Fluids.WATER,DataComponentPatch.EMPTY,20000,false);
             coldWater.absorbRF(-primary(cryo).absorbRF(1e9));
             h.assertTrue(coldWater.fluidAmountInTank(1)==7500,"Cryo budget changed");
@@ -64,8 +62,8 @@ public final class HotCoolantYieldGameTests {
     public static void equalBatchNativeChannelsConserveHeatAndShowTheGain(GameTestHelper h)throws Exception {
         var rows=new ArrayList<Map<String,Object>>();
         var obs=FluidTransitionRegistry.liquidTransition(LiquidObsidian.INSTANCE);rows.add(channelBatch(obs));
-        var id=ResourceLocation.parse("ad_astra:cryo_fuel");
-        if(BuiltInRegistries.FLUID.containsKey(id))rows.add(channelBatch(FluidTransitionRegistry.liquidTransition(BuiltInRegistries.FLUID.get(id))));
+        var id=Identifier.parse("ad_astra:cryo_fuel");
+        if(BuiltInRegistries.FLUID.containsKey(id))rows.add(channelBatch(FluidTransitionRegistry.liquidTransition(BuiltInRegistries.FLUID.getValue(id))));
         for(var row:rows) {
             long returned=((Number)row.get("cold_returned_mB")).longValue();double steam=((Number)row.get("steam_mB")).doubleValue();
             double heat=((Number)row.get("declared_batch_heat")).doubleValue();double retained=((Number)row.get("retained_channel_heat")).doubleValue();

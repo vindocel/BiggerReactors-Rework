@@ -3,7 +3,6 @@ package biggerreactorsrework.core.util;
 import it.unimi.dsi.fastutil.longs.Long2IntLinkedOpenHashMap;
 import it.unimi.dsi.fastutil.longs.LongArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import biggerreactorsrework.core.modular.api.IModularTile;
@@ -17,7 +16,6 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 @ParametersAreNonnullByDefault
-@MethodsReturnNonnullByDefault
 public class ModuleMap<ModuleType extends TileModule<TileType>, TileType extends BlockEntity & IModularTile> {
     
     private final ObjectArrayList<ModuleType> modules;

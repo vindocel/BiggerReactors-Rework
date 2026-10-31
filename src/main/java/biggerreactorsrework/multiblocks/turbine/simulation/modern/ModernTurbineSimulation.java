@@ -144,7 +144,7 @@ public class ModernTurbineSimulation implements ITurbineSimulation {
     
     @Override
     public double RPM() {
-        return rotorEnergy / rotorAxialMass;
+        return rotorAxialMass > 0 ? Math.min(MAX_RPM, rotorEnergy / rotorAxialMass) : 0;
     }
     
     @Override
@@ -185,6 +185,8 @@ public class ModernTurbineSimulation implements ITurbineSimulation {
     
     @Override
     public void tick() {
+        // Normalize saved overspeed before calculating induction and discard excess steam torque at the limit.
+        rotorEnergy = Math.min(rotorEnergy, MAX_RPM * rotorAxialMass);
         double rpm = RPM();
         
         if (active) {
@@ -256,9 +258,7 @@ public class ModernTurbineSimulation implements ITurbineSimulation {
         
         rotorEnergy -= rotorMass * Math.pow(rpm * Config.CONFIG.Turbine.FrictionDragMultiplier, 2); // yes, rpm squared, thats how drag works, bitch ain't it?
         rotorEnergy -= linearBladeMetersPerRevolution * Math.pow(rpm * Config.CONFIG.Turbine.AerodynamicDragMultiplier, 2);
-        if (rotorEnergy < 0) {
-            rotorEnergy = 0;
-        }
+        rotorEnergy = Math.clamp(rotorEnergy, 0, MAX_RPM * rotorAxialMass);
         
     }
     
@@ -346,14 +346,14 @@ public class ModernTurbineSimulation implements ITurbineSimulation {
     
     @Override
     public void deserializeNBT(CompoundTag nbt) {
-        fluidTank.deserializeNBT(nbt.getCompound("fluidTank"));
-        battery.deserializeNBT(nbt.getCompound("battery"));
+        fluidTank.deserializeNBT(nbt.getCompoundOrEmpty("fluidTank"));
+        battery.deserializeNBT(nbt.getCompoundOrEmpty("battery"));
         // Modified 2026-10-30: invalid saved controls cannot prevent the machine loading.
-        int vent = nbt.getInt("ventState");
+        int vent = nbt.getIntOr("ventState", 0);
         ventState = vent >= 0 && vent <= 2 ? VentState.fromInt(vent) : VentState.OVERFLOW;
-        rotorEnergy = biggerreactorsrework.core.util.SavedValues.nonNegative(nbt.getDouble("rotorEnergy"), 0);
-        maxFlowRate = Math.max(0, nbt.getLong("maxFlowRate"));
-        coilEngaged = nbt.getBoolean("coilEngaged");
-        active = nbt.getBoolean("active");
+        rotorEnergy = biggerreactorsrework.core.util.SavedValues.nonNegative(nbt.getDoubleOr("rotorEnergy", 0D), 0);
+        maxFlowRate = Math.max(0, nbt.getLongOr("maxFlowRate", 0L));
+        coilEngaged = nbt.getBooleanOr("coilEngaged", false);
+        active = nbt.getBooleanOr("active", false);
     }
 }

@@ -6,12 +6,8 @@
     "CGC"
   ],
   "key": {
-    "G": {
-      "item": "minecraft:glass"
-    },
-    "C": {
-      "item": "minecraft:copper_ingot"
-    }
+    "G": "minecraft:glass",
+    "C": "minecraft:copper_ingot"
   },
   "result": {
     "id": "biggerreactorsrework:heat_exchanger_evaporator_channel"

@@ -19,7 +19,7 @@ public class Queues {
         int threads = Runtime.getRuntime().availableProcessors();
         threads = Math.max(1, threads - 1); // if possible, leave a core for the main server threads
         try {
-            if (FMLEnvironment.dist == Dist.CLIENT) {
+            if (FMLEnvironment.getDist() == Dist.CLIENT) {
                 threads = Math.max(1, threads - 1); // if possible, leave a core for the main client thread too
                 clientThread1 = new WorkQueue();
             }

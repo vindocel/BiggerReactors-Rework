@@ -22,6 +22,8 @@ public final class OutputBackpressure {
         int current=(cursor+history.length-1)%history.length;
         history[current]=Math.min(history[current],occupancy(remaining,capacity));
     }
+    public double[] history(){return history.clone();}
+    public void restoreHistory(double[] saved){System.arraycopy(saved,0,history,0,history.length);}
     public double limit(){return limit;}
     public double retainedFraction(){return Arrays.stream(history).min().orElse(0);}
     public void reset(){Arrays.fill(history,0);cursor=0;limit=1;}

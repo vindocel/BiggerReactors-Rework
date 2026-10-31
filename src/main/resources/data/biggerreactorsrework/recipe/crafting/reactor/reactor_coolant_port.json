@@ -6,18 +6,10 @@
     "CPC"
   ],
   "key": {
-    "C": {
-      "item": "biggerreactorsrework:reactor_casing"
-    },
-    "I": {
-      "item": "minecraft:iron_ingot"
-    },
-    "V": {
-      "item": "minecraft:bucket"
-    },
-    "P": {
-      "item": "minecraft:piston"
-    }
+    "C": "biggerreactorsrework:reactor_casing",
+    "I": "minecraft:iron_ingot",
+    "V": "minecraft:bucket",
+    "P": "minecraft:piston"
   },
   "result": {
     "id": "biggerreactorsrework:reactor_coolant_port"

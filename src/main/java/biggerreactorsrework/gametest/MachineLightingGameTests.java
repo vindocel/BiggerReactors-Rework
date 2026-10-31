@@ -26,13 +26,11 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.material.Fluids;
 import net.neoforged.neoforge.fluids.FluidStack;
-import net.neoforged.neoforge.fluids.capability.IFluidHandler.FluidAction;
+import biggerreactorsrework.core.transfer.FluidTanks.FluidAction;
 import net.neoforged.neoforge.gametest.*;
 import static biggerreactorsrework.core.multiblock.IAssemblyStateBlock.ASSEMBLED;
 
 /** Added 2026-10-27: state emission, real processing/coolant transitions and batched relighting. */
-@GameTestHolder(BiggerReactors.modid)
-@PrefixGameTestTemplate(false)
 public final class MachineLightingGameTests {
     @GameTest(template="empty_7x7x7")
     public static void terminalsAndFuelUseVisibleOperatingStates(GameTestHelper h) {
@@ -55,7 +53,7 @@ public final class MachineLightingGameTests {
     @GameTest(template="empty_7x7x7")
     public static void industrialLightFollowsProcessingAndPauses(GameTestHelper h) {
         var pos=new BlockPos(2,2,2);h.setBlock(pos,CyaniteReprocessor.INSTANCE);
-        var tile=(CyaniteReprocessorTile)h.getBlockEntity(pos);tile.tick();
+        var tile=(CyaniteReprocessorTile)GameTestSupport.be(h,pos);tile.tick();
         tile.energyFor(null).receiveEnergy(500,false);
         tile.fluidFor(null).fill(new FluidStack(Fluids.WATER,1000),FluidAction.EXECUTE);
         tile.itemHandlerFor(null).insertItem(0,new ItemStack(CyaniteIngot.INSTANCE,2),false);tile.tick();
@@ -69,7 +67,7 @@ public final class MachineLightingGameTests {
         GuideStructures.exchanger().parts().forEach(h::setBlock);var terminal=new BlockPos(1,1,0);
         h.startSequence().thenWaitUntil(()->h.assertTrue(h.getBlockState(terminal).getValue(ASSEMBLED),"exchanger not assembled"))
             .thenExecute(()->{
-                var c=((HeatExchangerBaseTile)h.getBlockEntity(terminal)).controller();
+                var c=((HeatExchangerBaseTile)GameTestSupport.be(h,terminal)).controller();
                 var profile=FluidTransitionRegistry.liquidTransition(LiquidObsidian.INSTANCE);
                 h.assertTrue(c.condenserTank.fill(HeatedCoolant.INSTANCE,CoolantComponents.heated(profile),1000,false)==1000,"hot coolant rejected");
                 c.onReassembled();

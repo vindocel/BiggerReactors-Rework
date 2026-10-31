@@ -99,27 +99,27 @@ public final class CalculatorClient {
     }
 
     public static void receive(CompoundTag tag) {
-        switch (tag.getString("type")) {
+        switch (tag.getStringOr("type", "")) {
             case CalculatorNetwork.CATALOG -> {
-                catalog = CalculatorCatalog.fromClientTag(tag.getCompound("catalog"));
+                catalog = CalculatorCatalog.fromClientTag(tag.getCompoundOrEmpty("catalog"));
                 catalogRefreshPending = false;
             }
             case CalculatorNetwork.PROGRESS -> {
-                if (!tag.getString("session").equals(session) || !running()) return;
+                if (!tag.getStringOr("session", "").equals(session) || !running()) return;
                 try {
-                    phase = Phase.valueOf(tag.getString("phase"));
+                    phase = Phase.valueOf(tag.getStringOr("phase", ""));
                 } catch (IllegalArgumentException ignored) {
                 }
-                done = Math.max(0, tag.getInt("done"));
-                total = Math.max(0, tag.getInt("total"));
+                done = Math.max(0, tag.getIntOr("done", 0));
+                total = Math.max(0, tag.getIntOr("total", 0));
             }
             case CalculatorNetwork.RESULT -> {
-                if (!tag.getString("session").equals(session) || !running()) return;
-                var body = tag.getCompound("result");
+                if (!tag.getStringOr("session", "").equals(session) || !running()) return;
+                var body = tag.getCompoundOrEmpty("result");
                 phase = Phase.DONE;
                 if (body.contains("failure")) {
                     try {
-                        failure = CalculationStatus.valueOf(body.getString("failure"));
+                        failure = CalculationStatus.valueOf(body.getStringOr("failure", ""));
                     } catch (IllegalArgumentException e) {
                         failure = CalculationStatus.FAILED;
                     }

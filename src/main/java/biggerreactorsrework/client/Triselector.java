@@ -1,11 +1,9 @@
 package biggerreactorsrework.client;
 
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 import biggerreactorsrework.core.client.gui.elements.InteractiveElement;
 import biggerreactorsrework.core.client.gui.screens.ModScreen;
 
@@ -13,7 +11,6 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.function.IntSupplier;
 
-@OnlyIn(Dist.CLIENT)
 public class Triselector<T extends AbstractContainerMenu> extends InteractiveElement<T> {
     
     private final IntSupplier renderState;
@@ -86,7 +83,7 @@ public class Triselector<T extends AbstractContainerMenu> extends InteractiveEle
      * @param mouseY The y position of the mouse.
      */
     @Override
-    public void render(@Nonnull GuiGraphics graphics, int mouseX, int mouseY) {
+    public void render(@Nonnull GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
         // Check conditions.
         if (this.renderEnable) {
             GuiArt.toggleCells(graphics, this.x, this.y, this.cellOf(this.renderState.getAsInt()), this.actionEnable && this.isMouseOver(mouseX, mouseY), !this.actionEnable, this.parent.getFrame(), this.colors);
@@ -110,7 +107,7 @@ public class Triselector<T extends AbstractContainerMenu> extends InteractiveEle
         // Check conditions.
         if (this.isMouseOver(mouseX, mouseY)) {
             // Get actual x position.
-            int relativeX = this.parent.getGuiLeft() + this.x;
+            int relativeX = this.parent.getLeftPos() + this.x;
             // Check if the selector is enabled.
             if (this.actionEnable) {
                 // Set side depending on position of click.

@@ -1,3 +1,31 @@
+# 26.3-0.1.5 (BiggerReactors-Rework, unreleased)
+
+## Changed
+
+- Assembled resource ports now show their connection face on the outside and inside, with closed chassis sides matching their machine. Loose ports retain their original appearance.
+- Turbine steam haze now moves gently behind the glass, with slightly stronger whiteness. It follows stored steam even while switched off and actual steam throughput while operating, so fully consumed input remains visible. Condensation starts only after a few seconds of continuous rotating operation.
+- Reduced repeated rotor and fluid-mesh rendering work without removing rotor, coolant or connected-glass detail.
+- Increased turbine steam-film opacity further while retaining the stored-steam and actual-flow response.
+- Updated the mod to Minecraft 26.3 and NeoForge 26.3.0.99. Java 25 is now required.
+- The machine item, fluid and energy connections now use the NeoForge transfer system, so cancelled transfers leave the machines untouched.
+- Machine and guide screens, fluids, rotors, connected glass, fuel columns and heat-exchanger channels were rebuilt on the new rendering system without changing their appearance or behaviour.
+
+## Fixed
+
+- Replaced visible intersecting steam sheets with a continuous animated film behind turbine windows, keeping solid ports and casing clear.
+- Fixed indexed fluid extraction from output chambers, allowing Pipez to move heated coolant from reactors to heat exchangers while retaining its coolant identity.
+- Cancelled coolant transfers now restore the reactor's internal tank as well as its fluid profile, preventing automated filling from leaving unidentified fluid that blocks later coolant insertion.
+- Fixed gauge fills and fluid masks using the old blit signature, which caused missing RPM bars and animated graphical artifacts on 26.3.
+- Turbine rotors now stop accelerating at 2,200 RPM, including with disengaged coils or excess steam. Existing overspeed saves recover on the next simulation tick.
+
+## Added
+
+- Restored optional CC:Tweaked integration for reactor, turbine and heat-exchanger computer ports, with live telemetry, controls and native wired-modem discovery. The existing ports can be crafted when CC:Tweaked or OpenComputers is installed. OpenComputers support remains retained separately.
+
+## Removed for this version
+
+- EMI, Roughly Enough Items and OpenComputers support is not available on Minecraft 26.3 because those mods have no build for it. JEI and Jade remain supported. These integrations stay available on the 1.21.1 line.
+
 # 1.21.1-0.1.5 (BiggerReactors-Rework, unreleased)
 
 ## Added

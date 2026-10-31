@@ -3,7 +3,7 @@ package biggerreactorsrework.registries;
 // Added 2026-10-28: calibrated mono loops; runtime gain 1 is the approved maximum.
 import biggerreactorsrework.BiggerReactors;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvent;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.registries.DeferredRegister;
@@ -17,7 +17,7 @@ public final class MachineSounds {
     public static final Supplier<SoundEvent> TURBINE_MID = sound("machine.turbine.mid_loop");
     public static final Supplier<SoundEvent> TURBINE_HIGH = sound("machine.turbine.high_loop");
     private static Supplier<SoundEvent> sound(String id) {
-        return EVENTS.register(id, () -> SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath(BiggerReactors.modid, id)));
+        return EVENTS.register(id, () -> SoundEvent.createVariableRangeEvent(Identifier.fromNamespaceAndPath(BiggerReactors.modid, id)));
     }
     public static void register(IEventBus bus) { EVENTS.register(bus); }
     private MachineSounds() {}

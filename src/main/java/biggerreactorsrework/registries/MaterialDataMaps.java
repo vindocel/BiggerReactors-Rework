@@ -8,7 +8,7 @@ import com.mojang.serialization.DataResult;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.material.Fluid;
@@ -41,25 +41,25 @@ public final class MaterialDataMaps {
             NONNEGATIVE.fieldOf("gasThermalConductivity").forGetter(Transition::gasThermalConductivity),NONNEGATIVE.fieldOf("turbineMultiplier").forGetter(Transition::turbineMultiplier),
             POSITIVE.validate(n->n<=1?DataResult.success(n):DataResult.error(()->"Recovery must be in (0,1]")).optionalFieldOf("recovery",1d).forGetter(Transition::recovery)).apply(i,Transition::new));
     }
-    private static ResourceLocation id(String path){return ResourceLocation.fromNamespaceAndPath(BiggerReactors.modid,path);}
+    private static Identifier id(String path){return Identifier.fromNamespaceAndPath(BiggerReactors.modid,path);}
     public static final DataMapType<Block,Moderator> MODERATOR=DataMapType.builder(id("reactor_moderator"),Registries.BLOCK,Moderator.CODEC).build();
     public static final DataMapType<Fluid,Moderator> FLUID_MODERATOR=DataMapType.builder(id("reactor_fluid_moderator"),Registries.FLUID,Moderator.CODEC).build();
     public static final DataMapType<Block,Coil> COIL=DataMapType.builder(id("turbine_coil"),Registries.BLOCK,Coil.CODEC).build();
     public static final DataMapType<Fluid,Transition> TRANSITION=DataMapType.builder(id("fluid_transition"),Registries.FLUID,Transition.CODEC).build();
     public static void register(RegisterDataMapTypesEvent event){event.register(MODERATOR);event.register(FLUID_MODERATOR);event.register(COIL);event.register(TRANSITION);}
     static void moderators(Map<Block,ReactorModeratorRegistry.ModeratorProperties> target){
-        BuiltInRegistries.FLUID.holders().forEach(holder->{var data=holder.getData(FLUID_MODERATOR);if(data!=null)target.put(holder.value().defaultFluidState().createLegacyBlock().getBlock(),data.properties());});
-        BuiltInRegistries.BLOCK.holders().forEach(holder->{var data=holder.getData(MODERATOR);if(data!=null)target.put(holder.value(),data.properties());});
+        BuiltInRegistries.FLUID.listElements().forEach(holder->{var data=holder.getData(FLUID_MODERATOR);if(data!=null)target.put(holder.value().defaultFluidState().createLegacyBlock().getBlock(),data.properties());});
+        BuiltInRegistries.BLOCK.listElements().forEach(holder->{var data=holder.getData(MODERATOR);if(data!=null)target.put(holder.value(),data.properties());});
     }
     static void coils(Map<Block,TurbineCoilRegistry.CoilData> target){
-        BuiltInRegistries.BLOCK.holders().forEach(holder->{var d=holder.getData(COIL);if(d!=null)target.put(holder.value(),new TurbineCoilRegistry.CoilData(d.efficiency,d.bonus,d.extractionRate));});
+        BuiltInRegistries.BLOCK.listElements().forEach(holder->{var d=holder.getData(COIL);if(d!=null)target.put(holder.value(),new TurbineCoilRegistry.CoilData(d.efficiency,d.bonus,d.extractionRate));});
     }
     static void transitions(Map<Fluid,FluidTransitionRegistry.FluidTransition> liquids,Map<Fluid,FluidTransitionRegistry.FluidTransition> gases){
-        BuiltInRegistries.FLUID.holders().sorted(java.util.Comparator.comparing(h->h.key().location())).forEach(holder->{
+        BuiltInRegistries.FLUID.listElements().sorted(java.util.Comparator.comparing(h->h.key().identifier())).forEach(holder->{
             var d=holder.getData(TRANSITION);if(d==null)return;
             var outputs=new java.util.ArrayList<Fluid>();
-            if(d.gas.tag()) BuiltInRegistries.FLUID.getTag(net.minecraft.tags.TagKey.create(Registries.FLUID,d.gas.id())).ifPresent(tag->tag.forEach(h->{if(h.value().isSource(h.value().defaultFluidState()))outputs.add(h.value());}));
-            else if(BuiltInRegistries.FLUID.containsKey(d.gas.id())) outputs.add(BuiltInRegistries.FLUID.get(d.gas.id()));
+            if(d.gas.tag()) BuiltInRegistries.FLUID.get(net.minecraft.tags.TagKey.create(Registries.FLUID,d.gas.id())).ifPresent(tag->tag.forEach(h->{if(h.value().isSource(h.value().defaultFluidState()))outputs.add(h.value());}));
+            else if(BuiltInRegistries.FLUID.containsKey(d.gas.id())) outputs.add(BuiltInRegistries.FLUID.getValue(d.gas.id()));
             if(outputs.isEmpty()){BiggerReactors.LOGGER.error("Ignoring transition with missing gas: {}",d.gas);return;}
             outputs.sort(java.util.Comparator.comparing(BuiltInRegistries.FLUID::getKey));
             var transition=new FluidTransitionRegistry.FluidTransition(List.of(holder.value()),List.copyOf(outputs),d.latentHeat,d.boilingPoint,d.liquidThermalConductivity,d.gasThermalConductivity,d.turbineMultiplier);

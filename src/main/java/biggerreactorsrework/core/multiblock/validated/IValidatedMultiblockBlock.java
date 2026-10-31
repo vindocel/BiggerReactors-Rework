@@ -28,7 +28,7 @@ public interface IValidatedMultiblockBlock extends IMultiblockBlock {
         @Override
         public InteractionResult onUse(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult) {
             if (player.getMainHandItem().isEmpty() && hand == InteractionHand.MAIN_HAND && (!state.hasProperty(IAssemblyStateBlock.ASSEMBLED) || !state.getValue(IAssemblyStateBlock.ASSEMBLED))) {
-                if (!level.isClientSide && level.getBlockEntity(pos) instanceof IValidatedMultiblockTile tile) {
+                if (!level.isClientSide() && level.getBlockEntity(pos) instanceof IValidatedMultiblockTile tile) {
                     MultiblockController<?, ?, ?> controller = tile.nullableController();
                     if (controller != null) {
                         final IValidatedMultiblock.Module<?, ?, ?> module = controller.module(IValidatedMultiblock.class, IValidatedMultiblock.Module.class);

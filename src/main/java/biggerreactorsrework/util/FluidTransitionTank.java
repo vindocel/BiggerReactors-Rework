@@ -1,10 +1,9 @@
 package biggerreactorsrework.util;
 
 import net.minecraft.core.component.DataComponentPatch;
-import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
 import biggerreactorsrework.util.NbtSerializable;
@@ -17,9 +16,27 @@ import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.List;
 
-@MethodsReturnNonnullByDefault
 @ParametersAreNonnullByDefault
 public class FluidTransitionTank extends HeatBody implements IFluidTankHandler, NbtSerializable {
+    private record TransferState(FluidTransitionRegistry.FluidTransition transition, Fluid inFluid, long inAmount, Fluid outFluid, long outAmount,
+                                 DataComponentPatch inComponents, DataComponentPatch outComponents, double incoming, double outgoing, double[] observer) {
+    }
+
+    @Override
+    public Object transferSnapshot() {
+        return new TransferState(activeTransition, inFluid, inAmount, outFluid, outAmount, inComponents, outComponents, incoming, outgoing,
+                outputObserver == null ? null : outputObserver.history());
+    }
+
+    @Override
+    public void restoreTransferSnapshot(Object snapshot) {
+        if (!(snapshot instanceof TransferState state)) return;
+        activeTransition = state.transition; inFluid = state.inFluid; inAmount = state.inAmount; outFluid = state.outFluid; outAmount = state.outAmount;
+        inComponents = state.inComponents; outComponents = state.outComponents; incoming = state.incoming; outgoing = state.outgoing;
+        if (outputObserver != null && state.observer != null) outputObserver.restoreHistory(state.observer);
+        transitionUpdate();
+    }
+
     
     public final boolean condenser;
     
@@ -194,7 +211,7 @@ public class FluidTransitionTank extends HeatBody implements IFluidTankHandler, 
         if(unresolved!=null) {
             if(tank==IN_TANK)unresolved.putLong("inAmount",0);
             if(tank==OUT_TANK)unresolved.putLong("outAmount",0);
-            if(unresolved.getLong("inAmount")==0 && unresolved.getLong("outAmount")==0)unresolved=null;
+            if(unresolved.getLongOr("inAmount", 0L)==0 && unresolved.getLongOr("outAmount", 0L)==0)unresolved=null;
         }
         clearSelectionIfEmpty();
     }
@@ -284,8 +301,8 @@ public class FluidTransitionTank extends HeatBody implements IFluidTankHandler, 
             nbt.putLong("outAmount", outAmount);
             nbt.putDouble("thermalRemainder",thermalRemainder);
             nbt.putString("profile",biggerreactorsrework.registries.CoolantComponents.fingerprint(activeTransition));
-            var origin=inComponents.get(biggerreactorsrework.registries.CoolantComponents.ORIGIN.get());
-            if(origin!=null && origin.isPresent()) nbt.putString("origin",origin.get());
+            String origin=inComponents.get(net.minecraft.core.component.DataComponentMap.EMPTY,biggerreactorsrework.registries.CoolantComponents.ORIGIN.get());
+            if(origin!=null) nbt.putString("origin",origin);
         }
         return nbt;
     }
@@ -293,38 +310,38 @@ public class FluidTransitionTank extends HeatBody implements IFluidTankHandler, 
     /** Modified 2026-10-26: quarantined saved fluids also prevent destructive inventory merges. */
     public boolean hasStoredContents() {
         return inAmount>0 || outAmount>0 || unresolved!=null &&
-                (unresolved.getLong("inAmount")>0 || unresolved.getLong("outAmount")>0);
+                (unresolved.getLongOr("inAmount", 0L)>0 || unresolved.getLongOr("outAmount", 0L)>0);
     }
 
     @Override
     public void deserializeNBT(CompoundTag nbt) {
         // Modified 2026-10-27: retain invalid legacy stock without reinterpreting its product.
-        inAmount=Math.max(0,nbt.getLong("inAmount"));outAmount=Math.max(0,nbt.getLong("outAmount"));
+        inAmount=Math.max(0,nbt.getLongOr("inAmount", 0L));outAmount=Math.max(0,nbt.getLongOr("outAmount", 0L));
         inFluid=Fluids.EMPTY;outFluid=Fluids.EMPTY;
         inComponents=DataComponentPatch.EMPTY;outComponents=DataComponentPatch.EMPTY;
         unresolved=nbt.contains("inFluid")?nbt.copy():null;
         activeTransition=null;
         transitionUpdate();
-        if ((inAmount>0 || outAmount>0) && ((condenser && "minecraft:lava".equals(nbt.getString("inFluid"))) ||
-            (!condenser && "biggerreactorsrework:liquid_obsidian".equals(nbt.getString("inFluid")) &&
-             "minecraft:lava".equals(nbt.getString("outFluid"))))) return;
-        if(nbt.getLong("inAmount")==0 && nbt.getLong("outAmount")==0) {
+        if ((inAmount>0 || outAmount>0) && ((condenser && "minecraft:lava".equals(nbt.getStringOr("inFluid", ""))) ||
+            (!condenser && "biggerreactorsrework:liquid_obsidian".equals(nbt.getStringOr("inFluid", "")) &&
+             "minecraft:lava".equals(nbt.getStringOr("outFluid", ""))))) return;
+        if(nbt.getLongOr("inAmount", 0L)==0 && nbt.getLongOr("outAmount", 0L)==0) {
             inAmount=0;outAmount=0;unresolved=null;clearSelectionIfEmpty();return;
         }
         if (!nbt.contains("inFluid")) {
             return;
         }
         // Modified 2026-10-30: quarantine malformed identifiers without losing their stored amounts.
-        ResourceLocation inFluidLocation = ResourceLocation.tryParse(nbt.getString("inFluid"));
+        Identifier inFluidLocation = Identifier.tryParse(nbt.getStringOr("inFluid", ""));
         if (inFluidLocation == null) return;
         if (BuiltInRegistries.FLUID.containsKey(inFluidLocation)) {
-            Fluid newInFluid = BuiltInRegistries.FLUID.get(inFluidLocation);
+            Fluid newInFluid = BuiltInRegistries.FLUID.getValue(inFluidLocation);
             if (newInFluid == null) {
                 return;
             }
             FluidTransitionRegistry.FluidTransition newTransition;
             if (condenser) {
-                var components=nbt.contains("origin") ? DataComponentPatch.builder().set(biggerreactorsrework.registries.CoolantComponents.ORIGIN.get(),nbt.getString("origin")).build() : DataComponentPatch.EMPTY;
+                var components=nbt.contains("origin") ? DataComponentPatch.builder().set(biggerreactorsrework.registries.CoolantComponents.ORIGIN.get(),nbt.getStringOr("origin", "")).build() : DataComponentPatch.EMPTY;
                 newTransition = FluidTransitionRegistry.gasTransition(newInFluid,components);
             } else {
                 newTransition = FluidTransitionRegistry.liquidTransition(newInFluid);
@@ -333,16 +350,16 @@ public class FluidTransitionTank extends HeatBody implements IFluidTankHandler, 
                 return;
             }
             if(!selectable(newTransition))return;
-            if(nbt.contains("profile") && !biggerreactorsrework.registries.CoolantComponents.matchesStoredProfile(nbt.getString("profile"),newTransition)) {
+            if(nbt.contains("profile") && !biggerreactorsrework.registries.CoolantComponents.matchesStoredProfile(nbt.getStringOr("profile", ""),newTransition)) {
                 biggerreactorsrework.BiggerReactors.LOGGER.error("Coolant profile changed for stored fluid {}; tank load refused to prevent energy conversion",inFluidLocation);
                 return;
             }
             List<Fluid> outFluidList = (condenser ? newTransition.liquids : newTransition.gases);
             Fluid newOutFluid = null;
-            ResourceLocation outFluidLocation = ResourceLocation.tryParse(nbt.getString("outFluid"));
+            Identifier outFluidLocation = Identifier.tryParse(nbt.getStringOr("outFluid", ""));
             if (outFluidLocation == null && nbt.contains("outFluid")) return;
             if (outFluidLocation != null && BuiltInRegistries.FLUID.containsKey(outFluidLocation)) {
-                Fluid oldOutFluid = BuiltInRegistries.FLUID.get(outFluidLocation);
+                Fluid oldOutFluid = BuiltInRegistries.FLUID.getValue(outFluidLocation);
                 if (outFluidList.contains(oldOutFluid)) {
                     newOutFluid = oldOutFluid;
                 }
@@ -353,11 +370,11 @@ public class FluidTransitionTank extends HeatBody implements IFluidTankHandler, 
             activeTransition = newTransition;
             inFluid = newInFluid;
             outFluid = newOutFluid;
-            inComponents=nbt.contains("origin") ? DataComponentPatch.builder().set(biggerreactorsrework.registries.CoolantComponents.ORIGIN.get(),nbt.getString("origin")).build() : DataComponentPatch.EMPTY;
+            inComponents=nbt.contains("origin") ? DataComponentPatch.builder().set(biggerreactorsrework.registries.CoolantComponents.ORIGIN.get(),nbt.getStringOr("origin", "")).build() : DataComponentPatch.EMPTY;
             outComponents=!condenser && newTransition.genericHot() ? biggerreactorsrework.registries.CoolantComponents.heated(newTransition) : DataComponentPatch.EMPTY;
-            inAmount = Math.max(0, nbt.getLong("inAmount"));
-            outAmount = Math.max(0, nbt.getLong("outAmount"));
-            thermalRemainder=Math.max(0,Math.min(Math.nextDown(newTransition.latentHeat),nbt.getDouble("thermalRemainder")));
+            inAmount = Math.max(0, nbt.getLongOr("inAmount", 0L));
+            outAmount = Math.max(0, nbt.getLongOr("outAmount", 0L));
+            thermalRemainder=Math.max(0,Math.min(Math.nextDown(newTransition.latentHeat),nbt.getDoubleOr("thermalRemainder", 0D)));
             if(!Double.isFinite(thermalRemainder))thermalRemainder=0;
             unresolved=null;
             transitionUpdate();

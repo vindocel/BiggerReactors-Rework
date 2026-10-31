@@ -4,14 +4,12 @@ import biggerreactorsrework.client.GuiTheme;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.datafixers.util.Pair;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.entity.player.Inventory;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 import biggerreactorsrework.BiggerReactors;
 import biggerreactorsrework.client.CommonButton;
 import biggerreactorsrework.client.GaugeBar;
@@ -29,7 +27,6 @@ import biggerreactorsrework.core.client.gui.elements.RenderedElement;
 
 import javax.annotation.Nonnull;
 
-@OnlyIn(Dist.CLIENT)
 public class ReactorControlRodScreen extends ModScreen<ReactorControlRodContainer> {
 
 
@@ -108,12 +105,12 @@ public class ReactorControlRodScreen extends ModScreen<ReactorControlRodContaine
             if (rodRetractButton.isMouseOver(mX, mY)) {
                 // Calculate amount of change:
                 double delta;
-                if (Screen.hasShiftDown() && Screen.hasControlDown()) delta = -100D;
-                else if (Screen.hasControlDown()) delta = -50D;
-                else if (Screen.hasShiftDown()) delta = -10D;
+                if (net.minecraft.client.Minecraft.getInstance().hasShiftDown() && net.minecraft.client.Minecraft.getInstance().hasControlDown()) delta = -100D;
+                else if (net.minecraft.client.Minecraft.getInstance().hasControlDown()) delta = -50D;
+                else if (net.minecraft.client.Minecraft.getInstance().hasShiftDown()) delta = -10D;
                 else delta = -1D;
                 // Mouse is hovering, do the thing.
-                this.getMenu().executeRequest("changeInsertionLevel", new Pair<>(delta, Screen.hasAltDown()));
+                this.getMenu().executeRequest("changeInsertionLevel", new Pair<>(delta, net.minecraft.client.Minecraft.getInstance().hasAltDown()));
                 // Play the selection sound.
                 rodRetractButton.playSound(SoundEvents.UI_BUTTON_CLICK);
                 return true;
@@ -135,12 +132,12 @@ public class ReactorControlRodScreen extends ModScreen<ReactorControlRodContaine
             if (rodInsertButton.isMouseOver(mX, mY)) {
                 // Calculate amount of change:
                 double delta;
-                if (Screen.hasShiftDown() && Screen.hasControlDown()) delta = 100D;
-                else if (Screen.hasControlDown()) delta = 50D;
-                else if (Screen.hasShiftDown()) delta = 10D;
+                if (net.minecraft.client.Minecraft.getInstance().hasShiftDown() && net.minecraft.client.Minecraft.getInstance().hasControlDown()) delta = 100D;
+                else if (net.minecraft.client.Minecraft.getInstance().hasControlDown()) delta = 50D;
+                else if (net.minecraft.client.Minecraft.getInstance().hasShiftDown()) delta = 10D;
                 else delta = 1D;
                 // Mouse is hovering, do the thing.
-                this.getMenu().executeRequest("changeInsertionLevel", new Pair<>(delta, Screen.hasAltDown()));
+                this.getMenu().executeRequest("changeInsertionLevel", new Pair<>(delta, net.minecraft.client.Minecraft.getInstance().hasAltDown()));
                 // Play the selection sound.
                 rodInsertButton.playSound(SoundEvents.UI_BUTTON_CLICK);
                 return true;
@@ -162,7 +159,7 @@ public class ReactorControlRodScreen extends ModScreen<ReactorControlRodContaine
     public void initGauges() {
         // (Center) Control rod insertion gauge:
         RenderedElement<ReactorControlRodContainer> rodInsertionGauge = new RenderedElement<>(this, 36, 50, 18, 64, 0, 126, Component.empty());
-        rodInsertionGauge.onRender = (@Nonnull GuiGraphics graphics, int mX, int mY) -> ReactorControlRodScreen.renderInsertionLevel(graphics, rodInsertionGauge, this.reactorControlRodState.insertionLevel);
+        rodInsertionGauge.onRender = (@Nonnull GuiGraphicsExtractor graphics, int mX, int mY) -> ReactorControlRodScreen.renderInsertionLevel(graphics, rodInsertionGauge, this.reactorControlRodState.insertionLevel);
         this.addScreenElement(rodInsertionGauge);
     }
 
@@ -175,14 +172,14 @@ public class ReactorControlRodScreen extends ModScreen<ReactorControlRodContaine
      * @param partialTicks Partial ticks.
      */
     @Override
-    public void render(@Nonnull GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
-        super.render(graphics, mouseX, mouseY, partialTicks);
+    public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTicks) {
+        super.extractRenderState(graphics, mouseX, mouseY, partialTicks);
 
         // Render text for text box:
-        graphics.drawString(this.getFont(), Component.translatable("screen.biggerreactorsrework.reactor_control_rod.name").getString(), this.getGuiLeft() + 8, this.getGuiTop() + 17, GuiTheme.textColor(), false);
+        graphics.text(this.getFont(), Component.translatable("screen.biggerreactorsrework.reactor_control_rod.name").getString(), this.getLeftPos() + 8, this.getTopPos() + 17, GuiTheme.textColor(), false);
 
         // Render text for insertion level:
-        graphics.drawString(this.getFont(), String.format("%.1f%%", reactorControlRodState.insertionLevel), this.getGuiLeft() + 76, this.getGuiTop() + 77, GuiTheme.textColor(), false);
+        graphics.text(this.getFont(), String.format("%.1f%%", reactorControlRodState.insertionLevel), this.getLeftPos() + 76, this.getTopPos() + 77, GuiTheme.textColor(), false);
     }
 
     /**
@@ -192,7 +189,7 @@ public class ReactorControlRodScreen extends ModScreen<ReactorControlRodContaine
      * @param symbol         The symbol to draw as.
      * @param insertionLevel How far the control rod is inserted. 0 is no insertion, 100 is full insertion.
      */
-    public static void renderInsertionLevel(@Nonnull GuiGraphics graphics, @Nonnull RenderedElement<ReactorControlRodContainer> symbol, double insertionLevel) {
+    public static void renderInsertionLevel(@Nonnull GuiGraphicsExtractor graphics, @Nonnull RenderedElement<ReactorControlRodContainer> symbol, double insertionLevel) {
         // Fuel behind, rod coming down from the top as it is inserted.
         GaugeBar.drawControlRod(graphics, symbol.x, symbol.y, insertionLevel, LiquidUranium.INSTANCE.getSource());
         // Update tooltip.

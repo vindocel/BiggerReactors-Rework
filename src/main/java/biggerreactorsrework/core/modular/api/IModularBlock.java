@@ -1,12 +1,10 @@
 package biggerreactorsrework.core.modular.api;
 
 
-import net.minecraft.MethodsReturnNonnullByDefault;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.List;
 
-@MethodsReturnNonnullByDefault
 @ParametersAreNonnullByDefault
 public interface IModularBlock {
     default <Type> Type as(Class<Type> clazz) {

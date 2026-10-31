@@ -17,7 +17,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.contents.TranslatableContents;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.material.Fluid;
@@ -36,7 +36,7 @@ final class GuideReferences {
     private static final Map<String, List<String>> POLICY = Map.of();
 
     /** Items already referenced in the chapter being built: only the first mention is marked. */
-    private static final Set<ResourceLocation> SEEN = new HashSet<>();
+    private static final Set<Identifier> SEEN = new HashSet<>();
 
     /** What a reference shows: an item, or a fluid that has no item of its own. */
     record Target(ItemStack stack, Fluid fluid, Component name, net.neoforged.neoforge.fluids.FluidStack fluidStack) {
@@ -50,10 +50,10 @@ final class GuideReferences {
     }
 
     /** A referenced word on one line, in pixels from the start of the line. */
-    record Span(int start, int end, ResourceLocation id) {
+    record Span(int start, int end, Identifier id) {
     }
 
-    private record Alias(String text, ResourceLocation id) {
+    private record Alias(String text, Identifier id) {
     }
 
     private GuideReferences() {
@@ -115,7 +115,7 @@ final class GuideReferences {
         }
         List<Alias> aliases = new ArrayList<>();
         for (String entry : allowed) {
-            ResourceLocation id = entry.contains(":") ? ResourceLocation.parse(entry) : GuideIds.id(entry);
+            Identifier id = entry.contains(":") ? Identifier.parse(entry) : GuideIds.id(entry);
             Target target = target(id);
             if (target == null) {
                 continue;
@@ -165,13 +165,13 @@ final class GuideReferences {
     }
 
     /** The item (or fluid) behind an id, or null when nothing is registered under it. */
-    static Target target(ResourceLocation id) {
+    static Target target(Identifier id) {
         if (BuiltInRegistries.ITEM.containsKey(id)) {
-            ItemStack stack = new ItemStack(BuiltInRegistries.ITEM.get(id));
+            ItemStack stack = new ItemStack(BuiltInRegistries.ITEM.getValue(id));
             return new Target(stack, null, stack.getHoverName());
         }
         if (BuiltInRegistries.FLUID.containsKey(id)) {
-            Fluid fluid = BuiltInRegistries.FLUID.get(id);
+            Fluid fluid = BuiltInRegistries.FLUID.getValue(id);
             return new Target(ItemStack.EMPTY, fluid, fluid.getFluidType().getDescription());
         }
         return null;
@@ -188,7 +188,7 @@ final class GuideReferences {
             String id = insertion != null && insertion.startsWith(PREFIX) ? insertion.substring(PREFIX.length()) : null;
             if (!Objects.equals(id, current[0])) {
                 if (current[0] != null) {
-                    out.add(new Span(start[0], x[0], ResourceLocation.parse(current[0])));
+                    out.add(new Span(start[0], x[0], Identifier.parse(current[0])));
                 }
                 current[0] = id;
                 start[0] = x[0];
@@ -197,7 +197,7 @@ final class GuideReferences {
             return true;
         });
         if (current[0] != null) {
-            out.add(new Span(start[0], x[0], ResourceLocation.parse(current[0])));
+            out.add(new Span(start[0], x[0], Identifier.parse(current[0])));
         }
         return out;
     }

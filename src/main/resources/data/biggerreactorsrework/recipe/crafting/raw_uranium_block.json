@@ -6,9 +6,7 @@
     "III"
   ],
   "key": {
-    "I": {
-      "tag": "c:raw_materials/uranium"
-    }
+    "I": "#c:raw_materials/uranium"
   },
   "result": {
     "id": "biggerreactorsrework:raw_uranium_block"

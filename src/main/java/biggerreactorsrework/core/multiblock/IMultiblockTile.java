@@ -1,6 +1,5 @@
 package biggerreactorsrework.core.multiblock;
 
-import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import biggerreactorsrework.core.modular.api.IModularTile;
@@ -9,7 +8,6 @@ import biggerreactorsrework.core.modular.tile.IIsTickingTracker;
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 
-@MethodsReturnNonnullByDefault
 @ParametersAreNonnullByDefault
 public interface IMultiblockTile<
         TileType extends BlockEntity & IMultiblockTile<TileType, BlockType, ControllerType>,

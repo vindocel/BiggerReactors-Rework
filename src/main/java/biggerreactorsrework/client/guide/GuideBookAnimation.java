@@ -2,7 +2,7 @@ package biggerreactorsrework.client.guide;
 
 
 
-import net.minecraft.Util;
+import net.minecraft.util.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
@@ -38,7 +38,7 @@ public final class GuideBookAnimation {
             phaseStart = Util.getMillis() - (phase == Phase.CLOSING ? (long) ((1 - progress()) * DURATION_MS) : 0);
             phase = Phase.OPENING;
         }
-        Minecraft.getInstance().setScreen(new GuideScreen());
+        Minecraft.getInstance().gui.setScreen(new GuideScreen());
     }
 
     /** The guide screen turned a page: a leaf of the book in the hand turns too, as if the player were reading it. */

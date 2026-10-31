@@ -4,23 +4,17 @@ import biggerreactorsrework.util.GuideStructures.Example;
 import biggerreactorsrework.multiblocks.reactor.blocks.*;
 import biggerreactorsrework.multiblocks.turbine.blocks.*;
 import biggerreactorsrework.multiblocks.battery.blocks.*;
-import com.mojang.blaze3d.platform.Lighting;
-import com.mojang.math.Axis;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.renderer.*;
-import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.phys.AABB;
 import java.util.*;
 
 /** Models and materials on facing pages. */
 final class GuideMultiblock {
-    private static final String FRAME="frame",WALLS="walls";
+    private static final String FRAME="frame";static final String WALLS="walls";
     private static final Map<String,ViewState> STATES=new HashMap<>();
     private static final class ViewState {float yaw=35,pitch=28,zoom=1;int layer=-1;boolean rotating=true;long lastFrame;String highlight;}
     record Box(int x,int y,int z,int w,int h,int d,BlockState block,String group){long count(){return (long)w*h*d;}}
@@ -30,11 +24,11 @@ final class GuideMultiblock {
         final Component title;final Viewer viewer;final PartsPanel parts;
         Spread(Preview p,Component title){this.title=title;var state=STATES.computeIfAbsent(p.id(),k->new ViewState());if(state.layer>=p.height())state.layer=-1;viewer=new Viewer(p,state);parts=new PartsPanel(p,state);}
         public int height(GuideScreen s,int w){return 0;}
-        public void render(GuideScreen s,GuiGraphics g,int x,int y,int w,int mx,int my){}
+        public void render(GuideScreen s,GuiGraphicsExtractor g,int x,int y,int w,int mx,int my){}
     }
     record DimensionsTitle(Component title) implements GuideElement {
         public int height(GuideScreen s,int w){return 15;}
-        public void render(GuideScreen s,GuiGraphics g,int x,int y,int w,int mx,int my){
+        public void render(GuideScreen s,GuiGraphicsExtractor g,int x,int y,int w,int mx,int my){
             s.fixedText(g,title,x,y+2,w,GuideElements.HEADING);g.fill(x,y+12,x+w,y+13,GuideElements.RULE);
         }
     }
@@ -81,32 +75,16 @@ final class GuideMultiblock {
         Viewer(Preview p,ViewState s){example=p;state=s;}
         public int height(GuideScreen s,int w){return Math.min(230,s.pageHeight()-50);}
         private int viewHeight(GuideScreen s,int w){return height(s,w)-20;}
-        public void render(GuideScreen s,GuiGraphics g,int x,int y,int width,int mx,int my){
-            int vh=viewHeight(s,width);g.fill(x,y,x+width,y+vh,0xFF222832);long now=net.minecraft.Util.getMillis();
+        public void render(GuideScreen s,GuiGraphicsExtractor g,int x,int y,int width,int mx,int my){
+            int vh=viewHeight(s,width);g.fill(x,y,x+width,y+vh,0xFF222832);long now=net.minecraft.util.Util.getMillis();
             if(state.rotating&&!dragging&&state.lastFrame!=0)state.yaw+=(now-state.lastFrame)*0.02f;state.lastFrame=now;
             if(!s.turning()){
-                g.enableScissor(x,y,x+width,y+vh);var pose=g.pose();pose.pushPose();pose.translate(x+width/2f,y+vh/2f,200);
+                g.enableScissor(x,y,x+width,y+vh);
                 float scale=state.zoom*Math.min(width,vh)/(Math.max(example.width(),Math.max(example.depth(),example.height()))*1.8f);
-                pose.scale(scale,-scale,scale);pose.mulPose(Axis.XP.rotationDegrees(state.pitch));pose.mulPose(Axis.YP.rotationDegrees(state.yaw));pose.translate(-example.width()/2f,-example.height()/2f,-example.depth()/2f);
-                Lighting.setupFor3DItems();boolean glass=(now/2500)%2==1;
-                for(var box:example.boxes()){
-                    if(state.layer>=0&&(state.layer<box.y||state.layer>=box.y+box.h))continue;
-                    int by=state.layer<0?box.y:state.layer,bh=state.layer<0?box.h:1;
-                    var block=WALLS.equals(box.group)&&example.glass()!=null&&glass?example.glass().defaultBlockState():box.block;
-                    pose.pushPose();pose.translate(box.x,by,box.z);pose.scale(box.w,bh,box.d);
-                    Minecraft.getInstance().getBlockRenderer().renderSingleBlock(block,pose,g.bufferSource(),LightTexture.FULL_BRIGHT,OverlayTexture.NO_OVERLAY);
-                    // Coolant inside, as in a working reactor; the frame alone shows only its outer faces.
-                    if(block.getBlock()==ReactorManifold.INSTANCE)biggerreactorsrework.client.FluidBoxRenderer.draw(pose,g.bufferSource(),
-                            java.util.List.of(new biggerreactorsrework.client.FluidBoxRenderer.Volume(
-                                    new net.neoforged.neoforge.fluids.FluidStack(net.minecraft.world.level.material.Fluids.WATER,1000),
-                                    biggerreactorsrework.core.util.ManifoldFluidGeometry.box(0,1),0)),LightTexture.FULL_BRIGHT,OverlayTexture.NO_OVERLAY);
-                    pose.popPose();
-                }g.flush();
-                if(state.highlight!=null)for(var box:example.boxes()){
-                    if(!box.group.equals(state.highlight)||state.layer>=0&&(state.layer<box.y||state.layer>=box.y+box.h))continue;
-                    int by=state.layer<0?box.y:state.layer,bh=state.layer<0?box.h:1;
-                    LevelRenderer.renderLineBox(pose,g.bufferSource().getBuffer(RenderType.lines()),new AABB(box.x-0.015,by-0.015,box.z-0.015,box.x+box.w+0.015,by+bh+0.015,box.z+box.d+0.015),1f,0.85f,0.1f,1f);
-                }g.flush();pose.popPose();Lighting.setupForFlatItems();g.disableScissor();
+                var origin=g.pose().transformPosition(new org.joml.Vector2f(x,y));
+                int ox=Math.round(origin.x),oy=Math.round(origin.y);
+                g.submitPictureInPictureRenderState(new GuideStructureRenderer.State(example,state.layer,state.highlight,(now/2500)%2==1,state.yaw,state.pitch,ox,oy,ox+width,oy+vh,scale,g.peekScissorStack()));
+                g.disableScissor();
             }
             int bw=(width-4)/2;
             var layer=state.layer<0?Component.translatable("guide.biggerreactorsrework.viewer.layer_all"):Component.translatable("guide.biggerreactorsrework.viewer.layer",state.layer+1);
@@ -156,10 +134,10 @@ final class GuideMultiblock {
         public int height(GuideScreen s,int width){return Math.min(parts.size()*24,s.pageHeight()-28);}
         private int row(GuideScreen s,int width){return height(s,width)/Math.max(1,parts.size());}
         @Override public void prepare(GuideScreen s,int x,int y,int width,int mx,int my){int row=row(s,width),index=(my-y)/Math.max(1,row);if(mx>=x&&mx<x+width&&my>=y&&index<parts.size())state.highlight=parts.get(index).group;}
-        public void render(GuideScreen s,GuiGraphics g,int x,int y,int width,int mx,int my){
+        public void render(GuideScreen s,GuiGraphicsExtractor g,int x,int y,int width,int mx,int my){
             int row=row(s,width);for(int i=0;i<parts.size();i++){
                 var part=parts.get(i);int py=y+i*row;boolean walls=WALLS.equals(part.group)&&example.glass()!=null,hover=part.group.equals(state.highlight);
-                var stack=new ItemStack(walls&&(net.minecraft.Util.getMillis()/2500)%2==1?example.glass().asItem():part.item);
+                var stack=new ItemStack(walls&&(net.minecraft.util.Util.getMillis()/2500)%2==1?example.glass().asItem():part.item);
                 if(hover)g.fill(x,py,x+width,py+row,0x40FFE033);s.itemSlot(g,stack,x,py,mx,my);
                 Component name=walls?Component.translatable("guide.biggerreactorsrework.viewer.walls",part.count):FRAME.equals(part.group)?Component.translatable("guide.biggerreactorsrework.viewer.frame",part.count):Component.literal(part.count+"\u00d7 ").append(stack.getHoverName());
                 s.fixedText(g,name,x+23,py+5,width-23,hover?0xFF8A6500:GuideElements.BODY);

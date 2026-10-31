@@ -1,6 +1,5 @@
 package biggerreactorsrework.multiblocks.heatexchanger.tiles;
 
-import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
@@ -20,7 +19,6 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 
-@MethodsReturnNonnullByDefault
 @ParametersAreNonnullByDefault
 public class HeatExchangerTerminalTile extends HeatExchangerBaseTile implements MenuProvider, IHasUpdatableState<HeatExchangerState> {
     
@@ -35,7 +33,7 @@ public class HeatExchangerTerminalTile extends HeatExchangerBaseTile implements 
     public biggerreactorsrework.core.fluids.FluidRenderSnapshot primaryView=biggerreactorsrework.core.fluids.FluidRenderSnapshot.EMPTY;
     public biggerreactorsrework.core.fluids.FluidRenderSnapshot secondaryView=biggerreactorsrework.core.fluids.FluidRenderSnapshot.EMPTY;
     @Override protected net.minecraft.nbt.CompoundTag writeNBT(){var tag=super.writeNBT();tag.put("primaryView",primaryView.save());tag.put("secondaryView",secondaryView.save());return tag;}
-    @Override protected void readNBT(net.minecraft.nbt.CompoundTag tag){super.readNBT(tag);primaryView=biggerreactorsrework.core.fluids.FluidRenderSnapshot.load(tag.getCompound("primaryView"));secondaryView=biggerreactorsrework.core.fluids.FluidRenderSnapshot.load(tag.getCompound("secondaryView"));}
+    @Override protected void readNBT(net.minecraft.nbt.CompoundTag tag){super.readNBT(tag);primaryView=biggerreactorsrework.core.fluids.FluidRenderSnapshot.load(tag.getCompoundOrEmpty("primaryView"));secondaryView=biggerreactorsrework.core.fluids.FluidRenderSnapshot.load(tag.getCompoundOrEmpty("secondaryView"));}
     @Override protected net.minecraft.nbt.CompoundTag getUpdateNBT(){return writeNBT();}
     @Override protected void handleUpdateNBT(net.minecraft.nbt.CompoundTag tag){readNBT(tag);}
     

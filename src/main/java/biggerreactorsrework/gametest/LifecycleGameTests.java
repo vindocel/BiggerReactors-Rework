@@ -15,8 +15,6 @@ import net.neoforged.neoforge.gametest.*;
 import java.util.Map;
 import static biggerreactorsrework.core.multiblock.IAssemblyStateBlock.ASSEMBLED;
 
-@GameTestHolder(BiggerReactors.modid)
-@PrefixGameTestTemplate(false)
 public final class LifecycleGameTests {
     @GameTest(template="empty_7x7x7",timeoutTicks=200)
     public static void stoppedRotorAcceptsGeometryBeforeAssembledStateArrives(GameTestHelper h){
@@ -25,8 +23,8 @@ public final class LifecycleGameTests {
         var pos=new BlockPos(2,0,2);
         h.startSequence().thenWaitUntil(()->h.assertTrue(h.getBlockState(pos).getValue(ASSEMBLED),"turbine not assembled"))
             .thenExecute(()->{
-                var server=(biggerreactorsrework.multiblocks.turbine.tiles.TurbineRotorBearingTile)h.getBlockEntity(pos);
-                if(!server.isRenderBearing)server=(biggerreactorsrework.multiblocks.turbine.tiles.TurbineRotorBearingTile)h.getBlockEntity(new BlockPos(2,6,2));
+                var server=(biggerreactorsrework.multiblocks.turbine.tiles.TurbineRotorBearingTile)GameTestSupport.be(h,pos);
+                if(!server.isRenderBearing)server=(biggerreactorsrework.multiblocks.turbine.tiles.TurbineRotorBearingTile)GameTestSupport.be(h,new BlockPos(2,6,2));
                 var client=new biggerreactorsrework.multiblocks.turbine.tiles.TurbineRotorBearingTile(server.getType(),server.getBlockPos(),server.getBlockState().setValue(ASSEMBLED,false));
                 client.setLevel(h.getLevel());
                 var update=new net.minecraft.nbt.CompoundTag();update.putDouble("speed",0);
@@ -45,7 +43,7 @@ public final class LifecycleGameTests {
         h.startSequence()
             .thenWaitUntil(()->h.assertTrue(h.getBlockState(terminal).getValue(ASSEMBLED),"reactor not assembled"))
             .thenExecute(()->{
-                part[0]=(ReactorBaseTile)h.getBlockEntity(corner);original[0]=part[0].controller();
+                part[0]=(ReactorBaseTile)GameTestSupport.be(h,corner);original[0]=part[0].controller();
                 original[0].setActive(ReactorActivity.ACTIVE);part[0].multiblockModule().stopTicking();
             })
             .thenIdle(4)
@@ -58,14 +56,14 @@ public final class LifecycleGameTests {
             .thenWaitUntil(()->h.assertTrue(h.getBlockState(terminal).getValue(ASSEMBLED),"reactor did not reassemble"))
             .thenExecute(()->h.setBlock(corner,Blocks.AIR))
             .thenIdle(4)
-            .thenExecute(()->h.assertFalse(((ReactorBaseTile)h.getBlockEntity(terminal)).controller().isActive(),"manual break kept active intent"))
+            .thenExecute(()->h.assertFalse(((ReactorBaseTile)GameTestSupport.be(h,terminal)).controller().isActive(),"manual break kept active intent"))
             .thenSucceed();
     }
     @GameTest(template="empty_7x7x7",timeoutTicks=200)
     public static void turbineRedstoneCommandsAndSensors(GameTestHelper h){
         GuideStructures.turbine().parts().forEach(h::setBlock);
         BlockPos port=new BlockPos(4,2,2),signal=port.east();h.setBlock(port,TurbineRedstonePort.INSTANCE);
-        var tile=(TurbineRedstonePortTile)h.getBlockEntity(port);
+        var tile=(TurbineRedstonePortTile)GameTestSupport.be(h,port);
         h.startSequence()
             .thenWaitUntil(()->h.assertTrue(h.getBlockState(port).getValue(ASSEMBLED),"port not assembled"))
             .thenExecute(()->{

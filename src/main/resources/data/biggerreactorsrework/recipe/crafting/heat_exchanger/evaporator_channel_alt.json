@@ -4,9 +4,7 @@
     "C"
   ],
   "key": {
-    "C": {
-      "item": "biggerreactorsrework:heat_exchanger_condenser_channel"
-    }
+    "C": "biggerreactorsrework:heat_exchanger_condenser_channel"
   },
   "result": {
     "id": "biggerreactorsrework:heat_exchanger_evaporator_channel"

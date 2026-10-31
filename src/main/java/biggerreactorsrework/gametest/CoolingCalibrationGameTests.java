@@ -12,8 +12,6 @@ import org.joml.Vector4i;
 import java.util.*;
 
 /** Reproducible numerical baseline, real registry and real turbine. Runs without an external mod. */
-@GameTestHolder(BiggerReactors.modid)
-@PrefixGameTestTemplate(false)
 public final class CoolingCalibrationGameTests {
     private static SimulationDescription layout(boolean passive,ReactorModeratorRegistry.ModeratorProperties solid){
         var d=new SimulationDescription();d.setSize(3,3,3);d.setDefaultIModeratorProperties(new ReactorModeratorRegistry.ModeratorProperties(.1,.25,1.1,.05));
@@ -56,14 +54,14 @@ public final class CoolingCalibrationGameTests {
             for(int tick=0;tick<180000;tick++){
                 actual.fuelTank().extractWaste(Long.MAX_VALUE,false);actual.fuelTank().insertFuel(Long.MAX_VALUE,false);actual.tick(true);
                 var target=profile==water?(biggerreactorsrework.core.fluids.IFluidTankHandler)turbine.fluidTank():hotTank;
-                int moved=target.fill(primary.getFluidInTank(1),net.neoforged.neoforge.fluids.capability.IFluidHandler.FluidAction.EXECUTE);
-                primary.drain(moved,net.neoforged.neoforge.fluids.capability.IFluidHandler.FluidAction.EXECUTE);
+                int moved=target.fill(primary.getFluidInTank(1),biggerreactorsrework.core.transfer.FluidTanks.FluidAction.EXECUTE);
+                primary.drain(moved,biggerreactorsrework.core.transfer.FluidTanks.FluidAction.EXECUTE);
                 long currentSteam=actual.coolantTank().transitionedLastTick();
                 if(profile!=water){
                     waterTank.fill(net.minecraft.world.level.material.Fluids.WATER,net.minecraft.core.component.DataComponentPatch.EMPTY,channels*10000,false);
                     hotTank.transferWith(c,channels*80);c.transferWith(air,(3*channels+2)*.5);c.transferWith(e,channels*50);e.transferWith(air,(3*channels+2)*.5);waterTank.transferWith(e,channels*80);air.transferWith(ambient,(16*channels+64)*.2);
-                    int back=primary.fill(hotTank.getFluidInTank(1),net.neoforged.neoforge.fluids.capability.IFluidHandler.FluidAction.EXECUTE);hotTank.drain(back,net.neoforged.neoforge.fluids.capability.IFluidHandler.FluidAction.EXECUTE);
-                    int steamMoved=turbine.fluidTank().fill(waterTank.getFluidInTank(1),net.neoforged.neoforge.fluids.capability.IFluidHandler.FluidAction.EXECUTE);waterTank.drain(steamMoved,net.neoforged.neoforge.fluids.capability.IFluidHandler.FluidAction.EXECUTE);currentSteam=waterTank.transitionedLastTick();
+                    int back=primary.fill(hotTank.getFluidInTank(1),biggerreactorsrework.core.transfer.FluidTanks.FluidAction.EXECUTE);hotTank.drain(back,biggerreactorsrework.core.transfer.FluidTanks.FluidAction.EXECUTE);
+                    int steamMoved=turbine.fluidTank().fill(waterTank.getFluidInTank(1),biggerreactorsrework.core.transfer.FluidTanks.FluidAction.EXECUTE);waterTank.drain(steamMoved,biggerreactorsrework.core.transfer.FluidTanks.FluidAction.EXECUTE);currentSteam=waterTank.transitionedLastTick();
                 }else primary.fill(net.minecraft.world.level.material.Fluids.WATER,net.minecraft.core.component.DataComponentPatch.EMPTY,primary.perSideCapacity(),false);
                 turbine.tick();turbine.battery().extract(Long.MAX_VALUE);
                 if(tick>=160000){generated+=turbine.FEGeneratedLastTick();burned+=actual.fuelTank().burnedLastTick();steamTotal+=currentSteam;hotTotal+=actual.coolantTank().transitionedLastTick();}

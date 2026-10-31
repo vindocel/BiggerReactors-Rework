@@ -7,8 +7,8 @@ import net.minecraft.world.inventory.ContainerLevelAccess;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.items.IItemHandler;
-import net.neoforged.neoforge.items.SlotItemHandler;
+import biggerreactorsrework.core.transfer.ItemSlots;
+import biggerreactorsrework.core.transfer.SlotsSlot;
 import biggerreactorsrework.machine.blocks.CyaniteReprocessor;
 import biggerreactorsrework.machine.tiles.CyaniteReprocessorTile;
 import biggerreactorsrework.machine.tiles.impl.CyaniteReprocessorItemHandler;
@@ -40,11 +40,11 @@ public class CyaniteReprocessorContainer extends AbstractContainerMenu implement
 
         // Populate machine slots.
         if (this.tileEntity != null) {
-            IItemHandler handler = tileEntity.getItemHandler();
+            ItemSlots handler = tileEntity.getItemHandler();
             // Add input slot.
-            this.addSlot(new SlotItemHandler(handler, CyaniteReprocessorItemHandler.INPUT_SLOT_INDEX, 56, 56));
+            this.addSlot(new SlotsSlot(handler, CyaniteReprocessorItemHandler.INPUT_SLOT_INDEX, 56, 56));
             // Add output slot.
-            this.addSlot(new SlotItemHandler(handler, CyaniteReprocessorItemHandler.OUTPUT_SLOT_INDEX, 116, 56));
+            this.addSlot(new SlotsSlot(handler, CyaniteReprocessorItemHandler.OUTPUT_SLOT_INDEX, 116, 56));
         }
 
         // Populate player inventory.
@@ -63,7 +63,7 @@ public class CyaniteReprocessorContainer extends AbstractContainerMenu implement
     @Override
     public void executeRequest(String requestName, @Nullable Object requestData) {
         assert this.tileEntity.getLevel() != null;
-        if (this.tileEntity.getLevel().isClientSide) {
+        if (this.tileEntity.getLevel().isClientSide()) {
             runRequest(requestName, requestData);
             return;
         }

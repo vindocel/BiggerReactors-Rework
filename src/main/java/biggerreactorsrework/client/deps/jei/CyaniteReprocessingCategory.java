@@ -14,7 +14,7 @@ import mezz.jei.api.recipe.IFocusGroup;
 import mezz.jei.api.recipe.RecipeIngredientRole;
 import mezz.jei.api.recipe.RecipeType;
 import mezz.jei.api.recipe.category.IRecipeCategory;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.material.Fluids;
@@ -32,7 +32,7 @@ public class CyaniteReprocessingCategory implements IRecipeCategory<CyaniteRepro
             new mezz.jei.api.ingredients.IIngredientRenderer<>() {
                 @Override public int getWidth() { return biggerreactorsrework.client.GaugeBar.WIDTH; }
                 @Override public int getHeight() { return biggerreactorsrework.client.GaugeBar.HEIGHT; }
-                @Override public void render(GuiGraphics g, net.neoforged.neoforge.fluids.FluidStack fluid) {
+                @Override public void render(GuiGraphicsExtractor g, net.neoforged.neoforge.fluids.FluidStack fluid) {
                     biggerreactorsrework.client.GaugeBar.drawFluid(g,0,0,fluid.getAmount(),Math.max(1,fluid.getAmount()),fluid);
                 }
                 @Override public java.util.List<Component> getTooltip(net.neoforged.neoforge.fluids.FluidStack fluid,net.minecraft.world.item.TooltipFlag flag) {
@@ -75,7 +75,7 @@ public class CyaniteReprocessingCategory implements IRecipeCategory<CyaniteRepro
     @Override
     public void setRecipe(IRecipeLayoutBuilder builder, Recipe recipe, IFocusGroup focuses) {
         builder.addSlot(RecipeIngredientRole.INPUT, Cyanite.INPUT_X + 1, Cyanite.SLOT_Y + 1)
-                .addItemStacks(java.util.Arrays.stream(recipe.value().ingredient().getItems()).map(stack -> stack.copyWithCount(recipe.value().count())).toList());
+                .addItemStacks(java.util.Arrays.stream(biggerreactorsrework.machine.recipe.RecipeAccess.stacks(recipe.value().ingredient())).map(stack -> stack.copyWithCount(recipe.value().count())).toList());
         if(recipe.value().producesFluid()) {
             var product=recipe.value().fluidResult();
             builder.addSlot(RecipeIngredientRole.OUTPUT,Cyanite.PRODUCT_X,0)
@@ -89,7 +89,7 @@ public class CyaniteReprocessingCategory implements IRecipeCategory<CyaniteRepro
     }
 
     @Override
-    public void draw(Recipe recipe, IRecipeSlotsView view, GuiGraphics g, double mouseX, double mouseY) {
+    public void draw(Recipe recipe, IRecipeSlotsView view, GuiGraphicsExtractor g, double mouseX, double mouseY) {
         Cyanite.draw(g, recipe.value());
     }
 

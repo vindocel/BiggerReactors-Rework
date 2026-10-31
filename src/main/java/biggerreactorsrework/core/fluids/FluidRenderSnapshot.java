@@ -20,5 +20,5 @@ public record FluidRenderSnapshot(String input,String output,String inputOrigin,
             inputShare,outputShare);
     }
     public CompoundTag save(){var tag=new CompoundTag();tag.putString("input",input);tag.putString("output",output);tag.putString("inputOrigin",inputOrigin);tag.putString("outputOrigin",outputOrigin);tag.putDouble("inputFill",inputFill);tag.putDouble("outputFill",outputFill);return tag;}
-    public static FluidRenderSnapshot load(CompoundTag tag){return new FluidRenderSnapshot(tag.getString("input"),tag.getString("output"),tag.getString("inputOrigin"),tag.getString("outputOrigin"),tag.getDouble("inputFill"),tag.getDouble("outputFill"));}
+    public static FluidRenderSnapshot load(CompoundTag tag){return new FluidRenderSnapshot(tag.getStringOr("input", ""),tag.getStringOr("output", ""),tag.getStringOr("inputOrigin", ""),tag.getStringOr("outputOrigin", ""),tag.getDoubleOr("inputFill", 0D),tag.getDoubleOr("outputFill", 0D));}
 }

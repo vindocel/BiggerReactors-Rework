@@ -1,15 +1,11 @@
 {
   "type": "minecraft:crafting_shaped",
   "pattern": [
-      "GCG"
+    "GCG"
   ],
   "key": {
-    "G": {
-      "item": "minecraft:glass"
-    },
-    "C": {
-      "item": "biggerreactorsrework:turbine_casing"
-    }
+    "G": "minecraft:glass",
+    "C": "biggerreactorsrework:turbine_casing"
   },
   "result": {
     "id": "biggerreactorsrework:turbine_glass"

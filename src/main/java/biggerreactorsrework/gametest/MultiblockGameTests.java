@@ -6,19 +6,14 @@ import biggerreactorsrework.multiblocks.reactor.blocks.ReactorControlRod;
 import biggerreactorsrework.multiblocks.reactor.blocks.ReactorFuelRod;
 import biggerreactorsrework.multiblocks.reactor.blocks.ReactorTerminal;
 import net.minecraft.core.BlockPos;
-import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.world.level.block.Blocks;
-import net.neoforged.neoforge.gametest.GameTestHolder;
-import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
 
 import static biggerreactorsrework.core.multiblock.IAssemblyStateBlock.ASSEMBLED;
 
 /**
  * Formation and disassembly of the multiblocks, driven by the internal multiblock framework.
  */
-@GameTestHolder(BiggerReactors.modid)
-@PrefixGameTestTemplate(false)
 public final class MultiblockGameTests {
     private MultiblockGameTests() {
     }

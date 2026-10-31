@@ -5,7 +5,6 @@ import biggerreactorsrework.core.multiblock.rectangular.IFaceDirectionBlock;
 import biggerreactorsrework.core.registry.RegisterBlock;
 import biggerreactorsrework.core.util.Util;
 import biggerreactorsrework.multiblocks.battery.tiles.BatteryEnergyPortTile;
-import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.StringRepresentable;
@@ -27,11 +26,10 @@ import java.util.Locale;
 import static biggerreactorsrework.multiblocks.battery.blocks.BatteryEnergyPort.PortDirection.*;
 
 @ParametersAreNonnullByDefault
-@MethodsReturnNonnullByDefault
 public class BatteryEnergyPort extends BatteryBaseBlock implements IAssemblyStateBlock, IFaceDirectionBlock {
     
     @RegisterBlock(name = "battery_energy_port", tileEntityClass = BatteryEnergyPortTile.class)
-    public static final BatteryEnergyPort INSTANCE = new BatteryEnergyPort();
+    public static final BatteryEnergyPort INSTANCE = biggerreactorsrework.core.registry.RegistryIds.named("battery_energy_port", () -> new BatteryEnergyPort());
     
     public BatteryEnergyPort() {
         super();
@@ -72,7 +70,7 @@ public class BatteryEnergyPort extends BatteryBaseBlock implements IAssemblyStat
             if (!level.isClientSide() && level.getBlockEntity(pos) instanceof BatteryEnergyPortTile port) {
                 PortDirection direction = state.getValue(PORT_DIRECTION_ENUM_PROPERTY).opposite();
                 port.setDirection(direction);
-                player.displayClientMessage(Component.translatable("message.biggerreactorsrework.battery_energy_port." + direction.getSerializedName()), true);
+                player.sendOverlayMessage(Component.translatable("message.biggerreactorsrework.battery_energy_port." + direction.getSerializedName()));
             }
             return InteractionResult.SUCCESS;
         }

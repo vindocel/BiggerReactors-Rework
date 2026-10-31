@@ -22,7 +22,7 @@ public final class ComputerPortState {
 
     public ComputerPortState(BlockEntity tile) { this.tile = tile; }
     public Component component() {
-        if (component == null && tile.getLevel() != null && !tile.getLevel().isClientSide) {
+        if (component == null && tile.getLevel() != null && !tile.getLevel().isClientSide()) {
             component = factory.apply(tile);
             if (component != null) component.load(saved, tile.getLevel().registryAccess());
         }
@@ -39,7 +39,7 @@ public final class ComputerPortState {
         if (component != null) component.remove();
     }
     public void load(CompoundTag tag, HolderLookup.Provider registries) {
-        saved = tag.getCompound("computerComponent").copy();
+        saved = tag.getCompoundOrEmpty("computerComponent").copy();
         if (component != null) component.load(saved, registries);
     }
     public void save(CompoundTag tag, HolderLookup.Provider registries) {

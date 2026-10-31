@@ -1,23 +1,20 @@
 package biggerreactorsrework.core.client.gui;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import net.minecraft.client.gui.GuiGraphics;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 
 import javax.annotation.Nonnull;
 
 /**
  * Screen callbacks used for hooking functions to screens.
  */
-@OnlyIn(Dist.CLIENT)
 public interface ScreenCallbacks {
 
     /**
      * Callback for custom rendering.
      */
     interface OnRender {
-        void trigger(@Nonnull GuiGraphics graphics, int mouseX, int mouseY);
+        void trigger(@Nonnull GuiGraphicsExtractor graphics, int mouseX, int mouseY);
     }
 
     /**

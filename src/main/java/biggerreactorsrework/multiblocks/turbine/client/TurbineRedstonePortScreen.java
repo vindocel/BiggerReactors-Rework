@@ -6,7 +6,7 @@ import biggerreactorsrework.client.GuiIcon;
 import biggerreactorsrework.client.RedstoneIcon;
 import biggerreactorsrework.client.SelectorColors;
 import biggerreactorsrework.multiblocks.turbine.containers.TurbineRedstonePortContainer;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.Tooltip;
@@ -34,8 +34,6 @@ public final class TurbineRedstonePortScreen extends ModScreen<TurbineRedstonePo
 
     public TurbineRedstonePortScreen(TurbineRedstonePortContainer menu, Inventory inventory, Component title) {
         super(menu, inventory, title, PANEL_WIDTH + 2 * PANEL_X, 214);
-        imageWidth = PANEL_WIDTH + 2 * PANEL_X;
-        imageHeight = 214;
         inventoryLabelY = 1000;
     }
 
@@ -53,12 +51,12 @@ public final class TurbineRedstonePortScreen extends ModScreen<TurbineRedstonePo
 
     @FunctionalInterface
     private interface Painter {
-        void draw(GuiGraphics graphics, Button button);
+        void draw(GuiGraphicsExtractor graphics, Button button);
     }
 
     private Button button(int x, int y, int width, int height, Component label, Button.OnPress action, Painter painter) {
         return addRenderableWidget(new Button(leftPos + x, topPos + y, width, height, label, action, supplier -> supplier.get()) {
-            @Override protected void renderWidget(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
+            @Override protected void extractContents(GuiGraphicsExtractor g, int mouseX, int mouseY, float partialTick) {
                 painter.draw(g, this);
             }
         });
@@ -178,20 +176,20 @@ public final class TurbineRedstonePortScreen extends ModScreen<TurbineRedstonePo
                 "high", usesHigh() ? Double.parseDouble(high.getValue()) : 0.0));
     }
 
-    @Override protected void renderBg(GuiGraphics g, float partial, int mouseX, int mouseY) {
+    @Override public void extractBackground(GuiGraphicsExtractor g, int mouseX, int mouseY, float partial) {
         GuiArt.panel(g, leftPos + PANEL_X, topPos, PANEL_WIDTH, imageHeight, GuiFrame.TURBINE);
         GuiFrame.TURBINE.ear(g, leftPos, topPos + TAB_Y, 102, true);
         GuiFrame.TURBINE.ear(g, leftPos + RIGHT_EAR, topPos + TAB_Y, 102, false);
     }
 
-    @Override public void renderLabels(GuiGraphics g, int mouseX, int mouseY) {
+    @Override protected void extractLabels(GuiGraphicsExtractor g, int mouseX, int mouseY) {
         int x = PANEL_X + 10;
         GuiArt.scrollingText(g, font, title.getString(), x, 8, PANEL_WIDTH - 20, GuiTheme.textColor());
         ICONS[mode].draw(g, x, 28);
         GuiArt.scrollingText(g, font, text("mode." + mode).getString(), x + 21, 32, PANEL_WIDTH - 42, GuiTheme.textColor());
         int lineY = 49;
         for (var line : font.split(help(), PANEL_WIDTH - 20)) {
-            g.drawString(font, line, x, lineY, GuiTheme.textColor(), false);
+            g.text(font, line, x, lineY, GuiTheme.textColor(), false);
             lineY += font.lineHeight;
         }
         if (mode != 0) GuiArt.scrollingText(g, font, text("behavior." + behavior).getString(),
@@ -202,7 +200,7 @@ public final class TurbineRedstonePortScreen extends ModScreen<TurbineRedstonePo
         if (usesHigh()) {
             GuiArt.scrollingText(g, font, high.getMessage().getString() + " (" + unit() + ")", x, 142, PANEL_WIDTH - 20, GuiTheme.textColor());
         }
-        if (!valid()) g.drawString(font, text("invalid"), x, 177, 0xFF9F2828, false);
+        if (!valid()) g.text(font, text("invalid"), x, 177, 0xFF9F2828, false);
     }
     @Override protected GuiFrame frame() { return GuiFrame.TURBINE; }
 }

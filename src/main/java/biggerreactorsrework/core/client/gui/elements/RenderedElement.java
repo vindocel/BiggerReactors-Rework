@@ -1,11 +1,9 @@
 package biggerreactorsrework.core.client.gui.elements;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 import biggerreactorsrework.core.client.gui.screens.ModScreen;
 import biggerreactorsrework.core.client.gui.RenderHelper;
 import biggerreactorsrework.core.client.gui.ScreenCallbacks;
@@ -20,7 +18,6 @@ import javax.annotation.Nullable;
  *
  * @param <T> Elements must be parented to a screen implementing {@link net.minecraft.world.inventory.AbstractContainerMenu AbstractContainerMenu}.
  */
-@OnlyIn(Dist.CLIENT)
 public class RenderedElement<T extends AbstractContainerMenu> extends TooltipElement<T> implements IRender {
 
     /**
@@ -65,7 +62,7 @@ public class RenderedElement<T extends AbstractContainerMenu> extends TooltipEle
      * @param mouseY    The y position of the mouse.
      */
     @Override
-    public void render(@Nonnull GuiGraphics graphics, int mouseX, int mouseY) {
+    public void render(@Nonnull GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
         // Check conditions, and render.
         if (this.renderEnable) {
             if (this.onRender != null) {
@@ -82,10 +79,10 @@ public class RenderedElement<T extends AbstractContainerMenu> extends TooltipEle
      * Blit/draw a part of this element.
      *
      * @param graphics The current pose stack.
-     * @see GuiGraphics#blit(PoseStack, int, int, int, int, int, int) GuiGraphics.blit(PoseStack, int, int, int, int, int, int)
+     * @see GuiGraphicsExtractor#blit(PoseStack, int, int, int, int, int, int) GuiGraphicsExtractor.blit(PoseStack, int, int, int, int, int, int)
      */
-    public void blit(@Nonnull GuiGraphics graphics) {
-        graphics.blit(RenderHelper.getCurrentResource(), this.x, this.y, this.u, this.v, this.width, this.height, 256, 256);
+    public void blit(@Nonnull GuiGraphicsExtractor graphics) {
+        graphics.blit(net.minecraft.client.renderer.RenderPipelines.GUI_TEXTURED, RenderHelper.getCurrentResource(), this.x, this.y, this.u, this.v, this.width, this.height, 256, 256);
     }
 
     /**
@@ -94,10 +91,10 @@ public class RenderedElement<T extends AbstractContainerMenu> extends TooltipEle
      * @param poseStack The current pose stack.
      * @param u         The u offset in the current texture to draw.
      * @param v         The v offset in the current texture to draw.
-     * @see GuiGraphics#blit(PoseStack, int, int, float, float, int, int, int, int) GuiGraphics.blit(PoseStack, int, int, float, float, int, int, int, int)
+     * @see GuiGraphicsExtractor#blit(PoseStack, int, int, float, float, int, int, int, int) GuiGraphicsExtractor.blit(PoseStack, int, int, float, float, int, int, int, int)
      */
-    public void blit(@Nonnull GuiGraphics graphics, int u, int v) {
-        graphics.blit(RenderHelper.getCurrentResource(), this.x, this.y, u, v, this.width, this.height, 256, 256);
+    public void blit(@Nonnull GuiGraphicsExtractor graphics, int u, int v) {
+        graphics.blit(net.minecraft.client.renderer.RenderPipelines.GUI_TEXTURED, RenderHelper.getCurrentResource(), this.x, this.y, u, v, this.width, this.height, 256, 256);
     }
 
     /**
@@ -108,10 +105,10 @@ public class RenderedElement<T extends AbstractContainerMenu> extends TooltipEle
      * @param height    How tall to draw the element.
      * @param u         The u offset in the current texture to draw.
      * @param v         The v offset in the current texture to draw.
-     * @see GuiGraphics#blit(PoseStack, int, int, float, float, int, int, int, int) GuiGraphics.blit(PoseStack, int, int, float, float, int, int, int, int)
+     * @see GuiGraphicsExtractor#blit(PoseStack, int, int, float, float, int, int, int, int) GuiGraphicsExtractor.blit(PoseStack, int, int, float, float, int, int, int, int)
      */
-    public void blit(@Nonnull GuiGraphics graphics, int width, int height, int u, int v) {
-        graphics.blit(RenderHelper.getCurrentResource(), this.x, this.y, u, v, width, height, 256, 256);
+    public void blit(@Nonnull GuiGraphicsExtractor graphics, int width, int height, int u, int v) {
+        graphics.blit(net.minecraft.client.renderer.RenderPipelines.GUI_TEXTURED, RenderHelper.getCurrentResource(), this.x, this.y, u, v, width, height, 256, 256);
     }
 
     /**
@@ -124,10 +121,10 @@ public class RenderedElement<T extends AbstractContainerMenu> extends TooltipEle
      * @param v         The v offset in the current texture to draw.
      * @param width     How wide to draw the element.
      * @param height    How tall to draw the element.
-     * @see GuiGraphics#blit(PoseStack, int, int, float, float, int, int, int, int) GuiGraphics.blit(PoseStack, int, int, float, float, int, int, int, int)
+     * @see GuiGraphicsExtractor#blit(PoseStack, int, int, float, float, int, int, int, int) GuiGraphicsExtractor.blit(PoseStack, int, int, float, float, int, int, int, int)
      */
-    public void blit(@Nonnull GuiGraphics graphics, int x, int y, int u, int v, int width, int height) {
-        graphics.blit(RenderHelper.getCurrentResource(), x, y, u, v, width, height, 256, 256);
+    public void blit(@Nonnull GuiGraphicsExtractor graphics, int x, int y, int u, int v, int width, int height) {
+        graphics.blit(net.minecraft.client.renderer.RenderPipelines.GUI_TEXTURED, RenderHelper.getCurrentResource(), x, y, u, v, width, height, 256, 256);
     }
 
     /**

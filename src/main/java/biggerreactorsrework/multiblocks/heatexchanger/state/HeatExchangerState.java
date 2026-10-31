@@ -11,7 +11,7 @@ import java.util.Map;
 public class HeatExchangerState implements GuiSync.IGUIPacket {
 
     /**
-     * The fluid entering the condenser channels. This should match the value of the fluid's ResourceLocation.
+     * The fluid entering the condenser channels. This should match the value of the fluid's Identifier.
      * This fluid should be hot; its cold (output) variant should match condenserExhaustFluid.
      */
     public String condenserIntakeFluid = "minecraft:empty";
@@ -27,7 +27,7 @@ public class HeatExchangerState implements GuiSync.IGUIPacket {
     public long condenserIntakeFluidAmount = 0;
 
     /**
-     * The fluid exiting the condenser channels. This should match the value of the fluid's ResourceLocation.
+     * The fluid exiting the condenser channels. This should match the value of the fluid's Identifier.
      * This fluid should be cold; its hot (input) variant should match condenserIntakeFluid.
      */
     public String condenserExhaustFluid = "minecraft:empty";
@@ -48,7 +48,7 @@ public class HeatExchangerState implements GuiSync.IGUIPacket {
     public double condenserChannelFlowRate = 0;
 
     /**
-     * The fluid entering the evaporator channels. This should match the value of the fluid's ResourceLocation.
+     * The fluid entering the evaporator channels. This should match the value of the fluid's Identifier.
      * This fluid should be cold; its hot (output) variant should match evaporatorExhaustFluid.
      */
     public String evaporatorIntakeFluid = "minecraft:empty";
@@ -64,7 +64,7 @@ public class HeatExchangerState implements GuiSync.IGUIPacket {
     public long evaporatorIntakeFluidAmount = 0;
 
     /**
-     * The fluid exiting the evaporator channels. This should match the value of the fluid's ResourceLocation.
+     * The fluid exiting the evaporator channels. This should match the value of the fluid's Identifier.
      * This fluid should be hot; its cold (input) variant should match evaporatorIntakeFluid.
      */
     public String evaporatorExhaustFluid = "minecraft:empty";

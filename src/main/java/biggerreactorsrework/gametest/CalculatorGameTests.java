@@ -23,12 +23,9 @@ import biggerreactorsrework.registries.ReactorModeratorRegistry;
 import biggerreactorsrework.registries.TurbineCoilRegistry;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.component.DataComponentPatch;
-import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.material.Fluids;
-import net.neoforged.neoforge.gametest.GameTestHolder;
-import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -38,8 +35,6 @@ import java.util.Map;
 import static biggerreactorsrework.core.multiblock.IAssemblyStateBlock.ASSEMBLED;
 
 /** Added 2026-10-28: plants emitted by the calculator assemble with the real validators and match the virtual plant. */
-@GameTestHolder(BiggerReactors.modid)
-@PrefixGameTestTemplate(false)
 public final class CalculatorGameTests {
     private static final BlockPos ORIGIN = new BlockPos(1, 1, 1);
 
@@ -64,7 +59,7 @@ public final class CalculatorGameTests {
         for (int m = 0; m < plant.machines().size(); m++) {
             var machine = plant.machines().get(m).machine();
             for (var port : machine.ports()) {
-                var tile = h.getBlockEntity(at(plant, m, port.pos()));
+                var tile = GameTestSupport.be(h,at(plant, m, port.pos()));
                 if (tile instanceof ReactorCoolantPortTile reactorPort)
                     reactorPort.setDirection(port.role().inlet() ? ReactorAccessPort.PortDirection.INLET : ReactorAccessPort.PortDirection.OUTLET);
                 else if (tile instanceof TurbineFluidPortTile turbinePort)
@@ -85,8 +80,8 @@ public final class CalculatorGameTests {
 
     @GameTest(template = "empty_64x48x40", timeoutTicks = 200)
     public static void emittedSolidReactorAssembles(GameTestHelper h) {
-        var plant = PlantAssembler.solid(new ReactorDesign(5, 4, 5, ReactorDesign.Pattern.CHECKER, net.minecraft.core.registries.BuiltInRegistries.BLOCK.get(
-                net.minecraft.resources.ResourceLocation.parse("biggerreactorsrework:graphite_block")), 0));
+        var plant = PlantAssembler.solid(new ReactorDesign(5, 4, 5, ReactorDesign.Pattern.CHECKER, net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(
+                net.minecraft.resources.Identifier.parse("biggerreactorsrework:graphite_block")), 0));
         place(h, plant);
         h.succeedWhen(() -> h.assertTrue(assembled(h, plant), "solid reactor did not assemble"));
     }
@@ -117,7 +112,7 @@ public final class CalculatorGameTests {
         place(h, plant);
         h.succeedWhen(() -> {
             h.assertTrue(assembled(h, plant), "exchanger did not assemble");
-            var c = ((HeatExchangerBaseTile) h.getBlockEntity(at(plant, 0, design.hotIn()))).controller();
+            var c = ((HeatExchangerBaseTile) GameTestSupport.be(h,at(plant, 0, design.hotIn()))).controller();
             var g = design.geometry();
             h.assertTrue(c.condenserChannels.size() == g.condenser() && c.evaporatorChannels.size() == g.evaporator(), "channel count differs");
             h.assertTrue(c.channelRFKT == g.channelRFKT(), "contact differs: " + c.channelRFKT + " vs " + g.channelRFKT());
@@ -149,7 +144,7 @@ public final class CalculatorGameTests {
     private static void assertExchangerGeometry(GameTestHelper h, PlantLayout plant, int index, ExchangerDesign design) {
         h.succeedWhen(() -> {
             h.assertTrue(assembled(h, plant), "folded heat paths did not assemble");
-            var controller = ((HeatExchangerBaseTile) h.getBlockEntity(at(plant, index, design.hotIn()))).controller();
+            var controller = ((HeatExchangerBaseTile) GameTestSupport.be(h,at(plant, index, design.hotIn()))).controller();
             var g = design.geometry();
             h.assertTrue(controller.condenserChannels.size() == g.condenser() && controller.evaporatorChannels.size() == g.evaporator(), "folded channel count differs");
             h.assertTrue(controller.channelRFKT == g.channelRFKT(), "folded channel contacts differ");
@@ -179,16 +174,16 @@ public final class CalculatorGameTests {
         var spec = new PlantSpec(reactor, null, coolant, exchanger, water, turbine, TurbineCoilRegistry.getCoilData(Blocks.IRON_BLOCK), primary, secondary);
         h.startSequence().thenWaitUntil(() -> h.assertTrue(assembled(h, plant), "plant did not assemble")).thenExecute(() -> {
             configurePorts(h, plant);
-            var r = ((ReactorBaseTile) h.getBlockEntity(at(plant, 0, plant.machines().get(0).machine().ports().getFirst().pos()))).controller();
-            var x = ((HeatExchangerBaseTile) h.getBlockEntity(at(plant, 1, exchanger.hotIn()))).controller();
-            var t = ((TurbineBaseTile) h.getBlockEntity(at(plant, 2, plant.machines().get(2).machine().ports().getFirst().pos()))).controller();
+            var r = ((ReactorBaseTile) GameTestSupport.be(h,at(plant, 0, plant.machines().get(0).machine().ports().getFirst().pos()))).controller();
+            var x = ((HeatExchangerBaseTile) GameTestSupport.be(h,at(plant, 1, exchanger.hotIn()))).controller();
+            var t = ((TurbineBaseTile) GameTestSupport.be(h,at(plant, 2, plant.machines().get(2).machine().ports().getFirst().pos()))).controller();
             r.setAllControlRodLevels(reactor.insertion());
             r.setActive(biggerreactorsrework.multiblocks.reactor.state.ReactorActivity.ACTIVE);
             t.simulation().setNominalFlowRate(turbine.flow());
             t.simulation().setVentState(biggerreactorsrework.multiblocks.turbine.state.VentState.CLOSED);
             t.setActive(true);
-            var coldIn = (ReactorCoolantPortTile) h.getBlockEntity(at(plant, 0, plant.machines().get(0).machine().port(MachineLayout.Role.REACTOR_COLD_IN).pos()));
-            var waterIn = (HeatExchangerFluidPortTile) h.getBlockEntity(at(plant, 1, exchanger.waterIn()));
+            var coldIn = (ReactorCoolantPortTile) GameTestSupport.be(h,at(plant, 0, plant.machines().get(0).machine().port(MachineLayout.Role.REACTOR_COLD_IN).pos()));
+            var waterIn = (HeatExchangerFluidPortTile) GameTestSupport.be(h,at(plant, 1, exchanger.waterIn()));
             var virtual = new VirtualPlant(spec, false);
             long primaryLeft = primary, waterLeft = secondary;
             int ticks = 30000, window = 5000;
@@ -298,14 +293,14 @@ public final class CalculatorGameTests {
         h.startSequence().thenWaitUntil(() -> h.assertTrue(assembled(h, plant), "searched plant did not assemble")).thenExecute(() -> {
             configurePorts(h, plant);
             var reactorPort = plant.machines().get(0).machine().port(MachineLayout.Role.REACTOR_COLD_IN).pos();
-            var r = ((ReactorBaseTile) h.getBlockEntity(at(plant, 0, reactorPort))).controller();
-            var t = ((TurbineBaseTile) h.getBlockEntity(at(plant, 1, plant.machines().get(1).machine().ports().getFirst().pos()))).controller();
+            var r = ((ReactorBaseTile) GameTestSupport.be(h,at(plant, 0, reactorPort))).controller();
+            var t = ((TurbineBaseTile) GameTestSupport.be(h,at(plant, 1, plant.machines().get(1).machine().ports().getFirst().pos()))).controller();
             r.setAllControlRodLevels(spec.reactor().insertion());
             r.setActive(biggerreactorsrework.multiblocks.reactor.state.ReactorActivity.ACTIVE);
             t.simulation().setNominalFlowRate(spec.turbine().flow());
             t.simulation().setVentState(biggerreactorsrework.multiblocks.turbine.state.VentState.CLOSED);
             t.setActive(true);
-            var coldIn = (ReactorCoolantPortTile) h.getBlockEntity(at(plant, 0, reactorPort));
+            var coldIn = (ReactorCoolantPortTile) GameTestSupport.be(h,at(plant, 0, reactorPort));
             long left = spec.primaryCharge();
             int ticks = (int) outcome.validation().ticks() + 8000, window = 8000;
             double power = 0, fuel = 0;
@@ -335,7 +330,7 @@ public final class CalculatorGameTests {
     /** The author's sodium setup reaches about 468 kRF/t with a 6x5x6 reactor: the search must stay in that range of size. */
     @GameTest(template = "empty_7x7x7", timeoutTicks = 12000)
     public static void sodiumPlantForHalfAMillionStaysCompact(GameTestHelper h) throws Exception {
-        if (!net.minecraft.core.registries.BuiltInRegistries.FLUID.containsKey(net.minecraft.resources.ResourceLocation.parse("mekanism:sodium"))) {
+        if (!net.minecraft.core.registries.BuiltInRegistries.FLUID.containsKey(net.minecraft.resources.Identifier.parse("mekanism:sodium"))) {
             h.succeed();
             return;
         }

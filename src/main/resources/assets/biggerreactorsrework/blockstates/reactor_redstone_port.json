@@ -1,10 +1,56 @@
 {
   "variants": {
-    "is_lit=true": {
+    "is_lit=true,assembled=false": {
       "model": "biggerreactorsrework:block/reactor/redstone_port/lit"
     },
-    "is_lit=false": {
+    "is_lit=true,assembled=true,facing=north": {
+      "model": "biggerreactorsrework:block/reactor/redstone_port/lit_assembled"
+    },
+    "is_lit=true,assembled=true,facing=south": {
+      "model": "biggerreactorsrework:block/reactor/redstone_port/lit_assembled",
+      "y": 180
+    },
+    "is_lit=true,assembled=true,facing=east": {
+      "model": "biggerreactorsrework:block/reactor/redstone_port/lit_assembled",
+      "y": 90
+    },
+    "is_lit=true,assembled=true,facing=west": {
+      "model": "biggerreactorsrework:block/reactor/redstone_port/lit_assembled",
+      "y": 270
+    },
+    "is_lit=true,assembled=true,facing=up": {
+      "model": "biggerreactorsrework:block/reactor/redstone_port/lit_assembled",
+      "x": 270
+    },
+    "is_lit=true,assembled=true,facing=down": {
+      "model": "biggerreactorsrework:block/reactor/redstone_port/lit_assembled",
+      "x": 90
+    },
+    "is_lit=false,assembled=false": {
       "model": "biggerreactorsrework:block/reactor/redstone_port/unlit"
+    },
+    "is_lit=false,assembled=true,facing=north": {
+      "model": "biggerreactorsrework:block/reactor/redstone_port/unlit_assembled"
+    },
+    "is_lit=false,assembled=true,facing=south": {
+      "model": "biggerreactorsrework:block/reactor/redstone_port/unlit_assembled",
+      "y": 180
+    },
+    "is_lit=false,assembled=true,facing=east": {
+      "model": "biggerreactorsrework:block/reactor/redstone_port/unlit_assembled",
+      "y": 90
+    },
+    "is_lit=false,assembled=true,facing=west": {
+      "model": "biggerreactorsrework:block/reactor/redstone_port/unlit_assembled",
+      "y": 270
+    },
+    "is_lit=false,assembled=true,facing=up": {
+      "model": "biggerreactorsrework:block/reactor/redstone_port/unlit_assembled",
+      "x": 270
+    },
+    "is_lit=false,assembled=true,facing=down": {
+      "model": "biggerreactorsrework:block/reactor/redstone_port/unlit_assembled",
+      "x": 90
     }
   }
 }

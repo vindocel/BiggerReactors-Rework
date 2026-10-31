@@ -8,10 +8,10 @@ import javax.annotation.Nonnull;
 public class CyaniteIngot extends Item {
     
     @RegisterItem(name = "cyanite_ingot")
-    public static final CyaniteIngot INSTANCE = new CyaniteIngot(new Properties());
+    public static final CyaniteIngot INSTANCE = biggerreactorsrework.core.registry.RegistryIds.named("cyanite_ingot", () -> new CyaniteIngot(new Properties()));
     
     @SuppressWarnings("unused")
     public CyaniteIngot(@Nonnull Properties properties) {
-        super(properties);
+        super(biggerreactorsrework.core.registry.RegistryIds.item(properties));
     }
 }

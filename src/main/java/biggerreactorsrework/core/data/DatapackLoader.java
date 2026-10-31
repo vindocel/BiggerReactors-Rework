@@ -4,7 +4,7 @@ import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectMaps;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.Resource;
 import biggerreactorsrework.core.CoreEvents;
 import biggerreactorsrework.core.config.ConfigType;
@@ -32,12 +32,12 @@ public class DatapackLoader<T> {
         this.objectSupplier = objectSupplier;
     }
     
-    public Map<ResourceLocation, List<T>> loadAllMappedStack(ResourceLocation baseResourceLocation) {
+    public Map<Identifier, List<T>> loadAllMappedStack(Identifier baseResourceLocation) {
         if (CoreEvents.serverResourceManager == null) {
             return new Object2ObjectOpenHashMap<>();
         }
         
-        final var map = new Object2ObjectOpenHashMap<ResourceLocation, List<T>>();
+        final var map = new Object2ObjectOpenHashMap<Identifier, List<T>>();
         
         final var resourceLocations = CoreEvents.serverResourceManager.listResourceStacks(baseResourceLocation.getPath(), s -> s.getPath().contains(".json"));
         
@@ -63,16 +63,16 @@ public class DatapackLoader<T> {
         return map;
     }
     
-    public List<T> loadAll(ResourceLocation baseResourceLocation) {
+    public List<T> loadAll(Identifier baseResourceLocation) {
         if (CoreEvents.serverResourceManager == null) {
             return new ObjectArrayList<>();
         }
         
         final var list = new ObjectArrayList<T>();
         
-        Map<ResourceLocation, Resource> resourceLocations = CoreEvents.serverResourceManager.listResources(baseResourceLocation.getPath(), s -> s.getPath().contains(".json"));
+        Map<Identifier, Resource> resourceLocations = CoreEvents.serverResourceManager.listResources(baseResourceLocation.getPath(), s -> s.getPath().contains(".json"));
         
-        for (Map.Entry<ResourceLocation, Resource> entry : resourceLocations.entrySet()) {
+        for (Map.Entry<Identifier, Resource> entry : resourceLocations.entrySet()) {
             final var resourceLocation = entry.getKey();
             // TODO: 9/8/22 add an option for enforcing this
             if (!resourceLocation.getNamespace().equals(baseResourceLocation.getNamespace())) {
@@ -88,7 +88,7 @@ public class DatapackLoader<T> {
     }
     
     @Nullable
-    public T load(ResourceLocation location) {
+    public T load(Identifier location) {
         if (CoreEvents.serverResourceManager == null) {
             return null;
         }
@@ -96,7 +96,7 @@ public class DatapackLoader<T> {
     }
     
     @Nullable
-    private T load(ResourceLocation location, Resource resource) {
+    private T load(Identifier location, Resource resource) {
         String json;
         try {
             try (BufferedReader reader = resource.openAsReader()) {

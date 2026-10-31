@@ -1,6 +1,5 @@
 package biggerreactorsrework.multiblocks.heatexchanger.tiles;
 
-import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
@@ -13,7 +12,6 @@ import javax.annotation.ParametersAreNonnullByDefault;
  * The channel model is chosen from the block state and baked into the chunk mesh,
  * see {@code HeatExchangerChannelModels}.
  */
-@MethodsReturnNonnullByDefault
 @ParametersAreNonnullByDefault
 public class HeatExchangerChannelTile extends HeatExchangerBaseTile {
 
@@ -31,7 +29,7 @@ public class HeatExchangerChannelTile extends HeatExchangerBaseTile {
     public int coolantPathIndex,coolantPathLength;
     public net.minecraft.core.Direction coolantEntry=net.minecraft.core.Direction.DOWN,coolantExit=net.minecraft.core.Direction.UP;
     @Override protected net.minecraft.nbt.CompoundTag writeNBT(){var tag=super.writeNBT();if(coolantAnchor!=null)tag.putLong("coolantAnchor",coolantAnchor.asLong());tag.putInt("pathIndex",coolantPathIndex);tag.putInt("pathLength",coolantPathLength);tag.putInt("pathEntry",coolantEntry.ordinal());tag.putInt("pathExit",coolantExit.ordinal());return tag;}
-    @Override protected void readNBT(net.minecraft.nbt.CompoundTag tag){super.readNBT(tag);coolantAnchor=tag.contains("coolantAnchor")?BlockPos.of(tag.getLong("coolantAnchor")):null;coolantPathIndex=Math.max(0,tag.getInt("pathIndex"));coolantPathLength=Math.max(0,tag.getInt("pathLength"));coolantEntry=net.minecraft.core.Direction.from3DDataValue(tag.getInt("pathEntry"));coolantExit=net.minecraft.core.Direction.from3DDataValue(tag.getInt("pathExit"));}
+    @Override protected void readNBT(net.minecraft.nbt.CompoundTag tag){super.readNBT(tag);coolantAnchor=tag.contains("coolantAnchor")?BlockPos.of(tag.getLongOr("coolantAnchor", 0L)):null;coolantPathIndex=Math.max(0,tag.getIntOr("pathIndex", 0));coolantPathLength=Math.max(0,tag.getIntOr("pathLength", 0));coolantEntry=net.minecraft.core.Direction.from3DDataValue(tag.getIntOr("pathEntry", 0));coolantExit=net.minecraft.core.Direction.from3DDataValue(tag.getIntOr("pathExit", 0));}
     @Override protected net.minecraft.nbt.CompoundTag getUpdateNBT(){return writeNBT();}
     @Override protected void handleUpdateNBT(net.minecraft.nbt.CompoundTag tag){readNBT(tag);}
 

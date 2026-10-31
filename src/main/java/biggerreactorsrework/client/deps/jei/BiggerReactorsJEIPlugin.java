@@ -7,7 +7,7 @@ import mezz.jei.api.registration.IRecipeCatalystRegistration;
 import mezz.jei.api.registration.IRecipeCategoryRegistration;
 import mezz.jei.api.registration.IRecipeRegistration;
 import mezz.jei.api.runtime.IJeiRuntime;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.fluids.FluidStack;
 import biggerreactorsrework.BiggerReactors;
@@ -28,8 +28,8 @@ import java.util.List;
 public class BiggerReactorsJEIPlugin implements IModPlugin {
 
     @Nonnull
-    public ResourceLocation getPluginUid() {
-        return ResourceLocation.fromNamespaceAndPath(BiggerReactors.modid, "jei_plugin");
+    public Identifier getPluginUid() {
+        return Identifier.fromNamespaceAndPath(BiggerReactors.modid, "jei_plugin");
     }
 
     /** Modified 2026-10-27: viewers with native plugins do not need JEI compatibility categories. */

@@ -6,15 +6,9 @@
     "CSC"
   ],
   "key": {
-    "C" : {
-      "item": "biggerreactorsrework:turbine_casing"
-    },
-    "S": {
-      "item": "biggerreactorsrework:turbine_rotor_shaft"
-    },
-    "D": {
-      "item": "minecraft:diamond"
-    }
+    "C": "biggerreactorsrework:turbine_casing",
+    "S": "biggerreactorsrework:turbine_rotor_shaft",
+    "D": "minecraft:diamond"
   },
   "result": {
     "id": "biggerreactorsrework:turbine_rotor_bearing"

@@ -13,7 +13,7 @@ import biggerreactorsrework.registries.FluidTransitionRegistry;
 import biggerreactorsrework.registries.ReactorModeratorRegistry;
 import biggerreactorsrework.registries.TurbineCoilRegistry;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.block.Block;
 
 import javax.annotation.Nullable;
@@ -628,8 +628,8 @@ public final class PlantSearch {
 
     @Nullable
     private static Block block(String id) {
-        var key = ResourceLocation.tryParse(id);
+        var key = Identifier.tryParse(id);
         if (key == null || !BuiltInRegistries.BLOCK.containsKey(key)) return null;
-        return BuiltInRegistries.BLOCK.get(key);
+        return BuiltInRegistries.BLOCK.getValue(key);
     }
 }

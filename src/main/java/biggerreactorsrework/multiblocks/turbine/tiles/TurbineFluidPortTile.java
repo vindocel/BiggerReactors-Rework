@@ -1,7 +1,6 @@
 package biggerreactorsrework.multiblocks.turbine.tiles;
 
 import net.minecraft.core.component.DataComponentPatch;
-import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
@@ -36,17 +35,16 @@ import javax.annotation.ParametersAreNonnullByDefault;
 import static biggerreactorsrework.multiblocks.turbine.blocks.TurbineFluidPort.PortDirection.*;
 
 @ParametersAreNonnullByDefault
-@MethodsReturnNonnullByDefault
 public class TurbineFluidPortTile extends TurbineBaseTile implements IFluidTankHandler, MenuProvider, IHasUpdatableState<TurbineFluidPortState>, IEventMultiblock.AssemblyStateTransition.OnAssembly, IEventMultiblock.AssemblyStateTransition.OnDisassembly {
     // Modified 2026-10-30: refresh output handlers after neighbor capability changes.
-    private final biggerreactorsrework.core.capability.NeighborCapability<net.neoforged.neoforge.fluids.capability.IFluidHandler> outputCapability =
-            new biggerreactorsrework.core.capability.NeighborCapability<>(this, Capabilities.FluidHandler.BLOCK);
+    private final biggerreactorsrework.core.capability.NeighborCapability<biggerreactorsrework.core.transfer.FluidTanks, ?> outputCapability =
+            biggerreactorsrework.core.capability.NeighborCapability.fluids(this);
     
     @RegisterTile("turbine_fluid_port")
     public static final BlockEntityType.BlockEntitySupplier<TurbineFluidPortTile> SUPPLIER = new RegisterTile.Producer<>(TurbineFluidPortTile::new);
     
     @RegisterCapability
-    private static final CapabilityRegistration FLUID_HANDLER_CAP_REGISTRATION = CapabilityRegistration.tileCap(Capabilities.FluidHandler.BLOCK, TurbineFluidPortTile.class);
+    private static final CapabilityRegistration FLUID_HANDLER_CAP_REGISTRATION = CapabilityRegistration.tileFluids(TurbineFluidPortTile.class);
     
     public TurbineFluidPortTile(BlockEntityType<?> TYPE, BlockPos pos, BlockState state) {
         super(TYPE, pos, state);
@@ -55,6 +53,18 @@ public class TurbineFluidPortTile extends TurbineBaseTile implements IFluidTankH
     
     private ITurbineFluidTank transitionTank;
     
+    @Override
+    public Object transferSnapshot() {
+        return transitionTank == null ? null : transitionTank.transferSnapshot();
+    }
+
+    @Override
+    public void restoreTransferSnapshot(Object snapshot) {
+        if (transitionTank != null) {
+            transitionTank.restoreTransferSnapshot(snapshot);
+        }
+    }
+
     @Override
     public int tankCount() {
         if (transitionTank == null) {
@@ -174,7 +184,7 @@ public class TurbineFluidPortTile extends TurbineBaseTile implements IFluidTankH
     @Override
     protected void readNBT(CompoundTag compound) {
         if (compound.contains("direction")) {
-            direction = biggerreactorsrework.core.util.SavedValues.enumValue(TurbineFluidPort.PortDirection.class, compound.getString("direction"), TurbineFluidPort.PortDirection.INLET);
+            direction = biggerreactorsrework.core.util.SavedValues.enumValue(TurbineFluidPort.PortDirection.class, compound.getStringOr("direction", ""), TurbineFluidPort.PortDirection.INLET);
         }
     }
     

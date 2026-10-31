@@ -1,8 +1,6 @@
 package biggerreactorsrework.client;
 
-import net.minecraft.client.gui.GuiGraphics;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 
 import javax.annotation.Nonnull;
 
@@ -12,7 +10,6 @@ import javax.annotation.Nonnull;
  * shadow under it. Side tabs are ears of the same metal growing out of the band. Each machine has its own metal, taken
  * from the tones of its casing texture, so the screen matches the block it belongs to.
  */
-@OnlyIn(Dist.CLIENT)
 public enum GuiFrame {
     /**
      * Dark grey of the reactor casing.
@@ -164,7 +161,7 @@ public enum GuiFrame {
     /**
      * The panel at (x, y, width, height), filled with {@code fill}, with the band around it.
      */
-    public void panel(@Nonnull GuiGraphics graphics, int x, int y, int width, int height, int fill) {
+    public void panel(@Nonnull GuiGraphicsExtractor graphics, int x, int y, int width, int height, int fill) {
         int x0 = x - BAND;
         int y0 = y - BAND;
         int x1 = x + width + BAND;
@@ -203,7 +200,7 @@ public enum GuiFrame {
      * stacked next to each other share one tall ear. Drawn after the panel, so the ear covers the band's outline and the
      * two read as one piece.
      */
-    public void ear(@Nonnull GuiGraphics graphics, int x, int y, int height, boolean leftSide) {
+    public void ear(@Nonnull GuiGraphicsExtractor graphics, int x, int y, int height, boolean leftSide) {
         int last = height - 1;
         // Columns counted from the outer side; the band itself takes the last BAND columns.
         int open = TAB_SIZE - BAND;
@@ -227,25 +224,25 @@ public enum GuiFrame {
         return earX + (leftSide ? TAB_BUTTON_LEFT : TAB_SIZE - TAB_BUTTON_LEFT - TAB_BUTTON);
     }
 
-    private void row(GuiGraphics graphics, int x, boolean leftSide, int from, int to, int y, int color) {
+    private void row(GuiGraphicsExtractor graphics, int x, boolean leftSide, int from, int to, int y, int color) {
         int a = leftSide ? x + from : x + TAB_SIZE - 1 - to;
         int b = leftSide ? x + to : x + TAB_SIZE - 1 - from;
         graphics.fill(a, y, b + 1, y + 1, color);
     }
 
-    private void column(GuiGraphics graphics, int x, boolean leftSide, int column, int fromY, int toY, int color) {
+    private void column(GuiGraphicsExtractor graphics, int x, boolean leftSide, int column, int fromY, int toY, int color) {
         int c = leftSide ? x + column : x + TAB_SIZE - 1 - column;
         graphics.fill(c, fromY, c + 1, toY, color);
     }
 
-    private void rivet(GuiGraphics graphics, int x, int y) {
+    private void rivet(GuiGraphicsExtractor graphics, int x, int y) {
         pixel(graphics, x, y, this.rivetLight);
         pixel(graphics, x + 1, y, this.rivetMid);
         pixel(graphics, x, y + 1, this.rivetMid);
         pixel(graphics, x + 1, y + 1, this.rivetDark);
     }
 
-    private static void pixel(GuiGraphics graphics, int x, int y, int color) {
+    private static void pixel(GuiGraphicsExtractor graphics, int x, int y, int color) {
         graphics.fill(x, y, x + 1, y + 1, color);
     }
 }

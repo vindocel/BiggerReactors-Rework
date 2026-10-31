@@ -1,10 +1,8 @@
 {
   "type": "minecraft:blasting",
-  "ingredient": [
-    {
-      "item": "biggerreactorsrework:blutonium_dust"
-    }
-  ],
-  "result": {"id": "biggerreactorsrework:blutonium_ingot"},
+  "ingredient": "biggerreactorsrework:blutonium_dust",
+  "result": {
+    "id": "biggerreactorsrework:blutonium_ingot"
+  },
   "cookingtime": 100
 }

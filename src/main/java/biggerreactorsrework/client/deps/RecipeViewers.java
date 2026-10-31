@@ -1,10 +1,8 @@
 package biggerreactorsrework.client.deps;
 
 import biggerreactorsrework.BiggerReactors;
-import biggerreactorsrework.client.deps.emi.EmiBridge;
 import biggerreactorsrework.client.deps.jei.JeiBridge;
-import biggerreactorsrework.client.deps.rei.ReiBridge;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.neoforged.fml.ModList;
 
 /**
@@ -12,18 +10,31 @@ import net.neoforged.fml.ModList;
  * clickable). The viewer-specific bridges are only touched when that viewer is loaded.
  */
 public final class RecipeViewers {
-    public static final ResourceLocation CYANITE_REPROCESSING = ResourceLocation.fromNamespaceAndPath(BiggerReactors.modid, "cyanite_reprocessing");
-    public static final ResourceLocation MODERATOR_BLOCK = ResourceLocation.fromNamespaceAndPath(BiggerReactors.modid, "classic/reactor_moderator_block");
-    public static final ResourceLocation MODERATOR_FLUID = ResourceLocation.fromNamespaceAndPath(BiggerReactors.modid, "classic/reactor_coolant");
-    public static final ResourceLocation TURBINE_COIL = ResourceLocation.fromNamespaceAndPath(BiggerReactors.modid, "classic/turbine_coil");
-    public static final ResourceLocation HEAT_EXCHANGE = ResourceLocation.fromNamespaceAndPath(BiggerReactors.modid, "heat_exchange");
+    public static final Identifier CYANITE_REPROCESSING = Identifier.fromNamespaceAndPath(BiggerReactors.modid, "cyanite_reprocessing");
+    public static final Identifier MODERATOR_BLOCK = Identifier.fromNamespaceAndPath(BiggerReactors.modid, "classic/reactor_moderator_block");
+    public static final Identifier MODERATOR_FLUID = Identifier.fromNamespaceAndPath(BiggerReactors.modid, "classic/reactor_coolant");
+    public static final Identifier TURBINE_COIL = Identifier.fromNamespaceAndPath(BiggerReactors.modid, "classic/turbine_coil");
+    public static final Identifier HEAT_EXCHANGE = Identifier.fromNamespaceAndPath(BiggerReactors.modid, "heat_exchange");
 
     private RecipeViewers() {
     }
 
-    /** EMI has its own plugin; the JEI plugin stays out of the way when EMI is installed. */
+    private static final String EMI_BRIDGE = "biggerreactorsrework.client.deps.emi.EmiBridge";
+    private static final String REI_BRIDGE = "biggerreactorsrework.client.deps.rei.ReiBridge";
+
+    /** The EMI and REI bridges exist only when turned on in gradle.properties. */
+    private static boolean bridge(String className) {
+        try {
+            Class.forName(className, false, RecipeViewers.class.getClassLoader());
+            return true;
+        } catch (ClassNotFoundException absent) {
+            return false;
+        }
+    }
+
+    /** EMI has its own plugin; the JEI plugin stays out of the way when EMI is active. */
     public static boolean emi() {
-        return ModList.get().isLoaded("emi");
+        return ModList.get().isLoaded("emi") && bridge(EMI_BRIDGE);
     }
 
     public static boolean available() {
@@ -32,18 +43,26 @@ public final class RecipeViewers {
 
     /** Modified 2026-10-27: native REI support, with EMI retaining priority when both are installed. */
     public static boolean rei() {
-        return ModList.get().isLoaded("roughlyenoughitems");
+        return ModList.get().isLoaded("roughlyenoughitems") && bridge(REI_BRIDGE);
+    }
+
+    private static void showIn(String className, Class<?> parameter, Object argument) {
+        try {
+            Class.forName(className).getMethod("show", parameter).invoke(null, argument);
+        } catch (ReflectiveOperationException e) {
+            throw new IllegalStateException("Could not open " + className, e);
+        }
     }
 
     /** Shows the categories (EMI shows the first one; JEI shows them all as tabs). */
-    public static void show(ResourceLocation... categories) {
+    public static void show(Identifier... categories) {
         if (categories.length == 0) {
             return;
         }
         if (emi()) {
-            EmiBridge.show(categories[0]);
+            showIn(EMI_BRIDGE, Identifier.class, categories[0]);
         } else if (rei()) {
-            ReiBridge.show(categories);
+            showIn(REI_BRIDGE, Identifier[].class, categories);
         } else if (ModList.get().isLoaded("jei")) {
             JeiBridge.show(categories);
         }

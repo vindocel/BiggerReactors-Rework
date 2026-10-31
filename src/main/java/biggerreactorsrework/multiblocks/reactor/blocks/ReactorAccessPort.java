@@ -1,6 +1,5 @@
 package biggerreactorsrework.multiblocks.reactor.blocks;
 
-import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.InteractionHand;
@@ -26,11 +25,10 @@ import java.util.Locale;
 import static biggerreactorsrework.multiblocks.reactor.blocks.ReactorAccessPort.PortDirection.*;
 
 @ParametersAreNonnullByDefault
-@MethodsReturnNonnullByDefault
 public class ReactorAccessPort extends ReactorBaseBlock implements IAssemblyStateBlock, IFaceDirectionBlock {
     
     @RegisterBlock(name = "reactor_access_port", tileEntityClass = ReactorAccessPortTile.class)
-    public static final ReactorAccessPort INSTANCE = new ReactorAccessPort();
+    public static final ReactorAccessPort INSTANCE = biggerreactorsrework.core.registry.RegistryIds.named("reactor_access_port", () -> new ReactorAccessPort());
     
     public ReactorAccessPort() {
         super();

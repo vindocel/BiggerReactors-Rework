@@ -31,7 +31,7 @@ public final class MachineAudio {
                     && old.running() == running && CoreEvents.tickNumber() % 10 != 0) continue;
             tile.machineAudio = state;
             var level = tile.getLevel();
-            if (level != null && !level.isClientSide && !tile.isRemoved()) {
+            if (level != null && !level.isClientSide() && !tile.isRemoved()) {
                 level.sendBlockUpdated(tile.getBlockPos(), tile.getBlockState(), tile.getBlockState(), 2);
             }
         }

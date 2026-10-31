@@ -65,18 +65,18 @@ public interface IPersistentMultiblockTile<
         
         @Override
         public void readNBT(CompoundTag nbt) {
-            origin = nbt.hasUUID("machine_origin") ? nbt.getUUID("machine_origin") : null;
+            origin = nbt.read("machine_origin", net.minecraft.core.UUIDUtil.CODEC).orElse(null);
             // backwards compat with opening older worlds
             // TODO: require this
             if (nbt.contains("last_assembly_state")) {
                 // Modified 2026-10-30: invalid metadata must not prevent reconstruction of valid stored machines.
-                lastAssemblyState = biggerreactorsrework.core.util.SavedValues.enumValue(IValidatedMultiblock.AssemblyState.class, nbt.getString("last_assembly_state"), IValidatedMultiblock.AssemblyState.DISASSEMBLED);
+                lastAssemblyState = biggerreactorsrework.core.util.SavedValues.enumValue(IValidatedMultiblock.AssemblyState.class, nbt.getStringOr("last_assembly_state", ""), IValidatedMultiblock.AssemblyState.DISASSEMBLED);
             }
             if (nbt.contains("expected_blocks")) {
-                expectedBlocks = Math.max(0, nbt.getInt("expected_blocks"));
+                expectedBlocks = Math.max(0, nbt.getIntOr("expected_blocks", 0));
             }
             if (nbt.contains("controller_data")) {
-                this.controllerNBT = nbt.getCompound("controller_data");
+                this.controllerNBT = nbt.getCompoundOrEmpty("controller_data");
                 return;
             }
             this.controllerNBT = null;
@@ -89,7 +89,7 @@ public interface IPersistentMultiblockTile<
             }
             final var toReturn = new CompoundTag();
             if (controllerPersistentModule != null && controllerPersistentModule.origin() != null) origin = controllerPersistentModule.origin();
-            if (origin != null) toReturn.putUUID("machine_origin", origin);
+            if (origin != null) toReturn.store("machine_origin", net.minecraft.core.UUIDUtil.CODEC, origin);
             toReturn.putString("last_assembly_state", lastAssemblyState.toString());
             if (controllerNBT != null) {
                 toReturn.put("controller_data", controllerNBT);

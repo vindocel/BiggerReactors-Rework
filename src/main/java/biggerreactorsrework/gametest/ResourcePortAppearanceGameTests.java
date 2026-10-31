@@ -23,8 +23,6 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.neoforged.neoforge.gametest.*;
 import java.util.List;
 
-@GameTestHolder(BiggerReactors.modid)
-@PrefixGameTestTemplate(false)
 public final class ResourcePortAppearanceGameTests {
     private static GuiSync.IGUIPacket packet(BlockEntity tile) {
         if (tile instanceof BatteryBaseTile && !(tile instanceof BatteryEnergyPortTile))
@@ -40,7 +38,7 @@ public final class ResourcePortAppearanceGameTests {
     private static void check(GameTestHelper h,BlockPos expected,List<BlockPos> positions) {
         var player=net.neoforged.neoforge.common.util.FakePlayerFactory.getMinecraft(h.getLevel());
         for (var relative:positions) {
-            var tile=h.getBlockEntity(relative);
+            var tile=GameTestSupport.be(h,relative);
             var menu=tile instanceof BatteryTerminalTile
                     ? new BatteryTerminalContainer(42,tile.getBlockPos(),player)
                     : ((MenuProvider)tile).createMenu(42,player.getInventory(),player);

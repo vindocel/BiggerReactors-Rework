@@ -7,7 +7,7 @@ import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.level.block.Block;
@@ -68,7 +68,7 @@ public class TurbineCoilRegistry {
         RegistryType type = RegistryType.tag;
         
         @ConfigValue
-        ResourceLocation location = ResourceLocation.parse("dirt");
+        Identifier location = Identifier.parse("dirt");
     
         @ConfigValue(range = "(0,)")
         double efficiency;
@@ -86,7 +86,7 @@ public class TurbineCoilRegistry {
         BiggerReactors.LOGGER.info("Loading turbine coils");
         registry.clear();
         
-        List<TurbineCoilJsonData> data = dataLoader.loadAll(ResourceLocation.parse("biggerreactorsrework:ebest/coils"));
+        List<TurbineCoilJsonData> data = dataLoader.loadAll(Identifier.parse("biggerreactorsrework:ebest/coils"));
         BiggerReactors.LOGGER.info("Loaded " + data.size() + " coil data entries");
         
         for (TurbineCoilJsonData coilData : data) {
@@ -94,7 +94,7 @@ public class TurbineCoilRegistry {
             CoilData properties = new CoilData(coilData.efficiency, coilData.bonus, coilData.extractionRate);
             
             if (coilData.type == RegistryType.tag) {
-                var blockTagOptional = BuiltInRegistries.BLOCK.getTag(TagKey.create(BuiltInRegistries.BLOCK.key(), coilData.location));
+                var blockTagOptional = BuiltInRegistries.BLOCK.get(TagKey.create(BuiltInRegistries.BLOCK.key(), coilData.location));
                 blockTagOptional.ifPresent(holders -> holders.forEach(blockHolder -> {
                     var element = blockHolder.value();
                     registry.put(element, properties);
@@ -103,7 +103,7 @@ public class TurbineCoilRegistry {
             } else {
                 // cant check against air, because air is a valid thing to load
                 if (BuiltInRegistries.BLOCK.containsKey(coilData.location)) {
-                    registry.put(BuiltInRegistries.BLOCK.get(coilData.location), properties);
+                    registry.put(BuiltInRegistries.BLOCK.getValue(coilData.location), properties);
                     BiggerReactors.LOGGER.debug("Loaded coil " + coilData.location);
                 }
             }
@@ -114,14 +114,14 @@ public class TurbineCoilRegistry {
     
     public static class Client {
         
-        private static final SimpleChannel CHANNEL = new SimpleChannel(ResourceLocation.fromNamespaceAndPath(BiggerReactors.modid, "coil_sync_channel"), Client::readSync, null);
+        private static final SimpleChannel CHANNEL = new SimpleChannel(Identifier.fromNamespaceAndPath(BiggerReactors.modid, "coil_sync_channel"), Client::readSync, null);
         private static final ObjectOpenHashSet<Block> coilBlocks = new ObjectOpenHashSet<>();
         private static final Object2ObjectOpenHashMap<Block, CoilData> coilProperties = new Object2ObjectOpenHashMap<>();
         
         @OnModLoad
         private static void onModLoad() {
             NeoForge.EVENT_BUS.addListener(Client::datapackEvent);
-            if (FMLEnvironment.dist.isClient()) {
+            if (FMLEnvironment.getDist().isClient()) {
                 NeoForge.EVENT_BUS.addListener(Client::toolTipEvent);
             }
         }
@@ -172,9 +172,9 @@ public class TurbineCoilRegistry {
             for (int i = 0; i < list.size(); i++) {
                 var value = list.get(i);
                 var properties = propertiesList.get(i);
-                var id=ResourceLocation.tryParse(value);
+                var id=Identifier.tryParse(value);
                 if(id==null||!BuiltInRegistries.BLOCK.containsKey(id))continue;
-                final var block = BuiltInRegistries.BLOCK.get(id);
+                final var block = BuiltInRegistries.BLOCK.getValue(id);
                 if (block == null) {
                     return;
                 }
