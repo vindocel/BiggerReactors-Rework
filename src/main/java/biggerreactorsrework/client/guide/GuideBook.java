@@ -77,6 +77,18 @@ final class GuideBook {
             add(new GuideElements.ChapterTitle(ch.icon(), Component.translatable("guide.biggerreactorsrework.chapter." + ch.id())), null);
             List<GuideElement> elements = ch.elements();
             for (int i = 0; i < elements.size(); i++) {
+                // The calculator fills an open spread: the rest of a left page and the whole right page.
+                if (elements.get(i) instanceof CalculatorPages.Spread calculator) {
+                    if (pages.size() % 2 == 1) {
+                        closePage();
+                        if (pages.size() % 2 == 1) decoratedPage();
+                    }
+                    current.add(new Placed(calculator.left(height - y), y, height - y));
+                    closePage();
+                    current.add(new Placed(calculator.right(height), 0, height));
+                    closePage();
+                    continue;
+                }
                 if(elements.get(i) instanceof GuideMultiblock.Spread model){
                     closePage();
                     if(pages.size()%2==1)decoratedPage();

@@ -1,0 +1,6 @@
+{
+  "variants": {
+    "is_lit=false": { "model": "biggerreactorsrework:block/battery/redstone_port/unlit" },
+    "is_lit=true": { "model": "biggerreactorsrework:block/battery/redstone_port/lit" }
+  }
+}

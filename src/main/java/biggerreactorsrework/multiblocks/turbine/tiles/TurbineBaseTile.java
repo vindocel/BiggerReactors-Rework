@@ -20,8 +20,19 @@ public class TurbineBaseTile extends ModularTile implements IMultiblockTile<Turb
         IRectangularMultiblockTile<TurbineBaseTile, TurbineBaseBlock, TurbineMultiblockController>,
         IPersistentMultiblockTile<TurbineBaseTile, TurbineBaseBlock, TurbineMultiblockController>,
         ITouchingMultiblockTile<TurbineBaseTile, TurbineBaseBlock, TurbineMultiblockController> {
+    // Modified 2026-10-30: client appearance identity, separate from menu/request position.
+    public BlockPos appearancePos;
     public TurbineBaseTile(BlockEntityType<?> tileEntityTypeIn, BlockPos pos, BlockState state) {
         super(tileEntityTypeIn, pos, state);
+        appearancePos = pos.immutable();
+    }
+
+    public long writeAppearance() {
+        appearancePos = nullableController() == null ? getBlockPos() : controller().appearancePos(getBlockPos());
+        return appearancePos.asLong();
+    }
+    public void readAppearance(java.util.Map<?, ?> data) {
+        if (data.get("appearancePos") instanceof Long position) appearancePos = BlockPos.of(position);
     }
     
     @Override

@@ -108,6 +108,8 @@ public class ModularTile extends BlockEntity implements IModularTile, IDebuggabl
     public final void onLoad() {
         assert level != null;
         super.onLoad();
+        // Modified 2026-10-30: a revived tile must release its modules again on the next unload.
+        removed = false;
         moduleList.forEach(TileModule::onAdded);
         onAdded();
         if (level.isClientSide && biggerreactorsrework.audio.MachineAudio.supported(this))

@@ -1,7 +1,4 @@
-<!-- DESCRIÇÃO EM INGLÊS PARA CURSEFORGE E MODRINTH — revisão 28/10/2026
-URLs de imagens já publicadas foram preservadas. Substitua IMAGEM_PROCESSADOR_INDUSTRIAL
-pela imagem do bloco e IMAGEM_UI_PROCESSADOR_INDUSTRIAL pela nova interface antes de publicar.
-A screenshot antiga do Cyanite Reprocessor foi mantida somente em comentário para referência. -->
+<!-- Shared store description for CurseForge and Modrinth. -->
 
 # ⚛️ BiggerReactors Rework
 
@@ -29,6 +26,7 @@ Design your own reactor, turn its heat into steam, drive a turbine and store the
 | 💡 Soft machine lighting | Operating terminals, reactor fuel, hot exchanger fluids and the running Industrial Processor emit a modest glow. |
 | 📊 Machine statistics | Current and potential rates, flow measurements and explanations of bottlenecks. |
 | 🔋 Multiblock battery | Expandable FE storage, item charging and equipped-gear charging. |
+| 🔴 Battery redstone sensor | Configurable charge thresholds and full/empty signals for connected machine automation. |
 | 📖 In-game guide | Interactive multiblock views, recipes and operating advice. |
 
 **The familiar foundation stays:** configurable reactors, fuel rods, control rods, turbines, coils, the heat exchanger and cyanite fuel recycling. The existing reprocessor becomes the **Industrial Processor**, adding coolant production. The battery is an added multiblock; the cooling circuit and machine interfaces are reworked systems.
@@ -97,7 +95,7 @@ Persistent heated-coolant or steam buildup reduces conversion and fuel burn. A f
 
 **The original Cyanite Reprocessor has been upgraded and renamed Industrial Processor.** It keeps its cyanite-to-blutonium fuel recycling and now also manufactures **Liquid Obsidian**. The same single-block machine handles both processes, with separate item and fluid outputs. Existing placed processors retain their stored resources.
 
-<!-- 📸 BLOCO DO PROCESSADOR INDUSTRIAL: substituir pelo link da nova imagem da máquina. -->
+<!-- Industrial Processor block. -->
 ![Industrial Processor block](https://cdn.modrinth.com/data/IXXgM5v4/images/4a099fff37a6552ae37289a26e49043ca4d71e58.png)
 
 ### ♻️ Fuel recycling and coolant production
@@ -119,12 +117,11 @@ Liquid Obsidian circulates as a reusable coolant. It heats up into **Heated Liqu
 
 Input water sits beside the energy bar on the left. Item slots occupy the center, and the separate product tank on the right stores Liquid Obsidian.
 
-<!-- 📸 NOVA UI DO PROCESSADOR INDUSTRIAL: substituir pelo link da interface atualizada. -->
+<!-- Industrial Processor interface. -->
 ![Industrial Processor interface with energy, water, item slots and Liquid Obsidian output](https://cdn.modrinth.com/data/IXXgM5v4/images/e7d65603e924d5b53fd1266b1629ed7569a6f92b.png)
 
-<!-- Screenshot antiga: não publicar como interface atual. Substituir o espaço da nova UI acima por uma
-screenshot do Processador Industrial com água à esquerda e produto líquido à direita.
-URL anterior preservada: https://cdn.modrinth.com/data/IXXgM5v4/images/8ab6ad762b1a419164f74d53970d6e68041fd365.png -->
+<!-- Historical interface screenshot, retained for reference rather than current publication:
+https://cdn.modrinth.com/data/IXXgM5v4/images/8ab6ad762b1a419164f74d53970d6e68041fd365.png -->
 
 ---
 
@@ -139,14 +136,14 @@ The primary circuit cools your reactor's hot coolant back into its reusable form
 
 **Layout matters:** separated channels transfer heat less effectively and can take longer to stabilize. The statistics panel helps you compare what the structure could process with what it is processing now.
 
-<!-- render cinematográfico (artes-cinematicas/05_heat_exchanger.png) -->
+<!-- Heat exchanger build view. -->
 ![A heat exchanger multiblock with its hot and cold channels side by side](https://cdn.modrinth.com/data/IXXgM5v4/images/de8da187ef34fade34046a1cb8b0a7fcaf31aae7.png)
 
 ### 🖥️ Heat exchanger controls and statistics
 
 Compare current and potential coolant conversion, water consumption and steam production. Tank levels, channel temperatures and operating messages help you identify a circulation or heat-transfer limit.
 
-<!-- screenshot da GUI (05_heat_exchanger.png da pasta de screenshots) -->
+<!-- Heat exchanger interface. -->
 ![Heat exchanger interface with primary and secondary tanks, temperatures, flow rates and the statistics panel](https://cdn.modrinth.com/data/IXXgM5v4/images/95f0b5feb18653dba17f02a61fa9e181967ea85e.png)
 
 ### 🛡️ Keep your outputs moving
@@ -193,6 +190,16 @@ Check stored energy, input and output rates, and installed cell capacity. The te
 
 ![Battery terminal with stored energy, input and output rates, cell count, the + and − item slots and equipped gear slots](https://cdn.modrinth.com/data/IXXgM5v4/images/7923c1037b7ccc8cd90504319d3d88e12ac32d9c.png)
 
+### 🔴 Automate with stored charge
+
+Add an optional **Battery Redstone Sensor** to the battery wall. Choose a charge percentage,
+signal at or above or at or below that threshold, or detect a completely full or empty battery.
+Each sensor keeps its own settings and sends its signal through the outer face.
+
+Connect the output to a turbine's redstone port in **Activity / Level** mode to start and stop
+generation as the battery fills and drains. The sensor's recipe and operating instructions
+are available in the in-game guide.
+
 ---
 
 ## 🖥️ Consistent interfaces across your plant
@@ -202,6 +209,7 @@ Redesigned screens bring resources and controls together. Each machine shows its
 Potential values assume the conditions shown in the statistics panel. Compare them with current rates to see where supply, controls or circulation are holding the machine back.
 
 The **settings tab** switches each screen between a light and a dark background, for one machine or for all machines at once.
+Redstone sensors follow the appearance of their own reactor, turbine or battery.
 
 ---
 
@@ -235,10 +243,11 @@ Learn the plant inside the game:
 | Integration | What it adds |
 | --- | --- |
 | 📚 JEI, EMI and REI | Both Industrial Processor recipes, moderators, turbine coils and current heat-exchanger fluid conversions. |
-| 💻 CC Tweaked | Supported peripherals for machine monitoring and control. |
+| 💻 OpenComputers | Native cable-connected components for reactor, turbine and heat-exchanger monitoring and control. |
 | 🔎 Jade | Supported machine information in the inspection overlay. |
 | 🧪 Mekanism | The liquid sodium coolant option. |
 | ❄️ Ad Astra | The Cryo Fuel coolant option. |
+| 🛡️ Carry On | Protects assembled multiblocks from accidental pickup while keeping loose and disassembled parts carryable. |
 
 > 📦 **No additional mod is required.** The base mod runs with Minecraft and NeoForge alone.
 

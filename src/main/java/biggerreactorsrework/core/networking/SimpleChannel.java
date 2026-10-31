@@ -31,7 +31,8 @@ public class SimpleChannel {
      * Upper bound for a single encoded compound, keeps a malformed or hostile packet from allocating without limit.
      */
     private static final int MAX_PAYLOAD_BYTES = 1 << 20;
-    private static final String PROTOCOL_VERSION = "4";
+    // Modified 2026-10-30: protocol 5 includes authoritative server configuration snapshots.
+    private static final String PROTOCOL_VERSION = "5";
 
     private static final List<SimpleChannel> channelsToRegister = new ObjectArrayList<>();
 

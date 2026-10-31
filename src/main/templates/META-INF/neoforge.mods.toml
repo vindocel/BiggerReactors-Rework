@@ -33,3 +33,11 @@ This rework is not affiliated with or endorsed by the original authors.
     versionRange="${minecraft_version_range}"
     ordering="NONE"
     side="BOTH"
+
+# Modified 2026-10-30: validate the native API version only when OpenComputers is installed.
+[[dependencies.${mod_id}]]
+    modId="opencomputers"
+    type="optional"
+    versionRange="[${oc_version},)"
+    ordering="AFTER"
+    side="BOTH"

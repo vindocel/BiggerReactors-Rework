@@ -3,6 +3,7 @@ package biggerreactorsrework.multiblocks.turbine.client;
 import biggerreactorsrework.client.GuiArt;
 import biggerreactorsrework.client.GuiFrame;
 import biggerreactorsrework.client.GuiIcon;
+import biggerreactorsrework.client.RedstoneIcon;
 import biggerreactorsrework.client.SelectorColors;
 import biggerreactorsrework.multiblocks.turbine.containers.TurbineRedstonePortContainer;
 import net.minecraft.client.gui.GuiGraphics;
@@ -23,8 +24,9 @@ public final class TurbineRedstonePortScreen extends ModScreen<TurbineRedstonePo
     private static final int RIGHT_EAR = PANEL_X + PANEL_WIDTH;
     // Same top inset as the face configuration window.
     private static final int TAB_Y = 4;
-    private static final GuiIcon[] ICONS = {GuiIcon.CLOSE, GuiIcon.REACTOR_ACTIVITY, GuiIcon.ROTOR_EFFICIENCY,
-            GuiIcon.FLOW_RATE, GuiIcon.TACHOMETER, GuiIcon.BATTERY, GuiIcon.DROP_INPUT, GuiIcon.WATER_DROP};
+    private static final RedstoneIcon[] ICONS = {RedstoneIcon.DISABLED, RedstoneIcon.image(GuiIcon.REACTOR_ACTIVITY), RedstoneIcon.image(GuiIcon.ROTOR_EFFICIENCY),
+            RedstoneIcon.image(GuiIcon.FLOW_RATE), RedstoneIcon.image(GuiIcon.TACHOMETER), RedstoneIcon.image(GuiIcon.BATTERY),
+            RedstoneIcon.image(GuiIcon.DROP_INPUT), RedstoneIcon.image(GuiIcon.WATER_DROP)};
     private int mode, behavior;
     private boolean draftLoaded;
     private EditBox low, high;
@@ -62,10 +64,10 @@ public final class TurbineRedstonePortScreen extends ModScreen<TurbineRedstonePo
         });
     }
 
-    private Button iconButton(int x, int y, GuiIcon icon, Component label, Button.OnPress action) {
+    private Button iconButton(int x, int y, RedstoneIcon icon, Component label, Button.OnPress action) {
         var button = button(x, y, 15, 15, label, action, (g, b) ->
-                GuiArt.button(g, b.getX(), b.getY(), b.getWidth(), b.getHeight(), b.isHoveredOrFocused(),
-                        false, !b.active, icon, GuiFrame.TURBINE));
+                icon.button(g, b.getX(), b.getY(), b.getWidth(), b.getHeight(), b.isHoveredOrFocused(),
+                        !b.active, GuiFrame.TURBINE));
         button.setTooltip(Tooltip.create(label));
         return button;
     }
@@ -92,8 +94,7 @@ public final class TurbineRedstonePortScreen extends ModScreen<TurbineRedstonePo
                     }, (g, b) -> {
                         int tabY = topPos + y;
                         GuiArt.tabButton(g, leftPos + ear, tabY, left, b.isHoveredOrFocused(), mode == tab, GuiFrame.TURBINE);
-                        GuiArt.tabIcon(g, leftPos + ear, tabY, left, ICONS[tab].width(), ICONS[tab].height(),
-                                () -> ICONS[tab].draw(g, 0, 0));
+                        ICONS[tab].tab(g, leftPos + ear, tabY, left);
                     });
             tabButton.setTooltip(Tooltip.create(Component.empty().append(text(left ? "input" : "output"))
                     .append(": ").append(text("mode." + i))));
@@ -117,16 +118,16 @@ public final class TurbineRedstonePortScreen extends ModScreen<TurbineRedstonePo
         high.setMaxLength(32);
         low.setValue(lowDraft);
         high.setValue(highDraft);
-        enterLow = iconButton(PANEL_X + 178, 119, GuiIcon.ARROW_ENTER, text("apply"), b -> apply());
-        enterHigh = iconButton(PANEL_X + 178, 154, GuiIcon.ARROW_ENTER, text("apply"), b -> apply());
-        iconButton(PANEL_X + PANEL_WIDTH - 44, 194, GuiIcon.REVERT, text("revert"), b -> {
+        enterLow = iconButton(PANEL_X + 178, 119, RedstoneIcon.ENTER, text("apply"), b -> apply());
+        enterHigh = iconButton(PANEL_X + 178, 154, RedstoneIcon.ENTER, text("apply"), b -> apply());
+        iconButton(PANEL_X + PANEL_WIDTH - 44, 194, RedstoneIcon.REVERT, text("revert"), b -> {
             mode = menu.tile.mode;
             behavior = menu.tile.behavior;
             low.setValue(Double.toString(menu.tile.low));
             high.setValue(Double.toString(menu.tile.high));
             refresh();
         });
-        apply = iconButton(PANEL_X + PANEL_WIDTH - 26, 194, GuiIcon.CONFIRM, text("apply"), b -> apply());
+        apply = iconButton(PANEL_X + PANEL_WIDTH - 26, 194, RedstoneIcon.CONFIRM, text("apply"), b -> apply());
         low.setResponder(value -> refresh());
         high.setResponder(value -> refresh());
         refresh();

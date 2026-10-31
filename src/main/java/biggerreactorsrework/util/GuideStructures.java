@@ -62,7 +62,7 @@ public final class GuideStructures {
         return new Example("battery",5,5,5,Collections.unmodifiableMap(p));
     }
     /** Structure placement does not call player placement hooks. Encode the same texture connections. */
-    private static void connect(Map<BlockPos,BlockState> p) {
+    public static void connect(Map<BlockPos,BlockState> p) {
         p.replaceAll((pos,state)-> {
             if (!(state.getBlock() instanceof biggerreactorsrework.core.modular.block.IConnectedTexture connected)) return state;
             var properties=java.util.Map.of(

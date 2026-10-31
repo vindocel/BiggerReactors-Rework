@@ -43,6 +43,9 @@ import static biggerreactorsrework.multiblocks.reactor.blocks.ReactorAccessPort.
 
 @NonnullDefault
 public class ReactorAccessPortTile extends ReactorBaseTile implements IItemHandler, MenuProvider, IHasUpdatableState<ReactorAccessPortState>, IEventMultiblock.AssemblyStateTransition {
+    // Modified 2026-10-30: refresh cached neighbors when their capability is invalidated.
+    private final biggerreactorsrework.core.capability.NeighborCapability<IItemHandler> outputCapability =
+            new biggerreactorsrework.core.capability.NeighborCapability<>(this, Capabilities.ItemHandler.BLOCK);
     
     @RegisterTile("reactor_access_port")
     public static final BlockEntityType.BlockEntitySupplier<ReactorAccessPortTile> SUPPLIER = new RegisterTile.Producer<>(ReactorAccessPortTile::new);
@@ -76,7 +79,7 @@ public class ReactorAccessPortTile extends ReactorBaseTile implements IItemHandl
     @Override
     protected void readNBT(CompoundTag compound) {
         if (compound.contains("direction")) {
-            direction = ReactorAccessPort.PortDirection.valueOf(compound.getString("direction"));
+            direction = biggerreactorsrework.core.util.SavedValues.enumValue(ReactorAccessPort.PortDirection.class, compound.getString("direction"), ReactorAccessPort.PortDirection.INLET);
         }
         if (compound.contains("fuelMode")) {
             fuelMode = compound.getBoolean("fuelMode");
@@ -210,6 +213,7 @@ public class ReactorAccessPortTile extends ReactorBaseTile implements IItemHandl
     }
     
     public int pushWaste(int waste, boolean simulated) {
+        neighborChanged();
         if (itemOutput != null) {
             waste /= Config.CONFIG.Reactor.FuelMBPerIngot;
             int wasteHandled = 0;
@@ -232,6 +236,7 @@ public class ReactorAccessPortTile extends ReactorBaseTile implements IItemHandl
     }
     
     public int pushFuel(int fuel, boolean simulated) {
+        neighborChanged();
         if (itemOutput != null) {
             fuel /= Config.CONFIG.Reactor.FuelMBPerIngot;
             int fuelHandled = 0;
@@ -264,10 +269,11 @@ public class ReactorAccessPortTile extends ReactorBaseTile implements IItemHandl
     public void neighborChanged() {
         if (itemOutputDirection == null) {
             connected = false;
+            itemOutput = null;
             return;
         }
         assert level != null;
-        itemOutput = level.getCapability(Capabilities.ItemHandler.BLOCK, worldPosition.relative(itemOutputDirection), itemOutputDirection.getOpposite());
+        itemOutput = outputCapability.get(itemOutputDirection);
         connected = itemOutput != null;
     }
     
@@ -279,6 +285,8 @@ public class ReactorAccessPortTile extends ReactorBaseTile implements IItemHandl
         
         // Change IO direction.
         if (requestName.equals("setDirection")) {
+            // Modified 2026-10-30: reject invalid command types and domains before mutation.
+            if (!(requestData instanceof Integer value) || value < 0 || value > 1) return;
             this.setDirection(((Integer) requestData != 0) ? OUTLET : INLET);
             assert level != null;
             level.setBlockAndUpdate(this.worldPosition, this.getBlockState().setValue(PORT_DIRECTION_ENUM_PROPERTY, direction));
@@ -287,7 +295,9 @@ public class ReactorAccessPortTile extends ReactorBaseTile implements IItemHandl
         
         // Change fuel/waste ejection.
         if (requestName.equals("setFuelMode")) {
+            if (!(requestData instanceof Integer value) || value < 0 || value > 1) return;
             this.fuelMode = ((Integer) requestData != 0);
+            this.setChanged();
             return;
         }
         

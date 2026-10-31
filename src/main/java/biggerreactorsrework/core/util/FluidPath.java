@@ -7,6 +7,8 @@ import java.util.*;
  * Modified 2026-10-26: the two phases cover every segment whenever the circuit contains fluid.
  */
 public final class FluidPath {
+    // Modified 2026-10-29: channel frames have a two-pixel wall; fluid meets its inner edge with 0.02 px clearance.
+    private static final float MIN = 2.02f / 16, MAX = 1 - MIN;
     public record Span(float start,float end) { }
     public record Box(float x0,float y0,float z0,float x1,float y1,float z1) { }
     public static Span span(double input,double output,int index,int length,boolean product) {
@@ -21,18 +23,18 @@ public final class FluidPath {
         if(entry==exit || span.end<=span.start)return List.of();
         var result=new ArrayList<Box>(3);
         if(entry.getAxis()==exit.getAxis()) {
-            add(result,new float[]{.25f,.25f,.25f,.75f,.75f,.75f},entry.getOpposite(),0,1,span,true);
+            add(result,new float[]{MIN,MIN,MIN,MAX,MAX,MAX},entry.getOpposite(),0,1,span,true);
         } else {
-            arm(result,entry,entry.getOpposite(),0,.25f,span);
-            add(result,new float[]{.25f,.25f,.25f,.75f,.75f,.75f},entry.getOpposite(),.25f,.75f,span,false);
-            arm(result,exit,exit,.75f,1,span);
+            arm(result,entry,entry.getOpposite(),0,MIN,span);
+            add(result,new float[]{MIN,MIN,MIN,MAX,MAX,MAX},entry.getOpposite(),MIN,MAX,span,false);
+            arm(result,exit,exit,MAX,1,span);
         }
         return result;
     }
     private static int axis(Direction direction){return switch(direction.getAxis()){case X->0;case Y->1;case Z->2;};}
     private static void arm(List<Box> result,Direction face,Direction travel,float from,float to,Span span){
-        float[] bounds={.25f,.25f,.25f,.75f,.75f,.75f};int axis=axis(face);
-        if(face.getAxisDirection()==Direction.AxisDirection.POSITIVE){bounds[axis]=.75f;bounds[axis+3]=1;}else{bounds[axis]=0;bounds[axis+3]=.25f;}
+        float[] bounds={MIN,MIN,MIN,MAX,MAX,MAX};int axis=axis(face);
+        if(face.getAxisDirection()==Direction.AxisDirection.POSITIVE){bounds[axis]=MAX;bounds[axis+3]=1;}else{bounds[axis]=0;bounds[axis+3]=MIN;}
         add(result,bounds,travel,from,to,span,false);
     }
     private static void add(List<Box> result,float[] b,Direction travel,float from,float to,Span span,boolean straight){

@@ -119,14 +119,43 @@ final class GuideMultiblock {
         }
         public boolean drag(GuideScreen s,double dx,double dy){if(!dragging)return false;state.yaw+=(float)dx*1.5f;state.pitch=net.minecraft.util.Mth.clamp(state.pitch+(float)dy*1.2f,-10,85);return true;}
         void zoom(double direction){state.zoom=net.minecraft.util.Mth.clamp(state.zoom*(float)Math.pow(1.2,direction),0.75f,12f);}
-        void release(){dragging=false;}
+        @Override public void release(){dragging=false;}
+        @Override public boolean scroll(GuideScreen s,double mx,double my,int x,int y,int width,int height,double amount){
+            if(my>=y+viewHeight(s,width))return false;zoom(amount);return true;
+        }
     }
+    /** Highlights one group of a preview this frame, as hovering its line in the parts list does. */
+    static void highlight(String id,String group){var state=STATES.get(id);if(state!=null)state.highlight=group;}
+    /**
+     * A calculated machine or plant as a preview, grouped like the book's examples: frame and walls of casing apart
+     * from the functional parts. Added 2026-10-28.
+     */
+    static Spread spread(String id,List<biggerreactorsrework.calculator.design.PlantLayout.Placed> machines,Component title){
+        var boxes=new ArrayList<Box>();int w=0,h=0,d=0;boolean[] inlet={false};
+        int minX=machines.stream().mapToInt(p->p.offset().getX()).min().orElse(0),minY=machines.stream().mapToInt(p->p.offset().getY()).min().orElse(0),minZ=machines.stream().mapToInt(p->p.offset().getZ()).min().orElse(0);
+        for(var placed:machines){
+            var m=placed.machine();int ox=placed.offset().getX()-minX,oy=placed.offset().getY()-minY,oz=placed.offset().getZ()-minZ;
+            w=Math.max(w,ox+m.width());h=Math.max(h,oy+m.height());d=Math.max(d,oz+m.depth());
+            m.blocks().forEach((pos,placedState)->{
+                var block=display(placedState,inlet);String group=key(block.getBlock());
+                if(block.getBlock()==ReactorCasing.INSTANCE||block.getBlock()==TurbineCasing.INSTANCE||block.getBlock()==biggerreactorsrework.multiblocks.heatexchanger.blocks.HeatExchangerCasingBlock.INSTANCE){
+                    int bounds=(pos.getX()==0||pos.getX()==m.width()-1?1:0)+(pos.getY()==0||pos.getY()==m.height()-1?1:0)+(pos.getZ()==0||pos.getZ()==m.depth()-1?1:0);group=bounds>=2?FRAME:WALLS;
+                }
+                boxes.add(new Box(pos.getX()+ox,pos.getY()+oy,pos.getZ()+oz,1,1,1,block,group));
+            });
+        }
+        var spread=new Spread(new Preview(id,w,h,d,List.copyOf(boxes),null),title);
+        // Large plants open on their first layer instead of drawing every block each frame.
+        if(boxes.size()>LARGE_PREVIEW)STATES.get(id).layer=0;
+        return spread;
+    }
+    private static final int LARGE_PREVIEW=6000;
     static final class PartsPanel implements GuideElement {
         private final Preview example;private final ViewState state;private final List<Part> parts;
         PartsPanel(Preview p,ViewState s){example=p;state=s;var counts=new LinkedHashMap<String,Part>();for(var box:p.boxes()){var old=counts.get(box.group);counts.put(box.group,new Part(box.group,box.block.getBlock().asItem(),box.count()+(old==null?0:old.count)));}parts=List.copyOf(counts.values());}
         public int height(GuideScreen s,int width){return Math.min(parts.size()*24,s.pageHeight()-28);}
         private int row(GuideScreen s,int width){return height(s,width)/Math.max(1,parts.size());}
-        void prepareHover(GuideScreen s,int x,int y,int width,int mx,int my){int row=row(s,width),index=(my-y)/Math.max(1,row);if(mx>=x&&mx<x+width&&my>=y&&index<parts.size())state.highlight=parts.get(index).group;}
+        @Override public void prepare(GuideScreen s,int x,int y,int width,int mx,int my){int row=row(s,width),index=(my-y)/Math.max(1,row);if(mx>=x&&mx<x+width&&my>=y&&index<parts.size())state.highlight=parts.get(index).group;}
         public void render(GuideScreen s,GuiGraphics g,int x,int y,int width,int mx,int my){
             int row=row(s,width);for(int i=0;i<parts.size();i++){
                 var part=parts.get(i);int py=y+i*row;boolean walls=WALLS.equals(part.group)&&example.glass()!=null,hover=part.group.equals(state.highlight);

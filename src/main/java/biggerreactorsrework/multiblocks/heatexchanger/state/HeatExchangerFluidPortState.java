@@ -33,6 +33,8 @@ public class HeatExchangerFluidPortState implements GuiSync.IGUIPacket {
 
     @Override
     public void read(@Nonnull Map<?, ?> data) {
+        // Modified 2026-10-30: resource ports share the terminal's appearance, not its menu origin.
+        heatExchangerFluidPortTile.readAppearance(data);
         this.direction = (Boolean) data.get("direction");
         this.condenser = (Boolean) data.get("condenser");
     }
@@ -42,6 +44,7 @@ public class HeatExchangerFluidPortState implements GuiSync.IGUIPacket {
     public Map<?, ?> write() {
         this.heatExchangerFluidPortTile.updateState();
         HashMap<String, Object> data = new HashMap<>();
+        data.put("appearancePos", heatExchangerFluidPortTile.writeAppearance());
 
         data.put("direction", this.direction);
         data.put("condenser", this.condenser);

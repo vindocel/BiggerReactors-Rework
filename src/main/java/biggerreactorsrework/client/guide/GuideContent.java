@@ -21,7 +21,11 @@ final class GuideContent {
             combine("reactor","reactor_terminal",sections,"build_reactor","reactor_parts","reactor_panel","active","moderators","efficiency"),
             combine("turbine","turbine_terminal",sections,"turbine_parts","build_turbine","automation"),
             combine("battery","battery_terminal",sections,"battery_parts","build_battery"),
-            combine("exchanger","heat_exchanger_terminal",sections,"exchanger"));
+            combine("exchanger","heat_exchanger_terminal",sections,"exchanger"),
+            // Added 2026-10-28: new calculation, recents and saved results all live inside this entry.
+            new Chapter("calculator",()->stack("reactor_computer_port"),List.of(
+                    new CalculatorPages.Spread(),
+                    new GuideElements.Text(Component.translatable("guide.biggerreactorsrework.calculator.help")))));
     }
     private static Chapter combine(String id,String icon,Map<String,Chapter> sections,String... included) {
         var elements=new ArrayList<GuideElement>();
@@ -126,6 +130,8 @@ final class GuideContent {
           elements.add(new GuideElements.Crafting(GuideIds.id("crafting/battery/battery_glass")));
           elements.add(new GuideElements.Crafting(GuideIds.id("crafting/battery/battery_terminal")));
           elements.add(new GuideElements.Crafting(GuideIds.id("crafting/battery/battery_energy_port")));
+          elements.add(new GuideElements.Crafting(GuideIds.id("crafting/battery/battery_redstone_port")));
+          elements.add(new GuideElements.Text(Component.translatable("guide.biggerreactorsrework.content.battery_redstone")));
           elements.add(new GuideElements.Crafting(GuideIds.id("crafting/battery/battery_cell")));
           chapters.add(new Chapter("battery_parts",()->new ItemStack(BuiltInRegistries.ITEM.get(GuideIds.id("battery_cell"))),List.copyOf(elements))); }
         { var elements=new ArrayList<GuideElement>();

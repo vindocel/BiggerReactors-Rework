@@ -1,14 +1,47 @@
-# 1.21.1-0.1.3 (BiggerReactors-Rework, unreleased)
+# 1.21.1-0.1.5 (BiggerReactors-Rework, unreleased)
+
+## Added
+
+- Added the Battery Redstone Sensor, with separate settings for each sensor: at or above a charge threshold, at or below it, completely full, completely empty, or disabled.
+- Added the sensor's configuration screen, crafting recipe, recipe-book unlock and guide instructions. Its lit texture follows the signal, and it stops emitting when the battery disassembles.
+- Battery charge can now control a connected turbine through its existing Activity / Level redstone input.
+- Added optional OpenComputers support through native cable-connected components for reactor, turbine and heat-exchanger computer ports, replacing the ComputerCraft integration. Component addresses persist across reloads.
+
+## Improved
+
+- Replaced the tiny close glyph used for Disabled with a dedicated crossed-circle icon. Battery threshold arrows are larger and easier to read.
+- Apply, restore and confirm icons now have a consistent compact size and more padding inside the redstone-screen buttons.
+
+## Fixed
+
+- Reactor, turbine and battery redstone sensors now follow their machine's light/dark theme, including machines with multiple terminals.
+- Item, fluid and energy port screens now follow the selected theme of their reactor, turbine, heat exchanger or battery instead of using a separate port appearance.
+- Industrial Processors now mark externally received energy for saving even while idle.
+- Machine ports reject malformed interface commands without changing their settings.
+- Computer operations run on the server thread, and computers attached after assembly can immediately access existing control rods.
+- The guide and processing costs now follow the server's synchronized configuration in multiplayer.
+- Energy output distributes small integer remainders across connected consumers instead of leaving them stranded.
+- Fluid and item output ports refresh their connections when a neighbor changes its available capabilities.
+- Invalid saved controls and fluid identifiers no longer prevent otherwise recoverable machine state from loading.
+
+# 1.21.1-0.1.4 (BiggerReactors-Rework)
+
+## Fixed
+
+- Carry On can no longer pick up blocks from assembled reactors, turbines, heat exchangers or batteries. Loose and disassembled parts remain carryable, and placing carried blocks still works.
+- The battery terminal and body now use the same appearance preference.
+- Heat-exchanger fluids now fill the channel opening up to the inner red and blue borders, with a small clearance to avoid overlapping surfaces. Fluid amounts and heat transfer are unchanged.
+
+# 1.21.1-0.1.3 (BiggerReactors-Rework)
 
 ## Machine audio and rod seams (2026-10-28)
  - shorten volume tooltips and fit the focus outline to the full rectangular −/+ buttons
- - add approved reactor, boiler and RPM-dependent turbine loops, calibrated to their agreed maximum levels
+ - add original reactor, boiler and RPM-dependent turbine operating sounds
  - add local per-multiblock volume/mute controls in Settings, independent of shared appearance
  - synchronize operating audio without opening the GUI; deduplicate terminals and release unloaded sources
- - use the same 25-block attenuation from the structure surface for reactor, boiler and all turbine anchors; preserve approved gains
+ - use the same 25-block sound range from the structure surface for reactors, boilers and turbines
  - bring reactor manifold coolant against the outer grille using shared world/guide geometry and a minimal surface clearance; preserve fluid quantities and cold/hot slices
  - close full fuel/waste segment micro-gaps and omit internal rod caps while retaining exposed and partial surfaces
- - pass 68 unit tests and 85 dedicated-server GameTests; the author confirmed the final audio, UI and visual changes work correctly in game on 2026-10-28
 
 ## Machine lighting (2026-10-27)
  - add level 7 light to operating multiblock terminals and visible reactor fuel
@@ -47,7 +80,7 @@
  - add obsidian and water processing into Liquid Obsidian, a separate product tank, fluid output routes, automatic ejection and the revised water/energy layout
  - replace the lava coolant pair with identified heated Liquid Obsidian; legacy pairs stop as invalid until manually emptied
  - give hot obsidian 20% more heat per mB than unchanged hot Cryo Fuel, verified with equal-volume exchanger batches; leave other coolant and turbine coefficients unchanged
- - update native recipes, JEI/EMI, guide, locales and protocol 4 synchronization; verify 56 unit tests and 79 GameTests per environment
+ - update recipes, JEI/EMI, the guide, translations and synchronization for the new processing options
 
 
 ## Battery terminal and Unicode fixes (2026-10-27)
@@ -57,21 +90,18 @@
 - Deduplicate equipment charging within each server tick and synchronize modified item components through the menu.
 - Correct corrupted dimension/conversion separators and serialize new ROBN strings as length-prefixed UTF-8 with an explicit type tag. Retain legacy string decoding and bounds checks; reject malformed UTF-8.
 - Bump internal network protocol to 3 so incompatible clients cannot decode the new string representation.
-- Add Unicode round-trip, legacy compatibility and malformed-payload tests, plus a real battery/menu GameTest covering equipment charging, closing, shared limits and plus/minus behavior.
 
 ## Contained-fluid rendering and reactor repair (2026-10-27)
  - render only exterior fluid surfaces, omitting shared phase, segment and bend caps; use consistent UVs, outward normals, face culling, native tint alpha and fluid emission light
  - use vanilla cutout rendering for opaque contained fluids and the culled translucent layer for translucent tints, avoiding forced transparency behind machine glass without depending on Iris
  - preserve coolant profile/origin alongside simulation volumes when disassembling or rebuilding a reactor; fixes stored coolant becoming unidentified and rejecting refill after casing repair
  - show unidentified coolant instead of Air for orphaned stored amounts; require an explicit coolant-port manual dump before refilling an already unidentified tank, without silently changing its contents
- - add exterior-mesh/winding regression tests and real reactor repair/refill tests
 
 ## Turbine reload regression (2026-10-26)
  - resolve queued controller aliases before checking emptiness or removing controllers from the registry; prevents loaded turbine parts and rotor bearings from remaining split between controllers
  - use deterministic inventory/size/creation-order merge selection while preserving the independent-inventory protection
- - add fresh, stocked, staged, alias-chain and shuffled saved-turbine regression cases; exclude their fixtures from distribution artifacts
 
-## Production audit fixes (2026-10-26)
+## Stability and data fixes (2026-10-26)
  - validate binary lengths/nesting before collection allocation, reject nontext compound keys and bind GUI packets to their menu and position (internal protocol 2)
  - validate rod commands and numeric configuration bounds, including open endpoints and nonfinite numbers
  - replace removed persistence delegates; preserve machine origin across parts and refuse merging independently stocked machines, including inventories awaiting NBT load
@@ -83,7 +113,6 @@
  - exclude GameTests and their empty template from the distribution jar; keep generated numerical studies local
 
 ## Liquid cooling
- - added measured restricted-extraction experiments for obsidian-to-lava reactors and lava/water exchangers, checking steady bottlenecks, complete blockage, recovery and per-tick fluid/heat balances
  - active reactors now reduce burn and coolant conversion linearly with persistent hot output stock; exchangers limit both conversions from retained steam only, preserving turbine behavior and solid-mode generation
  - output monitoring ignores normal transfer batches cleared within one second, stops immediately at full capacity and recovers by up to five percentage points per tick; saved monitoring state survives reloads
  - added output occupancy, retained occupancy and operating-limit statistics with localized bottleneck/recovery reasons, plus guide explanations in English and Portuguese
@@ -93,7 +122,6 @@
  - preserved existing sodium inventories across this specific temperature correction without accepting unrelated coolant profile changes
  - JEI and EMI coolant entries show heat-exchange temperature and the correct destination of the hot output instead of labeling coolant heat capacity as FE/mB
  - empty coolant tank pairs now clear their selected fluid, origin and fractional heat so another coolant can enter; fixes both manual emptying and loading previously empty saves, while keeping nonempty fluids separated
- - added an automated water/obsidian comparison for the saved 6×6×6 reactor, preserving individual rod insertions and checking finite closed-loop coolant conservation and steady-state steam/fuel progression
  - fixed a client crash when rendering exchanger fluids: channels resolve assembly through their terminal instead of reading an ASSEMBLED property they do not have
  - assembled turbines now send rotor geometry even at zero RPM and accept geometry arriving before the assembled block state
  - repaired 119 malformed English color codes that displayed stray characters in machine screens and tooltips

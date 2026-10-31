@@ -277,6 +277,15 @@ public class TurbineMultiblockController extends MultiblockController<TurbineBas
     private boolean updateBlockStates = false;
     
     private final Set<TurbineTerminalTile> terminals = new HashSet<>();
+
+    public net.minecraft.core.BlockPos appearancePos(net.minecraft.core.BlockPos fallback) {
+        net.minecraft.core.BlockPos anchor = null;
+        for (var terminal : terminals) {
+            var pos = terminal.getBlockPos();
+            if (anchor == null || pos.compareTo(anchor) < 0) anchor = pos;
+        }
+        return anchor == null ? fallback : anchor.immutable();
+    }
     private final Set<TurbineFluidPortTile> fluidPorts = new HashSet<>();
     private final Set<TurbineRotorBearingTile> rotorBearings = new HashSet<>();
     private final ObjectArrayList<TurbineRotorShaftTile> rotorShafts = new ObjectArrayList<>();
@@ -575,10 +584,11 @@ public class TurbineMultiblockController extends MultiblockController<TurbineBas
 
     @SuppressWarnings("UnnecessaryReturnStatement")
     public void runRequest(String requestName, @Nullable Object requestData) {
+        // Modified 2026-10-30: validate enum domains before invoking simulation controls.
         switch (requestName) {
             // Set the turbine to ACTIVE or INACTIVE.
             case "setActive": {
-                if (!(requestData instanceof Integer)) {
+                if (!(requestData instanceof Integer value) || value < 0 || value > 1) {
                     return;
                 }
                 setActive(TurbineActivity.fromInt((Integer) requestData) == TurbineActivity.ACTIVE);
@@ -594,7 +604,7 @@ public class TurbineMultiblockController extends MultiblockController<TurbineBas
             }
             // Set coils to engaged or disengaged.
             case "setCoilEngaged": {
-                if (!(requestData instanceof Integer)) {
+                if (!(requestData instanceof Integer value) || value < 0 || value > 1) {
                     return;
                 }
                 setCoilEngaged(((Integer) requestData != 0));
@@ -602,7 +612,7 @@ public class TurbineMultiblockController extends MultiblockController<TurbineBas
             }
             // Set vent state to OVERFLOW, ALL, or CLOSED.
             case "setVentState": {
-                if (!(requestData instanceof Integer)) {
+                if (!(requestData instanceof Integer value) || value < 0 || value > 2) {
                     return;
                 }
                 setVentState(VentState.fromInt((int) requestData));

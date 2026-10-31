@@ -38,6 +38,9 @@ import static biggerreactorsrework.multiblocks.reactor.blocks.ReactorAccessPort.
 @MethodsReturnNonnullByDefault
 @ParametersAreNonnullByDefault
 public class ReactorCoolantPortTile extends ReactorBaseTile implements IFluidTankHandler, MenuProvider, IHasUpdatableState<ReactorCoolantPortState>, IEventMultiblock.AssemblyStateTransition {
+    // Modified 2026-10-30: refresh output handlers on capability invalidation, including absent neighbors.
+    private final biggerreactorsrework.core.capability.NeighborCapability<net.neoforged.neoforge.fluids.capability.IFluidHandler> outputCapability =
+            new biggerreactorsrework.core.capability.NeighborCapability<>(this, Capabilities.FluidHandler.BLOCK);
     
     @RegisterTile("reactor_coolant_port")
     public static final BlockEntityType.BlockEntitySupplier<ReactorCoolantPortTile> SUPPLIER = new RegisterTile.Producer<>(ReactorCoolantPortTile::new);
@@ -120,6 +123,7 @@ public class ReactorCoolantPortTile extends ReactorBaseTile implements IFluidTan
     }
     
     public long pushFluid() {
+        neighborChanged();
         if (!connected || direction == INLET) {
             return 0;
         }
@@ -153,7 +157,7 @@ public class ReactorCoolantPortTile extends ReactorBaseTile implements IFluidTan
             return;
         }
         assert level != null;
-        final var capHandler = level.getCapability(Capabilities.FluidHandler.BLOCK, worldPosition.relative(steamOutputDirection), steamOutputDirection.getOpposite());
+        final var capHandler = outputCapability.get(steamOutputDirection);
         connected = false;
         if (capHandler != null) {
             connected = true;
@@ -169,7 +173,7 @@ public class ReactorCoolantPortTile extends ReactorBaseTile implements IFluidTan
     @Override
     protected void readNBT(CompoundTag compound) {
         if (compound.contains("direction")) {
-            direction = ReactorAccessPort.PortDirection.valueOf(compound.getString("direction"));
+            direction = biggerreactorsrework.core.util.SavedValues.enumValue(ReactorAccessPort.PortDirection.class, compound.getString("direction"), ReactorAccessPort.PortDirection.INLET);
         }
     }
     
@@ -185,6 +189,8 @@ public class ReactorCoolantPortTile extends ReactorBaseTile implements IFluidTan
     public void runRequest(String requestName, Object requestData) {
         // Change IO direction.
         if (requestName.equals("setDirection")) {
+            // Modified 2026-10-30: reject invalid command types and domains before mutation.
+            if (!(requestData instanceof Integer value) || value < 0 || value > 1) return;
             this.setDirection(((Integer) requestData != 0) ? OUTLET : INLET);
             assert level != null;
             level.setBlock(this.worldPosition, this.getBlockState().setValue(PORT_DIRECTION_ENUM_PROPERTY, direction), 3);

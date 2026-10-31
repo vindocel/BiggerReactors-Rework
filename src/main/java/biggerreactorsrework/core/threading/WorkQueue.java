@@ -1,9 +1,5 @@
 package biggerreactorsrework.core.threading;
 
-import net.minecraft.CrashReport;
-import net.minecraft.client.Minecraft;
-
-import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Queue;
 import java.util.concurrent.BlockingQueue;
@@ -13,38 +9,38 @@ import java.util.concurrent.atomic.AtomicLong;
 
 @SuppressWarnings("unused")
 public class WorkQueue {
+    // Modified 2026-10-30: start workers on demand and terminate them explicitly on either side.
     private final BlockingQueue<Runnable> queue = new LinkedBlockingQueue<>();
     
     private final ArrayList<DequeueThread> dequeueThreads = new ArrayList<>();
     
-    private RuntimeException toRethrow;
+    private volatile Throwable toRethrow;
+    private boolean finished;
     
     public WorkQueue() {
-        // workaround for FML issue
-        // triggers the classloading here instead of the finalizer
-        dequeueThreads.forEach(DequeueThread::finish);
     }
     
     private class DequeueThread implements Runnable {
-        private final WeakReference<BlockingQueue<Runnable>> queue;
+        private final BlockingQueue<Runnable> queue;
         private final AtomicBoolean stop = new AtomicBoolean(false);
+        private final Thread thread;
+        private boolean started;
         
         public DequeueThread(BlockingQueue<Runnable> queue, String name) {
-            this.queue = new WeakReference<>(queue);
-            Thread thread = new Thread(this);
+            this.queue = queue;
+            thread = new Thread(this);
             if (name != null) {
                 thread.setName(name);
             }
             thread.setDaemon(true); // just, because, shouldn't be necessary, but just because
-            thread.start();
+        }
+
+        void start() {
+            if (!started) { started = true; thread.start(); }
         }
         
         public void run() {
             while (!stop.get()) {
-                BlockingQueue<Runnable> queue = this.queue.get();
-                if (queue == null) {
-                    return;
-                }
                 Runnable nextItem;
                 try {
                     nextItem = queue.take();
@@ -53,13 +49,8 @@ public class WorkQueue {
                 }
                 try {
                     nextItem.run();
-                } catch (RuntimeException e) {
-                    WorkQueue.this.toRethrow = e;
-                    e.printStackTrace();
                 } catch (Throwable e) {
-                    // this should be impossible, but just in case
-                    e.printStackTrace();
-                    Minecraft.getInstance().emergencySaveAndCrash(new CrashReport("Exception rolled back to CoreEvents WorkQueue", e));
+                    WorkQueue.this.toRethrow = e;
                 }
             }
             
@@ -67,6 +58,7 @@ public class WorkQueue {
         
         public void finish() {
             stop.set(true);
+            thread.interrupt();
         }
     }
     
@@ -78,7 +70,8 @@ public class WorkQueue {
         return addProcessingThreads(threads, null);
     }
     
-    public WorkQueue addProcessingThreads(int threads, String name) {
+    public synchronized WorkQueue addProcessingThreads(int threads, String name) {
+        if (finished) throw new IllegalStateException("Work queue is closed");
         for (int i = 0; i < threads; i++) {
             dequeueThreads.add(new DequeueThread(queue, name == null ? null : name + i));
         }
@@ -86,15 +79,20 @@ public class WorkQueue {
     }
     
     public void finish() {
-        dequeueThreads.forEach(DequeueThread::finish);
-        synchronized (queue) {
-            queue.notifyAll();
+        final ArrayList<DequeueThread> workers;
+        synchronized (this) {
+            finished = true;
+            workers = new ArrayList<>(dequeueThreads);
+            workers.forEach(DequeueThread::finish);
         }
-    }
-    
-    @Override
-    protected void finalize() {
-        finish();
+        long deadline = System.nanoTime() + java.util.concurrent.TimeUnit.SECONDS.toNanos(1);
+        for (var worker : workers) {
+            if (worker.thread == Thread.currentThread()) continue;
+            long remaining = deadline - System.nanoTime();
+            if (remaining <= 0) break;
+            try { worker.thread.join(Math.max(1, java.util.concurrent.TimeUnit.NANOSECONDS.toMillis(remaining))); }
+            catch (InterruptedException e) { Thread.currentThread().interrupt(); break; }
+        }
     }
     
     private static class WorkItem implements Runnable {
@@ -115,6 +113,7 @@ public class WorkQueue {
                     if (unTriggeredWaitEvents.decrementAndGet() == 0) {
                         readyEvent.trigger();
                     }
+                    continue;
                 }
                 assert event != null;
                 event.registerCallback(() -> {
@@ -140,16 +139,23 @@ public class WorkQueue {
         }
     }
     
-    public Event enqueue(Runnable runnable, Event... events) {
-        if (toRethrow != null) {
-            throw toRethrow;
-        }
+    public synchronized Event enqueue(Runnable runnable, Event... events) {
+        prepareWorkers();
         WorkItem item = new WorkItem(queue, runnable, events);
         return item.waitEvent;
     }
     
-    public void enqueueUntracked(Runnable runnable) {
+    public synchronized void enqueueUntracked(Runnable runnable) {
+        prepareWorkers();
         queue.add(runnable);
+    }
+
+    private void prepareWorkers() {
+        if (finished) throw new IllegalStateException("Work queue is closed");
+        if (toRethrow instanceof Error error) throw error;
+        if (toRethrow instanceof RuntimeException exception) throw exception;
+        if (toRethrow != null) throw new IllegalStateException("Worker failed", toRethrow);
+        dequeueThreads.forEach(DequeueThread::start);
     }
     
     public boolean runOne() {

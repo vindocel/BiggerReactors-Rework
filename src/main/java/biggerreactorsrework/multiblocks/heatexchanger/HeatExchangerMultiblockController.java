@@ -57,6 +57,11 @@ public class HeatExchangerMultiblockController extends MultiblockController<Heat
     public final Set<HeatExchangerChannelTile> evaporatorChannels = new LinkedHashSet<>();
     private final Set<HeatExchangerFluidPortTile> fluidPorts = new LinkedHashSet<>();
     private final Set<biggerreactorsrework.multiblocks.heatexchanger.tiles.HeatExchangerTerminalTile> renderTerminals=new LinkedHashSet<>();
+    // Modified 2026-10-30: match the canonical terminal selection used by other multiblocks.
+    public net.minecraft.core.BlockPos appearancePos(net.minecraft.core.BlockPos fallback) {
+        return renderTerminals.stream().map(BlockEntity::getBlockPos).min(net.minecraft.core.BlockPos::compareTo)
+                .map(net.minecraft.core.BlockPos::immutable).orElse(fallback);
+    }
     private long soundActiveUntil;
     
     @Nullable
@@ -538,10 +543,12 @@ public class HeatExchangerMultiblockController extends MultiblockController<Heat
         condenserTank.deserializeNBT(nbt.getCompound("condenserTank"));
         evaporatorTank.deserializeNBT(nbt.getCompound("evaporatorTank"));
         outputPressure.load(nbt.getCompound("outputPressure"));
-        ambientHeatBody.setTemperature(nbt.getDouble("ambientHeatBody"));
-        airHeatBody.setTemperature(nbt.getDouble("airHeatBody"));
-        condenserHeatBody.setTemperature(nbt.getDouble("condenserHeatBody"));
-        evaporatorHeatBody.setTemperature(nbt.getDouble("evaporatorHeatBody"));
+        // Modified 2026-10-30: reject nonfinite saved heat without affecting valid channel stocks.
+        double ambient=level.dimensionType().ultraWarm()?423.15:293.15;
+        ambientHeatBody.setTemperature(biggerreactorsrework.core.util.SavedValues.nonNegative(nbt.getDouble("ambientHeatBody"),ambient));
+        airHeatBody.setTemperature(biggerreactorsrework.core.util.SavedValues.nonNegative(nbt.getDouble("airHeatBody"),ambient));
+        condenserHeatBody.setTemperature(biggerreactorsrework.core.util.SavedValues.nonNegative(nbt.getDouble("condenserHeatBody"),ambient));
+        evaporatorHeatBody.setTemperature(biggerreactorsrework.core.util.SavedValues.nonNegative(nbt.getDouble("evaporatorHeatBody"),ambient));
         thermalInitialized=java.util.stream.DoubleStream.of(airHeatBody.temperature(),condenserHeatBody.temperature(),evaporatorHeatBody.temperature()).allMatch(t->Double.isFinite(t) && t>0);
     }
 

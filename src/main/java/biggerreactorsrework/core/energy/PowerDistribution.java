@@ -5,6 +5,7 @@ import java.util.function.LongUnaryOperator;
 
 /** Shared output accounting for generators. */
 public final class PowerDistribution {
+    // Modified 2026-10-30: allocate integer remainders before executing transfers.
     private PowerDistribution() { }
 
     @FunctionalInterface
@@ -27,9 +28,27 @@ public final class PowerDistribution {
         }
         if (total <= 0) return 0;
         double fraction = Math.min(1, stored / total);
+        long[] offers = new long[requests.length];
+        long planned = 0;
+        for (int i = 0; i < offers.length; i++) {
+            offers[i] = Math.min(requests[i], bounded(stored - planned, (long) (requests[i] * fraction)));
+            planned += offers[i];
+        }
+        if (fraction < 1) {
+            long remainder = stored - planned;
+            for (int pass = 0; pass < 2 && remainder > 0; pass++) {
+                for (int i = 0; i < offers.length && remainder > 0; i++) {
+                    long extra = Math.min(remainder, requests[i] - offers[i]);
+                    // Assign ordinary integer remainders evenly; a second pass handles floating-point precision loss.
+                    if (pass == 0) extra = Math.min(1, extra);
+                    offers[i] += extra;
+                    remainder -= extra;
+                }
+            }
+        }
         long delivered = 0;
         for (int i = 0; i < requests.length; i++) {
-            long offer = bounded(stored - delivered, (long) (requests[i] * fraction));
+            long offer = bounded(stored - delivered, offers[i]);
             if (offer == 0) continue;
             long accepted = bounded(offer, transfer.transfer(ports.get(i), offer, false));
             extract.applyAsLong(accepted);

@@ -1,9 +1,9 @@
 package biggerreactorsrework.core.threading;
 
 import java.util.ArrayList;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 public class Event {
+    // Modified 2026-10-30: completion is explicit; garbage collection cannot complete unfinished work.
     private final ArrayList<Runnable> callbacks = new ArrayList<>();
     private volatile boolean wasTriggered = false;
     
@@ -52,6 +52,7 @@ public class Event {
             return;
         }
         callbacks.forEach(Runnable::run);
+        callbacks.clear();
         wasTriggered = true;
         notifyAll();
     }
@@ -64,8 +65,4 @@ public class Event {
         callbacks.add(runnable);
     }
     
-    @Override
-    protected void finalize() {
-        trigger();
-    }
 }

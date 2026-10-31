@@ -8,6 +8,8 @@ import biggerreactorsrework.machine.recipe.ReprocessingRecipe;
 import biggerreactorsrework.multiblocks.reactor.blocks.ReactorCasing;
 import biggerreactorsrework.multiblocks.turbine.blocks.TurbineCasing;
 import biggerreactorsrework.multiblocks.turbine.blocks.TurbineRedstonePort;
+import biggerreactorsrework.multiblocks.battery.blocks.BatteryCasing;
+import biggerreactorsrework.multiblocks.battery.blocks.BatteryRedstonePort;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.PackOutput;
 import net.minecraft.data.recipes.*;
@@ -40,13 +42,16 @@ public final class ModDataGeneration {
             ShapedRecipeBuilder.shaped(RecipeCategory.REDSTONE,TurbineRedstonePort.INSTANCE)
                 .pattern("CRC").pattern("RGR").pattern("CRC").define('C',TurbineCasing.INSTANCE).define('R',Items.REDSTONE).define('G',Items.GOLD_INGOT)
                 .unlockedBy("has_casing",has(TurbineCasing.INSTANCE)).save(output,id("crafting/turbine/turbine_redstone_port"));
+            ShapedRecipeBuilder.shaped(RecipeCategory.REDSTONE,BatteryRedstonePort.INSTANCE)
+                .pattern("CRC").pattern("RGR").pattern("CRC").define('C',BatteryCasing.INSTANCE).define('R',Items.REDSTONE).define('G',Items.GOLD_INGOT)
+                .unlockedBy("has_casing",has(BatteryCasing.INSTANCE)).save(output,id("crafting/battery/battery_redstone_port"));
             output.accept(id("cyanite_reprocessing"),new ReprocessingRecipe(Ingredient.of(CyaniteIngot.INSTANCE),2,new net.minecraft.world.item.ItemStack(BlutoniumIngot.INSTANCE),Fluids.WATER,-1,-1,-1),null);
         }
     }
     private static final class Loot extends BlockLootSubProvider {
         Loot(HolderLookup.Provider lookup){super(Set.of(),FeatureFlags.REGISTRY.allFlags(),lookup);}
-        @Override protected void generate(){dropSelf(TurbineRedstonePort.INSTANCE);}
-        @Override protected Iterable<Block> getKnownBlocks(){return List.of(TurbineRedstonePort.INSTANCE);}
+        @Override protected void generate(){dropSelf(TurbineRedstonePort.INSTANCE);dropSelf(BatteryRedstonePort.INSTANCE);}
+        @Override protected Iterable<Block> getKnownBlocks(){return List.of(TurbineRedstonePort.INSTANCE,BatteryRedstonePort.INSTANCE);}
     }
 
     private static final class MiningTags extends net.minecraft.data.tags.TagsProvider<Block> {
@@ -97,6 +102,7 @@ public final class ModDataGeneration {
                 "battery_glass",
                 "battery_terminal",
                 "battery_energy_port",
+                "battery_redstone_port",
                 "battery_cell");
             add(net.minecraft.tags.BlockTags.NEEDS_IRON_TOOL,
                 "reactor_power_tap",
@@ -140,6 +146,7 @@ public final class ModDataGeneration {
                 "battery_glass",
                 "battery_terminal",
                 "battery_energy_port",
+                "battery_redstone_port",
                 "battery_cell");
         }
     }

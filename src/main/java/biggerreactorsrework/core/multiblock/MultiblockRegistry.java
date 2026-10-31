@@ -15,6 +15,21 @@ import biggerreactorsrework.core.registry.OnModLoad;
 import biggerreactorsrework.core.util.Util;
 
 public final class MultiblockRegistry {
+
+    /** Added 2026-10-29: also protect non-machine interior blocks, such as moderators and turbine coils. No chunk loads. */
+    public static boolean isInsideAssembledMultiblock(ServerLevel level, net.minecraft.core.BlockPos pos) {
+        var controllers = controllersToTick.get(level);
+        if (controllers == null) return false;
+        for (var controller : controllers) {
+            if (!(controller instanceof IValidatedMultiblock<?, ?, ?> validated)
+                    || validated.assemblyState() != IValidatedMultiblock.AssemblyState.ASSEMBLED) continue;
+            var min = controller.min();
+            var max = controller.max();
+            if (pos.getX() >= min.x() && pos.getX() <= max.x() && pos.getY() >= min.y() && pos.getY() <= max.y()
+                    && pos.getZ() >= min.z() && pos.getZ() <= max.z()) return true;
+        }
+        return false;
+    }
     
     private static final Object2ObjectOpenHashMap<ServerLevel, ObjectArrayList<MultiblockController<?, ?, ?>>> controllersToTick = new Object2ObjectOpenHashMap<>();
     private static final ObjectArrayList<MultiblockController<?, ?, ?>> newControllers = new ObjectArrayList<>();

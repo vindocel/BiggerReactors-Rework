@@ -57,7 +57,8 @@ public class BatteryMultiblockController extends MultiblockController<BatteryBas
         IRectangularMultiblock<BatteryBaseTile, BatteryBaseBlock, BatteryMultiblockController>,
         IPersistentMultiblock<BatteryBaseTile, BatteryBaseBlock, BatteryMultiblockController>,
         ITouchingMultiblock<BatteryBaseTile, BatteryBaseBlock, BatteryMultiblockController>,
-        IEventMultiblock<BatteryBaseTile, BatteryBaseBlock, BatteryMultiblockController> {
+        IEventMultiblock<BatteryBaseTile, BatteryBaseBlock, BatteryMultiblockController>,
+        biggerreactorsrework.core.multiblock.common.ITickablePartsMultiblock<BatteryBaseTile, BatteryBaseBlock, BatteryMultiblockController> {
 
     /**
      * Ticks without transfer before the terminals go idle, so bursty loads do not flicker them.
@@ -427,6 +428,12 @@ public class BatteryMultiblockController extends MultiblockController<BatteryBas
     }
 
     public void updateDataPacket(BatteryState state) {
+        // Modified 2026-10-29: preserve the terminal's existing theme when opening through any battery part.
+        terminals.stream().map(BatteryTerminalTile::getBlockPos).min(BlockPos::compareTo)
+                .ifPresent(position -> {
+                    state.appearancePos = position.immutable();
+                    state.appearanceReady = true;
+                });
         state.energyStored = stored;
         state.energyCapacity = capacity;
         state.lastInput = lastInput;

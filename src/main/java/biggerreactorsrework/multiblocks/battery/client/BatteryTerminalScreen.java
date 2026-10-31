@@ -134,6 +134,7 @@ public class BatteryTerminalScreen extends ModScreen<BatteryTerminalContainer> {
 
     @Override
     public boolean hasAppearanceSettings() {
-        return true;
+        // Modified 2026-10-29: do not save a clicked-block theme before the shared identity arrives.
+        return batteryState != null && batteryState.appearanceReady;
     }
 }

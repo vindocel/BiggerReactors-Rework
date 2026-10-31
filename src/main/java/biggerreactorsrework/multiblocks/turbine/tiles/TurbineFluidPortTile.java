@@ -38,6 +38,9 @@ import static biggerreactorsrework.multiblocks.turbine.blocks.TurbineFluidPort.P
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
 public class TurbineFluidPortTile extends TurbineBaseTile implements IFluidTankHandler, MenuProvider, IHasUpdatableState<TurbineFluidPortState>, IEventMultiblock.AssemblyStateTransition.OnAssembly, IEventMultiblock.AssemblyStateTransition.OnDisassembly {
+    // Modified 2026-10-30: refresh output handlers after neighbor capability changes.
+    private final biggerreactorsrework.core.capability.NeighborCapability<net.neoforged.neoforge.fluids.capability.IFluidHandler> outputCapability =
+            new biggerreactorsrework.core.capability.NeighborCapability<>(this, Capabilities.FluidHandler.BLOCK);
     
     @RegisterTile("turbine_fluid_port")
     public static final BlockEntityType.BlockEntitySupplier<TurbineFluidPortTile> SUPPLIER = new RegisterTile.Producer<>(TurbineFluidPortTile::new);
@@ -118,6 +121,7 @@ public class TurbineFluidPortTile extends TurbineBaseTile implements IFluidTankH
     }
     
     public long pushFluid() {
+        neighborChanged();
         if (!connected || direction == INLET) {
             return 0;
         }
@@ -150,7 +154,7 @@ public class TurbineFluidPortTile extends TurbineBaseTile implements IFluidTankH
             return;
         }
         assert level != null;
-        final var outputCap = level.getCapability(Capabilities.FluidHandler.BLOCK, worldPosition.relative(waterOutputDirection), waterOutputDirection.getOpposite());
+        final var outputCap = outputCapability.get(waterOutputDirection);
         if (outputCap == null) {
             connected = false;
             return;
@@ -170,7 +174,7 @@ public class TurbineFluidPortTile extends TurbineBaseTile implements IFluidTankH
     @Override
     protected void readNBT(CompoundTag compound) {
         if (compound.contains("direction")) {
-            direction = TurbineFluidPort.PortDirection.valueOf(compound.getString("direction"));
+            direction = biggerreactorsrework.core.util.SavedValues.enumValue(TurbineFluidPort.PortDirection.class, compound.getString("direction"), TurbineFluidPort.PortDirection.INLET);
         }
     }
     
@@ -186,6 +190,8 @@ public class TurbineFluidPortTile extends TurbineBaseTile implements IFluidTankH
     public void runRequest(String requestName, Object requestData) {
         // Change IO direction.
         if (requestName.equals("setDirection")) {
+            // Modified 2026-10-30: reject invalid command types and domains before mutation.
+            if (!(requestData instanceof Integer value) || value < 0 || value > 1) return;
             this.setDirection(((Integer) requestData != 0) ? OUTLET : INLET);
             level.setBlockAndUpdate(this.worldPosition, this.getBlockState().setValue(PORT_DIRECTION_ENUM_PROPERTY, direction));
         }

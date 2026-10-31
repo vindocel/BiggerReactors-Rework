@@ -200,7 +200,7 @@ public class ReactorRedstonePortScreen extends ModScreen<ReactorRedstonePortCont
         };
         this.applyChangesButton.onRender = (mS, mX, mY) -> {
             // Custom rendering.
-            GuiArt.button(mS, this.applyChangesButton.x, this.applyChangesButton.y, this.applyChangesButton.width, this.applyChangesButton.height, this.applyChangesButton.isMouseOver(mX, mY), GuiIcon.CONFIRM, this.frame());
+            RedstoneIcon.CONFIRM.button(mS, this.applyChangesButton.x, this.applyChangesButton.y, this.applyChangesButton.width, this.applyChangesButton.height, this.applyChangesButton.isMouseOver(mX, mY), false, this.frame());
         };
         this.addScreenElement(this.applyChangesButton);
 
@@ -221,7 +221,7 @@ public class ReactorRedstonePortScreen extends ModScreen<ReactorRedstonePortCont
         };
         this.revertChangesButton.onRender = (mS, mX, mY) -> {
             // Custom rendering.
-            GuiArt.button(mS, this.revertChangesButton.x, this.revertChangesButton.y, this.revertChangesButton.width, this.revertChangesButton.height, this.revertChangesButton.isMouseOver(mX, mY), GuiIcon.REVERT, this.frame());
+            RedstoneIcon.REVERT.button(mS, this.revertChangesButton.x, this.revertChangesButton.y, this.revertChangesButton.width, this.revertChangesButton.height, this.revertChangesButton.isMouseOver(mX, mY), false, this.frame());
         };
         this.addScreenElement(this.revertChangesButton);
 
@@ -267,7 +267,7 @@ public class ReactorRedstonePortScreen extends ModScreen<ReactorRedstonePortCont
         this.addScreenElement(this.textBufferA);
 
         // (Top) Text buffer A enter button:
-        this.textEnterButtonA = new CommonButton<>(this, 135, 92, 17, 14, GuiIcon.ARROW_ENTER, GuiIcon.ARROW_ENTER_DISABLED, Component.translatable("screen.biggerreactorsrework.reactor_redstone_port.apply.tooltip"));
+        this.textEnterButtonA = enterButton(92);
         this.textEnterButtonA.onMouseReleased = (mX, mY, btn) -> {
             // Click logic.
             this.getMenu().executeRequest("setTextBufferA", this.textBufferA.getContents().replaceAll("[^\\d.]", ""));
@@ -280,13 +280,23 @@ public class ReactorRedstonePortScreen extends ModScreen<ReactorRedstonePortCont
         this.addScreenElement(textBufferB);
 
         // (Top) Text buffer B enter button:
-        this.textEnterButtonB = new CommonButton<>(this, 135, 123, 17, 14, GuiIcon.ARROW_ENTER, GuiIcon.ARROW_ENTER_DISABLED, Component.translatable("screen.biggerreactorsrework.reactor_redstone_port.apply.tooltip"));
+        this.textEnterButtonB = enterButton(123);
         this.textEnterButtonB.onMouseReleased = (mX, mY, btn) -> {
             // Click logic.
             this.getMenu().executeRequest("setTextBufferB", this.textBufferB.getContents().replaceAll("[^\\d.]", ""));
             return true;
         };
         this.addScreenElement(this.textEnterButtonB);
+    }
+
+    private CommonButton<ReactorRedstonePortContainer> enterButton(int y) {
+        return new CommonButton<>(this, 135, y, 17, 14, GuiIcon.ARROW_ENTER, GuiIcon.ARROW_ENTER_DISABLED,
+                Component.translatable("screen.biggerreactorsrework.reactor_redstone_port.apply.tooltip")) {
+            @Override public void render(@Nonnull GuiGraphics graphics, int mouseX, int mouseY) {
+                if (renderEnable) RedstoneIcon.ENTER.button(graphics, x, this.y, width, height, isMouseOver(mouseX, mouseY),
+                        !actionEnable, ReactorRedstonePortScreen.this.frame());
+            }
+        };
     }
 
     /**
