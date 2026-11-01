@@ -1,10 +1,13 @@
 package biggerreactorsrework.blocks.materials;
 
+import net.minecraft.world.level.material.MapColor;
+
 import net.minecraft.util.valueproviders.ConstantInt;
 import net.minecraft.world.level.block.DropExperienceBlock;
 import net.minecraft.world.level.block.SoundType;
 import biggerreactorsrework.core.registry.RegisterBlock;
 
+// Modified 2026-11-01: declare a map palette color without changing block behavior.
 public class UraniumOre extends DropExperienceBlock {
 
     @RegisterBlock(name = "uranium_ore")
@@ -12,7 +15,7 @@ public class UraniumOre extends DropExperienceBlock {
 
     public UraniumOre() {
         super(ConstantInt.of(0),
-                biggerreactorsrework.core.registry.RegistryIds.block(Properties.of()
+                biggerreactorsrework.core.registry.RegistryIds.block(Properties.of().mapColor(MapColor.STONE)
                         .sound(SoundType.STONE)
                         .explosionResistance(3.0F)
                         .destroyTime(3.0f)

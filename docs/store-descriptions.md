@@ -95,6 +95,8 @@ Persistent heated-coolant or steam buildup reduces conversion and fuel burn. A f
 
 **The original Cyanite Reprocessor has been upgraded and renamed Industrial Processor.** It keeps its cyanite-to-blutonium fuel recycling and now also manufactures **Liquid Obsidian**. The same single-block machine handles both processes, with separate item and fluid outputs. Existing placed processors retain their stored resources.
 
+The guide groups each process's item and fluid inputs together, with one output and labelled fluid, total energy and processing time requirements.
+
 <!-- Industrial Processor block. -->
 ![Industrial Processor block](https://cdn.modrinth.com/data/IXXgM5v4/images/4a099fff37a6552ae37289a26e49043ca4d71e58.png)
 

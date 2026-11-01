@@ -12,7 +12,7 @@ import net.minecraft.world.level.storage.loot.LootTable;
 import net.neoforged.fml.ModList;
 
 /**
- * Checks that the migrated datapack content (recipes, loot tables) parses on 1.21.1.
+ * Checks that the migrated datapack content (recipes, loot tables) parses on the native platform.
  */
 public final class ContentGameTests {
     private ContentGameTests() {
@@ -98,5 +98,16 @@ public final class ContentGameTests {
         }
         helper.assertTrue(checked >= 30, "loot tables checked: " + checked);
         helper.succeed();
+    }
+    /** Added 2026-11-01: map renderers draw MapColor.NONE as black or empty. */
+    @GameTest(template="empty_7x7x7")
+    public static void everySolidBlockDeclaresAMapColor(GameTestHelper h) {
+        var missing = net.minecraft.core.registries.BuiltInRegistries.BLOCK.entrySet().stream()
+                .filter(e -> e.getKey().identifier().getNamespace().equals(biggerreactorsrework.BiggerReactors.modid))
+                .filter(e -> !(e.getValue() instanceof net.minecraft.world.level.block.LiquidBlock))
+                .filter(e -> e.getValue().defaultMapColor() == net.minecraft.world.level.material.MapColor.NONE)
+                .map(e -> e.getKey().identifier().getPath()).toList();
+        h.assertTrue(missing.isEmpty(), "blocks without a map color: " + missing);
+        h.succeed();
     }
 }

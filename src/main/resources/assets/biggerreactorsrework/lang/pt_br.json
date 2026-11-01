@@ -824,5 +824,9 @@
   "advancements.biggerreactorsrework.turbine_accident.description": "Morra picotado pelas pás de uma turbina em rotação.",
   "death.attack.biggerreactorsrework.turbine_rotor": "%1$s morreu picotado",
   "death.attack.biggerreactorsrework.turbine_rotor.player": "%1$s morreu picotado",
-  "death.attack.biggerreactorsrework.turbine_rotor.item": "%1$s morreu picotado"
+  "death.attack.biggerreactorsrework.turbine_rotor.item": "%1$s morreu picotado",
+  "guide.biggerreactorsrework.process.fluid": "%s: %s mB",
+  "guide.biggerreactorsrework.process.energy": "Energia: %s FE (%s FE/t)",
+  "guide.biggerreactorsrework.process.time": "Tempo: %s s",
+  "guide.biggerreactorsrework.process.produces": "Produz: %s mB"
 }

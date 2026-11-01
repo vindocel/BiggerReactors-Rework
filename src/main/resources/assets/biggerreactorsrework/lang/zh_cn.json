@@ -824,5 +824,9 @@
   "advancements.biggerreactorsrework.turbine_accident.description": "Be killed by the blades of a spinning turbine.",
   "death.attack.biggerreactorsrework.turbine_rotor": "%1$s was chopped to pieces",
   "death.attack.biggerreactorsrework.turbine_rotor.player": "%1$s was chopped to pieces",
-  "death.attack.biggerreactorsrework.turbine_rotor.item": "%1$s was chopped to pieces"
+  "death.attack.biggerreactorsrework.turbine_rotor.item": "%1$s was chopped to pieces",
+  "guide.biggerreactorsrework.process.fluid": "%s: %s mB",
+  "guide.biggerreactorsrework.process.energy": "Energy: %s FE (%s FE/t)",
+  "guide.biggerreactorsrework.process.time": "Time: %s s",
+  "guide.biggerreactorsrework.process.produces": "Produces: %s mB"
 }

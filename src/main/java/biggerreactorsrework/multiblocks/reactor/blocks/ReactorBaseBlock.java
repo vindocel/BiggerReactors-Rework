@@ -1,5 +1,7 @@
 package biggerreactorsrework.multiblocks.reactor.blocks;
 
+import net.minecraft.world.level.material.MapColor;
+
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
@@ -24,8 +26,9 @@ import static biggerreactorsrework.core.multiblock.IAssemblyStateBlock.ASSEMBLED
 public abstract class ReactorBaseBlock extends ModularBlock implements IRectangularMultiblockBlock {
     // Modified 2026-10-27: state-based light for terminals and visible fuel.
     
-    public static final Properties PROPERTIES_SOLID = Properties.of().lightLevel(biggerreactorsrework.multiblocks.MachineLighting::emission).sound(SoundType.METAL).destroyTime(2).explosionResistance(10).isValidSpawn((a, b, c, d) -> false).requiresCorrectToolForDrops();
-    public static final Properties PROPERTIES_GLASS = Properties.of().lightLevel(biggerreactorsrework.multiblocks.MachineLighting::emission).sound(SoundType.GLASS).noOcclusion().destroyTime(2).explosionResistance(2).isValidSpawn((a, b, c, d) -> false).requiresCorrectToolForDrops();
+    // Modified 2026-11-01: declare the machine palette color for map renderers.
+    public static final Properties PROPERTIES_SOLID = Properties.of().mapColor(MapColor.COLOR_GRAY).lightLevel(biggerreactorsrework.multiblocks.MachineLighting::emission).sound(SoundType.METAL).destroyTime(2).explosionResistance(10).isValidSpawn((a, b, c, d) -> false).requiresCorrectToolForDrops();
+    public static final Properties PROPERTIES_GLASS = Properties.of().mapColor(MapColor.COLOR_GRAY).lightLevel(biggerreactorsrework.multiblocks.MachineLighting::emission).sound(SoundType.GLASS).noOcclusion().destroyTime(2).explosionResistance(2).isValidSpawn((a, b, c, d) -> false).requiresCorrectToolForDrops();
     
     public ReactorBaseBlock() {
         this(true);

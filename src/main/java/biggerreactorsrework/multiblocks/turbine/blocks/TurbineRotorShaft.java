@@ -30,6 +30,14 @@ public class TurbineRotorShaft extends TurbineBaseBlock implements IAssemblyStat
         return super.playerWillDestroy(level,pos,state,player);
     }
     
+    // Modified 2026-11-01: slim aiming outline; retain full-block collision.
+    @Override protected net.minecraft.world.phys.shapes.VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, net.minecraft.world.phys.shapes.CollisionContext context) {
+        return RotorShapes.shaft(state.getValue(TurbineShaftRotationState.TURBINE_SHAFT_ROTATION_STATE_ENUM_PROPERTY).ordinal());
+    }
+    @Override protected net.minecraft.world.phys.shapes.VoxelShape getCollisionShape(BlockState state, BlockGetter level, BlockPos pos, net.minecraft.world.phys.shapes.CollisionContext context) {
+        return net.minecraft.world.phys.shapes.Shapes.block();
+    }
+
     @RegisterBlock(name = "turbine_rotor_shaft", tileEntityClass = TurbineRotorShaftTile.class)
     public static final TurbineRotorShaft INSTANCE = biggerreactorsrework.core.registry.RegistryIds.named("turbine_rotor_shaft", () -> new TurbineRotorShaft());
     

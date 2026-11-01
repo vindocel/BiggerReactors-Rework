@@ -1,5 +1,7 @@
 package biggerreactorsrework.machine.blocks;
 
+import net.minecraft.world.level.material.MapColor;
+
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.InteractionHand;
@@ -25,6 +27,7 @@ import biggerreactorsrework.core.registry.RegisterBlock;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+// Modified 2026-11-01: declare a map palette color without changing block behavior.
 public class CyaniteReprocessor extends Block implements EntityBlock {
 
     public static final EnumProperty<Direction> FACING = BlockStateProperties.HORIZONTAL_FACING;
@@ -34,7 +37,7 @@ public class CyaniteReprocessor extends Block implements EntityBlock {
     public static final CyaniteReprocessor INSTANCE = biggerreactorsrework.core.registry.RegistryIds.named("cyanite_reprocessor", () -> new CyaniteReprocessor());
 
     public CyaniteReprocessor() {
-        super(biggerreactorsrework.core.registry.RegistryIds.block(Properties.of()
+        super(biggerreactorsrework.core.registry.RegistryIds.block(Properties.of().mapColor(MapColor.COLOR_GRAY)
                 // Modified 2026-10-27: light follows the existing processing animation.
                 .lightLevel(biggerreactorsrework.multiblocks.MachineLighting::emission)
                 .sound(SoundType.STONE)

@@ -1,5 +1,7 @@
 package biggerreactorsrework.multiblocks.turbine.blocks;
 
+import net.minecraft.world.level.material.MapColor;
+
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
@@ -25,8 +27,9 @@ import static biggerreactorsrework.core.multiblock.IAssemblyStateBlock.ASSEMBLED
 @ParametersAreNonnullByDefault
 public abstract class TurbineBaseBlock extends ModularBlock implements IMultiblockBlock, EntityBlock, IRectangularMultiblockBlock {
     // Modified 2026-10-27: operating terminal light.
-    public static final Block.Properties PROPERTIES_SOLID = Block.Properties.of().lightLevel(biggerreactorsrework.multiblocks.MachineLighting::emission).sound(SoundType.METAL).destroyTime(2).explosionResistance(10).isValidSpawn((a, b, c, d) -> false).requiresCorrectToolForDrops();
-    public static final Block.Properties PROPERTIES_GLASS = Block.Properties.of().lightLevel(biggerreactorsrework.multiblocks.MachineLighting::emission).sound(SoundType.METAL).noOcclusion().destroyTime(2).explosionResistance(2).isValidSpawn((a, b, c, d) -> false).requiresCorrectToolForDrops();
+    // Modified 2026-11-01: declare the machine palette color for map renderers.
+    public static final Block.Properties PROPERTIES_SOLID = Block.Properties.of().mapColor(MapColor.COLOR_LIGHT_GRAY).lightLevel(biggerreactorsrework.multiblocks.MachineLighting::emission).sound(SoundType.METAL).destroyTime(2).explosionResistance(10).isValidSpawn((a, b, c, d) -> false).requiresCorrectToolForDrops();
+    public static final Block.Properties PROPERTIES_GLASS = Block.Properties.of().mapColor(MapColor.COLOR_LIGHT_GRAY).lightLevel(biggerreactorsrework.multiblocks.MachineLighting::emission).sound(SoundType.METAL).noOcclusion().destroyTime(2).explosionResistance(2).isValidSpawn((a, b, c, d) -> false).requiresCorrectToolForDrops();
     
     public TurbineBaseBlock() {
         this(true);

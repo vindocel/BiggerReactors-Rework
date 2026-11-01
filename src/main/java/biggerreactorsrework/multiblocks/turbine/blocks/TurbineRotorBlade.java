@@ -31,6 +31,14 @@ public class TurbineRotorBlade extends TurbineBaseBlock implements IAssemblyStat
     
     public static final IntegerProperty BLADE_POSITION = IntegerProperty.create("blade_position", 0, 3);
     
+    // Modified 2026-11-01: slim aiming outline; retain full-block collision.
+    @Override protected net.minecraft.world.phys.shapes.VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, net.minecraft.world.phys.shapes.CollisionContext context) {
+        return RotorShapes.blade(state.getValue(TurbineShaftRotationState.TURBINE_SHAFT_ROTATION_STATE_ENUM_PROPERTY).ordinal(), state.getValue(BLADE_POSITION));
+    }
+    @Override protected net.minecraft.world.phys.shapes.VoxelShape getCollisionShape(BlockState state, BlockGetter level, BlockPos pos, net.minecraft.world.phys.shapes.CollisionContext context) {
+        return net.minecraft.world.phys.shapes.Shapes.block();
+    }
+
     @RegisterBlock(name = "turbine_rotor_blade", tileEntityClass = TurbineRotorBladeTile.class)
     public static final TurbineRotorBlade INSTANCE = biggerreactorsrework.core.registry.RegistryIds.named("turbine_rotor_blade", () -> new TurbineRotorBlade());
     

@@ -1,5 +1,7 @@
 package biggerreactorsrework.multiblocks.battery.blocks;
 
+import net.minecraft.world.level.material.MapColor;
+
 import biggerreactorsrework.core.modular.block.ModularBlock;
 import biggerreactorsrework.core.multiblock.IMultiblockBlock;
 import biggerreactorsrework.core.multiblock.rectangular.IRectangularMultiblockBlock;
@@ -25,8 +27,9 @@ import static biggerreactorsrework.core.multiblock.IAssemblyStateBlock.ASSEMBLED
 @ParametersAreNonnullByDefault
 public abstract class BatteryBaseBlock extends ModularBlock implements IMultiblockBlock, EntityBlock, IRectangularMultiblockBlock {
     // Modified 2026-10-27: active terminal light.
-    public static final Block.Properties PROPERTIES_SOLID = Block.Properties.of().lightLevel(biggerreactorsrework.multiblocks.MachineLighting::emission).sound(SoundType.METAL).destroyTime(2).explosionResistance(10).isValidSpawn((a, b, c, d) -> false).requiresCorrectToolForDrops();
-    public static final Block.Properties PROPERTIES_GLASS = Block.Properties.of().lightLevel(biggerreactorsrework.multiblocks.MachineLighting::emission).sound(SoundType.GLASS).noOcclusion().destroyTime(2).explosionResistance(2).isValidSpawn((a, b, c, d) -> false).requiresCorrectToolForDrops();
+    // Modified 2026-11-01: declare the machine palette color for map renderers.
+    public static final Block.Properties PROPERTIES_SOLID = Block.Properties.of().mapColor(MapColor.WOOL).lightLevel(biggerreactorsrework.multiblocks.MachineLighting::emission).sound(SoundType.METAL).destroyTime(2).explosionResistance(10).isValidSpawn((a, b, c, d) -> false).requiresCorrectToolForDrops();
+    public static final Block.Properties PROPERTIES_GLASS = Block.Properties.of().mapColor(MapColor.WOOL).lightLevel(biggerreactorsrework.multiblocks.MachineLighting::emission).sound(SoundType.GLASS).noOcclusion().destroyTime(2).explosionResistance(2).isValidSpawn((a, b, c, d) -> false).requiresCorrectToolForDrops();
     
     public BatteryBaseBlock() {
         this(true);

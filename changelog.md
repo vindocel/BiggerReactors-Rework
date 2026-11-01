@@ -2,6 +2,9 @@
 
 ## Changed
 
+- Industrial Processor guide recipes now group item and fluid inputs together, use a single output slot, and label fluid, energy and time requirements.
+- Turbine shafts and blades now use slimmer targeting outlines so players can aim past their corners, while retaining full-block collision.
+
 - Spinning turbine blades now hurt players within their swept area, with damage increasing with rotor speed. Coasting rotors remain dangerous; armor and normal immunities still apply.
 - Assembled resource ports now show their connection face on the outside and inside, with closed chassis sides matching their machine. Loose ports retain their original appearance.
 - Turbine steam haze now moves gently behind the glass, with slightly stronger whiteness. It follows stored steam even while switched off and actual steam throughput while operating, so fully consumed input remains visible. Condensation starts only after a few seconds of continuous rotating operation.
@@ -12,6 +15,8 @@
 - Machine and guide screens, fluids, rotors, connected glass, fuel columns and heat-exchanger channels were rebuilt on the new rendering system without changing their appearance or behaviour.
 
 ## Fixed
+
+- Solid mod blocks now declare texture-appropriate map colors instead of appearing black or empty in map renderers.
 
 - Clarified advancement descriptions, including completed machine assembly, direct reactor energy generation and the automatically unlocked progression root.
 - Reducing configured battery cell capacity no longer deletes stored energy. Overfull batteries stop accepting energy until their charge falls below the new limit.

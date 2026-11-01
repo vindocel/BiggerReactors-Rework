@@ -277,4 +277,35 @@ public final class TurbineRotorPlacementGameTests {
             h.assertTrue(tank.vaporAmount()+tank.liquidAmount()==total[0],"closed steam/water stock changed during normal revalidation");
         }).thenSucceed();
     }
+    // Modified 2026-11-01: exercise native outline ray casts and unchanged collision.
+    private static net.minecraft.world.phys.BlockHitResult aim(GameTestHelper h,Vec3 from,Vec3 to){
+        return h.getLevel().clip(new net.minecraft.world.level.ClipContext(h.absoluteVec(from),h.absoluteVec(to),net.minecraft.world.level.ClipContext.Block.OUTLINE,net.minecraft.world.level.ClipContext.Fluid.NONE,net.minecraft.world.phys.shapes.CollisionContext.empty()));
+    }
+    @GameTest(template="empty_7x7x7")
+    public static void slimOutlinesLetPlayersAimPastRotorPartsAndKeepCollision(GameTestHelper h){
+        var shaftPos=new BlockPos(3,3,3);var bladePos=new BlockPos(3,3,2);var behind=new BlockPos(3,3,4);
+        h.setBlock(shaftPos,TurbineRotorShaft.INSTANCE);h.setBlock(bladePos,TurbineRotorBlade.INSTANCE);h.setBlock(behind,Blocks.STONE);
+        var past=aim(h,new Vec3(3.5,3.1,1.5),new Vec3(3.5,3.1,3.9));
+        h.assertTrue(past.getBlockPos().equals(h.absolutePos(shaftPos)),"blade corner did not let the aim reach the shaft: "+past.getBlockPos());
+        var corner=aim(h,new Vec3(3.1,3.1,2.9),new Vec3(3.1,3.1,4.5));
+        h.assertTrue(corner.getBlockPos().equals(h.absolutePos(behind)),"shaft corner did not let the aim reach the block behind: "+corner.getBlockPos());
+        var center=aim(h,new Vec3(3.5,3.5,1.5),new Vec3(3.5,3.5,3.9));
+        h.assertTrue(center.getBlockPos().equals(h.absolutePos(bladePos)),"blade center was not targetable");
+        var axisProperty=biggerreactorsrework.multiblocks.turbine.state.TurbineShaftRotationState.TURBINE_SHAFT_ROTATION_STATE_ENUM_PROPERTY;
+        for(var rotation:biggerreactorsrework.multiblocks.turbine.state.TurbineShaftRotationState.values()){
+            var axis=Direction.Axis.values()[rotation.ordinal()];
+            var shaft=TurbineRotorShaft.INSTANCE.defaultBlockState().setValue(axisProperty,rotation);
+            var shaftBox=shaft.getShape(h.getLevel(),BlockPos.ZERO).bounds();
+            h.assertTrue(shaft.getCollisionShape(h.getLevel(),BlockPos.ZERO).equals(net.minecraft.world.phys.shapes.Shapes.block()),"shaft collision changed");
+            h.assertTrue(shaftBox.getXsize()==1&&shaftBox.getYsize()==1&&shaftBox.getZsize()==1,"shaft outline should still reach its neighbours");
+            var arms=TurbineRotorLayout.arms(axis);
+            for(int position=0;position<4;position++){
+                var blade=TurbineRotorBlade.INSTANCE.defaultBlockState().setValue(axisProperty,rotation).setValue(TurbineRotorBlade.BLADE_POSITION,position);
+                var box=blade.getShape(h.getLevel(),BlockPos.ZERO).bounds();var radial=arms.get(position).getAxis();
+                for(var a:Direction.Axis.values())h.assertTrue(a==radial?box.max(a)-box.min(a)==1:box.max(a)-box.min(a)<0.5,"blade outline wrong on "+a+" for "+axis+"/"+position);
+                h.assertTrue(blade.getCollisionShape(h.getLevel(),BlockPos.ZERO).equals(net.minecraft.world.phys.shapes.Shapes.block()),"blade collision changed");
+            }
+        }
+        h.succeed();
+    }
 }
