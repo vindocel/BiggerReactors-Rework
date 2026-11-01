@@ -13,6 +13,7 @@ public class UraniumOre extends DropExperienceBlock {
     public UraniumOre() {
         super(ConstantInt.of(0),
                 Properties.of()
+                        .mapColor(net.minecraft.world.level.material.MapColor.STONE)
                         .sound(SoundType.STONE)
                         .explosionResistance(3.0F)
                         .destroyTime(3.0f)

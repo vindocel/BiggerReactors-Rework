@@ -48,3 +48,10 @@ This rework is not affiliated with or endorsed by the original authors.
     versionRange="[${oc_version},)"
     ordering="AFTER"
     side="BOTH"
+
+[[dependencies.${mod_id}]]
+    modId="kubejs"
+    type="optional"
+    versionRange="[2101.7.2-build.377,)"
+    ordering="AFTER"
+    side="BOTH"

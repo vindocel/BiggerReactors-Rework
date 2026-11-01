@@ -7,6 +7,13 @@ import biggerreactorsrework.core.registry.RegisterConfig;
 
 @SuppressWarnings("unused")
 public class Config {
+    // Modified 2026-11-01: pack authors can disable future uranium generation independently of registered ore/items.
+    public static final class Worldgen {
+        @ConfigValue(comment = "Generate uranium ore in newly generated terrain. Existing ore is not removed.")
+        public final boolean GenerateUranium;
+        { GenerateUranium = true; }
+    }
+    @ConfigValue public final Worldgen Worldgen = new Worldgen();
     
     @RegisterConfig(format = ConfigFormat.TOML, type = {ConfigType.CLIENT, ConfigType.SERVER}, rootLevelType = ConfigType.SERVER)
     public static final Config CONFIG = new Config();
@@ -31,6 +38,9 @@ public class Config {
     }
     
     public static final class Reactor {
+        @ConfigValue(comment = "Optional fuel yields in mB per item, separated by semicolons: mod:item=2000;#mod:tag=1000. Zero disables an entry. Existing stored fuel is unchanged.")
+        public final String CustomFuelEntries;
+        { CustomFuelEntries = ""; }
         @ConfigValue(range = "[3,)")
         public final int MaxLength;
         @ConfigValue(range = "[3,)")

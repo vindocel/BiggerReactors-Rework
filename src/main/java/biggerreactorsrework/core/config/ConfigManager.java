@@ -48,6 +48,13 @@ public class ConfigManager {
     // Modified 2026-10-30: synchronize authoritative server rules and invalidate dependent views.
     private static long revision;
     public static long revision() { return revision; }
+    // Modified 2026-11-01: configuration edits share synchronization and remain local outside active worlds.
+    public static boolean hasActiveWorld() { return server != null || connectedToServer; }
+    public static void rulesChanged() {
+        revision++;
+        biggerreactorsrework.calculator.service.CalculatorService.invalidate();
+        if (server != null) for (var player : players) sendConfigToPlayer(player, true);
+    }
     private static List<ConfigRegistration> syncedConfigs() {
         return Stream.concat(commonConfigs.values().stream(), serverConfigs.values().stream()).toList();
     }
@@ -195,6 +202,7 @@ public class ConfigManager {
     }
     
     private static void onServerStopped(ServerStoppedEvent event) {
+        PackConfiguration.clearOverrides();
         server = null;
         players.clear();
     }
@@ -251,6 +259,8 @@ public class ConfigManager {
     }
 
     public static void applyRemoteSnapshot(DataCompound compound) {
+        // Modified 2026-11-01: integrated client and server already share the same fields. Do not save script rules as local preferences.
+        if (FMLEnvironment.dist.isClient() && server != null && !server.isDedicatedServer()) { revision++; return; }
         boolean initialLogin = compound.getBoolean("initialLogin");
         final var configs = compound.getMap("configs");
         for (final var entry : configs.entrySet()) {

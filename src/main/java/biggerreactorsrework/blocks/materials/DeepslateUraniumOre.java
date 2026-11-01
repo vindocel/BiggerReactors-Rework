@@ -14,6 +14,7 @@ public class DeepslateUraniumOre extends DropExperienceBlock {
     public DeepslateUraniumOre() {
         super(ConstantInt.of(0),
                 Properties.of()
+                        .mapColor(net.minecraft.world.level.material.MapColor.DEEPSLATE)
                         .sound(SoundType.DEEPSLATE)
                         .explosionResistance(3.0F)
                         .destroyTime(4.5f)

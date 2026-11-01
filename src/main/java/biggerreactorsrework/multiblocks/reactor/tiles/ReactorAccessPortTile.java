@@ -145,20 +145,14 @@ public class ReactorAccessPortTile extends ReactorBaseTile implements IItemHandl
             return stack;
         }
         stack = stack.copy();
-        if (stack.getItem().builtInRegistryHolder().is(uraniumIngotTag) || stack.getItem().builtInRegistryHolder().is(uraniumIngotTag) || stack.getItem() == BlutoniumIngot.INSTANCE) {
-            long maxAcceptable = controller().refuel(stack.getCount() * Config.CONFIG.Reactor.FuelMBPerIngot, true);
-            long canAccept = maxAcceptable - (maxAcceptable % Config.CONFIG.Reactor.FuelMBPerIngot);
-            controller().refuel(canAccept, simulate);
-            if (canAccept > 0) {
-                stack.setCount(stack.getCount() - (int) (canAccept / Config.CONFIG.Reactor.FuelMBPerIngot));
-            }
-        }
-        if (stack.getItem().builtInRegistryHolder().is(uraniumBlockTag) || stack.getItem().builtInRegistryHolder().is(uraniumBlockTag) || stack.getItem() == MaterialBlock.BLUTONIUM.asItem()) {
-            long maxAcceptable = controller().refuel(stack.getCount() * (Config.CONFIG.Reactor.FuelMBPerIngot * 9), true);
-            long canAccept = maxAcceptable - (maxAcceptable % (Config.CONFIG.Reactor.FuelMBPerIngot * 9));
-            controller().refuel(canAccept, simulate);
-            if (canAccept > 0) {
-                stack.setCount(stack.getCount() - (int) (canAccept / (Config.CONFIG.Reactor.FuelMBPerIngot * 9)));
+        // Modified 2026-11-01: whole configurable fuel items only; division before multiplication prevents overflow.
+        long perItem = biggerreactorsrework.registries.ReactorFuelRegistry.amount(stack);
+        if (perItem > 0) {
+            long available = controller().refuel(Long.MAX_VALUE, true);
+            int count = (int) Math.min(stack.getCount(), available / perItem);
+            if (count > 0) {
+                long accepted = controller().refuel(count * perItem, simulate);
+                stack.shrink((int) (accepted / perItem));
             }
         }
         return stack;
@@ -203,8 +197,7 @@ public class ReactorAccessPortTile extends ReactorBaseTile implements IItemHandl
     @Override
     public boolean isItemValid(int slot, ItemStack stack) {
         if (slot == FUEL_INSERT_SLOT) {
-            return stack.getItem().builtInRegistryHolder().is(uraniumIngotTag) || stack.getItem() == BlutoniumIngot.INSTANCE
-                    || stack.getItem().builtInRegistryHolder().is(uraniumBlockTag) || stack.getItem() == MaterialBlock.BLUTONIUM.asItem();
+            return biggerreactorsrework.registries.ReactorFuelRegistry.amount(stack) > 0;
         } else if (slot == FUEL_SLOT) {
             return stack.getItem() == UraniumIngot.INSTANCE;
         } else {

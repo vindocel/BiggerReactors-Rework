@@ -24,8 +24,8 @@ import static biggerreactorsrework.core.multiblock.IAssemblyStateBlock.ASSEMBLED
 public abstract class HeatExchangerBaseBlock extends ModularBlock implements IRectangularMultiblockBlock, EntityBlock {
     // Modified 2026-10-27: assembled terminal and hot-channel light.
     
-    public static final Properties PROPERTIES_SOLID = Properties.of().lightLevel(biggerreactorsrework.multiblocks.MachineLighting::emission).sound(SoundType.METAL).destroyTime(2).explosionResistance(10).isValidSpawn((a, b, c, d) -> false);
-    public static final Properties PROPERTIES_GLASS = Properties.of().lightLevel(biggerreactorsrework.multiblocks.MachineLighting::emission).sound(SoundType.GLASS).noOcclusion().destroyTime(2).explosionResistance(2).isValidSpawn((a, b, c, d) -> false);
+    public static final Properties PROPERTIES_SOLID = Properties.of().mapColor(net.minecraft.world.level.material.MapColor.TERRACOTTA_BROWN).lightLevel(biggerreactorsrework.multiblocks.MachineLighting::emission).sound(SoundType.METAL).destroyTime(2).explosionResistance(10).isValidSpawn((a, b, c, d) -> false);
+    public static final Properties PROPERTIES_GLASS = Properties.of().mapColor(net.minecraft.world.level.material.MapColor.TERRACOTTA_BROWN).lightLevel(biggerreactorsrework.multiblocks.MachineLighting::emission).sound(SoundType.GLASS).noOcclusion().destroyTime(2).explosionResistance(2).isValidSpawn((a, b, c, d) -> false);
     
     public HeatExchangerBaseBlock() {
         super(PROPERTIES_SOLID);

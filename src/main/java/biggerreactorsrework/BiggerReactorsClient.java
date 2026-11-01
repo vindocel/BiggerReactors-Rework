@@ -41,6 +41,12 @@ public final class BiggerReactorsClient {
         }
     }
 
+    // Modified 2026-11-01: isolated here so a dedicated server never resolves client screen classes.
+    static void registerConfigScreen(net.neoforged.fml.ModContainer container) {
+        container.registerExtensionPoint(net.neoforged.neoforge.client.gui.IConfigScreenFactory.class,
+                (net.neoforged.neoforge.client.gui.IConfigScreenFactory) (mod, parent) -> new biggerreactorsrework.client.PackConfigScreen(parent));
+    }
+
     static void init(IEventBus modBus) {
         // Modified 2026-10-28: positional loops and per-machine local volume.
         biggerreactorsrework.client.sound.MachineSoundManager.init();

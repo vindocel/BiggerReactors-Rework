@@ -137,8 +137,16 @@ public class SpecIntegralNode extends SpecNumberNode {
     
     public boolean isValueValid(long val) {
         // Modified 2026-10-26: accept valid values, including closed endpoints.
-        return (lowerInclusive ? val >= lowerBound : val > lowerBound)
+        return fitsField(val) && (lowerInclusive ? val >= lowerBound : val > lowerBound)
                 && (upperInclusive ? val <= upperBound : val < upperBound);
+    }
+
+    // Modified 2026-11-01: TOML/JSON and remote snapshots must not narrow an oversized number into a wrapped field.
+    private boolean fitsField(long value) {
+        Class<?> carrier = field.getType();
+        return !(carrier == int.class && (value < Integer.MIN_VALUE || value > Integer.MAX_VALUE)
+                || carrier == short.class && (value < Short.MIN_VALUE || value > Short.MAX_VALUE)
+                || carrier == byte.class && (value < Byte.MIN_VALUE || value > Byte.MAX_VALUE));
     }
     
     @Override
@@ -197,6 +205,9 @@ public class SpecIntegralNode extends SpecNumberNode {
         if (element.type != Element.Type.Number || !(element.value instanceof Number)) {
             return generateDefaultElement();
         }
+        try {
+            if (!fitsField(new java.math.BigDecimal(element.value.toString()).longValueExact())) return generateDefaultElement();
+        } catch (NumberFormatException | ArithmeticException invalid) { return generateDefaultElement(); }
         if (isValueValid(element.asLong())) {
             return element;
         }

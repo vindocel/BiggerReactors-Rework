@@ -3,9 +3,15 @@
 ## Added
 
 - Added optional CC:Tweaked support for reactor, turbine and heat-exchanger computer ports, with live telemetry, controls and wired-modem discovery. It works alongside the existing OpenComputers support on the same port blocks, and the ports can be crafted when either mod is installed.
+- Native progression advancements for the guide, reactors, liquid cooling, heat exchangers, turbines, batteries and cyanite reprocessing, plus a hidden discovery. These advancements grant no rewards.
+- Added a searchable in-game configuration editor under Mods, a uranium-generation switch, configurable fuel yields for items and tags, and optional KubeJS configuration/material events for modpacks. Existing battery cell capacity and transfer settings are now editable through the same screen.
+- Add real turbine blades by right-clicking the shaft, an existing blade or a bearing. Fill rings and levels automatically, once the base outline, aligned bearings and continuous shaft are in place, even before closing the walls or roof. Remove blades by sneaking with an empty hand, and collect attached blades when breaking a shaft with the correct tool.
 
 ## Changed
 
+- Industrial Processor recipes in the guide now show inputs side by side, a single output slot and labelled fluid, energy and time.
+- Rotor shafts and blades now have slimmer targeting outlines, so it is easier to aim at the parts around and behind them. Their collision is unchanged.
+- Spinning turbine blades now hurt players within their swept area, with damage increasing with rotor speed. Coasting rotors remain dangerous; armor and normal immunities still apply.
 - Assembled resource ports now show their connection face on the outside and inside, with closed chassis sides matching their machine. Loose ports retain their original appearance.
 - Turbine windows now show a gently moving white steam film. It follows stored steam even while switched off and actual steam throughput while operating, so fully consumed input remains visible. The film fades in and out smoothly and is compatible with shader packs. Occasional condensation drips from any block with free space below after a few seconds of continuous rotating operation, in standing and lying turbines.
 - Assembled battery cells only show their energy bands while charged.
@@ -13,6 +19,8 @@
 
 ## Fixed
 
+- Machines, ores and material blocks now declare map colors, so map mods show them in colors close to their textures instead of black.
+- Reducing configured battery cell capacity no longer deletes stored energy. Overfull batteries stop accepting energy until their charge falls below the new limit.
 - Turbine rotors now stop accelerating at 2,200 RPM, including with disengaged coils or excess steam, so generation no longer falls to zero from overspeed. Existing overspeed saves recover on the next simulation tick.
 
 # 1.21.1-0.1.5 (BiggerReactors-Rework, unreleased)

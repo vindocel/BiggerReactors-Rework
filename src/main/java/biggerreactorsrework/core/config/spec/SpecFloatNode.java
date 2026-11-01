@@ -98,7 +98,8 @@ public class SpecFloatNode extends SpecNumberNode {
         
         this.lowerBound = lowerBound;
         this.upperBound = upperBound;
-        this.defaultValue = (double) currentValueObject();
+        // Modified 2026-11-01: both Float and Double fields supply numeric defaults.
+        this.defaultValue = ((Number) currentValueObject()).doubleValue();
         type = FloatType.fromClass(field.getType());
     }
     
@@ -131,7 +132,7 @@ public class SpecFloatNode extends SpecNumberNode {
     
     public boolean isValueValid(double val) {
         // Modified 2026-10-26: honor inclusive bounds and reject nonfinite values.
-        return Double.isFinite(val) && (lowerInclusive ? val >= lowerBound : val > lowerBound)
+        return Double.isFinite(val) && (field.getType() != float.class || Float.isFinite((float) val)) && (lowerInclusive ? val >= lowerBound : val > lowerBound)
                 && (upperInclusive ? val <= upperBound : val < upperBound);
     }
     
@@ -195,7 +196,7 @@ public class SpecFloatNode extends SpecNumberNode {
             return element;
         }
         double val = element.asDouble();
-        if (!Double.isFinite(val)) return generateDefaultElement();
+        if (!Double.isFinite(val) || field.getType() == float.class && !Float.isFinite((float) val)) return generateDefaultElement();
         val = Math.min(Math.max(val, lowerBound), upperBound);
         if (!lowerInclusive && val == lowerBound) {
             val = type.nextAfter(lowerBound, Double.POSITIVE_INFINITY);

@@ -43,10 +43,19 @@ public final class MaterialDataMaps {
     }
     private static ResourceLocation id(String path){return ResourceLocation.fromNamespaceAndPath(BiggerReactors.modid,path);}
     public static final DataMapType<Block,Moderator> MODERATOR=DataMapType.builder(id("reactor_moderator"),Registries.BLOCK,Moderator.CODEC).build();
+    // Modified 2026-11-01: per-item generic fuel yields, zero explicitly disables a matching item/tag.
+    public record ReactorFuel(long amount) {
+        public static final Codec<ReactorFuel> CODEC = Codec.DOUBLE.validate(n -> Double.isFinite(n) && n == Math.rint(n) && n >= 0 && n <= Long.MAX_VALUE / Integer.MAX_VALUE
+                        ? DataResult.success(n) : DataResult.error(() -> "Fuel yield must be an integer within the safe range"))
+                .xmap(Double::longValue, Long::doubleValue)
+                .fieldOf("amount").xmap(ReactorFuel::new, ReactorFuel::amount).codec();
+    }
+    public static final DataMapType<net.minecraft.world.item.Item, ReactorFuel> REACTOR_FUEL =
+            DataMapType.builder(id("reactor_fuel"), Registries.ITEM, ReactorFuel.CODEC).synced(ReactorFuel.CODEC, false).build();
     public static final DataMapType<Fluid,Moderator> FLUID_MODERATOR=DataMapType.builder(id("reactor_fluid_moderator"),Registries.FLUID,Moderator.CODEC).build();
     public static final DataMapType<Block,Coil> COIL=DataMapType.builder(id("turbine_coil"),Registries.BLOCK,Coil.CODEC).build();
     public static final DataMapType<Fluid,Transition> TRANSITION=DataMapType.builder(id("fluid_transition"),Registries.FLUID,Transition.CODEC).build();
-    public static void register(RegisterDataMapTypesEvent event){event.register(MODERATOR);event.register(FLUID_MODERATOR);event.register(COIL);event.register(TRANSITION);}
+    public static void register(RegisterDataMapTypesEvent event){event.register(REACTOR_FUEL);event.register(MODERATOR);event.register(FLUID_MODERATOR);event.register(COIL);event.register(TRANSITION);}
     static void moderators(Map<Block,ReactorModeratorRegistry.ModeratorProperties> target){
         BuiltInRegistries.FLUID.holders().forEach(holder->{var data=holder.getData(FLUID_MODERATOR);if(data!=null)target.put(holder.value().defaultFluidState().createLegacyBlock().getBlock(),data.properties());});
         BuiltInRegistries.BLOCK.holders().forEach(holder->{var data=holder.getData(MODERATOR);if(data!=null)target.put(holder.value(),data.properties());});

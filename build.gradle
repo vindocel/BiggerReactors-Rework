@@ -51,6 +51,15 @@ neoForge {
             systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
         }
 
+        // Modified 2026-11-01: the optional scripting runtime is supplied by hand in run/gametest-scripting/mods.
+        gameTestScripting {
+            type = 'gameTestServer'
+            gameDirectory = project.file('run/gametest-scripting')
+            systemProperty 'biggerreactorsrework.testEnergyItems', 'true'
+            systemProperty 'biggerreactorsrework.testScripting', 'true'
+            systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
+        }
+
         data {
             data()
             gameDirectory = project.file('run/datagen')
@@ -124,6 +133,11 @@ repositories {
         content { includeGroup 'li.cil.oc' }
     }
     maven {
+        name = 'LatvianModder'
+        url = 'https://maven.latvian.dev/releases'
+        content { includeGroup 'dev.latvian.mods' }
+    }
+    maven {
         name = 'Modrinth'
         url = 'https://api.modrinth.com/maven'
         content { includeGroup 'maven.modrinth' }
@@ -132,6 +146,8 @@ repositories {
 
 // Modified 2026-10-30: native OpenComputers API, optional and never bundled.
 dependencies {
+    compileOnly("dev.latvian.mods:kubejs-neoforge:${kubejs_version}") { transitive = false }
+    compileOnly("dev.latvian.mods:rhino:${rhino_version}") { transitive = false }
     compileOnly("li.cil.oc:opencomputers:${oc_version}:api") { transitive = false }
     compileOnly("cc.tweaked:cc-tweaked-${minecraft_version}-core-api:${cc_version}") { transitive = false }
     compileOnly("cc.tweaked:cc-tweaked-${minecraft_version}-common-api:${cc_version}") { transitive = false }
@@ -154,6 +170,12 @@ dependencies {
 
 test {
     useJUnitPlatform()
+}
+
+tasks.matching { it.name == 'runGameTestScripting' }.configureEach {
+    doFirst {
+        copy { from 'src/test/resources/compat/kubejs'; into 'run/gametest-scripting/kubejs' }
+    }
 }
 
 tasks.named('jar', Jar).configure {

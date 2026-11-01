@@ -104,4 +104,15 @@ public final class ContentGameTests {
         helper.assertTrue(checked >= 30, "loot tables checked: " + checked);
         helper.succeed();
     }
+    /** Added 2026-11-01: map renderers draw MapColor.NONE as black or empty. */
+    @GameTest(template="empty_7x7x7")
+    public static void everySolidBlockDeclaresAMapColor(GameTestHelper h) {
+        var missing = net.minecraft.core.registries.BuiltInRegistries.BLOCK.entrySet().stream()
+                .filter(e -> e.getKey().location().getNamespace().equals(biggerreactorsrework.BiggerReactors.modid))
+                .filter(e -> !(e.getValue() instanceof net.minecraft.world.level.block.LiquidBlock))
+                .filter(e -> e.getValue().defaultMapColor() == net.minecraft.world.level.material.MapColor.NONE)
+                .map(e -> e.getKey().location().getPath()).toList();
+        h.assertTrue(missing.isEmpty(), "blocks without a map color: " + missing);
+        h.succeed();
+    }
 }

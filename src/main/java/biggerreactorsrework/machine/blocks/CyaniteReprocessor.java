@@ -35,6 +35,7 @@ public class CyaniteReprocessor extends Block implements EntityBlock {
 
     public CyaniteReprocessor() {
         super(Properties.of()
+                .mapColor(net.minecraft.world.level.material.MapColor.COLOR_GRAY)
                 // Modified 2026-10-27: light follows the existing processing animation.
                 .lightLevel(biggerreactorsrework.multiblocks.MachineLighting::emission)
                 .sound(SoundType.STONE)

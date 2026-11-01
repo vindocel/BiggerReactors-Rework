@@ -1,0 +1,26 @@
+{
+  "parent": "biggerreactorsrework:progression/reactor_formed",
+  "display": {
+    "icon": {
+      "id": "biggerreactorsrework:blutonium_ingot"
+    },
+    "title": {
+      "translate": "advancements.biggerreactorsrework.cyanite_reprocessed.title"
+    },
+    "description": {
+      "translate": "advancements.biggerreactorsrework.cyanite_reprocessed.description"
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "milestone": {
+      "trigger": "biggerreactorsrework:machine_event",
+      "conditions": {
+        "event": "cyanite_reprocessed"
+      }
+    }
+  }
+}

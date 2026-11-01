@@ -31,6 +31,8 @@ public class BiggerReactors {
         // Modified 2026-10-28: common events, with playback isolated to the client.
         biggerreactorsrework.registries.MachineSounds.register(modBus);
         biggerreactorsrework.registries.ModParticles.register(modBus);
+        biggerreactorsrework.worldgen.UraniumGeneration.register(modBus);
+        biggerreactorsrework.advancement.ReworkAdvancements.register(modBus);
         biggerreactorsrework.registries.CoolantComponents.register(modBus);
         version = container.getModInfo().getVersion().toString();
         new Registry(modid, BiggerReactors.class.getPackageName(), modBus, new ReferenceArrayList<>(), new ReferenceArrayList<>());
@@ -54,6 +56,7 @@ public class BiggerReactors {
             biggerreactorsrework.compat.cctweaked.CCTweakedCompat.init(modBus);
         }
         if (FMLEnvironment.dist.isClient()) {
+            BiggerReactorsClient.registerConfigScreen(container);
             BiggerReactorsClient.init(modBus);
         }
     }

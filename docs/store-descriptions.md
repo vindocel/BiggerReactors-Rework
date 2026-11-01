@@ -158,6 +158,8 @@ Persistent steam buildup slows heat exchange, reducing both steam production and
 
 Build your turbine, choose its rotor and coils, and tune the selected steam flow.
 
+Right-click a shaft, blade or bearing while holding rotor blades to fill the available arms ring by ring, then continue to the next level. You can start once the base outline, both aligned bearings and the continuous shaft are in place, before closing the walls or roof. Arm lengths follow your turbine's interior, including horizontal and off-center rotors. Sneak with an empty hand to remove a blade, or sneak with blades to place them manually. Breaking a shaft with the correct tool collects its attached blades into your inventory, with overflow dropped beside the shaft.
+
 - 🎛️ Adjust flow to suit your steam supply and turbine design.
 - 📊 Monitor rotor speed, efficiency and gross generation.
 - 🔁 Return condensed water to the exchanger for a closed water circuit.
@@ -289,6 +291,22 @@ No. Water supply, tank availability, channel layout and extraction still matter.
 
 **Why is actual production below potential?**  
 Check the operating message and the assumptions shown in the statistics panel. Potential assumes ideal conditions for that machine.
+
+---
+
+## ⚙️ Configure your modpack
+
+Open **Mods → BiggerReactors-Rework → Config** to search and edit the mod's local settings without installing a configuration library or scripting mod. Set battery capacity and input/output per cell, tune machine parameters, define fuel yields for registered items or tags, and disable uranium generation in new terrain. Existing ore is preserved. Restart the game after changing machine or world-generation rules; gameplay settings are locked while a world is open.
+
+Server owners and pack authors can also use **optional KubeJS events** to override configuration and define reactor fuels, moderators, turbine coils and fluid transitions. Server rules take priority for connected players, and script overrides do not overwrite their local files. The base mod works without KubeJS.
+
+---
+
+## 🏆 Mark your progress
+
+Follow a native advancement tree as you craft the guide, assemble machines, generate energy, work with liquid cooling and recycle cyanite. These milestones offer recognition without XP, loot or other rewards, and work without extra mods. A hidden discovery awaits the less cautious engineer.
+
+Keep clear of rotating turbine blades: their swept area causes damage that increases with RPM, including while the rotor coasts down. Stop the rotor before entering; armor and the game's normal immunities still apply.
 
 ---
 
