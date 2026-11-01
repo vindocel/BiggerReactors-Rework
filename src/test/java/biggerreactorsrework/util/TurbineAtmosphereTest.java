@@ -51,11 +51,25 @@ class TurbineAtmosphereTest {
         assertEquals(0, TurbineAtmosphere.opacity(Float.NaN));
         assertEquals(0, TurbineAtmosphere.opacity(Float.POSITIVE_INFINITY));
     }
-    @Test void OnlyExposedUpperCeilingAndCoilUndersidesCanDrip() {
-        assertTrue(TurbineAtmosphere.condensationSurface(true, false, true, 10, 0, 10));
-        assertTrue(TurbineAtmosphere.condensationSurface(false, true, true, 8, 0, 10));
-        assertFalse(TurbineAtmosphere.condensationSurface(true, true, false, 8, 0, 10));
-        assertFalse(TurbineAtmosphere.condensationSurface(false, true, true, 2, 0, 10));
-        assertFalse(TurbineAtmosphere.condensationSurface(false, false, true, 8, 0, 10));
+    @Test void exposedNonRotorUndersidesCanDripInAnyOrientation() {
+        assertTrue(TurbineAtmosphere.condensationSurface(true, false, true));
+        assertFalse(TurbineAtmosphere.condensationSurface(true, false, false));
+        assertFalse(TurbineAtmosphere.condensationSurface(false, false, true));
+        assertFalse(TurbineAtmosphere.condensationSurface(true, true, true));
+        assertEquals(1F, TurbineAtmosphere.fade(0.9F, 1F, 1F));
+        assertEquals(0.4F, TurbineAtmosphere.fade(0F, 1F, 1F), 1E-6F);
+        assertEquals(0.6F, TurbineAtmosphere.fade(1F, 0F, 1F), 1E-6F);
+        assertEquals(0F, TurbineAtmosphere.fade(0F, 0F, 0.05F));
+    }
+    @Test void shaderOpacityKeepsFaintestTextureTexelsAboveCutoutAndEmptyClear() {
+        assertEquals(0, TurbineAtmosphere.shaderOpacity(0));
+        assertEquals(0, TurbineAtmosphere.shaderOpacity(Float.NaN));
+        assertEquals(0, TurbineAtmosphere.shaderOpacity(Float.POSITIVE_INFINITY));
+        assertEquals(52, TurbineAtmosphere.shaderOpacity(1));
+        for (int alpha = 1; alpha <= 32; alpha++) {
+            int shaderAlpha = TurbineAtmosphere.shaderOpacity(alpha / 32F);
+            assertTrue((shaderAlpha / 255F) * (162 / 255F) > 0.1F);
+        }
+        assertEquals(32, TurbineAtmosphere.opacity(1));
     }
 }

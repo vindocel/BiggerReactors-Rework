@@ -1,0 +1,26 @@
+{
+  "parent": "biggerreactorsrework:progression/root",
+  "display": {
+    "icon": {
+      "id": "biggerreactorsrework:turbine_rotor_blade"
+    },
+    "title": {
+      "translate": "advancements.biggerreactorsrework.turbine_accident.title"
+    },
+    "description": {
+      "translate": "advancements.biggerreactorsrework.turbine_accident.description"
+    },
+    "frame": "challenge",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": true
+  },
+  "criteria": {
+    "milestone": {
+      "trigger": "biggerreactorsrework:machine_event",
+      "conditions": {
+        "event": "turbine_accident"
+      }
+    }
+  }
+}

@@ -38,6 +38,7 @@ public class TurbineRotorBearingTile extends TurbineBaseTile implements IEventMu
     public double speed = 0;
     // Modified 2026-10-31: transient atmosphere snapshot; never persisted as simulation contents.
     public float steamDensity = 0;
+    public float visibleSteam = 0;
     public boolean condensationReady;
     public int rotorRevision;
     public java.util.List<biggerreactorsrework.core.util.FluidSurfaceMesh.Face> steamWindows = java.util.List.of();

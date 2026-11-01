@@ -373,6 +373,9 @@ public class TurbineMultiblockController extends MultiblockController<TurbineBas
     public Vec3i rotationAxis = new Vec3i(0, 0, 0);
     
     private final ITurbineSimulation simulation = createSimulation();
+    // Added 2026-11-01: advancement reporting and cached server-side rotor contact volumes.
+    private final biggerreactorsrework.advancement.ReworkAdvancements.Reporter advancements = new biggerreactorsrework.advancement.ReworkAdvancements.Reporter();
+    private final TurbineRotorHazard rotorHazard = new TurbineRotorHazard();
     private final biggerreactorsrework.core.networking.RpmSyncTracker rpmSync = new biggerreactorsrework.core.networking.RpmSyncTracker();
     private float lastSteamDensity;
     private final biggerreactorsrework.util.TurbineAtmosphere.CondensationTimer condensationTimer =
@@ -395,6 +398,7 @@ public class TurbineMultiblockController extends MultiblockController<TurbineBas
         capacityEstimate=null;statisticsKey="";
         rpmSync.reset();
         simulation.reset();
+        rotorHazard.clear();
         condensationTimer.reset();
         for (TurbineRotorBearingTile rotorBearing : rotorBearings) {
             level.sendBlockUpdated(rotorBearing.getBlockPos(), rotorBearing.getBlockState(), rotorBearing.getBlockState(), 0);
@@ -480,6 +484,10 @@ public class TurbineMultiblockController extends MultiblockController<TurbineBas
         }
         
         simulation.setRotorConfiguration(rotorConfiguration);
+        for (var bearing : rotorBearings) if (bearing.isRenderBearing) {
+            rotorHazard.rebuild(bearing.getBlockPos(), rotationAxis, rotorConfiguration);
+            break;
+        }
         
         if (glassCount <= 0) {
             for (TurbineRotorBearingTile rotorBearing : rotorBearings) {
@@ -524,6 +532,10 @@ public class TurbineMultiblockController extends MultiblockController<TurbineBas
         }
         
         simulation.tick();
+        if (level instanceof net.minecraft.server.level.ServerLevel serverLevel && simulation.RPM() > 0 && level.getGameTime() % 10 == 0) {
+            rotorHazard.tick(serverLevel, new net.minecraft.world.phys.AABB(min().x()+1, min().y()+1, min().z()+1, max().x(), max().y(), max().z()), simulation.RPM());
+        }
+        if (simulation.FEGeneratedLastTick() > 0) advancements.report(level, min(), max(), "turbine_power");
         condensationTimer.tick(simulation.active(), simulation.flowLastTick(), simulation.RPM());
         // Modified 2026-10-28: coast-down follows actual speed, independent of the toggle.
         biggerreactorsrework.audio.MachineAudio.publish(2, min(), max(), terminals, simulation.RPM() > 20, simulation.RPM());

@@ -1,0 +1,1 @@
+biggerreactorsrework.compat.kubejs.ReworkKubeJSPlugin

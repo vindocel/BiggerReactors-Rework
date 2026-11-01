@@ -1,0 +1,26 @@
+{
+  "parent": "biggerreactorsrework:progression/heat_exchange",
+  "display": {
+    "icon": {
+      "id": "biggerreactorsrework:turbine_terminal"
+    },
+    "title": {
+      "translate": "advancements.biggerreactorsrework.turbine_power.title"
+    },
+    "description": {
+      "translate": "advancements.biggerreactorsrework.turbine_power.description"
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "milestone": {
+      "trigger": "biggerreactorsrework:machine_event",
+      "conditions": {
+        "event": "turbine_power"
+      }
+    }
+  }
+}

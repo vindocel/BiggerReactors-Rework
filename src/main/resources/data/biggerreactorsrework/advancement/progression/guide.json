@@ -1,0 +1,26 @@
+{
+  "parent": "biggerreactorsrework:progression/root",
+  "display": {
+    "icon": {
+      "id": "biggerreactorsrework:guide_book"
+    },
+    "title": {
+      "translate": "advancements.biggerreactorsrework.guide.title"
+    },
+    "description": {
+      "translate": "advancements.biggerreactorsrework.guide.description"
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "milestone": {
+      "trigger": "minecraft:recipe_crafted",
+      "conditions": {
+        "recipes": "biggerreactorsrework:crafting/guide_book"
+      }
+    }
+  }
+}

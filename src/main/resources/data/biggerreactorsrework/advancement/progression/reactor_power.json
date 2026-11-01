@@ -1,0 +1,26 @@
+{
+  "parent": "biggerreactorsrework:progression/reactor_formed",
+  "display": {
+    "icon": {
+      "id": "biggerreactorsrework:reactor_power_tap"
+    },
+    "title": {
+      "translate": "advancements.biggerreactorsrework.reactor_power.title"
+    },
+    "description": {
+      "translate": "advancements.biggerreactorsrework.reactor_power.description"
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "milestone": {
+      "trigger": "biggerreactorsrework:machine_event",
+      "conditions": {
+        "event": "reactor_power"
+      }
+    }
+  }
+}

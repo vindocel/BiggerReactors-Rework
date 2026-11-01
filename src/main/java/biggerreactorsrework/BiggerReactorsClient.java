@@ -42,6 +42,9 @@ public final class BiggerReactorsClient {
     }
 
     static void init(IEventBus modBus) {
+        modBus.addListener(biggerreactorsrework.multiblocks.turbine.client.TurbineAtmosphereEffects::registerParticles);
+        modBus.addListener((net.neoforged.neoforge.client.event.RegisterRenderPipelinesEvent event) ->
+                biggerreactorsrework.multiblocks.turbine.client.TurbineSteamRenderer.registerPipelines(event));
         // Modified 2026-10-28: positional loops and per-machine local volume.
         biggerreactorsrework.client.sound.MachineSoundManager.init();
         net.neoforged.neoforge.common.NeoForge.EVENT_BUS.addListener(

@@ -32,8 +32,12 @@ public final class ModGameTests {
 
     /** The OpenComputers tests exist only when that integration is turned on in gradle.properties. */
     private static List<Class<?>> withOptional(Class<?>... classes) {
+        if (Boolean.getBoolean("biggerreactorsrework.testScripting")) return List.of(PackConfigurationGameTests.class);
         var all = new java.util.ArrayList<>(List.of(classes));
         all.add(CCTweakedGameTests.class);
+        all.add(TurbineRotorPlacementGameTests.class);
+        all.add(PackConfigurationGameTests.class);
+        all.add(AdvancementGameTests.class);
         try {
             all.add(Class.forName("biggerreactorsrework.gametest.OpenComputersGameTests"));
         } catch (ClassNotFoundException absent) {

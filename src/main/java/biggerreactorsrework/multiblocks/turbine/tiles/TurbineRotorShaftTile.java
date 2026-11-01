@@ -29,35 +29,22 @@ public class TurbineRotorShaftTile extends TurbineBaseTile implements IEventMult
     @Override
     public void onAssemblyStateTransition(IValidatedMultiblock.AssemblyState oldState, IValidatedMultiblock.AssemblyState newState) {
         TurbineShaftRotationState newRotation = getBlockState().getValue(TurbineShaftRotationState.TURBINE_SHAFT_ROTATION_STATE_ENUM_PROPERTY);
-        for (Direction value : Direction.values()) {
-            BlockPos neighbor = getBlockPos().relative(value);
-            assert level != null;
-            BlockState state = level.getBlockState(neighbor);
-            if (state.getBlock() != TurbineRotorShaft.INSTANCE) {
-                continue;
-            }
-            if (neighbor.getX() != worldPosition.getX() && neighbor.getY() == worldPosition.getY() && neighbor.getZ() == worldPosition.getZ()) {
-                newRotation = X;
-            } else if (neighbor.getX() == worldPosition.getX() && neighbor.getY() != worldPosition.getY() && neighbor.getZ() == worldPosition.getZ()) {
-                newRotation = Y;
-            } else if (neighbor.getX() == worldPosition.getX() && neighbor.getY() == worldPosition.getY() && neighbor.getZ() != worldPosition.getZ()) {
-                newRotation = Z;
-            }
-            if(level.isLoaded(worldPosition)) {
-                level.setBlockAndUpdate(worldPosition, getBlockState().setValue(TURBINE_SHAFT_ROTATION_STATE_ENUM_PROPERTY, newRotation));
-            }
-        }
+        // Modified 2026-10-31: share topology inference with placement, including a lone shaft beside a bearing.
+        assert level != null;
+        if(!level.hasChunkAt(worldPosition)||!level.getBlockState(worldPosition).is(TurbineRotorShaft.INSTANCE))return;
+        var axis = biggerreactorsrework.multiblocks.turbine.TurbineRotorLayout.shaftAxis(level,getBlockPos());
+        if (axis != null) newRotation = TurbineShaftRotationState.values()[axis.ordinal()];
+        if(level.hasChunkAt(worldPosition)) level.setBlockAndUpdate(worldPosition,
+                getBlockState().setValue(TURBINE_SHAFT_ROTATION_STATE_ENUM_PROPERTY,newRotation));
         
         // propagate it out to the blades
         int i = 0;
-        for (Direction value : Direction.values()) {
-            if (value.getAxis().ordinal() == newRotation.ordinal()) {
-                continue;
-            }
+        for (Direction value : biggerreactorsrework.multiblocks.turbine.TurbineRotorLayout.arms(Direction.Axis.values()[newRotation.ordinal()])) {
             
             BlockPos pos = getBlockPos();
             while (true) {
                 pos = pos.relative(value);
+                if(!level.hasChunkAt(pos)) break;
                 BlockState state = level.getBlockState(pos);
                 if (state.getBlock() != TurbineRotorBlade.INSTANCE) {
                     break;

@@ -29,6 +29,9 @@ public class BiggerReactors {
     public BiggerReactors(IEventBus modBus, ModContainer container) {
         // Modified 2026-10-28: common events, with playback isolated to the client.
         biggerreactorsrework.registries.MachineSounds.register(modBus);
+        biggerreactorsrework.registries.ModParticles.register(modBus);
+        biggerreactorsrework.worldgen.UraniumGeneration.register(modBus);
+        biggerreactorsrework.advancement.ReworkAdvancements.register(modBus);
         biggerreactorsrework.registries.CoolantComponents.register(modBus);
         version = container.getModInfo().getVersion().toString();
         new Registry(modid, BiggerReactors.class.getPackageName(), modBus, new ReferenceArrayList<>(), new ReferenceArrayList<>());
@@ -56,6 +59,8 @@ public class BiggerReactors {
                 biggerreactorsrework.machine.recipe.ReprocessingRecipes.TYPE.get(),
                 net.minecraft.world.item.crafting.RecipeType.CRAFTING, net.minecraft.world.item.crafting.RecipeType.SMELTING));
         if (FMLEnvironment.getDist().isClient()) {
+            container.registerExtensionPoint(net.neoforged.neoforge.client.gui.IConfigScreenFactory.class,
+                    (net.neoforged.neoforge.client.gui.IConfigScreenFactory) (mod, parent) -> new biggerreactorsrework.client.PackConfigScreen(parent));
             BiggerReactorsClient.init(modBus);
         }
     }

@@ -340,6 +340,8 @@ public class HeatExchangerMultiblockController extends MultiblockController<Heat
     public double evaporatorAirRFKT;
     public double condenserAirRFKT;
     public double airAmbientRFKT;
+    // Added 2026-11-01: milestones follow actual conversion, not stored heat or a GUI setting.
+    private final biggerreactorsrework.advancement.ReworkAdvancements.Reporter advancements = new biggerreactorsrework.advancement.ReworkAdvancements.Reporter();
 
     @Override
     public void onAssembled() {
@@ -514,6 +516,7 @@ public class HeatExchangerMultiblockController extends MultiblockController<Heat
         condenserHeatBody.transferWith(evaporatorHeatBody, channelRFKT);
         evaporatorHeatBody.transferWith(airHeatBody, evaporatorAirRFKT);
         evaporatorTank.transferWith(evaporatorHeatBody, evaporatorChannels.size() * Config.CONFIG.HeatExchanger.ChannelInternalSurfaceArea);
+        if (evaporatorTank.transitionedLastTick() > 0) advancements.report(level, min(), max(), "heat_exchange");
         // Modified 2026-10-28: real conversion drives the boiler loop, not stored heat.
         if (condenserTank.transitionedLastTick() > 0 || evaporatorTank.transitionedLastTick() > 0)
             soundActiveUntil = CoreEvents.tickNumber() + 10;

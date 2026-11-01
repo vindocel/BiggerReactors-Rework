@@ -83,6 +83,8 @@ public class CyaniteReprocessorTile extends BlockEntity implements MenuProvider,
      * The item handler.
      */
     private final CyaniteReprocessorItemHandler itemHandler = new CyaniteReprocessorItemHandler(this::setChanged);
+    // Added 2026-11-01: award only a completed cyanite-to-blutonium operation.
+    private final biggerreactorsrework.advancement.ReworkAdvancements.Reporter advancements = new biggerreactorsrework.advancement.ReworkAdvancements.Reporter();
     /**
      * The energy storage. Other blocks can only insert energy; the machine consumes it while working.
      */
@@ -729,9 +731,12 @@ public class CyaniteReprocessorTile extends BlockEntity implements MenuProvider,
                 workHandler.decrement(Math.min(2, workHandler.getProgress())); doUpdate = true;
             }
             if (workHandler.isFinished()) {
+                boolean reprocessedCyanite = !recipe.producesFluid() && recipe.result().is(BlutoniumIngot.INSTANCE)
+                        && itemHandler.getStackInSlot(CyaniteReprocessorItemHandler.INPUT_SLOT_INDEX).is(biggerreactorsrework.items.ingots.CyaniteIngot.INSTANCE);
                 itemHandler.extractItem(CyaniteReprocessorItemHandler.INPUT_SLOT_INDEX, recipe.count(), false);
                 if(recipe.producesFluid())outputTank.fill(recipe.fluidResult(),FluidTanks.FluidAction.EXECUTE);
                 else itemHandler.insertItem(CyaniteReprocessorItemHandler.OUTPUT_SLOT_INDEX, recipe.result(), false);
+                if (reprocessedCyanite) advancements.report(level, new net.minecraft.world.phys.AABB(getBlockPos()), "cyanite_reprocessed");
                 workHandler.clear();
                 itemPresentLastTick = itemHandler.getStackInSlot(CyaniteReprocessorItemHandler.INPUT_SLOT_INDEX).copy();
             }

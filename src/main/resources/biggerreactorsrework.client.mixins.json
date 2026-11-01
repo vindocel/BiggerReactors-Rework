@@ -1,0 +1,8 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "biggerreactorsrework.compat.iris.mixin",
+  "compatibilityLevel": "JAVA_25",
+  "client": ["IrisCompositeUniformMixin"],
+  "injectors": { "defaultRequire": 1 }
+}

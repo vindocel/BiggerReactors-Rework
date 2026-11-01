@@ -99,9 +99,9 @@ public class TurbineRotorRenderer implements BlockEntityRenderer<TurbineRotorBea
 
         advanceSpin(tile);
         TurbineAtmosphereEffects.observe(tile);
-        if (tile.steamDensity > 0) {
+        if (tile.visibleSteam > 0) {
             state.steamWindows = tile.steamWindows;
-            state.steamDensity = tile.steamDensity;
+            state.steamDensity = tile.visibleSteam;
             state.steamFrame = biggerreactorsrework.core.util.SteamWindowMesh.frame(level.getGameTime() + partialTick);
         }
 

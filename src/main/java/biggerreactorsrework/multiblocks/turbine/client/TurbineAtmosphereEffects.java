@@ -1,11 +1,11 @@
 package biggerreactorsrework.multiblocks.turbine.client;
 
 import biggerreactorsrework.multiblocks.turbine.tiles.TurbineRotorBearingTile;
-import biggerreactorsrework.registries.TurbineCoilRegistry;
+import biggerreactorsrework.multiblocks.turbine.blocks.TurbineRotorBlade;
+import biggerreactorsrework.multiblocks.turbine.blocks.TurbineRotorShaft;
 import biggerreactorsrework.util.TurbineAtmosphere;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.particles.ParticleTypes;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
 import java.util.Collections;
 import java.util.Set;
@@ -19,6 +19,10 @@ public final class TurbineAtmosphereEffects {
 
     static void observe(TurbineRotorBearingTile bearing) { BEARINGS.add(bearing); }
 
+    public static void registerParticles(net.neoforged.neoforge.client.event.RegisterParticleProvidersEvent event) {
+        event.registerSpriteSet(biggerreactorsrework.registries.ModParticles.STEAM_DROPLET.get(), SteamDropletParticle.Provider::new);
+    }
+
     public static void tick(ClientTickEvent.Post event) {
         var mc = Minecraft.getInstance();
         var level = mc.level;
@@ -26,6 +30,8 @@ public final class TurbineAtmosphereEffects {
         if (mc.isPaused() || mc.player == null) return;
         BEARINGS.removeIf(b -> b.isRemoved() || b.getLevel() != level || !level.hasChunkAt(b.getBlockPos()) ||
                 level.getBlockEntity(b.getBlockPos()) != b);
+        for (var bearing : BEARINGS) bearing.visibleSteam = TurbineAtmosphere.fade(bearing.visibleSteam,
+                bearing.isRenderBearing ? bearing.steamDensity : 0, 0.05F);
         if (level.getGameTime() % 20 != 0) return;
         for (var bearing : BEARINGS) {
             var bounds = bearing.AABB;
@@ -39,15 +45,19 @@ public final class TurbineAtmosphereEffects {
             for (int attempt = 0; attempt < 8; attempt++) {
                 int x = (int) bounds.minX + 1 + RANDOM.nextInt(width);
                 int z = (int) bounds.minZ + 1 + RANDOM.nextInt(depth);
-                int y = RANDOM.nextBoolean() ? maxY : maxY - 1 - RANDOM.nextInt(Math.max(1, (maxY - minY) / 2));
-                var pos = new BlockPos(x, y, z);
-                if (!level.hasChunkAt(pos) || !level.hasChunkAt(pos.below())) continue;
-                var state = level.getBlockState(pos);
-                boolean roof = y == maxY && !state.isAir();
-                boolean coil = TurbineCoilRegistry.getCoilData(state.getBlock()) != null;
-                if (!TurbineAtmosphere.condensationSurface(roof, coil, level.getBlockState(pos.below()).isAir(), y, minY, maxY)) continue;
-                level.addParticle(ParticleTypes.DRIPPING_WATER, x + 0.2 + RANDOM.nextDouble() * 0.6,
-                        y - 0.02, z + 0.2 + RANDOM.nextDouble() * 0.6, 0, 0, 0);
+                // One column per attempt: every exposed underside in it has the same chance.
+                int surface = Integer.MIN_VALUE, found = 0;
+                for (int y = maxY; y > minY + 1; y--) {
+                    var pos = new BlockPos(x, y, z);
+                    if (!level.hasChunkAt(pos) || !level.hasChunkAt(pos.below())) break;
+                    var state = level.getBlockState(pos);
+                    boolean rotor = state.getBlock() instanceof TurbineRotorBlade || state.getBlock() instanceof TurbineRotorShaft;
+                    if (TurbineAtmosphere.condensationSurface(!state.isAir(), rotor, level.getBlockState(pos.below()).isAir())
+                            && RANDOM.nextInt(++found) == 0) surface = y;
+                }
+                if (found == 0) continue;
+                level.addParticle(biggerreactorsrework.registries.ModParticles.STEAM_DROPLET.get(), x + 0.2 + RANDOM.nextDouble() * 0.6,
+                        surface - 0.02, z + 0.2 + RANDOM.nextDouble() * 0.6, 0, 0, 0);
                 break;
             }
         }

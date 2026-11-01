@@ -431,6 +431,7 @@ public class ReactorMultiblockController extends MultiblockController<ReactorBas
         IRectangularMultiblock.super.onStateTransition(oldAssemblyState, newAssemblyState);
         if(newAssemblyState == AssemblyState.ASSEMBLED){
             onValidationPassed();
+            advancements.report(level, min(), max(), "reactor_formed");
         }
         for (ReactorCoolantPortTile coolantPort : coolantPorts) {
             coolantPort.onAssemblyStateTransition(oldAssemblyState, newAssemblyState);
@@ -617,6 +618,8 @@ public class ReactorMultiblockController extends MultiblockController<ReactorBas
     }
     
     private boolean forceDirty = false;
+    // Added 2026-11-01: native milestones observe actual assembly and simulation output.
+    private final biggerreactorsrework.advancement.ReworkAdvancements.Reporter advancements = new biggerreactorsrework.advancement.ReworkAdvancements.Reporter();
     
     @Override
     public synchronized void tick() {
@@ -631,6 +634,8 @@ public class ReactorMultiblockController extends MultiblockController<ReactorBas
         }
         
         simulation.tick(reactorActivity == ReactorActivity.ACTIVE && (coolantTank==null || !coolantTank.hasUnresolvedProfile()));
+        if (simulation.battery() != null && simulation.battery().generatedLastTick() > 0) advancements.report(level, min(), max(), "reactor_power");
+        if (simulation.coolantTank() != null && simulation.coolantTank().transitionedLastTick() > 0) advancements.report(level, min(), max(), "liquid_cooling");
         // Modified 2026-10-28: observe actual burning, allowing short operation gaps.
         if (simulation.fuelTank().burnedLastTick() > 0) soundActiveUntil = CoreEvents.tickNumber() + 10;
         biggerreactorsrework.audio.MachineAudio.publish(0, min(), max(), terminals,

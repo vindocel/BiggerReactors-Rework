@@ -167,11 +167,13 @@ public class BatteryMultiblockController extends MultiblockController<BatteryBas
     @Override
     public void onAssembled() {
         validationPassed();
+        advancements.report(level, min(), max(), "battery_formed");
     }
 
     @Override
     public void onReassembled() {
         validationPassed();
+        advancements.report(level, min(), max(), "battery_formed");
     }
 
     @Override
@@ -193,8 +195,9 @@ public class BatteryMultiblockController extends MultiblockController<BatteryBas
         for (BatteryCellTile cell : cells) {
             total = saturatedAdd(total, cell.energy());
         }
-        stored = Math.min(total, capacity);
-        cellsDirty = stored != total;
+        // Modified 2026-11-01: reduced configuration capacity blocks input without deleting saved cell energy.
+        stored = total;
+        cellsDirty = false;
 
         // A new battery needs an inlet and an outlet: if every port points the same way, flip one.
         boolean anyInlet = false;
@@ -241,10 +244,6 @@ public class BatteryMultiblockController extends MultiblockController<BatteryBas
         syncCells();
         stored = saturatedAdd(Math.max(0, stored - cell.energy()), energy);
         cell.setEnergy(energy);
-        if (assemblyState() == AssemblyState.ASSEMBLED && stored > capacity) {
-            stored = capacity;
-            cellsDirty = true;
-        }
         dirty();
     }
 
@@ -318,14 +317,11 @@ public class BatteryMultiblockController extends MultiblockController<BatteryBas
     public long capacity() {
         return capacity;
     }
+    // Added 2026-11-01: assembled battery milestone, without changes to saved charge.
+    private final biggerreactorsrework.advancement.ReworkAdvancements.Reporter advancements = new biggerreactorsrework.advancement.ReworkAdvancements.Reporter();
 
     @Override
     public void tick() {
-        if (stored > capacity) {
-            stored = capacity;
-            cellsDirty = true;
-        }
-
         chargeItems();
         
         long available = Math.min(stored, transferLimit - outputThisTick);

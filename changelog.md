@@ -2,6 +2,7 @@
 
 ## Changed
 
+- Spinning turbine blades now hurt players within their swept area, with damage increasing with rotor speed. Coasting rotors remain dangerous; armor and normal immunities still apply.
 - Assembled resource ports now show their connection face on the outside and inside, with closed chassis sides matching their machine. Loose ports retain their original appearance.
 - Turbine steam haze now moves gently behind the glass, with slightly stronger whiteness. It follows stored steam even while switched off and actual steam throughput while operating, so fully consumed input remains visible. Condensation starts only after a few seconds of continuous rotating operation.
 - Reduced repeated rotor and fluid-mesh rendering work without removing rotor, coolant or connected-glass detail.
@@ -12,6 +13,11 @@
 
 ## Fixed
 
+- Clarified advancement descriptions, including completed machine assembly, direct reactor energy generation and the automatically unlocked progression root.
+- Reducing configured battery cell capacity no longer deletes stored energy. Overfull batteries stop accepting energy until their charge falls below the new limit.
+- Assisted turbine blade placement now works with the base outline, aligned bearings and continuous shaft in place, before closing the walls or roof.
+- Fixed shader activation crashes with Iris 1.11.7 on 26.3 caused by incompatible composite-pass declarations and omitted vertex bindings.
+- Turbine steam now uses a continuous unlit film with shader-aware opacity and depth handling, fades gradually, and stays out of shadow passes. Condensation droplets remain visible with shader packs and work in either rotor orientation.
 - Replaced visible intersecting steam sheets with a continuous animated film behind turbine windows, keeping solid ports and casing clear.
 - Fixed indexed fluid extraction from output chambers, allowing Pipez to move heated coolant from reactors to heat exchangers while retaining its coolant identity.
 - Cancelled coolant transfers now restore the reactor's internal tank as well as its fluid profile, preventing automated filling from leaving unidentified fluid that blocks later coolant insertion.
@@ -20,6 +26,9 @@
 
 ## Added
 
+- Native progression advancements for the guide, reactors, liquid cooling, heat exchangers, turbines, batteries and cyanite reprocessing, plus a hidden discovery. These advancements grant no rewards.
+- Added a searchable in-game configuration editor under Mods, a uranium-generation switch, configurable fuel yields for items and tags, and optional KubeJS configuration/material events for modpacks. Existing battery cell capacity and transfer settings are now editable through the same screen.
+- Add real turbine blades by right-clicking the shaft, an existing blade or a bearing. Fill rings and levels automatically, remove blades by sneaking with an empty hand, and collect attached blades when breaking a shaft with the correct tool.
 - Restored optional CC:Tweaked integration for reactor, turbine and heat-exchanger computer ports, with live telemetry, controls and native wired-modem discovery. The existing ports can be crafted when CC:Tweaked or OpenComputers is installed. OpenComputers support remains retained separately.
 
 ## Removed for this version
