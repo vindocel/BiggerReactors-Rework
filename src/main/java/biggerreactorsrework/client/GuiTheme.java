@@ -1,10 +1,11 @@
 package biggerreactorsrework.client;
 
+// Modified 2026-11-01: native Minecraft 26.1.2 API.
 import biggerreactorsrework.core.client.gui.screens.ModScreen;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.renderer.RenderPipelines;
-import com.mojang.renderpearl.api.pipeline.RenderPipeline;
+import com.mojang.blaze3d.pipeline.RenderPipeline;
 import net.minecraft.resources.Identifier;
 
 /** Scoped dark chrome: controls and gauge textures, never machine casing frames, icons, items or fluids. */
@@ -17,7 +18,7 @@ public final class GuiTheme {
 
     public static boolean dark() {
         if (scopedDark != null) return scopedDark;
-        return Minecraft.getInstance().gui.screen() instanceof ModScreen<?> screen && GuiThemes.dark(screen.machinePos());
+        return Minecraft.getInstance().screen instanceof ModScreen<?> screen && GuiThemes.dark(screen.machinePos());
     }
 
     /** Modified 2026-10-27: temporary theme for external viewer drawing, without changing player preferences. */

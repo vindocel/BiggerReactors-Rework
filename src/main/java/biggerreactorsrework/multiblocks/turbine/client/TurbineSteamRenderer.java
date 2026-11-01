@@ -5,11 +5,11 @@ import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.client.renderer.rendertype.RenderSetup;
 import net.minecraft.client.renderer.RenderPipelines;
-import com.mojang.renderpearl.api.pipeline.RenderPipeline;
-import com.mojang.renderpearl.api.pipeline.ColorTargetState;
-import com.mojang.renderpearl.api.pipeline.BlendFunction;
-import com.mojang.renderpearl.api.pipeline.DepthStencilState;
-import com.mojang.renderpearl.api.pipeline.CompareOp;
+import com.mojang.blaze3d.pipeline.RenderPipeline;
+import com.mojang.blaze3d.pipeline.ColorTargetState;
+import com.mojang.blaze3d.pipeline.BlendFunction;
+import com.mojang.blaze3d.pipeline.DepthStencilState;
+import com.mojang.blaze3d.platform.CompareOp;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import biggerreactorsrework.core.util.FluidSurfaceMesh;
 import biggerreactorsrework.core.util.SteamWindowMesh;
@@ -33,7 +33,8 @@ public final class TurbineSteamRenderer {
                         depthWrite ? "pipeline/turbine_steam_shader" : "pipeline/turbine_steam"))
                 .withCull(true)
                 .withColorTargetState(new ColorTargetState(BlendFunction.TRANSLUCENT))
-                .withDepthStencilState(new DepthStencilState(CompareOp.GREATER_THAN_OR_EQUAL, depthWrite))
+                // Modified 2026-11-01: 26.1.2 uses conventional depth, before reversed-depth RenderPearl.
+                .withDepthStencilState(new DepthStencilState(CompareOp.LESS_THAN_OR_EQUAL, depthWrite))
                 .build();
     }
 

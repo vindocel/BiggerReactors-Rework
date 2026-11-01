@@ -8,26 +8,44 @@
         {
           "type": "minecraft:item",
           "name": "biggerreactorsrework:uranium_ore",
-          "condition": "minecraft:tool/can_silk_touch"
+          "conditions": [
+            {
+              "condition": "minecraft:match_tool",
+              "predicate": {
+                "predicates": {
+                  "minecraft:enchantments": [
+                    {
+                      "enchantments": "minecraft:silk_touch",
+                      "levels": {
+                        "min": 1
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          ]
         },
         {
           "type": "minecraft:item",
           "name": "biggerreactorsrework:uranium_chunk",
-          "modifier": [
+          "functions": [
             {
-              "type": "minecraft:apply_bonus",
               "enchantment": "minecraft:fortune",
-              "formula": "minecraft:ore_drops"
+              "formula": "minecraft:ore_drops",
+              "function": "minecraft:apply_bonus"
             },
             {
-              "type": "minecraft:explosion_decay"
+              "function": "minecraft:explosion_decay"
             }
           ]
         }
       ],
-      "condition": {
-        "type": "minecraft:survives_explosion"
-      }
+      "conditions": [
+        {
+          "condition": "minecraft:survives_explosion"
+        }
+      ]
     }
   ]
 }

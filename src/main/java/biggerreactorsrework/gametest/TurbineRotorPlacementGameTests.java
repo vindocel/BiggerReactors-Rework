@@ -1,5 +1,6 @@
 package biggerreactorsrework.gametest;
 
+// Modified 2026-11-01: native Minecraft 26.1.2 API.
 import biggerreactorsrework.multiblocks.turbine.blocks.*;
 import biggerreactorsrework.multiblocks.turbine.tiles.TurbineBaseTile;
 import biggerreactorsrework.multiblocks.turbine.TurbineRotorLayout;
@@ -239,9 +240,13 @@ public final class TurbineRotorPlacementGameTests {
         h.startSequence().thenWaitUntil(f::ready).thenExecute(()->{
             var p=f.player(false);
             var target=f.shaft(2).north();
-            h.spawn(net.minecraft.world.entity.EntityTypes.COW,h.relativePos(target));
+            var cow=h.spawn(net.minecraft.world.entity.EntityType.COW,h.relativePos(target));
+            // Modified 2026-11-01: 26.1.2 relativePos applies an extra half-turn; place the obstruction at its exact absolute target.
+            cow.snapTo(Vec3.atBottomCenterOf(target),0,0);
+            h.assertTrue(!h.getLevel().isUnobstructed(TurbineRotorBlade.INSTANCE.defaultBlockState(),target,
+                    net.minecraft.world.phys.shapes.CollisionContext.placementContext(p)),"collision fixture did not block target: "+cow.getBoundingBox()+" target "+target);
             f.click(p,f.shaft(2),InteractionHand.MAIN_HAND);
-            h.assertTrue(f.count(2)==0&&p.getMainHandItem().getCount()==64,"entity collision was ignored");
+            h.assertTrue(f.count(2)==0&&p.getMainHandItem().getCount()==64,"entity collision was ignored: blades="+f.count(2)+" items="+p.getMainHandItem().getCount());
         }).thenSucceed();
     }
     @GameTest(template="empty_17x17x17",timeoutTicks=100)

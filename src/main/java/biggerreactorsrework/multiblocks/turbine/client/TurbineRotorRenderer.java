@@ -1,5 +1,6 @@
 package biggerreactorsrework.multiblocks.turbine.client;
 
+// Modified 2026-11-01: native Minecraft 26.1.2 API.
 import biggerreactorsrework.multiblocks.turbine.blocks.TurbineRotorBlade;
 import biggerreactorsrework.multiblocks.turbine.blocks.TurbineRotorShaft;
 import biggerreactorsrework.multiblocks.turbine.tiles.TurbineRotorBearingTile;
@@ -140,7 +141,7 @@ public class TurbineRotorRenderer implements BlockEntityRenderer<TurbineRotorBea
             for (var part : cached.parts) {
                 lightPos.set(bearingPos.getX()+part.x,bearingPos.getY()+part.y,bearingPos.getZ()+part.z);
                 state.parts.add(new Part(part.model,part.x,part.y,part.z,spinMatrix,part.local,
-                        net.minecraft.util.LightCoordsUtil.getLightCoords(level,lightPos)));
+                        net.minecraft.client.renderer.LevelRenderer.getLightCoords(level,lightPos)));
             }
             return;
         }
@@ -229,7 +230,7 @@ public class TurbineRotorRenderer implements BlockEntityRenderer<TurbineRotorBea
         }
         mutablePos.set(partPos.x, partPos.y, partPos.z);
         out.parts.add(new Part(model, partPos.x - bearingPos.getX(), partPos.y - bearingPos.getY(), partPos.z - bearingPos.getZ(),
-                spinMatrix, new Matrix4f(localMatrix), net.minecraft.util.LightCoordsUtil.getLightCoords(level, mutablePos)));
+                spinMatrix, new Matrix4f(localMatrix), net.minecraft.client.renderer.LevelRenderer.getLightCoords(level, mutablePos)));
     }
 
     @Override

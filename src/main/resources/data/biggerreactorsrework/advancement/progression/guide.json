@@ -19,7 +19,7 @@
     "milestone": {
       "trigger": "minecraft:recipe_crafted",
       "conditions": {
-        "recipes": "biggerreactorsrework:crafting/guide_book"
+        "recipe_id": "biggerreactorsrework:crafting/guide_book"
       }
     }
   }

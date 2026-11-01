@@ -30,9 +30,9 @@ import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.util.EntryIngredients;
 import me.shedaniel.rei.api.common.util.EntryStacks;
 import me.shedaniel.rei.forge.REIPluginClient;
-import net.minecraft.client.gui.GuiGraphics;
+import me.shedaniel.rei.api.client.gui.compat.GuiGraphics;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ItemLike;
 import net.neoforged.neoforge.fluids.FluidStack;
@@ -42,7 +42,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-/** Added 2026-10-27: optional native REI categories using the synchronized viewer data and machine artwork. */
+/** Modified 2026-11-01: native REI 26.1.2 categories using synchronized recipes, fluid models and machine artwork. */
 @REIPluginClient
 public final class BiggerReactorsReiPlugin implements REIClientPlugin {
     private static final CategoryIdentifier<Page> PROCESSING = CategoryIdentifier.of(RecipeViewers.CYANITE_REPROCESSING);
@@ -72,14 +72,14 @@ public final class BiggerReactorsReiPlugin implements REIClientPlugin {
     @Override
     public void registerDisplays(DisplayRegistry registry) {
         if (RecipeViewers.emi() || !Config.CONFIG.EnableJEIIntegration) return;
-        for (var holder : registry.getRecipeManager().getAllRecipesFor(ReprocessingRecipes.TYPE.get())) {
+        for (var holder : biggerreactorsrework.machine.recipe.RecipeAccess.map(net.minecraft.client.Minecraft.getInstance().level).byType(ReprocessingRecipes.TYPE.get())) {
             var recipe = holder.value();
             var inputs = new ArrayList<EntryIngredient>();
-            inputs.add(EntryIngredients.ofItemStacks(Arrays.stream(recipe.ingredient().getItems())
+            inputs.add(EntryIngredients.ofItemStacks(recipe.ingredient().items().map(net.minecraft.world.item.ItemStack::new)
                     .map(stack -> stack.copyWithCount(recipe.count())).toList()));
             if (recipe.totalFluid() > 0) inputs.add(EntryIngredients.of(recipe.fluid(), recipe.totalFluid()));
             var output = recipe.producesFluid() ? fluid(recipe.fluidResult()) : EntryIngredients.of(recipe.result());
-            registry.add(new Page(PROCESSING, inputs, List.of(output), holder.id(), recipe, null, List.of()), holder);
+            registry.add(new Page(PROCESSING, inputs, List.of(output), holder.id().identifier(), recipe, null, List.of()), holder);
         }
         for (var moderator : RecipeViewerData.moderatorBlocks()) {
             registry.add(info(MODERATORS, moderator.block(), Stats.moderator(moderator.properties())));
@@ -109,12 +109,14 @@ public final class BiggerReactorsReiPlugin implements REIClientPlugin {
     }
 
     private record Page(CategoryIdentifier<Page> category, List<EntryIngredient> inputs, List<EntryIngredient> outputs,
-                        ResourceLocation location, ReprocessingRecipe recipe, RecipeViewerData.FluidCard card,
+                        Identifier location, ReprocessingRecipe recipe, RecipeViewerData.FluidCard card,
                         List<Stats.Stat> stats) implements Display {
         @Override public List<EntryIngredient> getInputEntries() { return inputs; }
         @Override public List<EntryIngredient> getOutputEntries() { return outputs; }
         @Override public CategoryIdentifier<?> getCategoryIdentifier() { return category; }
-        @Override public Optional<ResourceLocation> getDisplayLocation() { return Optional.ofNullable(location); }
+        @Override public Optional<Identifier> getDisplayLocation() { return Optional.ofNullable(location); }
+        // Modified 2026-11-01: client-derived displays rebuild from synchronized recipes/materials, without network persistence.
+        @Override public me.shedaniel.rei.api.common.display.DisplaySerializer<?> getSerializer() { return null; }
     }
 
     private record Category(CategoryIdentifier<Page> id, String title, ItemLike icon, int width, int height)
@@ -131,8 +133,8 @@ public final class BiggerReactorsReiPlugin implements REIClientPlugin {
             int x = bounds.x + 4, y = bounds.y + 4;
             widgets.add(Widgets.createRecipeBase(bounds));
             widgets.add(Widgets.createDrawableWidget((g, mouseX, mouseY, delta) -> {
-                g.pose().pushPose();
-                g.pose().translate(x, y, 0);
+                g.pose().pushMatrix();
+                g.pose().translate(x, y);
                 try {
                     withViewerTheme(() -> {
                         if (page.recipe() != null) Cyanite.draw(g, page.recipe());
@@ -140,7 +142,7 @@ public final class BiggerReactorsReiPlugin implements REIClientPlugin {
                         else Stats.draw(g, page.stats());
                     });
                 } finally {
-                    g.pose().popPose();
+                    g.pose().popMatrix();
                 }
             }));
             if (page.recipe() != null) {
@@ -188,14 +190,9 @@ public final class BiggerReactorsReiPlugin implements REIClientPlugin {
             @Override
             public void render(EntryStack<dev.architectury.fluid.FluidStack> stack, GuiGraphics g, Rectangle bounds,
                                int mouseX, int mouseY, float delta) {
-                var extension = net.neoforged.neoforge.client.extensions.common.IClientFluidTypeExtensions.of(fluid.getFluid());
-                var texture = extension.getStillTexture(fluid);
-                if (texture == null) return;
-                var sprite = net.minecraft.client.Minecraft.getInstance()
-                        .getTextureAtlas(net.minecraft.world.inventory.InventoryMenu.BLOCK_ATLAS).apply(texture);
-                int tint = extension.getTintColor(fluid);
-                g.blit(bounds.x, bounds.y, 0, bounds.width, bounds.height, sprite,
-                        ((tint >> 16) & 255) / 255F, ((tint >> 8) & 255) / 255F, (tint & 255) / 255F, ((tint >>> 24) & 255) / 255F);
+                var sprite = biggerreactorsrework.client.FluidSprites.still(fluid);
+                int tint = biggerreactorsrework.client.FluidSprites.tint(fluid);
+                g.blitSprite(net.minecraft.client.renderer.RenderPipelines.GUI_TEXTURED, sprite, bounds.x, bounds.y, bounds.width, bounds.height, tint);
             }
 
             @Override

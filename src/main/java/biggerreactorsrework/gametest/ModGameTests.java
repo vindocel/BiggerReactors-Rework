@@ -15,7 +15,6 @@ import net.minecraft.gametest.framework.TestData;
 import net.minecraft.gametest.framework.TestEnvironmentDefinition;
 import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Rotation;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.event.RegisterGameTestsEvent;
@@ -38,6 +37,7 @@ public final class ModGameTests {
         all.add(TurbineRotorPlacementGameTests.class);
         all.add(PackConfigurationGameTests.class);
         all.add(AdvancementGameTests.class);
+        all.add(PortInteractionGameTests.class);
         try {
             all.add(Class.forName("biggerreactorsrework.gametest.OpenComputersGameTests"));
         } catch (ClassNotFoundException absent) {
@@ -69,7 +69,7 @@ public final class ModGameTests {
                 String batch = test.batch().isEmpty() ? "default" : test.batch();
                 Holder<TestEnvironmentDefinition<?>> environment = environments.computeIfAbsent(batch, name -> event.registerEnvironment(id("batch/" + name)));
                 Identifier id = id(method);
-                TestData<Holder<TestEnvironmentDefinition<?>>> data = new TestData<>(environment, Level.OVERWORLD,
+                TestData<Holder<TestEnvironmentDefinition<?>>> data = new TestData<>(environment,
                         id(test.template()), test.timeoutTicks(), test.setupTicks(), test.required(),
                         Rotation.NONE, false, 1, 1, test.skyAccess(), 0);
                 event.registerTest(id, new FunctionGameTestInstance(ResourceKey.create(Registries.TEST_FUNCTION, id), data));

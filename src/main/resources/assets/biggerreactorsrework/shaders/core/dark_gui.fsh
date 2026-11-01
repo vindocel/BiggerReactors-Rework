@@ -1,12 +1,8 @@
 #version 330
 #extension GL_ARB_separate_shader_objects : require
 
-layout(std140) uniform DynamicTransforms {
-    mat4 ModelViewMat;
-    mat4 TextureMat;
-    vec4 ColorModulator;
-    vec3 ModelOffset;
-};
+// Modified 2026-11-01: match the native 26.1.2 uniform layout shared by the vertex shader.
+#moj_import <minecraft:dynamictransforms.glsl>
 
 uniform sampler2D Sampler0;
 

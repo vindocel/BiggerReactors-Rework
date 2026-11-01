@@ -1,5 +1,6 @@
 package biggerreactorsrework.client.guide;
 
+// Modified 2026-11-01: native Minecraft 26.1.2 API.
 import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
@@ -8,7 +9,6 @@ import java.util.List;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.navigation.ScreenRectangle;
 import net.minecraft.client.gui.render.pip.PictureInPictureRenderer;
-import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.block.BlockModelRenderState;
 import net.minecraft.client.renderer.block.dispatch.BlockStateModel;
 import net.minecraft.client.renderer.block.dispatch.BlockStateModelPart;
@@ -24,6 +24,9 @@ import org.jspecify.annotations.Nullable;
 
 /** Draws the guide's 3D view of a structure into its own picture on the page. */
 final class GuideStructureRenderer extends PictureInPictureRenderer<GuideStructureRenderer.State> {
+    GuideStructureRenderer(net.minecraft.client.renderer.MultiBufferSource.BufferSource buffers) {
+        super(buffers);
+    }
     record State(GuideMultiblock.Preview preview, int layer, @Nullable String highlight, boolean glass, float yaw, float pitch,
                  int x0, int y0, int x1, int y1, float scale, @Nullable ScreenRectangle scissorArea,
                  @Nullable ScreenRectangle bounds) implements PictureInPictureRenderState {
@@ -40,12 +43,15 @@ final class GuideStructureRenderer extends PictureInPictureRenderer<GuideStructu
     }
 
     @Override
-    protected void renderToTexture(State state, PoseStack pose, SubmitNodeCollector collector) {
-        Minecraft.getInstance().gameRenderer.lighting().setupFor(Lighting.Entry.ITEMS_3D);
+    protected void renderToTexture(State state, PoseStack pose) {
+        // Modified 2026-11-01: submit and flush within the native 26.1.2 picture render target.
+        var dispatcher = Minecraft.getInstance().gameRenderer.getFeatureRenderDispatcher();
+        var collector = dispatcher.getSubmitNodeStorage();
+        Minecraft.getInstance().gameRenderer.getLighting().setupFor(Lighting.Entry.ITEMS_3D);
         var preview = state.preview();
-        pose.rotate(Axis.XP.rotationDegrees(180));
-        pose.rotate(Axis.XP.rotationDegrees(state.pitch()));
-        pose.rotate(Axis.YP.rotationDegrees(state.yaw()));
+        pose.mulPose(Axis.XP.rotationDegrees(180));
+        pose.mulPose(Axis.XP.rotationDegrees(state.pitch()));
+        pose.mulPose(Axis.YP.rotationDegrees(state.yaw()));
         pose.translate(-preview.width() / 2F, -preview.height() / 2F, -preview.depth() / 2F);
         RandomSource random = RandomSource.create(42L);
         for (var box : preview.boxes()) {
@@ -72,6 +78,7 @@ final class GuideStructureRenderer extends PictureInPictureRenderer<GuideStructu
             }
             pose.popPose();
         }
+        dispatcher.renderAllFeatures();
         if (state.highlight() != null) {
             for (var box : preview.boxes()) {
                 if (!box.group().equals(state.highlight()) || state.layer() >= 0 && (state.layer() < box.y() || state.layer() >= box.y() + box.h())) {
@@ -79,10 +86,12 @@ final class GuideStructureRenderer extends PictureInPictureRenderer<GuideStructu
                 }
                 int by = state.layer() < 0 ? box.y() : state.layer();
                 int bh = state.layer() < 0 ? box.h() : 1;
-                collector.submitShapeOutline(pose, Shapes.box(box.x() - 0.015, by - 0.015, box.z() - 0.015, box.x() + box.w() + 0.015, by + bh + 0.015, box.z() + box.d() + 0.015),
-                        RenderTypes.lines(), 0xFFFFD91A, 2F, false);
+                net.minecraft.client.renderer.ShapeRenderer.renderShape(pose, bufferSource.getBuffer(RenderTypes.lines()),
+                        Shapes.box(box.x() - 0.015, by - 0.015, box.z() - 0.015, box.x() + box.w() + 0.015, by + bh + 0.015, box.z() + box.d() + 0.015),
+                        0, 0, 0, 0xFFFFD91A, 2F);
             }
         }
+        bufferSource.endBatch();
     }
 
     @Override

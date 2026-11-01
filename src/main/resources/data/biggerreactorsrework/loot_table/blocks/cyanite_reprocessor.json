@@ -10,9 +10,11 @@
           "name": "biggerreactorsrework:cyanite_reprocessor"
         }
       ],
-      "condition": {
-        "type": "minecraft:survives_explosion"
-      }
+      "conditions": [
+        {
+          "condition": "minecraft:survives_explosion"
+        }
+      ]
     }
   ]
 }

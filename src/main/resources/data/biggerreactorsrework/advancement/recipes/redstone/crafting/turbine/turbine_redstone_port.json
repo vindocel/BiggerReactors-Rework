@@ -13,7 +13,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipes": "biggerreactorsrework:crafting/turbine/turbine_redstone_port"
+        "recipe": "biggerreactorsrework:crafting/turbine/turbine_redstone_port"
       },
       "trigger": "minecraft:recipe_unlocked"
     }

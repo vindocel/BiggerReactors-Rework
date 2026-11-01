@@ -12,6 +12,11 @@ import java.util.List;
 
 /** Modified 2026-10-31: shared exterior surfaces, native tint alpha and vanilla render layers on the submit pipeline. */
 public final class FluidBoxRenderer {
+    // Modified 2026-11-01: culling and the main render target for contained translucent fluids on 26.1.2.
+    private static final net.minecraft.client.renderer.rendertype.RenderType TRANSLUCENT =
+            net.minecraft.client.renderer.rendertype.RenderType.create("biggerreactorsrework_contained_fluid",
+                    net.minecraft.client.renderer.rendertype.RenderSetup.builder(net.minecraft.client.renderer.RenderPipelines.ENTITY_TRANSLUCENT_CULL)
+                            .withTexture("Sampler0", TextureAtlas.LOCATION_BLOCKS).useLightmap().useOverlay().sortOnUpload().createRenderSetup());
     private static final ThreadLocal<biggerreactorsrework.core.util.FluidMeshCache> MESHES =
             ThreadLocal.withInitial(() -> new biggerreactorsrework.core.util.FluidMeshCache(256));
     public record Volume(FluidStack stack,FluidSurfaceMesh.Box box,int hidden) { }
@@ -29,7 +34,7 @@ public final class FluidBoxRenderer {
             var sprite=FluidSprites.still(stack);
             int color=FluidSprites.tint(stack),alpha=color>>>24;
             // Contained fluids have no artificial transparency; genuinely translucent tints keep their alpha.
-            var layer=alpha==255?RenderTypes.entityCutoutCull(TextureAtlas.LOCATION_BLOCKS):RenderTypes.entityTranslucentCull(TextureAtlas.LOCATION_BLOCKS);
+            var layer=alpha==255?RenderTypes.entityCutoutCull(TextureAtlas.LOCATION_BLOCKS):TRANSLUCENT;
             int emission=stack.getFluidType().getLightLevel(stack);
             int packedLight=LightCoordsUtil.pack(Math.max(LightCoordsUtil.block(light),emission),LightCoordsUtil.sky(light));
             var faces=MESHES.get().faces(volume.box,joined,volume.hidden);

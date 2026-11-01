@@ -99,5 +99,5 @@ jobs:
           loaders: neoforge
           game-versions: ${{ steps.release.outputs.minecraft_version }}
           game-version-filter: none
-          java: 21
+          java: 25
           fail-mode: fail

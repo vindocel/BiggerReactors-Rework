@@ -1,9 +1,10 @@
 package biggerreactorsrework.advancement;
 
+// Modified 2026-11-01: native Minecraft 26.1.2 API.
 import biggerreactorsrework.BiggerReactors;
 import java.util.HashMap;
 import java.util.Map;
-import net.minecraft.advancements.triggers.CriterionTrigger;
+import net.minecraft.advancements.CriterionTrigger;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;

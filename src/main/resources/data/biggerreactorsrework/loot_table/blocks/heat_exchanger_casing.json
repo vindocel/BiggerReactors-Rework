@@ -10,9 +10,11 @@
           "name": "biggerreactorsrework:heat_exchanger_casing"
         }
       ],
-      "condition": {
-        "type": "minecraft:survives_explosion"
-      }
+      "conditions": [
+        {
+          "condition": "minecraft:survives_explosion"
+        }
+      ]
     }
   ]
 }

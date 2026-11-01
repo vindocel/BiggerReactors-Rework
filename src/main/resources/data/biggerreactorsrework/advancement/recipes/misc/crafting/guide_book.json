@@ -13,7 +13,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipes": "biggerreactorsrework:crafting/guide_book"
+        "recipe": "biggerreactorsrework:crafting/guide_book"
       },
       "trigger": "minecraft:recipe_unlocked"
     }

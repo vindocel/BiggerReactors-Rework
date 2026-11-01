@@ -1,5 +1,6 @@
 package biggerreactorsrework.multiblocks.reactor.client;
 
+// Modified 2026-11-01: native Minecraft 26.1.2 API.
 import biggerreactorsrework.client.GuiTheme;
 
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -69,10 +70,10 @@ public class CommonReactorTerminalScreen extends ModScreen<ReactorTerminalContai
     public void init() {
         if (initialState.reactorType == ReactorType.ACTIVE) {
             // Initialize an actively-cooled reactor screen.
-            this.getMinecraft().gui.setScreen(new ActiveReactorTerminalScreen(this.menu, this.inventory, this.title));
+            this.getMinecraft().setScreen(new ActiveReactorTerminalScreen(this.menu, this.inventory, this.title));
         } else {
             // Initialize a passively-cooled reactor screen.
-            this.getMinecraft().gui.setScreen(new PassiveReactorTerminalScreen(this.menu, this.inventory, this.title));
+            this.getMinecraft().setScreen(new PassiveReactorTerminalScreen(this.menu, this.inventory, this.title));
         }
     }
 

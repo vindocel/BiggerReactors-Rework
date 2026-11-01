@@ -1,5 +1,6 @@
 package biggerreactorsrework.client.guide;
 
+// Modified 2026-11-01: native Minecraft 26.1.2 API.
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 
@@ -68,7 +69,7 @@ public class GuideBookRenderer implements SpecialModelRenderer<GuideBookAnimatio
         pose.pushPose();
         // The parts are modeled lying on the table with the cover up; stand the book up with the cover to the front.
         pose.translate(0.5, 0.5, 0.5);
-        pose.rotate(Axis.XP.rotationDegrees(90));
+        pose.mulPose(Axis.XP.rotationDegrees(90));
         pose.translate(-CLOSED_HALF_WIDTH / 16.0 * (1.0F - p.openness()), 0, 0);
         pose.translate(-0.5, -0.5, -0.5);
         part(pose, buffers, BACK_COVER, 0, 0, light, overlay);
@@ -83,7 +84,7 @@ public class GuideBookRenderer implements SpecialModelRenderer<GuideBookAnimatio
     private static void part(PoseStack pose, SubmitNodeCollector buffers, Identifier model, float angle, float drop, int light, int overlay) {
         pose.pushPose();
         pose.translate(0.5, 0.5 + drop / 16.0, 0.5);
-        pose.rotate(Axis.ZP.rotationDegrees(angle));
+        pose.mulPose(Axis.ZP.rotationDegrees(angle));
         pose.translate(-0.5, -0.5, -0.5);
         ModelRendering.render(pose, buffers, ModelRendering.model(model), light, overlay);
         pose.popPose();

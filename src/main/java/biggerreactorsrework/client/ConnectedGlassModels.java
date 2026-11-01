@@ -182,8 +182,8 @@ public final class ConnectedGlassModels {
 
         private static BakedQuad quad(Direction face, float u0, float v0, float u1, float v1, TextureAtlasSprite sprite, BakedQuad base) {
             var info = base.materialInfo();
-            var material = new BakedQuad.MaterialInfo(sprite, net.minecraft.client.renderer.chunk.ChunkSectionLayer.byTransparency(sprite.contents().transparency()), info.itemRenderType(), info.itemGlintRenderType(),
-                    info.itemGlintSpecialRenderType(), info.tintIndex(), info.shadeDirectionOverride(), info.lightEmission(), info.ambientOcclusion());
+            var material = new BakedQuad.MaterialInfo(sprite, net.minecraft.client.renderer.chunk.ChunkSectionLayer.byTransparency(sprite.contents().transparency()),
+                    info.itemRenderType(), info.tintIndex(), info.shade(), info.lightEmission(), info.ambientOcclusion());
             return new BakedQuad(point(face, u0, v0), point(face, u0, v1), point(face, u1, v1), point(face, u1, v0),
                     uv(sprite, u0, v0), uv(sprite, u0, v1), uv(sprite, u1, v1), uv(sprite, u1, v0),
                     face, material, base.bakedNormals(), base.bakedColors());

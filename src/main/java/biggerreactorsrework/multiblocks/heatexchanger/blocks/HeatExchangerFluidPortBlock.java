@@ -52,6 +52,9 @@ public class HeatExchangerFluidPortBlock extends HeatExchangerBaseBlock implemen
     
     @Override
     public InteractionResult onUse(BlockState state, Level worldIn, BlockPos pos, Player player, InteractionHand handIn, BlockHitResult hit) {
+        // Modified 2026-11-01: native containers use the selected circuit and port direction.
+        var container = biggerreactorsrework.core.fluids.FluidPortInteraction.use(worldIn, pos, player, handIn, hit);
+        if (container != InteractionResult.PASS) return container;
         if (handIn == InteractionHand.MAIN_HAND) {
             if (Util.isWrench(player.getMainHandItem().getItem())) {
                 boolean direction = !state.getValue(PORT_DIRECTION);

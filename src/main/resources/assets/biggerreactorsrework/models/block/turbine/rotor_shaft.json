@@ -1,4 +1,5 @@
 {
+	"__comment": "Modified 2026-11-01: end faces cull against their own axial neighbor.",
 	"credit": "Made with Blockbench",
 	"textures": {
 		"0": "biggerreactorsrework:block/turbine/rotor/shaft",
@@ -12,7 +13,7 @@
 			"to": [10, 6, 16],
 			"rotation": {"angle": 0, "axis": "y", "origin": [8, 9, 8]},
 			"faces": {
-				"north": {"uv": [0, 0, 1, 1], "texture": "#0", "cullface": "south"},
+				"north": {"uv": [0, 0, 1, 1], "texture": "#0", "cullface": "north"},
 				"east": {"uv": [0, 6, 16, 7], "texture": "#0"},
 				"south": {"uv": [0, 0, 1, 1], "texture": "#0", "cullface": "south"},
 				"west": {"uv": [0, 6, 16, 7], "texture": "#0"},
@@ -38,7 +39,7 @@
 			"to": [10, 11, 16],
 			"rotation": {"angle": 0, "axis": "y", "origin": [8, 7, 8]},
 			"faces": {
-				"north": {"uv": [0, 0, 1, 1], "texture": "#0", "cullface": "south"},
+				"north": {"uv": [0, 0, 1, 1], "texture": "#0", "cullface": "north"},
 				"east": {"uv": [0, 6, 16, 7], "texture": "#0"},
 				"south": {"uv": [0, 0, 1, 1], "texture": "#0", "cullface": "south"},
 				"west": {"uv": [0, 6, 16, 7], "texture": "#0"},
@@ -71,7 +72,7 @@
 			"from": [6, 6, 0],
 			"to": [10, 10, 1],
 			"faces": {
-				"north": {"uv": [0, 0, 1, 1], "texture": "#0", "cullface": "south"}
+				"north": {"uv": [0, 0, 1, 1], "texture": "#0", "cullface": "north"}
 			}
 		},
 		{

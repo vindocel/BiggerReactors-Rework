@@ -1,5 +1,6 @@
 package biggerreactorsrework.gametest;
 
+// Modified 2026-11-01: native Minecraft 26.1.2 API.
 import biggerreactorsrework.BiggerReactors;
 import biggerreactorsrework.multiblocks.reactor.blocks.*;
 import biggerreactorsrework.multiblocks.reactor.tiles.*;
@@ -131,7 +132,7 @@ public final class AuditRegressionGameTests {
             var recipes=new java.util.ArrayList<net.minecraft.world.item.crafting.RecipeHolder<?>>();
             recipes.add(new net.minecraft.world.item.crafting.RecipeHolder<>(net.minecraft.resources.ResourceKey.create(net.minecraft.core.registries.Registries.RECIPE,net.minecraft.resources.Identifier.fromNamespaceAndPath(BiggerReactors.modid,"audit_a_water")),water));
             recipes.add(new net.minecraft.world.item.crafting.RecipeHolder<>(net.minecraft.resources.ResourceKey.create(net.minecraft.core.registries.Registries.RECIPE,net.minecraft.resources.Identifier.fromNamespaceAndPath(BiggerReactors.modid,"audit_b_lava")),lava));
-            biggerreactorsrework.machine.recipe.RecipeAccess.overrideRecipes(net.minecraft.world.item.crafting.RecipeMap.createClient(recipes));
+            biggerreactorsrework.machine.recipe.RecipeAccess.overrideRecipes(net.minecraft.world.item.crafting.RecipeMap.create(recipes));
             h.setBlock(2,2,2,biggerreactorsrework.machine.blocks.CyaniteReprocessor.INSTANCE);
             var tile=(biggerreactorsrework.machine.tiles.CyaniteReprocessorTile)GameTestSupport.be(h,new BlockPos(2,2,2));tile.tick();
             tile.itemHandlerFor(null).insertItem(0,new net.minecraft.world.item.ItemStack(biggerreactorsrework.items.ingots.CyaniteIngot.INSTANCE),false);

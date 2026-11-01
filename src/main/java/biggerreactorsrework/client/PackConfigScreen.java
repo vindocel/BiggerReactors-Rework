@@ -1,5 +1,6 @@
 package biggerreactorsrework.client;
 
+// Modified 2026-11-01: native Minecraft 26.1.2 API.
 import biggerreactorsrework.core.config.PackConfiguration;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
@@ -43,7 +44,7 @@ public final class PackConfigScreen extends Screen {
         for (int i = page * pageSize; i < Math.min(filtered.size(), (page + 1) * pageSize); i++) {
             var option = filtered.get(i);
             var button = Button.builder(Component.literal(option.registration().configType.name() + " / ").append(optionName(option)).append(" = " + option.current()),
-                    b -> minecraft.gui.setScreen(new Editor(this, option))).bounds(x, 72 + (i % pageSize) * 24, w, 20)
+                    b -> minecraft.setScreen(new Editor(this, option))).bounds(x, 72 + (i % pageSize) * 24, w, 20)
                     .tooltip(Tooltip.create(Component.literal(option.node().generateComment()))).build(ConfigButton::new);
             button.active = PackConfiguration.editable(option);
             rows.add(addRenderableWidget(button));
@@ -56,7 +57,7 @@ public final class PackConfigScreen extends Screen {
         g.centeredText(font, text("scope"), width / 2, 27, 0xFFBBBBBB);
         g.centeredText(font, Component.literal((page + 1) + " / " + Math.max(1, (filtered.size() + pageSize - 1) / pageSize)), width / 2, height - 43, 0xFFFFFFFF);
     }
-    @Override public void onClose() { minecraft.gui.setScreen(parent); }
+    @Override public void onClose() { minecraft.setScreen(parent); }
 
     private static final class ConfigButton extends Button {
         ConfigButton(Builder builder) { super(builder); }
@@ -95,6 +96,6 @@ public final class PackConfigScreen extends Screen {
             for (var line : font.split(Component.literal(option.node().generateComment()), w)) { if(y > height - 68) break; g.text(font, line, x, y, 0xFFCCCCCC); y += 11; }
             if (!error.getString().isEmpty()) g.centeredText(font, error, width / 2, height - 51, 0xFFFF8888);
         }
-        @Override public void onClose() { minecraft.gui.setScreen(parent); }
+        @Override public void onClose() { minecraft.setScreen(parent); }
     }
 }

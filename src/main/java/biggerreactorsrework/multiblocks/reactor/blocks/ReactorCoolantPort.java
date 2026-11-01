@@ -45,6 +45,9 @@ public class ReactorCoolantPort extends ReactorBaseBlock implements IAssemblySta
     
     @Override
     public InteractionResult onUse(BlockState state, Level worldIn, BlockPos pos, Player player, InteractionHand handIn, BlockHitResult hit) {
+        // Modified 2026-11-01: containers use the port before ordinary menu/wrench interaction.
+        var container = biggerreactorsrework.core.fluids.FluidPortInteraction.use(worldIn, pos, player, handIn, hit);
+        if (container != InteractionResult.PASS) return container;
         if (handIn == InteractionHand.MAIN_HAND) {
             if (Util.isWrench(player.getMainHandItem().getItem())) {
                 ReactorAccessPort.PortDirection direction = state.getValue(PORT_DIRECTION_ENUM_PROPERTY);

@@ -1,5 +1,6 @@
 package biggerreactorsrework.multiblocks.reactor.client;
 
+// Modified 2026-11-01: native Minecraft 26.1.2 API.
 import biggerreactorsrework.client.GuiTheme;
 
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -154,7 +155,7 @@ public class ActiveReactorTerminalScreen extends ModScreen<ReactorTerminalContai
         super.containerTick();
         // Check if reactor type changed.
         if (reactorState.reactorType != ReactorType.ACTIVE) {
-            this.getMinecraft().gui.setScreen(new PassiveReactorTerminalScreen(this.menu, this.inventory, this.title));
+            this.getMinecraft().setScreen(new PassiveReactorTerminalScreen(this.menu, this.inventory, this.title));
         }
         // Check if coolant type changed.
         if (!reactorState.coolantResourceLocation.equals(Objects.requireNonNull(BuiltInRegistries.FLUID.getKey(coolantFluid)).toString())) {

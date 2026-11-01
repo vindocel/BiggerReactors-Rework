@@ -1,5 +1,6 @@
 package biggerreactorsrework.machine.recipe;
 
+// Modified 2026-11-01: native Minecraft 26.1.2 API.
 import java.util.List;
 import java.util.Optional;
 import net.minecraft.core.RegistryAccess;
@@ -50,7 +51,7 @@ public final class RecipeAccess {
     }
 
     public static ItemStack result(RegistryAccess registries, Recipe<?> recipe) {
-        ContextMap context = ContextMap.builder().set(SlotDisplayContext.REGISTRIES, registries).buildAndValidate(SlotDisplayContext.CONTEXT);
+        ContextMap context = new ContextMap.Builder().withParameter(SlotDisplayContext.REGISTRIES, registries).create(SlotDisplayContext.CONTEXT);
         for (RecipeDisplay display : recipe.display()) {
             ItemStack result = display.result().resolveForFirstStack(context);
             if (!result.isEmpty()) {

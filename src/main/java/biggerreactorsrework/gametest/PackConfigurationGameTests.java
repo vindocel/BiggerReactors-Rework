@@ -41,10 +41,10 @@ public final class PackConfigurationGameTests {
         var outputs = new java.util.ArrayList<BlockPos>(); var pos = h.absolutePos(new BlockPos(2,2,2));
         h.setBlock(2,2,2,biggerreactorsrework.blocks.materials.UraniumOre.INSTANCE);
         try {
-            option.node().writeFromString("false"); filter.modify(null, h.getLevel().getRandom(), pos, outputs::add);
+            option.node().writeFromString("false"); filter.getPositions(null, h.getLevel().getRandom(), pos).forEach(outputs::add);
             h.assertTrue(outputs.isEmpty(), "disabled ore generation emitted a position");
             h.assertTrue(h.getBlockState(new BlockPos(2,2,2)).is(biggerreactorsrework.blocks.materials.UraniumOre.INSTANCE), "switch deleted existing ore");
-            option.node().writeFromString("true"); filter.modify(null, h.getLevel().getRandom(), pos, outputs::add);
+            option.node().writeFromString("true"); filter.getPositions(null, h.getLevel().getRandom(), pos).forEach(outputs::add);
             h.assertTrue(outputs.equals(java.util.List.of(pos)), "enabled generation did not preserve placement origin");
         } finally { option.node().writeFromString(before); }
         h.succeed();

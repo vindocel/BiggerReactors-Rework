@@ -157,7 +157,9 @@ public final class CarryOnGameTests {
                 .thenExecute(() -> {
                     var player = new MenuPlayer(h.getLevel());
                     var data = carryData(player);
-                    invoke(data, "setBlock", new Class<?>[]{BlockState.class, BlockEntity.class}, Blocks.STONE.defaultBlockState(), null);
+                    // Modified 2026-11-01: Carry On 26.1.2 also records the player and source position.
+                    invoke(data, "setBlock", new Class<?>[]{BlockState.class, BlockEntity.class, net.minecraft.server.level.ServerPlayer.class, BlockPos.class},
+                            Blocks.STONE.defaultBlockState(), null, player, h.absolutePos(new BlockPos(5,1,5)));
                     var pos = h.absolutePos(new BlockPos(0,2,1));
                     click(player, pos);
                     h.assertTrue(h.getLevel().getBlockState(pos.above()).is(Blocks.STONE), "carried block placement was blocked");

@@ -585,7 +585,8 @@ public class Registry {
             
             fluids[0] = stillInstance;
             fluids[1] = flowingInstance;
-            blockArray[0] = new LiquidBlock(stillInstance, Block.Properties.of().setId(net.minecraft.resources.ResourceKey.create(net.minecraft.core.registries.Registries.BLOCK, baseResourceLocation)).noCollision().explosionResistance(100.0F).noLootTable());
+            // Modified 2026-11-01: placed fluids can be replaced by ordinary blocks, like vanilla liquids.
+            blockArray[0] = new LiquidBlock(stillInstance, Block.Properties.of().setId(net.minecraft.resources.ResourceKey.create(net.minecraft.core.registries.Registries.BLOCK, baseResourceLocation)).replaceable().noCollision().explosionResistance(100.0F).noLootTable());
             
             for (Field declaredField : fluidClazz.getDeclaredFields()) {
                 if (declaredField.isAnnotationPresent(RegisterFluid.Instance.class)) {

@@ -8,9 +8,8 @@
         {
           "type": "minecraft:item",
           "name": "biggerreactorsrework:battery_cell",
-          "modifier": [
+          "functions": [
             {
-              "type": "minecraft:copy_custom_data",
               "source": "block_entity",
               "ops": [
                 {
@@ -18,14 +17,17 @@
                   "target": "energy",
                   "op": "replace"
                 }
-              ]
+              ],
+              "function": "minecraft:copy_custom_data"
             }
           ]
         }
       ],
-      "condition": {
-        "type": "minecraft:survives_explosion"
-      }
+      "conditions": [
+        {
+          "condition": "minecraft:survives_explosion"
+        }
+      ]
     }
   ]
 }

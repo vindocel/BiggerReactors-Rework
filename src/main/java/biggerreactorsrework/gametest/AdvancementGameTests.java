@@ -1,5 +1,6 @@
 package biggerreactorsrework.gametest;
 
+// Modified 2026-11-01: native Minecraft 26.1.2 API.
 import biggerreactorsrework.advancement.ReworkAdvancements;
 import biggerreactorsrework.multiblocks.turbine.TurbineRotorHazard;
 import com.mojang.authlib.GameProfile;
@@ -41,7 +42,7 @@ public final class AdvancementGameTests {
             var holder=advancement(h,name); h.assertTrue(holder!=null,"missing advancement "+name);
             h.assertTrue(holder.value().rewards().equals(net.minecraft.advancements.AdvancementRewards.EMPTY),"advancement grants a reward: "+name);
         }
-        h.assertTrue(advancement(h,"turbine_accident").value().display().orElseThrow().hidden(),"secret is visible before completion");
+        h.assertTrue(advancement(h,"turbine_accident").value().display().orElseThrow().isHidden(),"secret is visible before completion");
         h.succeed();
     }
     @GameTest(template="empty_7x7x7") public static void bladeSweepExcludesCornersAndOtherLevelsForEveryAxis(GameTestHelper h) {

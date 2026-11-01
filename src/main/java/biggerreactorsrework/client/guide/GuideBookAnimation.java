@@ -1,5 +1,6 @@
 package biggerreactorsrework.client.guide;
 
+// Modified 2026-11-01: native Minecraft 26.1.2 API.
 
 
 import net.minecraft.util.Util;
@@ -38,7 +39,7 @@ public final class GuideBookAnimation {
             phaseStart = Util.getMillis() - (phase == Phase.CLOSING ? (long) ((1 - progress()) * DURATION_MS) : 0);
             phase = Phase.OPENING;
         }
-        Minecraft.getInstance().gui.setScreen(new GuideScreen());
+        Minecraft.getInstance().setScreen(new GuideScreen());
     }
 
     /** The guide screen turned a page: a leaf of the book in the hand turns too, as if the player were reading it. */

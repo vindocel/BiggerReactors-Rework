@@ -1,3 +1,23 @@
+# 26.1.2-0.1.6 (BiggerReactors-Rework, unreleased)
+
+## Changed
+
+- Ported the current rework to Minecraft 26.1.2 and NeoForge 26.1.2.126, requiring Java 25.
+- Adapted machine screens, connected glass, fluid rendering, guide previews, advancements, uranium generation and loot tables to the native 26.1.2 formats.
+- Uses the official KubeJS 26.1.2 API for optional configuration and material events.
+- Restored optional Roughly Enough Items support alongside JEI, including machine categories, decorated fluid gauges and recipe shortcuts.
+
+## Added
+
+- Buckets and compatible fluid containers can fill reactor, turbine and heat-exchanger fluid inlets directly. Empty containers can collect fluid from outlets, respecting the selected circuit and valid fluid types. Creative mode keeps the held bucket.
+- Plain buckets refuse extraction that would discard a heated coolant's identity.
+
+## Fixed
+
+- The first turbine shaft now aligns immediately with its placement face, and shaft end faces no longer disappear beside a bearing on specific sides.
+- Liquid Obsidian placed in the world can now be replaced by ordinary blocks, like vanilla liquids.
+- Statistics tabs and close buttons now play the normal interface click sound on reactor, turbine and heat-exchanger screens.
+
 # 26.3-0.1.6 (BiggerReactors-Rework, unreleased)
 
 ## Changed

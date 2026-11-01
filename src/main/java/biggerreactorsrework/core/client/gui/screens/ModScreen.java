@@ -1,5 +1,6 @@
 package biggerreactorsrework.core.client.gui.screens;
 
+// Modified 2026-11-01: native Minecraft 26.1.2 API.
 import biggerreactorsrework.client.GuiTheme;
 
 import com.google.common.collect.Lists;
@@ -350,13 +351,13 @@ public abstract class ModScreen<T extends AbstractContainerMenu> extends Abstrac
     @Override
     public final boolean keyPressed(KeyEvent event) {
         lastKeyPress = event;
-        return keyPressed(event.key(), event.keycode(), event.modifiers());
+        return keyPressed(event.key(), event.scancode(), event.modifiers());
     }
 
     @Override
     public final boolean keyReleased(KeyEvent event) {
         lastKeyRelease = event;
-        return keyReleased(event.key(), event.keycode(), event.modifiers());
+        return keyReleased(event.key(), event.scancode(), event.modifiers());
     }
 
     @Override

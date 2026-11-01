@@ -10,9 +10,11 @@
           "name": "biggerreactorsrework:reactor_fuel_rod"
         }
       ],
-      "condition": {
-        "type": "minecraft:survives_explosion"
-      }
+      "conditions": [
+        {
+          "condition": "minecraft:survives_explosion"
+        }
+      ]
     }
   ]
 }

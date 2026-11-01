@@ -139,15 +139,15 @@ public final class PlantCodec {
         }
     }
 
-    /** Block states saved by the 1.21.1 line use the keys {@code Name} and {@code Properties}. */
+    /** Modified 2026-11-01: retain native Name/Properties and normalize newer saved preview palettes. */
     public static net.minecraft.nbt.CompoundTag upgradedState(net.minecraft.nbt.CompoundTag tag) {
-        if (!tag.contains("Name")) {
+        if (!tag.contains("id")) {
             return tag;
         }
         var upgraded = new net.minecraft.nbt.CompoundTag();
-        upgraded.putString("id", tag.getStringOr("Name", ""));
-        if (tag.contains("Properties")) {
-            upgraded.put("properties", tag.getCompoundOrEmpty("Properties"));
+        upgraded.putString("Name", tag.getStringOr("id", ""));
+        if (tag.contains("properties")) {
+            upgraded.put("Properties", tag.getCompoundOrEmpty("properties"));
         }
         return upgraded;
     }

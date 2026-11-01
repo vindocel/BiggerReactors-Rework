@@ -34,7 +34,7 @@ neoForge {
 
         server {
             server()
-            gameDirectory = project.file('run/server')
+            gameDirectory = project.file('run/mc-26.1.2/server')
             programArgument '--nogui'
             systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
         }
@@ -42,23 +42,23 @@ neoForge {
         gameTestServer {
             type = 'gameTestServer'
             // own folder: GameTests always run with only Minecraft, NeoForge and this mod
-            gameDirectory = project.file('run/gametest')
+            gameDirectory = project.file('run/mc-26.1.2/gametest')
             systemProperty 'biggerreactorsrework.testEnergyItems', 'true'
             systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
         }
 
-        // Same GameTests with optional mods placed by hand in run/gametest-compat/mods (never bundled).
+        // Same GameTests with optional mods placed by hand in run/mc-26.1.2/gametest-compat/mods (never bundled).
         gameTestCompat {
             type = 'gameTestServer'
-            gameDirectory = project.file('run/gametest-compat')
+            gameDirectory = project.file('run/mc-26.1.2/gametest-compat')
             systemProperty 'biggerreactorsrework.testEnergyItems', 'true'
             systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
         }
 
-        // Optional 26.3 scripting runtimes are supplied separately; never add them to the base runtime classpath.
+        // Optional 26.1.2 scripting runtimes are supplied separately; never add them to the base runtime classpath.
         gameTestScripting {
             type = 'gameTestServer'
-            gameDirectory = project.file('run/gametest-scripting')
+            gameDirectory = project.file('run/mc-26.1.2/gametest-scripting')
             systemProperty 'biggerreactorsrework.testEnergyItems', 'true'
             systemProperty 'biggerreactorsrework.testScripting', 'true'
             systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
@@ -74,12 +74,12 @@ neoForge {
 
         clientVerification {
             client()
-            gameDirectory = project.file('run/client-verification')
+            gameDirectory = project.file('run/mc-26.1.2/client-verification')
         }
 
         serverVerification {
             server()
-            gameDirectory = project.file('run/server-verification')
+            gameDirectory = project.file('run/mc-26.1.2/server-verification')
             programArgument '--nogui'
         }
 
@@ -115,14 +115,12 @@ configurations {
 }
 
 repositories {
-    // Modified 2026-11-01: pinned 26.3 community-port APIs, compile-only until the official port is released.
+    // Modified 2026-11-01: official 26.1.2 scripting APIs, compile-only.
     exclusiveContent {
         forRepository {
-            ivy {
-                name = 'KubeJS26PortApi'
-                url = 'https://github.com/zoom-packers/zp5-mods/releases/download/kubejs-26.3-8.1.0-port.1'
-                patternLayout { artifact '[artifact]-[revision].[ext]' }
-                metadataSources { artifact() }
+            maven {
+                name = 'LatvianMods'
+                url = 'https://maven.latvian.dev/releases'
             }
         }
         filter { includeModule 'dev.latvian.mods', 'kubejs-neoforge'; includeModule 'dev.latvian.mods', 'rhino' }
@@ -167,8 +165,8 @@ repositories {
 }
 
 dependencies {
-    compileOnly('dev.latvian.mods:kubejs-neoforge:26.3-8.1.0-port.1') { transitive = false }
-    compileOnly('dev.latvian.mods:rhino:2603.2.8-port.1') { transitive = false }
+    compileOnly("dev.latvian.mods:kubejs-neoforge:${kubejs_version}") { transitive = false }
+    compileOnly("dev.latvian.mods:rhino:${rhino_version}") { transitive = false }
     // Modified 2026-10-31: optional native peripherals; the CC implementation is never bundled.
     compileOnly("cc.tweaked:cc-tweaked-${minecraft_version}-core-api:${cc_version}") { transitive = false }
     compileOnly("cc.tweaked:cc-tweaked-${minecraft_version}-common-api:${cc_version}") { transitive = false }
@@ -198,7 +196,7 @@ test {
 
 tasks.matching { it.name == 'runGameTestScripting' }.configureEach {
     doFirst {
-        copy { from 'src/test/resources/compat/kubejs'; into 'run/gametest-scripting/kubejs' }
+        copy { from 'src/test/resources/compat/kubejs'; into 'run/mc-26.1.2/gametest-scripting/kubejs' }
     }
 }
 
@@ -239,7 +237,7 @@ var generateModMetadata = tasks.register('generateModMetadata', ProcessResources
 [[dependencies.\${mod_id}]]
     modId="kubejs"
     type="optional"
-    versionRange="[26.3-8.1.0-port.1,)"
+    versionRange="[${kubejs_version},)"
     ordering="AFTER"
     side="BOTH"
 """.replace('\${mod_id}', mod_id).replace('\${cc_version}', cc_version) + (ocEnabled ? """

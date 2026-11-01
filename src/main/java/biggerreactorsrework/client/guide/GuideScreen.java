@@ -1,5 +1,6 @@
 package biggerreactorsrework.client.guide;
 
+// Modified 2026-11-01: native Minecraft 26.1.2 API.
 import com.mojang.blaze3d.systems.RenderSystem;
 import java.util.List;
 import net.minecraft.util.Util;
@@ -571,7 +572,7 @@ public class GuideScreen extends Screen {
     @Override
     public final boolean keyPressed(net.minecraft.client.input.KeyEvent event) {
         lastKey = event;
-        return keyPressed(event.key(), event.keycode(), event.modifiers());
+        return keyPressed(event.key(), event.scancode(), event.modifiers());
     }
 
     @Override

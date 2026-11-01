@@ -1,5 +1,6 @@
 package biggerreactorsrework.client;
 
+// Modified 2026-11-01: native Minecraft 26.1.2 API.
 import biggerreactorsrework.core.client.gui.screens.ModScreen;
 import net.minecraft.client.Minecraft;
 import net.neoforged.bus.api.EventPriority;
@@ -111,7 +112,7 @@ public final class GuiSettingsEvents {
 
     /** Tooltips of the screen under a popup are hidden only where the popup covers it. */
     private static void tooltip(RenderTooltipEvent.Pre event) {
-        if (!(Minecraft.getInstance().gui.screen() instanceof ModScreen<?> screen)) return;
+        if (!(Minecraft.getInstance().screen instanceof ModScreen<?> screen)) return;
         if (screen.statisticsWindow().rendering() || screen.settingsWindow().rendering()) return;
         if (screen.statisticsWindow().covers(event.getX(), event.getY()) || screen.settingsWindow().covers(event.getX(), event.getY())) {
             event.setCanceled(true);

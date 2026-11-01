@@ -10,9 +10,11 @@
           "name": "biggerreactorsrework:turbine_rotor_blade"
         }
       ],
-      "condition": {
-        "type": "minecraft:survives_explosion"
-      }
+      "conditions": [
+        {
+          "condition": "minecraft:survives_explosion"
+        }
+      ]
     }
   ]
 }
