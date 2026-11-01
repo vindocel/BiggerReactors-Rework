@@ -1,4 +1,4 @@
-package biggerreactorsrework.compat.opencomputers.access;
+package biggerreactorsrework.compat.computer.access;
 
 
 import biggerreactorsrework.core.util.ThrowingFunctions;

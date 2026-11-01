@@ -292,6 +292,19 @@ public class TurbineMultiblockController extends MultiblockController<TurbineBas
     private int attachedBladeCount = 0;
     private final Set<TurbinePowerTapTile> powerTaps = new HashSet<>();
     private long glassCount = 0;
+    private final Set<BlockPos> steamGlass = new HashSet<>();
+
+    // Modified 2026-10-31: window layout travels only with full rotor geometry, never every frame/tick.
+    public int[] steamGlassPositions(BlockPos origin) {
+        int[] positions = new int[steamGlass.size() * 3];
+        int i = 0;
+        for (var pos : steamGlass) {
+            positions[i++] = pos.getX() - origin.getX();
+            positions[i++] = pos.getY() - origin.getY();
+            positions[i++] = pos.getZ() - origin.getZ();
+        }
+        return positions;
+    }
     
     @Override
     protected void onPartAdded(TurbineBaseTile tile) {
@@ -316,6 +329,7 @@ public class TurbineMultiblockController extends MultiblockController<TurbineBas
         }
         if (tile instanceof TurbineGlassTile) {
             glassCount++;
+            steamGlass.add(tile.getBlockPos().immutable());
         }
     }
     
@@ -346,6 +360,7 @@ public class TurbineMultiblockController extends MultiblockController<TurbineBas
         }
         if (tile instanceof TurbineGlassTile) {
             glassCount--;
+            steamGlass.remove(tile.getBlockPos());
         }
     }
     
@@ -361,6 +376,11 @@ public class TurbineMultiblockController extends MultiblockController<TurbineBas
     
     private final ITurbineSimulation simulation = createSimulation();
     private final biggerreactorsrework.core.networking.RpmSyncTracker rpmSync = new biggerreactorsrework.core.networking.RpmSyncTracker();
+    private float lastSteamDensity;
+    private final biggerreactorsrework.util.TurbineAtmosphere.CondensationTimer condensationTimer =
+            new biggerreactorsrework.util.TurbineAtmosphere.CondensationTimer();
+    private boolean lastCondensationReady;
+    public boolean condensationReady() { return condensationTimer.ready(); }
     
     private static ITurbineSimulation createSimulation() {
         return new ModernTurbineSimulation();
@@ -377,6 +397,7 @@ public class TurbineMultiblockController extends MultiblockController<TurbineBas
         capacityEstimate=null;statisticsKey="";
         rpmSync.reset();
         simulation.reset();
+        condensationTimer.reset();
         for (TurbineRotorBearingTile rotorBearing : rotorBearings) {
             level.sendBlockUpdated(rotorBearing.getBlockPos(), rotorBearing.getBlockState(), rotorBearing.getBlockState(), 0);
         }
@@ -395,6 +416,7 @@ public class TurbineMultiblockController extends MultiblockController<TurbineBas
         capacityEstimate=null;statisticsKey="";
         rpmSync.reset();
         Vector3i internalVolume = new Vector3i().add(max()).sub(min()).sub(1, 1, 1);
+        condensationTimer.reset();
         
         
         BlockPos bearingPos = rotorBearings.iterator().next().getBlockPos();
@@ -504,6 +526,7 @@ public class TurbineMultiblockController extends MultiblockController<TurbineBas
         }
         
         simulation.tick();
+        condensationTimer.tick(simulation.active(), simulation.flowLastTick(), simulation.RPM());
         // Modified 2026-10-28: coast-down follows actual speed, independent of the toggle.
         biggerreactorsrework.audio.MachineAudio.publish(2, min(), max(), terminals, simulation.RPM() > 20, simulation.RPM());
         
@@ -517,7 +540,15 @@ public class TurbineMultiblockController extends MultiblockController<TurbineBas
             coolantPort.pushFluid();
         }
         
-        if (rpmSync.sample(CoreEvents.tickNumber(), simulation.RPM()) || rotorBearings.stream().anyMatch(TurbineRotorBearingTile::needsFullUpdate)) {
+        float steamDensity = biggerreactorsrework.util.TurbineAtmosphere.density(
+                simulation.fluidTank().vaporAmount(), simulation.fluidTank().perSideCapacity(),
+                simulation.active(), simulation.flowLastTick(), simulation.nominalFlowRate());
+        boolean atmosphereChanged = ((steamDensity == 0) != (lastSteamDensity == 0)) ||
+                (CoreEvents.tickNumber() % 10 == 0 && Math.abs(steamDensity - lastSteamDensity) >= 0.01F);
+        if (rpmSync.sample(CoreEvents.tickNumber(), simulation.RPM()) || atmosphereChanged ||
+                lastCondensationReady != condensationTimer.ready() || rotorBearings.stream().anyMatch(TurbineRotorBearingTile::needsFullUpdate)) {
+            lastSteamDensity = steamDensity;
+            lastCondensationReady = condensationTimer.ready();
             for (TurbineRotorBearingTile rotorBearing : rotorBearings) {
                 level.sendBlockUpdated(rotorBearing.getBlockPos(), rotorBearing.getBlockState(), rotorBearing.getBlockState(), 0);
             }
@@ -538,7 +569,7 @@ public class TurbineMultiblockController extends MultiblockController<TurbineBas
         turbineState.turbineOutputRate = simulation.FEGeneratedLastTick();
         
         turbineState.currentRPM = simulation.RPM();
-        turbineState.maxRPM = 2200.0;
+        turbineState.maxRPM = ITurbineSimulation.MAX_RPM;
         
         turbineState.intakeStored = simulation.fluidTank().vaporAmount();
         turbineState.intakeCapacity = simulation.fluidTank().perSideCapacity();

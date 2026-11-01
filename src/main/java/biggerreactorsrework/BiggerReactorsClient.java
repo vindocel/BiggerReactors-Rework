@@ -45,7 +45,10 @@ public final class BiggerReactorsClient {
         // Modified 2026-10-28: positional loops and per-machine local volume.
         biggerreactorsrework.client.sound.MachineSoundManager.init();
         modBus.addListener(biggerreactorsrework.client.HeatedFluidSprites::register);
+        modBus.addListener(biggerreactorsrework.multiblocks.turbine.client.TurbineAtmosphereEffects::registerParticles);
         biggerreactorsrework.client.GuiSettingsEvents.register();
+        net.neoforged.neoforge.common.NeoForge.EVENT_BUS.addListener(
+                biggerreactorsrework.multiblocks.turbine.client.TurbineAtmosphereEffects::tick);
         net.neoforged.neoforge.common.NeoForge.EVENT_BUS.addListener(
                 (net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent.LoggingOut event) -> {
                     biggerreactorsrework.registries.CoolantSync.clearClient();

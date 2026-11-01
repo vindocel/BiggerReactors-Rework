@@ -2,7 +2,7 @@ package biggerreactorsrework.compat.opencomputers;
 
 // Added 2026-10-30: native OpenComputers callbacks; all live state stays on the server thread.
 import biggerreactorsrework.multiblocks.reactor.tiles.ReactorComputerPortTile;
-import biggerreactorsrework.compat.opencomputers.access.ReactorAccess;
+import biggerreactorsrework.compat.computer.access.ReactorAccess;
 import li.cil.oc.api.machine.*;
 
 public final class ReactorComponent extends PortComponent {

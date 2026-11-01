@@ -114,6 +114,11 @@ repositories {
         content { includeGroup 'mezz.jei' }
     }
     maven {
+        name = 'CCTweaked'
+        url = 'https://maven.squiddev.cc'
+        content { includeGroup 'cc.tweaked' }
+    }
+    maven {
         name = 'OpenComputers'
         url = 'https://maven.michiyo.me/releases/'
         content { includeGroup 'li.cil.oc' }
@@ -128,6 +133,9 @@ repositories {
 // Modified 2026-10-30: native OpenComputers API, optional and never bundled.
 dependencies {
     compileOnly("li.cil.oc:opencomputers:${oc_version}:api") { transitive = false }
+    compileOnly("cc.tweaked:cc-tweaked-${minecraft_version}-core-api:${cc_version}") { transitive = false }
+    compileOnly("cc.tweaked:cc-tweaked-${minecraft_version}-common-api:${cc_version}") { transitive = false }
+    compileOnly("cc.tweaked:cc-tweaked-${minecraft_version}-forge-api:${cc_version}") { transitive = false }
     compileOnly "me.shedaniel:RoughlyEnoughItems-neoforge:${rei_version}"
     compileOnly "dev.architectury:architectury-neoforge:${architectury_version}"
     compileOnly "dev.emi:emi-neoforge:${emi_version}:api"
@@ -174,6 +182,7 @@ var generateModMetadata = tasks.register('generateModMetadata', ProcessResources
             mod_license            : mod_license,
             mod_version            : project.version,
             oc_version             : oc_version,
+            cc_version             : cc_version,
     ]
     inputs.properties replaceProperties
     expand replaceProperties

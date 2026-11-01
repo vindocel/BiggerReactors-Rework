@@ -4,17 +4,11 @@
   "textures": {
     "particle": "biggerreactorsrework:block/battery/cell/body",
     "b_up": "biggerreactorsrework:block/battery/cell/body/connected_tr",
-    "c_up": "biggerreactorsrework:block/battery/cell/energy/connected_t",
     "b_down": "biggerreactorsrework:block/battery/cell/body/connected_br",
-    "c_down": "biggerreactorsrework:block/battery/cell/energy/connected_b",
     "b_north": "biggerreactorsrework:block/battery/cell/body/connected_bl",
-    "c_north": "biggerreactorsrework:block/battery/cell/energy/connected_b",
     "b_south": "biggerreactorsrework:block/battery/cell/body/connected_br",
-    "c_south": "biggerreactorsrework:block/battery/cell/energy/connected_b",
     "b_east": "biggerreactorsrework:block/battery/cell/body/connected_br",
-    "c_east": "biggerreactorsrework:block/battery/cell/energy/connected_b",
-    "b_west": "biggerreactorsrework:block/battery/cell/body/connected_bl",
-    "c_west": "biggerreactorsrework:block/battery/cell/energy/connected_b"
+    "b_west": "biggerreactorsrework:block/battery/cell/body/connected_bl"
   },
   "elements": [
     {
@@ -51,45 +45,6 @@
         },
         "west": {
           "texture": "#b_west",
-          "cullface": "west"
-        }
-      }
-    },
-    {
-      "from": [
-        0,
-        0,
-        0
-      ],
-      "to": [
-        16,
-        16,
-        16
-      ],
-      "shade": false,
-      "faces": {
-        "up": {
-          "texture": "#c_up",
-          "cullface": "up"
-        },
-        "down": {
-          "texture": "#c_down",
-          "cullface": "down"
-        },
-        "north": {
-          "texture": "#c_north",
-          "cullface": "north"
-        },
-        "south": {
-          "texture": "#c_south",
-          "cullface": "south"
-        },
-        "east": {
-          "texture": "#c_east",
-          "cullface": "east"
-        },
-        "west": {
-          "texture": "#c_west",
           "cullface": "west"
         }
       }

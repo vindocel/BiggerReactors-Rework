@@ -1,0 +1,7 @@
+{
+  "parent": "biggerreactorsrework:block/assembled_port",
+  "textures": {
+    "front": "biggerreactorsrework:block/heat_exchanger/computer_port",
+    "side": "biggerreactorsrework:block/heat_exchanger/casing/disassembled"
+  }
+}

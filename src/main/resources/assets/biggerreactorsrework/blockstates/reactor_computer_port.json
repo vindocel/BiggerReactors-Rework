@@ -1,7 +1,30 @@
 {
   "variants": {
-    "": {
+    "assembled=false": {
       "model": "biggerreactorsrework:block/reactor/computer_port"
+    },
+    "assembled=true,facing=north": {
+      "model": "biggerreactorsrework:block/reactor/computer_port_assembled"
+    },
+    "assembled=true,facing=south": {
+      "model": "biggerreactorsrework:block/reactor/computer_port_assembled",
+      "y": 180
+    },
+    "assembled=true,facing=east": {
+      "model": "biggerreactorsrework:block/reactor/computer_port_assembled",
+      "y": 90
+    },
+    "assembled=true,facing=west": {
+      "model": "biggerreactorsrework:block/reactor/computer_port_assembled",
+      "y": 270
+    },
+    "assembled=true,facing=up": {
+      "model": "biggerreactorsrework:block/reactor/computer_port_assembled",
+      "x": 270
+    },
+    "assembled=true,facing=down": {
+      "model": "biggerreactorsrework:block/reactor/computer_port_assembled",
+      "x": 90
     }
   }
 }

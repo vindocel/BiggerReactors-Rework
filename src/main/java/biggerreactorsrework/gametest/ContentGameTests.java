@@ -39,7 +39,7 @@ public final class ContentGameTests {
     @GameTest(template = "empty_7x7x7")
     public static void allRecipesLoad(GameTestHelper helper) {
         final var mods = ModList.get();
-        long expectedCrafting = 48 + (mods.isLoaded("opencomputers") ? 3 : 0) + (mods.isLoaded("thermal_expansion") ? 1 : 0);
+        long expectedCrafting = 48 + (mods.isLoaded("opencomputers") || mods.isLoaded("computercraft") ? 3 : 0) + (mods.isLoaded("thermal_expansion") ? 1 : 0);
         long crafting = countOwn(helper, RecipeType.CRAFTING);
         long smelting = countOwn(helper, RecipeType.SMELTING);
         long blasting = countOwn(helper, RecipeType.BLASTING);

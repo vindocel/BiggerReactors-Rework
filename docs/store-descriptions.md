@@ -169,6 +169,8 @@ Build your turbine, choose its rotor and coils, and tune the selected steam flow
 
 Set the steam flow, coil state and condensate handling. Follow rotor speed, current and potential steam conversion, efficiency and gross FE generation.
 
+Turbines show a subtle, gently moving white haze behind their windows according to stored steam and actual operating flow. Steam remains visible when it is converted as quickly as it arrives; switched-off turbines show only their stored reserve. Occasional condensation droplets fall from any block with free space below after a few seconds of rotating operation. Rotor speed is limited to 2,200 RPM. Assembled reactor, turbine, heat-exchanger and battery ports show connections on the outer and inner faces, with closed chassis sides that fit neatly beside glass.
+
 ![Turbine interface showing rotor speed, FE output, steam flow, efficiency, coil and vent controls with the statistics panel](https://cdn.modrinth.com/data/IXXgM5v4/images/6cb949b6a6eb0fcb812ba5321e2b670ebecdff6d.png)
 
 ---
@@ -244,6 +246,7 @@ Learn the plant inside the game:
 | --- | --- |
 | 📚 JEI, EMI and REI | Both Industrial Processor recipes, moderators, turbine coils and current heat-exchanger fluid conversions. |
 | 💻 OpenComputers | Native cable-connected components for reactor, turbine and heat-exchanger monitoring and control. |
+| 💻 CC:Tweaked | Native computer ports for reactor, turbine and heat-exchanger telemetry and controls, with direct or wired-modem access. Works alongside OpenComputers on the same ports. |
 | 🔎 Jade | Supported machine information in the inspection overlay. |
 | 🧪 Mekanism | The liquid sodium coolant option. |
 | ❄️ Ad Astra | The Cryo Fuel coolant option. |

@@ -144,7 +144,7 @@ public class ModernTurbineSimulation implements ITurbineSimulation {
     
     @Override
     public double RPM() {
-        return rotorEnergy / rotorAxialMass;
+        return rotorAxialMass > 0 ? Math.min(MAX_RPM, rotorEnergy / rotorAxialMass) : 0;
     }
     
     @Override
@@ -185,6 +185,8 @@ public class ModernTurbineSimulation implements ITurbineSimulation {
     
     @Override
     public void tick() {
+        // Normalize saved overspeed before calculating induction and discard excess steam torque at the limit.
+        rotorEnergy = Math.min(rotorEnergy, MAX_RPM * rotorAxialMass);
         double rpm = RPM();
         
         if (active) {
@@ -256,10 +258,8 @@ public class ModernTurbineSimulation implements ITurbineSimulation {
         
         rotorEnergy -= rotorMass * Math.pow(rpm * Config.CONFIG.Turbine.FrictionDragMultiplier, 2); // yes, rpm squared, thats how drag works, bitch ain't it?
         rotorEnergy -= linearBladeMetersPerRevolution * Math.pow(rpm * Config.CONFIG.Turbine.AerodynamicDragMultiplier, 2);
-        if (rotorEnergy < 0) {
-            rotorEnergy = 0;
-        }
-        
+        rotorEnergy = Math.clamp(rotorEnergy, 0, MAX_RPM * rotorAxialMass);
+
     }
     
     @Override

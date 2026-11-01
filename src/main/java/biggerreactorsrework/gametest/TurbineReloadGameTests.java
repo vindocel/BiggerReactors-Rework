@@ -180,4 +180,117 @@ public final class TurbineReloadGameTests {
     public static void savedTurbineLoadOrder150(GameTestHelper h) {
         loadSavedRange(h,0,8,150);h.succeedWhen(()->assertSavedAssembled(h));
     }
+
+    @GameTest(template="empty_7x7x7",timeoutTicks=120)
+    public static void fullyConsumedSteamFlowStillSynchronizesHaze(GameTestHelper h) {
+        build(h,false,false);
+        h.startSequence().thenWaitUntil(()->assertAssembled(h)).thenExecute(()->{
+            var bearing=(TurbineRotorBearingTile)h.getBlockEntity(new BlockPos(3,1,3));
+            var sim=bearing.controller().simulation();
+            var transition=biggerreactorsrework.registries.FluidTransitionRegistry.liquidTransition(net.minecraft.world.level.material.Fluids.WATER);
+            long flow=Math.min(10000,sim.flowRateLimit());
+            h.assertTrue(flow>0,"test turbine has no flow capacity");
+            sim.setNominalFlowRate(flow);sim.setActive(true);
+            for(int i=0;i<25;i++) {
+                sim.fluidTank().dumpLiquid();
+                h.assertTrue(sim.fluidTank().fill(transition.gases.getFirst(),net.minecraft.core.component.DataComponentPatch.EMPTY,flow,false)==flow,"exact steam feed was not accepted");
+                bearing.controller().tick();
+                h.assertTrue(sim.flowLastTick()==flow && sim.fluidTank().vaporAmount()==0,"test did not consume all incoming steam");
+                h.assertTrue(bearing.getUpdateNBT().getFloat("steamDensity")==1,"empty-buffer flowing turbine lost haze");
+                h.assertTrue(bearing.getDataNBT().getFloat("steamDensity")==1 || !bearing.isRenderBearing,"initial window snapshot omitted through-flow haze");
+            }
+            bearing.controller().tick();
+            h.assertTrue(bearing.currentSteamDensity()==0,"starved empty turbine retained flow haze");
+            sim.fluidTank().fill(transition.gases.getFirst(),net.minecraft.core.component.DataComponentPatch.EMPTY,flow,false);bearing.controller().tick();
+            sim.setActive(false);
+            h.assertTrue(bearing.currentSteamDensity()==0,"stale last-tick conversion kept a stopped empty turbine hazy");
+            sim.fluidTank().fill(transition.gases.getFirst(),net.minecraft.core.component.DataComponentPatch.EMPTY,flow,false);
+            h.assertTrue(bearing.currentSteamDensity()>0,"stopped turbine lost its stored-steam haze");
+        }).thenSucceed();
+    }
+
+    @GameTest(template="empty_7x7x7",timeoutTicks=120)
+    public static void storedSteamHazeAndDelayedCondensationAreIndependent(GameTestHelper h) {
+        build(h,false,false);
+        h.startSequence().thenWaitUntil(() -> assertAssembled(h)).thenExecute(() -> {
+            var bearing = (TurbineRotorBearingTile) h.getBlockEntity(new BlockPos(3,1,3));
+            var sim = bearing.controller().simulation();
+            sim.setActive(false);
+            var transition=biggerreactorsrework.registries.FluidTransitionRegistry.liquidTransition(net.minecraft.world.level.material.Fluids.WATER);
+            var modern=(biggerreactorsrework.multiblocks.turbine.simulation.modern.ModernTurbineSimulation)sim;
+            modern.idealSupply(transition);
+            h.assertTrue(bearing.getUpdateNBT().getFloat("steamDensity")>0,"idle stored steam has no haze");
+            h.assertTrue(!bearing.getUpdateNBT().getBoolean("condensationReady"),"idle steam started dripping");
+            sim.setActive(true);sim.setCoilEngaged(false);
+            for(int tick=0;tick<120;tick++) {
+                modern.idealSupply(transition);
+                bearing.controller().tick();
+                if(tick<59)h.assertTrue(!bearing.getUpdateNBT().getBoolean("condensationReady"),"condensation started without warmup");
+            }
+            h.assertTrue(bearing.getUpdateNBT().getBoolean("condensationReady"),"continuous rotation did not warm condensation");
+            sim.setActive(false);bearing.controller().tick();
+            h.assertTrue(bearing.getUpdateNBT().getFloat("steamDensity")>0,"switching off erased stored steam haze");
+            h.assertTrue(!bearing.getUpdateNBT().getBoolean("condensationReady"),"coasting turbine continued dripping");
+            h.assertTrue(sim.RPM()>0,"test did not cover a coasting rotor");
+            sim.fluidTank().dumpVapor();
+            h.assertTrue(bearing.getUpdateNBT().getFloat("steamDensity")==0,"empty tank retained haze");
+        }).thenSucceed();
+    }
+
+    @GameTest(template="empty_7x7x7",timeoutTicks=20)
+    public static void rotorSpeedIsLimitedUnderExcessSteam(GameTestHelper h) {
+        var sim = new biggerreactorsrework.multiblocks.turbine.simulation.modern.ModernTurbineSimulation();
+        sim.resize(3, 3, 3);
+        sim.setRotorConfiguration(new java.util.ArrayList<>(java.util.List.of(new org.joml.Vector4i(1, 1, 1, 1))));
+        // Low induction drag ensures the steam supply can actually drive the rotor into the governor.
+        sim.setCoilData(1, 0, new biggerreactorsrework.registries.TurbineCoilRegistry.CoilData(1, 1, 0.1));
+        sim.updateInternalValues();
+        sim.setNominalFlowRate(sim.flowRateLimit());
+        sim.setActive(true);
+        var steam = biggerreactorsrework.registries.FluidTransitionRegistry.liquidTransition(net.minecraft.world.level.material.Fluids.WATER);
+        h.assertTrue(steam != null, "missing steam transition");
+        // A legacy save already above the limit must recover before computing generation.
+        var saved = sim.serializeNBT();
+        saved.putDouble("rotorEnergy", sim.rotorMass() * 10000);
+        sim.deserializeNBT(saved);
+        for (boolean coils : new boolean[]{false, true}) {
+            sim.setCoilEngaged(coils);
+            for (int tick = 0; tick < 1000; tick++) {
+                sim.idealSupply(steam);
+                sim.tick();
+                h.assertTrue(sim.RPM() <= 2200 && sim.RPM() >= 0, "rotor exceeded speed limit");
+                h.assertTrue(sim.serializeNBT().getDouble("rotorEnergy") <= sim.rotorMass() * 2200,
+                        "excess rotor energy accumulated behind the RPM display");
+                if (coils) h.assertTrue(sim.FEGeneratedLastTick() > 0, "generation stopped at the speed limit");
+                sim.battery().extract(Long.MAX_VALUE);
+            }
+            h.assertTrue(sim.RPM() == 2200, "excess steam did not reach the speed limit: " + sim.RPM());
+        }
+        sim.setActive(false);
+        sim.tick();
+        h.assertTrue(sim.RPM() < 2200, "rotor did not slow down without steam");
+        h.succeed();
+    }
+
+    @GameTest(template="empty_7x7x7",timeoutTicks=120)
+    public static void steamWindowsSynchronizeOnlyGlassAndClearOnDisassembly(GameTestHelper h) {
+        build(h,false,false);
+        h.setBlock(1,2,2,biggerreactorsrework.multiblocks.turbine.blocks.TurbineGlass.INSTANCE);
+        h.setBlock(1,2,3,biggerreactorsrework.multiblocks.turbine.blocks.TurbineGlass.INSTANCE);
+        h.startSequence().thenWaitUntil(()->assertAssembled(h)).thenExecute(()->{
+            var a=(TurbineRotorBearingTile)h.getBlockEntity(new BlockPos(3,1,3));
+            var b=(TurbineRotorBearingTile)h.getBlockEntity(new BlockPos(3,5,3));
+            var bearing=a.isRenderBearing?a:b;
+            var data=bearing.getDataNBT();
+            h.assertTrue(data.getIntArray("steamGlass").length==6,"window snapshot includes non-glass or loses glass");
+            var snapshot=TurbineRotorBearingTile.SUPPLIER.create(bearing.getBlockPos(),bearing.getBlockState());
+            snapshot.handleDataNBT(data);
+            h.assertTrue(snapshot.steamWindows.stream().mapToDouble(biggerreactorsrework.core.util.FluidSurfaceMesh.Face::area).sum()==2,"client film does not exactly cover the two windows");
+            var removed=new CompoundTag();removed.putBoolean("disassembled",true);
+            snapshot.handleUpdateNBT(removed);
+            h.assertTrue(snapshot.steamWindows.isEmpty(),"disassembly left stale window film");
+            data.remove("steamGlass");snapshot.handleDataNBT(data);
+            h.assertTrue(snapshot.steamWindows.isEmpty(),"absent geometry invented window films");
+        }).thenSucceed();
+    }
 }

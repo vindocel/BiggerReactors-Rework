@@ -1,10 +1,56 @@
 {
   "variants": {
-    "is_lit=false": {
+    "is_lit=false,assembled=false": {
       "model": "biggerreactorsrework:block/turbine_redstone_port"
     },
-    "is_lit=true": {
+    "is_lit=false,assembled=true,facing=north": {
+      "model": "biggerreactorsrework:block/turbine_redstone_port_assembled"
+    },
+    "is_lit=false,assembled=true,facing=south": {
+      "model": "biggerreactorsrework:block/turbine_redstone_port_assembled",
+      "y": 180
+    },
+    "is_lit=false,assembled=true,facing=east": {
+      "model": "biggerreactorsrework:block/turbine_redstone_port_assembled",
+      "y": 90
+    },
+    "is_lit=false,assembled=true,facing=west": {
+      "model": "biggerreactorsrework:block/turbine_redstone_port_assembled",
+      "y": 270
+    },
+    "is_lit=false,assembled=true,facing=up": {
+      "model": "biggerreactorsrework:block/turbine_redstone_port_assembled",
+      "x": 270
+    },
+    "is_lit=false,assembled=true,facing=down": {
+      "model": "biggerreactorsrework:block/turbine_redstone_port_assembled",
+      "x": 90
+    },
+    "is_lit=true,assembled=false": {
       "model": "biggerreactorsrework:block/turbine_redstone_port_lit"
+    },
+    "is_lit=true,assembled=true,facing=north": {
+      "model": "biggerreactorsrework:block/turbine_redstone_port_lit_assembled"
+    },
+    "is_lit=true,assembled=true,facing=south": {
+      "model": "biggerreactorsrework:block/turbine_redstone_port_lit_assembled",
+      "y": 180
+    },
+    "is_lit=true,assembled=true,facing=east": {
+      "model": "biggerreactorsrework:block/turbine_redstone_port_lit_assembled",
+      "y": 90
+    },
+    "is_lit=true,assembled=true,facing=west": {
+      "model": "biggerreactorsrework:block/turbine_redstone_port_lit_assembled",
+      "y": 270
+    },
+    "is_lit=true,assembled=true,facing=up": {
+      "model": "biggerreactorsrework:block/turbine_redstone_port_lit_assembled",
+      "x": 270
+    },
+    "is_lit=true,assembled=true,facing=down": {
+      "model": "biggerreactorsrework:block/turbine_redstone_port_lit_assembled",
+      "x": 90
     }
   }
 }

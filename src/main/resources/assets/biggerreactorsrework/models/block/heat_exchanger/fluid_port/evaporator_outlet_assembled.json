@@ -1,0 +1,7 @@
+{
+  "parent": "biggerreactorsrework:block/assembled_port",
+  "textures": {
+    "front": "biggerreactorsrework:block/heat_exchanger/fluid_port/evaporator_outlet",
+    "side": "biggerreactorsrework:block/heat_exchanger/casing/disassembled"
+  }
+}

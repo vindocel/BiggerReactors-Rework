@@ -11,6 +11,12 @@ public final class FluidSurfaceMesh {
         public boolean valid(){return Float.isFinite(x0+y0+z0+x1+y1+z1) && x1>x0 && y1>y0 && z1>z0;}
     }
     public record Face(int axis,boolean positive,float plane,float u0,float v0,float u1,float v1) {
+        public float coordinate(int index,int coordinateAxis) {
+            if(coordinateAxis==axis)return plane;
+            int order=positive?index:(4-index)%4;
+            if(coordinateAxis==(axis+1)%3)return order==1 || order==2?u1:u0;
+            return order>=2?v1:v0;
+        }
         public float[] vertex(int index) {
             int order=positive?index:(4-index)%4;
             float u=order==1 || order==2?u1:u0,v=order>=2?v1:v0;

@@ -34,7 +34,14 @@ This rework is not affiliated with or endorsed by the original authors.
     ordering="NONE"
     side="BOTH"
 
-# Modified 2026-10-30: validate the native API version only when OpenComputers is installed.
+# Modified 2026-10-31: validate each native API version only when its computer mod is installed.
+[[dependencies.${mod_id}]]
+    modId="computercraft"
+    type="optional"
+    versionRange="[${cc_version},)"
+    ordering="AFTER"
+    side="BOTH"
+
 [[dependencies.${mod_id}]]
     modId="opencomputers"
     type="optional"

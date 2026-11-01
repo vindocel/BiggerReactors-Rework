@@ -30,6 +30,7 @@ public class BiggerReactors {
     public BiggerReactors(IEventBus modBus, ModContainer container) {
         // Modified 2026-10-28: common events, with playback isolated to the client.
         biggerreactorsrework.registries.MachineSounds.register(modBus);
+        biggerreactorsrework.registries.ModParticles.register(modBus);
         biggerreactorsrework.registries.CoolantComponents.register(modBus);
         version = container.getModInfo().getVersion().toString();
         new Registry(modid, BiggerReactors.class.getPackageName(), modBus, new ReferenceArrayList<>(), new ReferenceArrayList<>());
@@ -45,9 +46,12 @@ public class BiggerReactors {
         if (ModList.get().isLoaded("carryon")) {
             biggerreactorsrework.compat.carryon.CarryOnCompat.init();
         }
-        // Modified 2026-10-30: replace the optional computer integration with native OpenComputers.
+        // Modified 2026-10-31: both optional computer integrations use the same port blocks.
         if (ModList.get().isLoaded("opencomputers")) {
             OpenComputersCompat.init(modBus);
+        }
+        if (ModList.get().isLoaded("computercraft")) {
+            biggerreactorsrework.compat.cctweaked.CCTweakedCompat.init(modBus);
         }
         if (FMLEnvironment.dist.isClient()) {
             BiggerReactorsClient.init(modBus);

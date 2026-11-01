@@ -12,6 +12,9 @@ import java.util.List;
 
 /** Modified 2026-10-27: shared shader-compatible exterior surfaces, native tint alpha and vanilla render layers. */
 public final class FluidBoxRenderer {
+    // Modified 2026-10-31: reuse exterior geometry only; sprites, tint and light stay live.
+    private static final ThreadLocal<biggerreactorsrework.core.util.FluidMeshCache> MESHES =
+            ThreadLocal.withInitial(() -> new biggerreactorsrework.core.util.FluidMeshCache(256));
     public record Volume(FluidStack stack,FluidSurfaceMesh.Box box,int hidden) { }
     public static int mask(Direction side) {
         int axis=switch(side.getAxis()){case X->0;case Y->1;case Z->2;};
@@ -32,13 +35,13 @@ public final class FluidBoxRenderer {
             var vertices=buffers.getBuffer(layer);
             int emission=stack.getFluidType().getLightLevel(stack);
             int packedLight=LightTexture.pack(Math.max(LightTexture.block(light),emission),LightTexture.sky(light));
-            for(var face:FluidSurfaceMesh.faces(volume.box,joined,volume.hidden))for(int i=0;i<4;i++){
-                var point=face.vertex(i);float[] normal=new float[3];normal[face.axis()]=face.positive()?1:-1;
-                float u=point[(face.axis()+1)%3],v=point[(face.axis()+2)%3];
-                vertices.addVertex(pose.last(),point[0],point[1],point[2])
+            for(var face:MESHES.get().faces(volume.box,joined,volume.hidden))for(int i=0;i<4;i++){
+                float normal=face.positive()?1:-1;
+                float u=face.coordinate(i,(face.axis()+1)%3),v=face.coordinate(i,(face.axis()+2)%3);
+                vertices.addVertex(pose.last(),face.coordinate(i,0),face.coordinate(i,1),face.coordinate(i,2))
                         .setColor((color>>16)&255,(color>>8)&255,color&255,alpha)
                         .setUv(sprite.getU(u),sprite.getV(1-v)).setOverlay(overlay).setLight(packedLight)
-                        .setNormal(pose.last(),normal[0],normal[1],normal[2]);
+                        .setNormal(pose.last(),face.axis()==0?normal:0,face.axis()==1?normal:0,face.axis()==2?normal:0);
             }
         }
     }

@@ -1,3 +1,20 @@
+# 1.21.1-0.1.6 (BiggerReactors-Rework, unreleased)
+
+## Added
+
+- Added optional CC:Tweaked support for reactor, turbine and heat-exchanger computer ports, with live telemetry, controls and wired-modem discovery. It works alongside the existing OpenComputers support on the same port blocks, and the ports can be crafted when either mod is installed.
+
+## Changed
+
+- Assembled resource ports now show their connection face on the outside and inside, with closed chassis sides matching their machine. Loose ports retain their original appearance.
+- Turbine windows now show a gently moving white steam film. It follows stored steam even while switched off and actual steam throughput while operating, so fully consumed input remains visible. The film fades in and out smoothly and is compatible with shader packs. Occasional condensation drips from any block with free space below after a few seconds of continuous rotating operation, in standing and lying turbines.
+- Assembled battery cells only show their energy bands while charged.
+- Reduced repeated rotor and fluid-mesh rendering work without removing rotor, coolant or connected-glass detail.
+
+## Fixed
+
+- Turbine rotors now stop accelerating at 2,200 RPM, including with disengaged coils or excess steam, so generation no longer falls to zero from overspeed. Existing overspeed saves recover on the next simulation tick.
+
 # 1.21.1-0.1.5 (BiggerReactors-Rework, unreleased)
 
 ## Added
