@@ -2,6 +2,9 @@
 
 ## Added
 
+- Fill reactor, turbine and heat-exchanger fluid inlets with buckets or compatible containers, and collect supported outlet fluids. Creative buckets are retained; refused transfers keep their contents without spilling. Ordinary buckets cannot collect heated coolant whose identity requires fluid components.
+- Blue Ice is now a solid reactor moderator with the same default properties as diamond blocks, listed in the guide's moderator table.
+- Added a customization guide for modpack creators and server administrators.
 - Added optional CC:Tweaked support for reactor, turbine and heat-exchanger computer ports, with live telemetry, controls and wired-modem discovery. It works alongside the existing OpenComputers support on the same port blocks, and the ports can be crafted when either mod is installed.
 - Native progression advancements for the guide, reactors, liquid cooling, heat exchangers, turbines, batteries and cyanite reprocessing, plus a hidden discovery. These advancements grant no rewards.
 - Added a searchable in-game configuration editor under Mods, a uranium-generation switch, configurable fuel yields for items and tags, and optional KubeJS configuration/material events for modpacks. Existing battery cell capacity and transfer settings are now editable through the same screen.
@@ -19,6 +22,9 @@
 
 ## Fixed
 
+- The first rotor shaft placed beside a bearing now faces the right way on all six sides, and its end caps no longer disappear next to the bearing.
+- Placed Liquid Obsidian can now be replaced by ordinary blocks, like vanilla liquids.
+- Opening and closing reactor, turbine and heat-exchanger statistics now plays the normal button click.
 - Machines, ores and material blocks now declare map colors, so map mods show them in colors close to their textures instead of black.
 - Reducing configured battery cell capacity no longer deletes stored energy. Overfull batteries stop accepting energy until their charge falls below the new limit.
 - Turbine rotors now stop accelerating at 2,200 RPM, including with disengaged coils or excess steam, so generation no longer falls to zero from overspeed. Existing overspeed saves recover on the next simulation tick.

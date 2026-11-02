@@ -62,6 +62,8 @@ public class TurbineFluidPort extends TurbineBaseBlock implements IAssemblyState
     
     @Override
     public InteractionResult onUse(BlockState state, Level worldIn, BlockPos pos, Player player, InteractionHand handIn, BlockHitResult hit) {
+        var container = biggerreactorsrework.core.fluids.FluidPortInteraction.use(worldIn, pos, player, handIn, hit);
+        if (container != InteractionResult.PASS) return container;
         if (handIn == InteractionHand.MAIN_HAND) {
             if (Util.isWrench(player.getMainHandItem().getItem())) {
                 PortDirection direction = state.getValue(PORT_DIRECTION_ENUM_PROPERTY);

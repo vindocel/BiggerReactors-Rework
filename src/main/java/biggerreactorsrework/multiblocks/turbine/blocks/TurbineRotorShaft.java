@@ -20,6 +20,11 @@ import static biggerreactorsrework.multiblocks.turbine.state.TurbineShaftRotatio
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
 public class TurbineRotorShaft extends TurbineBaseBlock implements IAssemblyStateBlock {
+    // Modified 2026-11-01: the first shaft beside a bearing takes its axis from the clicked face.
+    @Override public BlockState getStateForPlacement(net.minecraft.world.item.context.BlockPlaceContext context) {
+        return defaultBlockState().setValue(TurbineShaftRotationState.TURBINE_SHAFT_ROTATION_STATE_ENUM_PROPERTY,
+                TurbineShaftRotationState.values()[context.getClickedFace().getAxis().ordinal()]);
+    }
     // Modified 2026-11-01: real blade blocks can be managed through the shaft.
     @Override public net.minecraft.world.InteractionResult onUse(BlockState state, net.minecraft.world.level.Level level, BlockPos pos,
             net.minecraft.world.entity.player.Player player, net.minecraft.world.InteractionHand hand, net.minecraft.world.phys.BlockHitResult hit) {

@@ -40,7 +40,7 @@ Design your own reactor, turn its heat into steam, drive a turbine and store the
 Build the casing, arrange your fuel rods, add solid moderators and supply fuel. The reactor generates **FE directly**.
 
 - 🎛️ Control rods let you tune operation.
-- 🧩 Your layout and moderator choices affect performance.
+- 🧩 Your layout and moderator choices affect performance, from metal blocks to Blue Ice.
 - ⚡ A practical starting point before building a full steam plant.
 
 ### 💧 Move to liquid cooling
@@ -50,6 +50,7 @@ Place **reactor coolant manifolds directly beside the fuel rods**. Feed a suppor
 - 🔗 More contact faces improve heat transfer.
 - 🛢️ Coolant stays contained inside the manifolds, with visible fluid inside the machine.
 - 🧱 Solid blocks left in spare spaces do not add moderator bonuses in liquid mode.
+- 🪣 Fill reactor, turbine and heat-exchanger fluid ports by hand with buckets, without opening a screen.
 - ♨️ The reactor produces **steam or heated coolant**; the turbine produces the electricity.
 
 > 💡 **Liquid cooling can generate more FE per unit of fuel than direct generation with solid moderators.** Build a properly supplied plant with a turbine and, when needed, a heat exchanger. Its output depends on the design, temperatures, controls and circulation.
@@ -299,6 +300,8 @@ Check the operating message and the assumptions shown in the statistics panel. P
 Open **Mods → BiggerReactors-Rework → Config** to search and edit the mod's local settings without installing a configuration library or scripting mod. Set battery capacity and input/output per cell, tune machine parameters, define fuel yields for registered items or tags, and disable uranium generation in new terrain. Existing ore is preserved. Restart the game after changing machine or world-generation rules; gameplay settings are locked while a world is open.
 
 Server owners and pack authors can also use **optional KubeJS events** to override configuration and define reactor fuels, moderators, turbine coils and fluid transitions. Server rules take priority for connected players, and script overrides do not overwrite their local files. The base mod works without KubeJS.
+
+Every option, data format and script call is described in the [customization guide](https://github.com/vindocel/BiggerReactors-Rework/blob/mc/1.21.1/docs/CUSTOMIZATION.md).
 
 ---
 

@@ -1,0 +1,9 @@
+// Added 2026-11-01: Blue Ice uses the same default moderator properties as diamond blocks.
+{
+    type: "registry",
+    location: "minecraft:blue_ice",
+    absorption: 0.55,
+    efficiency: 0.85,
+    moderation: 1.5,
+    conductivity: 3,
+}
