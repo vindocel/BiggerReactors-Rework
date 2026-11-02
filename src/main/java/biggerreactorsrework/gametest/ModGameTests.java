@@ -40,6 +40,7 @@ public final class ModGameTests {
         all.add(AdvancementGameTests.class);
         // Modified 2026-11-01: native fluid-container and first-placement regression coverage.
         all.add(PortInteractionGameTests.class);
+        all.add(CoolantTransferGameTests.class);
         try {
             all.add(Class.forName("biggerreactorsrework.gametest.OpenComputersGameTests"));
         } catch (ClassNotFoundException absent) {

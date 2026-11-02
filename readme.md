@@ -10,7 +10,8 @@ It runs with only Minecraft, NeoForge and this mod installed.
 - Meant for new worlds. Worlds and machines from the original BiggerReactors are not migrated.
 - Optional JEI integration: Industrial Processor recipes, moderator and coolant properties, turbine coils and heat-exchanger conversions. Machine shortcuts open JEI. EMI, Roughly Enough Items and OpenComputers remain on the 1.21.1 line until they have a 26.3 build.
 - Optional CC:Tweaked integration: the reactor, turbine and heat-exchanger computer ports expose live telemetry and controls through native peripherals, including wired modems. OpenComputers support is retained separately for its compatible builds.
-- Requires Java 25. The 1.21.1 version lives on the `mc/1.21.1` branch.
+- Requires Java 25. The other lines live on `mc/1.21.1` and `mc/26.1.2`.
+- Options, data formats, KubeJS events and limits are described in the [customization guide](docs/CUSTOMIZATION.md).
 
 ## Origin and credits
 

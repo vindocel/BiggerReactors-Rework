@@ -36,6 +36,7 @@
 ## Added
 
 - Blue Ice is now a solid reactor moderator with the same default properties as diamond blocks, listed in the guide's moderator table.
+- Added a customization guide for modpack creators and server administrators.
 - Fill reactor, turbine and heat-exchanger fluid inlets with buckets or compatible containers, and collect supported outlet fluids. Creative buckets are retained; refused transfers keep their contents without spilling. Ordinary buckets cannot collect heated coolant whose identity requires fluid components.
 
 - Native progression advancements for the guide, reactors, liquid cooling, heat exchangers, turbines, batteries and cyanite reprocessing, plus a hidden discovery. These advancements grant no rewards.
