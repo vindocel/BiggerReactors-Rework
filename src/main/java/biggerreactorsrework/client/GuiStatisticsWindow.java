@@ -205,11 +205,16 @@ public final class GuiStatisticsWindow {
         if(!contains(mx,my))return false;
         consumeRelease=true;
         if(button==com.mojang.blaze3d.platform.InputConstants.MOUSE_BUTTON_LEFT){
-            if(onTab(mx,my)){open=!open;dragging=false;}
-            else if(mx>=x()+width()-20 && mx<x()+width()-8 && my>=y()+5 && my<y()+17)open=false;
+            // Modified 2026-11-01: opening and closing statistics use the same native button sound as settings.
+            if(onTab(mx,my)){open=!open;dragging=false;clickSound();}
+            else if(mx>=x()+width()-20 && mx<x()+width()-8 && my>=y()+5 && my<y()+17){open=false;clickSound();}
             else if(mx>=x() && mx<x()+width()-22 && my>=y() && my<y()+20){dragging=true;dragX=mx-x();dragY=my-y();}
         }
         return true;
+    }
+    private static void clickSound(){
+        net.minecraft.client.Minecraft.getInstance().getSoundManager().play(net.minecraft.client.resources.sounds.SimpleSoundInstance.forUI(
+                net.minecraft.sounds.SoundEvents.UI_BUTTON_CLICK,1.0F));
     }
     public boolean release(){boolean consumed=consumeRelease;consumeRelease=false;dragging=false;return consumed;}
     public boolean drag(double mx,double my){

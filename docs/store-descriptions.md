@@ -40,7 +40,7 @@ Design your own reactor, turn its heat into steam, drive a turbine and store the
 Build the casing, arrange your fuel rods, add solid moderators and supply fuel. The reactor generates **FE directly**.
 
 - 🎛️ Control rods let you tune operation.
-- 🧩 Your layout and moderator choices affect performance.
+- 🧩 Your layout and moderator choices affect performance. Blue Ice is also available as a solid moderator.
 - ⚡ A practical starting point before building a full steam plant.
 
 ### 💧 Move to liquid cooling
@@ -78,6 +78,8 @@ The exchanger's separate water circuit supplies your turbine:
 **💧 Water → 🔥 Heat Exchanger → ♨️ Steam → 🌀 Turbine → ⚡ FE**
 
 > ♨️ Heated coolant carries **heat**. **Steam** is what the turbine uses to generate FE. Optional coolant entries appear only when their source mod is installed.
+
+Supply reactor, turbine and heat-exchanger fluid inlets directly with **buckets or compatible fluid containers**, including both exchanger circuits. Creative mode keeps the held bucket. Valid outlet fluids can also be collected; ordinary buckets refuse heated coolant when they cannot preserve its identity. Rejected transfers keep their contents without spilling beside the machine.
 
 Every coolant circuit needs enough water, effective heat exchange and clear outputs. Empty both sides of a coolant circuit before changing its fluid pair.
 

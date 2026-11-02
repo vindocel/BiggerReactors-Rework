@@ -16,6 +16,10 @@
 
 ## Fixed
 
+- The first turbine shaft now aligns with its bearing immediately, with correctly culled end faces.
+- Placed Liquid Obsidian can now be replaced by ordinary blocks, like vanilla liquids.
+- Opening and closing reactor, turbine and heat-exchanger statistics now plays the normal button click.
+
 - Solid mod blocks now declare texture-appropriate map colors instead of appearing black or empty in map renderers.
 
 - Clarified advancement descriptions, including completed machine assembly, direct reactor energy generation and the automatically unlocked progression root.
@@ -30,6 +34,9 @@
 - Turbine rotors now stop accelerating at 2,200 RPM, including with disengaged coils or excess steam. Existing overspeed saves recover on the next simulation tick.
 
 ## Added
+
+- Blue Ice is now a solid reactor moderator with the same default properties as diamond blocks, listed in the guide's moderator table.
+- Fill reactor, turbine and heat-exchanger fluid inlets with buckets or compatible containers, and collect supported outlet fluids. Creative buckets are retained; refused transfers keep their contents without spilling. Ordinary buckets cannot collect heated coolant whose identity requires fluid components.
 
 - Native progression advancements for the guide, reactors, liquid cooling, heat exchangers, turbines, batteries and cyanite reprocessing, plus a hidden discovery. These advancements grant no rewards.
 - Added a searchable in-game configuration editor under Mods, a uranium-generation switch, configurable fuel yields for items and tags, and optional KubeJS configuration/material events for modpacks. Existing battery cell capacity and transfer settings are now editable through the same screen.

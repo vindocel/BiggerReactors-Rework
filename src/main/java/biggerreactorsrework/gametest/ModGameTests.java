@@ -38,6 +38,8 @@ public final class ModGameTests {
         all.add(TurbineRotorPlacementGameTests.class);
         all.add(PackConfigurationGameTests.class);
         all.add(AdvancementGameTests.class);
+        // Modified 2026-11-01: native fluid-container and first-placement regression coverage.
+        all.add(PortInteractionGameTests.class);
         try {
             all.add(Class.forName("biggerreactorsrework.gametest.OpenComputersGameTests"));
         } catch (ClassNotFoundException absent) {
