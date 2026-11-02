@@ -40,7 +40,7 @@ Design your own reactor, turn its heat into steam, drive a turbine and store the
 Build the casing, arrange your fuel rods, add solid moderators and supply fuel. The reactor generates **FE directly**.
 
 - 🎛️ Control rods let you tune operation.
-- 🧩 Your layout and moderator choices affect performance.
+- 🧩 Your layout and moderator choices affect performance, from metal blocks to Blue Ice.
 - ⚡ A practical starting point before building a full steam plant.
 
 ### 💧 Move to liquid cooling
@@ -173,7 +173,7 @@ Right-click a shaft, blade or bearing while holding rotor blades to fill the ava
 
 Set the steam flow, coil state and condensate handling. Follow rotor speed, current and potential steam conversion, efficiency and gross FE generation.
 
-On Minecraft 26.1.2, turbines show a subtle, gently moving white haze behind their windows according to stored steam and actual operating flow. Steam remains visible when it is converted as quickly as it arrives; switched-off turbines show only their stored reserve. The haze fades gradually as steam changes. Occasional condensation droplets appear beneath exposed non-rotor surfaces after a few seconds of rotating operation, including in horizontal turbines. Assembled reactor, turbine, heat-exchanger and battery ports show connections on the outer and inner faces, with closed chassis sides that fit neatly beside glass.
+On Minecraft 26.1.2, turbines show a subtle, gently moving white haze behind their windows according to stored steam and actual operating flow. Steam remains visible when it is converted as quickly as it arrives; switched-off turbines show only their stored reserve. The haze fades gradually as steam changes. Occasional condensation droplets appear beneath exposed non-rotor surfaces after a few seconds of rotating operation, including in horizontal turbines. Rotor speed is limited to 2,200 RPM. Assembled reactor, turbine, heat-exchanger and battery ports show connections on the outer and inner faces, with closed chassis sides that fit neatly beside glass.
 
 ![Turbine interface showing rotor speed, FE output, steam flow, efficiency, coil and vent controls with the statistics panel](https://cdn.modrinth.com/data/IXXgM5v4/images/6cb949b6a6eb0fcb812ba5321e2b670ebecdff6d.png)
 
@@ -308,6 +308,8 @@ Check the operating message and the assumptions shown in the statistics panel. P
 Open **Mods → BiggerReactors-Rework → Config** to search and edit the mod's local settings without installing a configuration library or scripting mod. Set battery capacity and input/output per cell, tune machine parameters, define fuel yields for registered items or tags, and disable uranium generation in new terrain. Existing ore is preserved. Restart the game after changing machine or world-generation rules; gameplay settings are locked while a world is open.
 
 Server owners and pack authors can also use **optional KubeJS events** to override configuration and define reactor fuels, moderators, turbine coils and fluid transitions. Server rules take priority for connected players, and script overrides do not overwrite their local files. The base mod works without KubeJS. This line uses the official KubeJS 26.1.2 release.
+
+Every option, data format and script call is described in the [customization guide](https://github.com/vindocel/BiggerReactors-Rework/blob/mc/26.1.2/docs/CUSTOMIZATION.md).
 
 ---
 

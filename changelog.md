@@ -11,6 +11,8 @@
 
 - Buckets and compatible fluid containers can fill reactor, turbine and heat-exchanger fluid inlets directly. Empty containers can collect fluid from outlets, respecting the selected circuit and valid fluid types. Creative mode keeps the held bucket.
 - Plain buckets refuse extraction that would discard a heated coolant's identity.
+- Blue Ice is now a solid reactor moderator with the same default properties as diamond blocks, listed in the guide's moderator table.
+- Added a customization guide for modpack creators and server administrators.
 
 ## Fixed
 

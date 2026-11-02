@@ -38,6 +38,7 @@ public final class ModGameTests {
         all.add(PackConfigurationGameTests.class);
         all.add(AdvancementGameTests.class);
         all.add(PortInteractionGameTests.class);
+        all.add(CoolantTransferGameTests.class);
         try {
             all.add(Class.forName("biggerreactorsrework.gametest.OpenComputersGameTests"));
         } catch (ClassNotFoundException absent) {

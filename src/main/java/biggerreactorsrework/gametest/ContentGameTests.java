@@ -110,4 +110,16 @@ public final class ContentGameTests {
         h.assertTrue(missing.isEmpty(), "blocks without a map color: " + missing);
         h.succeed();
     }
+    /** Added 2026-11-01: Blue Ice equals the diamond defaults and stays a separate entry. */
+    @GameTest(template="empty_7x7x7")
+    public static void blueIceModeratorMatchesDiamondDefaults(GameTestHelper h) {
+        var snapshot = biggerreactorsrework.registries.ReactorModeratorRegistry.snapshot();
+        var blue = snapshot.get(net.minecraft.world.level.block.Blocks.BLUE_ICE);
+        var diamond = snapshot.get(net.minecraft.world.level.block.Blocks.DIAMOND_BLOCK);
+        h.assertTrue(blue != null && diamond != null, "moderator missing");
+        h.assertTrue(blue.absorption() == 0.55 && blue.heatEfficiency() == 0.85 && blue.moderation() == 1.5 && blue.heatConductivity() == 3, "blue ice values wrong");
+        h.assertTrue(blue.absorption() == diamond.absorption() && blue.heatEfficiency() == diamond.heatEfficiency()
+                && blue.moderation() == diamond.moderation() && blue.heatConductivity() == diamond.heatConductivity(), "blue ice differs from diamond");
+        h.succeed();
+    }
 }
