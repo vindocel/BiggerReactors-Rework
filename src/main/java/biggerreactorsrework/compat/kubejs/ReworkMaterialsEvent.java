@@ -25,6 +25,18 @@ public final class ReworkMaterialsEvent implements KubeEvent {
     public void moderator(String block, double absorption, double efficiency, double moderation, double conductivity) {
         moderator("block/reactor_moderator", block, absorption, efficiency, moderation, conductivity);
     }
+    public void moderator(String block,double absorption,double efficiency,double moderation,double conductivity,String passiveClass) {
+        var data=new JsonObject();data.addProperty("absorption",absorption);data.addProperty("efficiency",efficiency);
+        data.addProperty("moderation",moderation);data.addProperty("conductivity",conductivity);data.addProperty("passiveClass",passiveClass);
+        put("block/reactor_moderator",block,data,MaterialDataMaps.Moderator.CODEC);
+    }
+    public void thermalTransition(String liquid,String gas,double latentHeat,double boilingPoint,double liquidConductivity,
+            double gasConductivity,double turbineMultiplier,double recovery,int steamPerBatch) {
+        var data=new JsonObject();data.addProperty("gas",key(gas));data.addProperty("latentHeat",latentHeat);data.addProperty("boilingPoint",boilingPoint);
+        data.addProperty("liquidThermalConductivity",liquidConductivity);data.addProperty("gasThermalConductivity",gasConductivity);
+        data.addProperty("turbineMultiplier",turbineMultiplier);data.addProperty("recovery",recovery);data.addProperty("steamPerBatch",steamPerBatch);
+        put("fluid/fluid_transition",liquid,data,MaterialDataMaps.Transition.CODEC);
+    }
     private void moderator(String map, String target, double absorption, double efficiency, double moderation, double conductivity) {
         var data = new JsonObject(); data.addProperty("absorption", absorption); data.addProperty("efficiency", efficiency);
         data.addProperty("moderation", moderation); data.addProperty("conductivity", conductivity);

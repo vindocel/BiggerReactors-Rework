@@ -111,7 +111,7 @@ public final class GuiStatisticsWindow {
         for(var row:rows){
             String key=String.valueOf(row.get("key"));
             if(key.equals("status")||key.equals("reference"))continue;
-            grouped.get(SECTIONS.getOrDefault(key,"other")).add(row);
+            grouped.get(java.util.Set.of("thermal_structuralEfficiency","thermal_contactEfficiency","thermal_occupancy","thermal_usefulManifolds","thermal_links").contains(key)?"structure":key.startsWith("thermal_")?"performance":SECTIONS.getOrDefault(key,"other")).add(row);
         }
         var lines=new java.util.ArrayList<Line>();
         for(var section:grouped.entrySet()){

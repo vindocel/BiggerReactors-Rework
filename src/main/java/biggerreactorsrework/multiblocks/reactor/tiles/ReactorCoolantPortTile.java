@@ -77,7 +77,7 @@ public class ReactorCoolantPortTile extends ReactorBaseTile implements IFluidTan
         if (transitionTank == null) {
             return Fluids.EMPTY;
         }
-        return transitionTank.fluidTypeInTank(tank);
+        return transitionTank.maintenanceFluid(tank);
     }
     
     @Nullable
@@ -86,7 +86,7 @@ public class ReactorCoolantPortTile extends ReactorBaseTile implements IFluidTan
         if (transitionTank == null) {
             return DataComponentPatch.EMPTY;
         }
-        return transitionTank.fluidComponentsInTank(tank);
+        return transitionTank.maintenanceComponents(tank);
     }
     
     @Override
@@ -119,21 +119,31 @@ public class ReactorCoolantPortTile extends ReactorBaseTile implements IFluidTan
         if (transitionTank == null || direction == INLET) {
             return 0;
         }
-        return transitionTank.drain(fluid, components, amount, simulate);
+        return transitionTank.maintenanceDrain(outputTank(),fluid, components, amount, simulate);
     }
     
+    // Modified 2026-11-02: controller drains only the sum actually accepted by balanced destinations.
+    public long offerFluid(long maximum) {
+        neighborChanged();
+        if(!connected || direction == INLET || handler==null || transitionTank==null)return 0;
+        long amount=Math.min(maximum,transitionTank.fluidAmountInTank(outputTank()));
+        return Math.max(0,Math.min(amount,handler.fill(transitionTank.maintenanceFluid(outputTank()),transitionTank.maintenanceComponents(outputTank()),amount,false)));
+    }
+
+    public boolean maintenanceCold;
+    private int outputTank() { return maintenanceCold?0:1; }
     public long pushFluid() {
         neighborChanged();
         if (!connected || direction == INLET) {
             return 0;
         }
         if (handler != null && transitionTank != null) {
-            Fluid fluid = transitionTank.vaporType();
-            var components = transitionTank.fluidComponentsInTank(1);
-            long amount = transitionTank.vaporAmount();
-            amount = transitionTank.drain(fluid, components, amount, true);
+            Fluid fluid = transitionTank.maintenanceFluid(outputTank());
+            var components = transitionTank.maintenanceComponents(outputTank());
+            long amount = transitionTank.fluidAmountInTank(outputTank());
+            amount = transitionTank.maintenanceDrain(outputTank(),fluid, components, amount, true);
             amount = handler.fill(fluid, components, amount, false);
-            amount = transitionTank.drain(fluid, components, amount, false);
+            amount = transitionTank.maintenanceDrain(outputTank(),fluid, components, amount, false);
             return amount;
         } else {
             handler = null;
@@ -172,6 +182,7 @@ public class ReactorCoolantPortTile extends ReactorBaseTile implements IFluidTan
     
     @Override
     protected void readNBT(CompoundTag compound) {
+        maintenanceCold=compound.getBoolean("maintenanceCold");
         if (compound.contains("direction")) {
             direction = biggerreactorsrework.core.util.SavedValues.enumValue(ReactorAccessPort.PortDirection.class, compound.getString("direction"), ReactorAccessPort.PortDirection.INLET);
         }
@@ -182,11 +193,13 @@ public class ReactorCoolantPortTile extends ReactorBaseTile implements IFluidTan
     protected CompoundTag writeNBT() {
         CompoundTag NBT = new CompoundTag();
         NBT.putString("direction", String.valueOf(direction));
+        NBT.putBoolean("maintenanceCold",maintenanceCold);
         return NBT;
     }
     
     @Override
     public void runRequest(String requestName, Object requestData) {
+        if(requestName.equals("maintenanceCold") && requestData instanceof Boolean value) { maintenanceCold=value;setChanged(); }
         // Change IO direction.
         if (requestName.equals("setDirection")) {
             // Modified 2026-10-30: reject invalid command types and domains before mutation.
@@ -219,6 +232,7 @@ public class ReactorCoolantPortTile extends ReactorBaseTile implements IFluidTan
     
     @Override
     public void updateState() {
+        reactorCoolantPortState.maintenanceCold=maintenanceCold;
         reactorCoolantPortState.direction = (this.direction == INLET);
     }
     

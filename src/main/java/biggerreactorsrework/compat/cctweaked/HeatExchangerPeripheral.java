@@ -11,6 +11,11 @@ public final class HeatExchangerPeripheral extends ComputerPeripheral {
         super(tile, "biggerreactorsrework_heat_exchanger");
         access = HeatExchangerAccess.create(tile::nullableController);
     }
+    @LuaFunction(mainThread=true)
+    public Object[] thermal(IArguments args) throws LuaException {
+        try { checkAvailable();return result(access.thermal()); }
+        catch(IllegalArgumentException | IllegalStateException error) { throw new LuaException(error.getMessage()); }
+    }
     @LuaFunction(mainThread = true)
     public Object[] connected(IArguments args) throws LuaException {
         try {

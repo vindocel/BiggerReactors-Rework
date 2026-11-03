@@ -30,6 +30,7 @@ public class BiggerReactors {
     public BiggerReactors(IEventBus modBus, ModContainer container) {
         // Modified 2026-10-28: common events, with playback isolated to the client.
         biggerreactorsrework.registries.MachineSounds.register(modBus);
+        biggerreactorsrework.fluids.HeatedCoolantBucket.register(modBus);
         biggerreactorsrework.registries.ModParticles.register(modBus);
         biggerreactorsrework.worldgen.UraniumGeneration.register(modBus);
         biggerreactorsrework.advancement.ReworkAdvancements.register(modBus);

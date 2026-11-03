@@ -26,6 +26,14 @@ public class ReactorManifold extends ReactorBaseBlock implements IConnectedTextu
     
     public ReactorManifold() {
         super(false);
+        registerDefaultState(defaultBlockState().setValue(net.minecraft.world.level.block.state.properties.BlockStateProperties.LIT, false));
+    }
+    
+    // Added 2026-11-03: the server marks manifolds holding a glowing coolant.
+    @Override
+    protected void buildStateDefinition(net.minecraft.world.level.block.state.StateDefinition.Builder<Block, BlockState> builder) {
+        super.buildStateDefinition(builder);
+        builder.add(net.minecraft.world.level.block.state.properties.BlockStateProperties.LIT);
     }
     
     @Nullable

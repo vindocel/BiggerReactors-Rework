@@ -1,5 +1,7 @@
+// Modified 2026-11-02: static thermal class.
 // Added 2026-11-01: Blue Ice uses the same default moderator properties as diamond blocks.
 {
+    passiveClass: "SUPERIOR",
     type: "registry",
     location: "minecraft:blue_ice",
     absorption: 0.55,

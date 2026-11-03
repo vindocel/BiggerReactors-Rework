@@ -11,6 +11,8 @@ public final class HeatExchangerComponent extends PortComponent {
         super(tile, "biggerreactorsrework_heat_exchanger");
         access = HeatExchangerAccess.create(tile::nullableController);
     }
+    @Callback(doc="function():table -- Thermal recipe snapshot: kJ/t heat, weighted channel links and actual mB/t flows.")
+    public Object[] thermal(Context context,Arguments args) { checkAvailable();return result(access.thermal()); }
     @Callback(doc = "function():boolean -- Whether the port belongs to an assembled machine.")
     public Object[] connected(Context context, Arguments args) {
         checkThread(); return result(available() && access.connected());

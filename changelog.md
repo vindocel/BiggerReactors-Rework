@@ -2,7 +2,7 @@
 
 ## Added
 
-- Fill reactor, turbine and heat-exchanger fluid inlets with buckets or compatible containers, and collect supported outlet fluids. Creative buckets are retained; refused transfers keep their contents without spilling. Ordinary buckets cannot collect heated coolant whose identity requires fluid components.
+- Fill reactor, turbine and heat-exchanger fluid inlets with buckets or compatible containers, and collect supported outlet fluids. Creative buckets are retained; refused transfers keep their contents without spilling. Heated coolant fills a Heated Coolant Bucket that remembers which coolant it came from, in tanks, ports and when placed in the world.
 - Blue Ice is now a solid reactor moderator with the same default properties as diamond blocks, listed in the guide's moderator table.
 - Added a customization guide for modpack creators and server administrators.
 - Added optional CC:Tweaked support for reactor, turbine and heat-exchanger computer ports, with live telemetry, controls and wired-modem discovery. It works alongside the existing OpenComputers support on the same port blocks, and the ports can be crafted when either mod is installed.
@@ -11,6 +11,20 @@
 - Add real turbine blades by right-clicking the shaft, an existing blade or a bearing. Fill rings and levels automatically, once the base outline, aligned bearings and continuous shaft are in place, even before closing the walls or roof. Remove blades by sneaking with an empty hand, and collect attached blades when breaking a shaft with the correct tool.
 
 ## Changed
+
+- Reworked reactor production around heat paid by actual fuel consumption, with a smooth size-dependent burn curve and proportional usable-fuel filling and control rods. Missing coolant, full hot outputs and full passive batteries discard unused production without reducing fuel burn.
+- Liquid reactor efficiency now follows local manifold coverage and useful structural occupancy. Incomplete layouts retain a percentage loss at every power; only directly adjacent manifolds add liquid capacity.
+- Solid moderators use four explicit passive cooling/output classes. Reactor and exchanger screens show thermal budgets and losses instead of variable reactor temperatures; computer integrations provide a thermal snapshot while old temperature/fertility readings remain neutral.
+- Heat exchangers process fixed atomic coolant/water batches. Straight channel links through up to three air blocks determine speed; recipe yield stays fixed. Multiple nonbranching paths and independently configured ports share logical circuit buffers.
+- Added Frozen Obsidian, a glowing coolant made in the Industrial Processor from 200 mB of Liquid Obsidian and 1 blue ice (100 mB). It boils 40 steam mB per ten hot mB, turns red when heated and makes reactor manifolds glow brighter than fuel. Placed in the world, it freezes players and mobs inside it like powder snow.
+- Heated coolants from reactors (Heated Liquid Obsidian, Heated Frozen Obsidian, heated Cryo Fuel and other generic heated coolants) burn players and mobs like lava when placed in the world.
+- Steam can no longer be collected or placed with buckets; move it through tanks and pipes. Its texture is now a translucent, animated white gas.
+- The Industrial Processor now uses `industrial_processor` and `industrial_processing` identifiers throughout.
+- Heat is measured in kJ: one mB of fuel gives 12,500 kJ, and with water each kJ makes one steam mB.
+- Turbines generate a fixed amount of FE per steam mB set by the coil material (for example iron 2.75, gold 5.25, ludicrite 9.25), limited by blade and coil capacity. Turbines only draw the steam they can use, and their flow limit shows that usable amount. Each coil block handles a fixed steam flow, the rotor reaches 1,800 RPM in 20 seconds, and the guide, recipe viewers and statistics show these values.
+- Passive reactor classes now give 4, 8, 16 or 24 RF per 100 kJ removed.
+- Each directly touching heat-exchanger channel pair processes 2,000 hot mB/t, four times as much as before, and water/steam channels hold four times as much as coolant channels.
+- Added persistent optional balanced outputs for reactors, heat exchangers and turbine water, plus input-stock maintenance extraction. Thermal migration preserves fuel fractions, cold/hot stock, overfill, controls and stored FE; known legacy coolant signatures adopt the new recipes, while unknown stock remains recoverable.
 
 - Industrial Processor recipes in the guide now show inputs side by side, a single output slot and labelled fluid, energy and time.
 - Rotor shafts and blades now have slimmer targeting outlines, so it is easier to aim at the parts around and behind them. Their collision is unchanged.
@@ -22,6 +36,7 @@
 
 ## Fixed
 
+- Turbine coil distances now use exact integer coordinates in every shaft orientation, including structures far from the world origin.
 - The first rotor shaft placed beside a bearing now faces the right way on all six sides, and its end caps no longer disappear next to the bearing.
 - Placed Liquid Obsidian can now be replaced by ordinary blocks, like vanilla liquids.
 - Opening and closing reactor, turbine and heat-exchanger statistics now plays the normal button click.

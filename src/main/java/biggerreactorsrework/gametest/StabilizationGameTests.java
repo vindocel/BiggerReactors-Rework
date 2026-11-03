@@ -8,8 +8,8 @@ import biggerreactorsrework.core.capability.NeighborCapability;
 import biggerreactorsrework.core.client.gui.GuiSync;
 import biggerreactorsrework.core.config.ConfigManager;
 import biggerreactorsrework.core.serialization.DataCompound;
-import biggerreactorsrework.machine.blocks.CyaniteReprocessor;
-import biggerreactorsrework.machine.tiles.CyaniteReprocessorTile;
+import biggerreactorsrework.machine.blocks.IndustrialProcessor;
+import biggerreactorsrework.machine.tiles.IndustrialProcessorTile;
 import biggerreactorsrework.machine.side.*;
 import biggerreactorsrework.multiblocks.reactor.blocks.*;
 import biggerreactorsrework.multiblocks.reactor.tiles.*;
@@ -87,8 +87,8 @@ public final class StabilizationGameTests {
 
     @GameTest(template = "empty_7x7x7")
     public static void idleProcessorChargingMarksChunkAndRoundTripsCurrentState(GameTestHelper h) {
-        var pos=new BlockPos(2,2,2);h.setBlock(pos,CyaniteReprocessor.INSTANCE);
-        var tile=(CyaniteReprocessorTile)h.getBlockEntity(pos);tile.tick();
+        var pos=new BlockPos(2,2,2);h.setBlock(pos,IndustrialProcessor.INSTANCE);
+        var tile=(IndustrialProcessorTile)h.getBlockEntity(pos);tile.tick();
         var chunk=h.getLevel().getChunkAt(h.absolutePos(pos));
         chunk.setUnsaved(false);
         var energy=tile.energyFor(null);
@@ -99,7 +99,7 @@ public final class StabilizationGameTests {
         energy.receiveEnergy(offered,false);tile.tick();
         h.assertTrue(chunk.isUnsaved(),"idle processor charge was not marked for disk saving");
         var saved=tile.saveWithFullMetadata(h.getLevel().registryAccess());
-        var restored=CyaniteReprocessorTile.SUPPLIER.create(tile.getBlockPos(),tile.getBlockState());
+        var restored=IndustrialProcessorTile.SUPPLIER.create(tile.getBlockPos(),tile.getBlockState());
         restored.setLevel(h.getLevel());restored.loadWithComponents(saved,h.getLevel().registryAccess());
         h.assertTrue(restored.energyFor(null).getEnergyStored()==accepted,"current processor charge was lost");
         h.succeed();
@@ -108,9 +108,9 @@ public final class StabilizationGameTests {
     @GameTest(template = "empty_7x7x7")
     public static void cachedNeighborTracksSideChangesWithoutBlockReplacement(GameTestHelper h) {
         var ownerPos=new BlockPos(2,2,2);var neighborPos=ownerPos.east();
-        h.setBlock(ownerPos,CyaniteReprocessor.INSTANCE);h.setBlock(neighborPos,CyaniteReprocessor.INSTANCE);
-        var owner=(CyaniteReprocessorTile)h.getBlockEntity(ownerPos);
-        var neighbor=(CyaniteReprocessorTile)h.getBlockEntity(neighborPos);
+        h.setBlock(ownerPos,IndustrialProcessor.INSTANCE);h.setBlock(neighborPos,IndustrialProcessor.INSTANCE);
+        var owner=(IndustrialProcessorTile)h.getBlockEntity(ownerPos);
+        var neighbor=(IndustrialProcessorTile)h.getBlockEntity(neighborPos);
         var cache=new NeighborCapability<>(owner,Capabilities.FluidHandler.BLOCK);
         neighbor.runRequest("sideClearAll",null);
         h.assertTrue(cache.get(Direction.EAST)==null,"disabled neighbor exposed fluid capability");
@@ -153,9 +153,9 @@ public final class StabilizationGameTests {
         var bad=new CompoundTag();bad.putLong("inAmount",125);bad.putString("inFluid","INVALID FLUID!");
         var tank=new FluidTransitionTank(false);tank.deserializeNBT(bad);
         h.assertTrue(tank.hasUnresolvedProfile() && tank.serializeNBT().getLong("inAmount")==125,"malformed fluid identifier lost stored stock");
-        var turbine=new ModernTurbineSimulation();bad=new CompoundTag();bad.putInt("ventState",999);bad.putDouble("rotorEnergy",Double.NaN);
+        var turbine=new ModernTurbineSimulation();bad=new CompoundTag();bad.putInt("ventState",999);bad.putDouble("rpm",Double.NaN);
         turbine.deserializeNBT(bad);
-        h.assertTrue(turbine.serializeNBT().getDouble("rotorEnergy")==0,"nonfinite rotor state was retained");
+        h.assertTrue(turbine.serializeNBT().getDouble("rpm")==0,"nonfinite rotor state was retained");
         h.setBlock(1,1,1,ReactorCoolantPort.INSTANCE);
         h.setBlock(2,1,1,biggerreactorsrework.multiblocks.turbine.blocks.TurbineFluidPort.INSTANCE);
         h.setBlock(3,1,1,biggerreactorsrework.multiblocks.heatexchanger.blocks.HeatExchangerFluidPortBlock.INSTANCE);

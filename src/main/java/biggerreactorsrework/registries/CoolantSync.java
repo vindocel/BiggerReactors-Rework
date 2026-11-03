@@ -23,7 +23,7 @@ public final class CoolantSync {
             if(cold==null || hot==null || !BuiltInRegistries.FLUID.containsKey(cold) || !BuiltInRegistries.FLUID.containsKey(hot))continue;
             var t=new FluidTransitionRegistry.FluidTransition(List.of(BuiltInRegistries.FLUID.get(cold)),List.of(BuiltInRegistries.FLUID.get(hot)),
                     number(map,"latent"),number(map,"boiling"),number(map,"liquid"),number(map,"gas"),number(map,"turbine"));
-            t.recovery=number(map,"recovery");result.add(t);
+            t.recovery=number(map,"recovery");t.steamPerBatch=((Number)map.get("steamPerBatch")).intValue();result.add(t);
         }
         clientProfiles=List.copyOf(result); received=true;
         if (net.neoforged.fml.loading.FMLEnvironment.dist.isClient()) biggerreactorsrework.BiggerReactorsClient.refreshCoolantSprites(clientProfiles);
@@ -35,7 +35,7 @@ public final class CoolantSync {
     private static void send(OnDatapackSyncEvent event){
         var rows=new ArrayList<Map<String,Object>>();
         for(var t:FluidTransitionRegistry.transitions())rows.add(Map.of("cold",BuiltInRegistries.FLUID.getKey(t.liquids.getFirst()).toString(),"hot",BuiltInRegistries.FLUID.getKey(t.gases.getFirst()).toString(),
-                "latent",t.latentHeat,"boiling",t.boilingPoint,"liquid",t.liquidRFMKT,"gas",t.gasRFMKT,"turbine",t.turbineMultiplier,"recovery",t.recovery));
+                "latent",t.latentHeat,"boiling",t.boilingPoint,"liquid",t.liquidRFMKT,"gas",t.gasRFMKT,"turbine",t.turbineMultiplier,"recovery",t.recovery,"steamPerBatch",t.steamPerBatch));
         var data=new DataCompound();data.put("profiles",rows);
         if(event.getPlayer()!=null)CHANNEL.sendToPlayer(event.getPlayer(),data);
         else event.getPlayerList().getPlayers().forEach(p->CHANNEL.sendToPlayer(p,data));

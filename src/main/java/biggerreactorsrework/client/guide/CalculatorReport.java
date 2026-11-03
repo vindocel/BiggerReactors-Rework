@@ -192,7 +192,10 @@ final class CalculatorReport {
         if (r.route() == Route.SOLID) body(out, t("reactor.moderator", whole(r.value(MODERATORS)), blockName(r.request().material())));
         else body(out, t("reactor.manifolds", whole(r.value(MANIFOLDS)), whole(r.value(CONTACTS))));
         body(out, t("reactor.rods", whole(r.value(INSERTION))));
-        body(out, t("reactor.temperature", whole(r.value(FUEL_TEMPERATURE))));
+        if(r.values().containsKey("thermal_generated")) {
+            body(out,t("reactor.thermal",whole(r.value("thermal_generated")),whole(r.value("thermal_capturable")),whole(100*r.value("thermal_structuralEfficiency"))));
+            body(out,t("reactor.burn_curve",String.format(java.util.Locale.ROOT,"%.4f",r.value("thermal_burnPerRod"))));
+        } else body(out, t("reactor.temperature", whole(r.value(FUEL_TEMPERATURE))));
         if (r.route() == Route.SOLID) {
             body(out, t("reactor.ports_solid"));
             return;

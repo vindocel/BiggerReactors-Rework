@@ -1,8 +1,8 @@
 package biggerreactorsrework.gametest;
 
 import biggerreactorsrework.BiggerReactors;
-import biggerreactorsrework.machine.blocks.CyaniteReprocessor;
-import biggerreactorsrework.machine.tiles.CyaniteReprocessorTile;
+import biggerreactorsrework.machine.blocks.IndustrialProcessor;
+import biggerreactorsrework.machine.tiles.IndustrialProcessorTile;
 import biggerreactorsrework.machine.recipe.ReprocessingRecipes;
 import biggerreactorsrework.items.ingots.CyaniteIngot;
 import biggerreactorsrework.items.ingots.BlutoniumIngot;
@@ -22,8 +22,8 @@ import net.neoforged.neoforge.gametest.*;
 public final class ProcessingGameTests {
     @GameTest(template="empty_7x7x7")
     public static void reprocessingSurvivesSave(GameTestHelper h) {
-        var pos=new BlockPos(2,2,2);h.setBlock(pos,CyaniteReprocessor.INSTANCE);
-        var tile=(CyaniteReprocessorTile)h.getBlockEntity(pos);tile.tick();
+        var pos=new BlockPos(2,2,2);h.setBlock(pos,IndustrialProcessor.INSTANCE);
+        var tile=(IndustrialProcessorTile)h.getBlockEntity(pos);tile.tick();
         var recipe=ReprocessingRecipes.all(h.getLevel()).getFirst().value();
         var items=tile.itemHandlerFor(null);items.insertItem(0,new ItemStack(CyaniteIngot.INSTANCE,recipe.count()+1),false);
         int energy=recipe.energy()*recipe.duration(),water=recipe.water()*recipe.duration();
@@ -31,7 +31,7 @@ public final class ProcessingGameTests {
         tile.fluidFor(null).fill(new FluidStack(recipe.fluid(),water),FluidAction.EXECUTE);
         for(int i=0;i<recipe.duration()/2;i++)tile.tick();
         var saved=tile.saveWithoutMetadata(h.getLevel().registryAccess());
-        int progress=saved.getCompound("cyaniteReprocessorState").getInt("workTime");
+        int progress=saved.getCompound("industrialProcessorState").getInt("workTime");
         h.assertTrue(progress>0,"machine made no progress");
         tile.loadWithComponents(saved,h.getLevel().registryAccess());
         for(int i=progress;i<recipe.duration();i++)tile.tick();

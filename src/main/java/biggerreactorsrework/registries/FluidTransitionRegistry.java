@@ -62,6 +62,8 @@ public class FluidTransitionRegistry {
     
     public static class FluidTransition implements ITransitionProperties {
         public double recovery = 1;
+        // Modified 2026-11-02: steam mB per ten hot mB; separate from turbine latentHeat.
+        public int steamPerBatch = 10;
         public boolean genericHot() { return gases.contains(biggerreactorsrework.fluids.HeatedCoolant.INSTANCE); }
         public final List<Fluid> liquids;
         public final List<Fluid> gases;
@@ -159,6 +161,7 @@ public class FluidTransitionRegistry {
         @ConfigValue(range = "[0,)")
         public double turbineMultiplier;
         @ConfigValue(range = "(0,1]") public double recovery = 1;
+        @ConfigValue(range = "[1,50]") public int steamPerBatch = 10;
     }
     
     private static final DatapackLoader<FluidTransitionJsonData> loader = new DatapackLoader<>(FluidTransitionJsonData::new);
@@ -218,6 +221,7 @@ public class FluidTransitionRegistry {
             
             FluidTransition transition = new FluidTransition(liquids, gases, transitionData.latentHeat, transitionData.boilingPoint, transitionData.liquidThermalConductivity, transitionData.gasThermalConductivity, transitionData.turbineMultiplier);
             transition.recovery = transitionData.recovery;
+            transition.steamPerBatch = transitionData.steamPerBatch;
             
             for (Fluid liquid : transition.liquids) {
                 if (liquidTransitions.put(liquid, transition) != null) {

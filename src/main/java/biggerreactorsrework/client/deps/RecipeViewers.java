@@ -8,11 +8,11 @@ import net.minecraft.resources.ResourceLocation;
 import net.neoforged.fml.ModList;
 
 /**
- * Opens the mod's recipe categories in the installed recipe viewer (the Cyanite Reprocessor's progress arrow is
+ * Opens the mod's recipe categories in the installed recipe viewer (the Industrial Processor's progress arrow is
  * clickable). The viewer-specific bridges are only touched when that viewer is loaded.
  */
 public final class RecipeViewers {
-    public static final ResourceLocation CYANITE_REPROCESSING = ResourceLocation.fromNamespaceAndPath(BiggerReactors.modid, "cyanite_reprocessing");
+    public static final ResourceLocation INDUSTRIAL_PROCESSING = ResourceLocation.fromNamespaceAndPath(BiggerReactors.modid, "industrial_processing");
     public static final ResourceLocation MODERATOR_BLOCK = ResourceLocation.fromNamespaceAndPath(BiggerReactors.modid, "classic/reactor_moderator_block");
     public static final ResourceLocation MODERATOR_FLUID = ResourceLocation.fromNamespaceAndPath(BiggerReactors.modid, "classic/reactor_coolant");
     public static final ResourceLocation TURBINE_COIL = ResourceLocation.fromNamespaceAndPath(BiggerReactors.modid, "classic/turbine_coil");

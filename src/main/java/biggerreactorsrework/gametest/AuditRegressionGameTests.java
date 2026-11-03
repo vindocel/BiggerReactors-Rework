@@ -93,7 +93,7 @@ public final class AuditRegressionGameTests {
     }
 
     @GameTest(template="empty_7x7x7")
-    public static void settlingPendingRadiationHonorsFullOutput(GameTestHelper h) {
+    public static void settlingDoesNotDuplicatePaidHeat(GameTestHelper h) {
         var d=OperationGameTests.description(3);
         for(int y=0;y<3;y++)d.setManifold(0,y,1,true);
         var sim=new biggerreactorsrework.multiblocks.reactor.simulation.SimulationDescription.Builder(true,true,true).build(d,
@@ -102,10 +102,10 @@ public final class AuditRegressionGameTests {
         var tank=new biggerreactorsrework.multiblocks.reactor.util.ReactorTransitionTank(sim.coolantTank());
         tank.fill(net.minecraft.world.level.material.Fluids.WATER,net.minecraft.core.component.DataComponentPatch.EMPTY,1000,false);
         sim.coolantTank().insertVapor(sim.coolantTank().perSideCapacity());
-        sim.tick(true);long fuel=sim.fuelTank().fuel();double heat=sim.fuelHeat();
+        sim.tick(true);long fuel=sim.fuelTank().fuel();double heat=sim.thermal().generated();double burn=sim.fuelTank().burnedLastTick();
         sim.settle();
-        h.assertTrue(sim.fuelTank().fuel()==fuel && sim.fuelTank().burnedLastTick()==0,"settle burned fuel into a full output");
-        h.assertTrue(sim.fuelHeat()==heat,"settle added heat despite blocked output");h.succeed();
+        h.assertTrue(sim.fuelTank().fuel()==fuel && sim.fuelTank().burnedLastTick()==burn && burn>0,"settle duplicated a paid tick");
+        h.assertTrue(sim.thermal().generated()==heat && sim.coolantTank().transitionedLastTick()==0,"settle changed heat or overfilled output");h.succeed();
     }
     @GameTest(template="empty_7x7x7")
     public static void pendingStockIsDetectedBeforeControllerLoad(GameTestHelper h) {
@@ -124,7 +124,7 @@ public final class AuditRegressionGameTests {
     }
 
     @GameTest(template="empty_7x7x7")
-    public static void reprocessorSelectsAndPullsAlternativeFluid(GameTestHelper h) {
+    public static void processorSelectsAndPullsAlternativeFluid(GameTestHelper h) {
         var manager=h.getLevel().getRecipeManager();
         var saved=new java.util.ArrayList<>(manager.getRecipes());
         try {
@@ -136,8 +136,8 @@ public final class AuditRegressionGameTests {
             recipes.add(new net.minecraft.world.item.crafting.RecipeHolder<>(net.minecraft.resources.ResourceLocation.fromNamespaceAndPath(BiggerReactors.modid,"audit_a_water"),water));
             recipes.add(new net.minecraft.world.item.crafting.RecipeHolder<>(net.minecraft.resources.ResourceLocation.fromNamespaceAndPath(BiggerReactors.modid,"audit_b_lava"),lava));
             manager.replaceRecipes(recipes);
-            h.setBlock(2,2,2,biggerreactorsrework.machine.blocks.CyaniteReprocessor.INSTANCE);
-            var tile=(biggerreactorsrework.machine.tiles.CyaniteReprocessorTile)h.getBlockEntity(new BlockPos(2,2,2));tile.tick();
+            h.setBlock(2,2,2,biggerreactorsrework.machine.blocks.IndustrialProcessor.INSTANCE);
+            var tile=(biggerreactorsrework.machine.tiles.IndustrialProcessorTile)h.getBlockEntity(new BlockPos(2,2,2));tile.tick();
             tile.itemHandlerFor(null).insertItem(0,new net.minecraft.world.item.ItemStack(biggerreactorsrework.items.ingots.CyaniteIngot.INSTANCE),false);
             var source=new net.neoforged.neoforge.fluids.capability.templates.FluidTank(1000);
             source.fill(new net.neoforged.neoforge.fluids.FluidStack(net.minecraft.world.level.material.Fluids.LAVA,1000),net.neoforged.neoforge.fluids.capability.IFluidHandler.FluidAction.EXECUTE);

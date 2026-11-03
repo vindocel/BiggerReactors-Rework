@@ -31,7 +31,7 @@ public class HeatExchangerFluidPortScreen extends ModScreen<HeatExchangerFluidPo
     private HeatExchangerFluidPortState heatExchangerFluidPortState;
 
     public HeatExchangerFluidPortScreen(HeatExchangerFluidPortContainer container, Inventory playerInventory, Component title) {
-        super(container, playerInventory, title, 176, 72);
+        super(container, playerInventory, title, 176, 92);
 
         // Initialize access port state.
         heatExchangerFluidPortState = (HeatExchangerFluidPortState) this.getMenu().getGuiPacket();
@@ -61,6 +61,10 @@ public class HeatExchangerFluidPortScreen extends ModScreen<HeatExchangerFluidPo
      * Initialize controls.
      */
     public void initControls() {
+        Biselector<HeatExchangerFluidPortContainer> maintenance=new Biselector<>(this,8,66,Component.translatable("thermal.biggerreactorsrework.maintenance_cold"),()->heatExchangerFluidPortState.maintenanceCold?1:0,SelectorColors.CYAN);
+        maintenance.onMouseReleased=(mx,my,button)->{getMenu().executeRequest("maintenanceCold",!heatExchangerFluidPortState.maintenanceCold);return true;};
+        addScreenElement(maintenance);
+
         // (Left) Direction toggle:
         Biselector<HeatExchangerFluidPortContainer> directionToggle = new Biselector<>(this, 8, 33, Component.translatable("screen.biggerreactorsrework.heat_exchanger_fluid_port.direction_toggle.tooltip"),
                 () -> heatExchangerFluidPortState.direction ? 0 : 1, SelectorColors.BLUE);
@@ -125,6 +129,7 @@ public class HeatExchangerFluidPortScreen extends ModScreen<HeatExchangerFluidPo
 
         // Render text for manual tank eject:
         graphics.drawString(this.getFont(), Component.translatable("screen.biggerreactorsrework.heat_exchanger_fluid_port.manual_dump").getString(), this.getGuiLeft() + 26, this.getGuiTop() + 53, GuiTheme.textColor(), false);
+        GuiArt.scrollingText(graphics,getFont(),Component.translatable("thermal.biggerreactorsrework.maintenance_label").getString(),getGuiLeft()+42,getGuiTop()+70,126,GuiTheme.textColor());
     }
 
     @Override

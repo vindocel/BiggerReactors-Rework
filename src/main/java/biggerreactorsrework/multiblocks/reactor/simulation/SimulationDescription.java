@@ -114,23 +114,19 @@ public class SimulationDescription implements ISerializable {
         manifoldLocations[x][y][z] = manifold;
     }
     
+    // Modified 2026-11-02: geometry is computed once per assembled description.
+    public biggerreactorsrework.thermal.ThermalModel.Geometry thermalGeometry() {
+        return biggerreactorsrework.thermal.ThermalModel.geometry(x,y,z,(a,b,c) ->
+            isControlRodAt(a,c) ? biggerreactorsrework.thermal.ThermalModel.Cell.ROD :
+            isManifoldAt(a,b,c) ? biggerreactorsrework.thermal.ThermalModel.Cell.MANIFOLD : biggerreactorsrework.thermal.ThermalModel.Cell.EMPTY);
+    }
+
     public record Builder(boolean fullPass, boolean allowOffThread, boolean allowMultiThread) {
         
         public IReactorSimulation build(SimulationDescription description, SimulationConfiguration configuration) {
             description.ensureValid();
 
-            if (!fullPass) {
-                return new TimeSlicedReactorSimulation(description, configuration);
-            }
-
-            var controlRodBatches = description.controlRodCount / Config.CONFIG.Reactor.ModeSpecific.ControlRodBatchSize;
-            if (allowMultiThread && controlRodBatches >= 2) {
-                return new FullPassReactorSimulation.MultiThreaded(description, configuration, false);
-            }
-            if (allowOffThread) {
-                return new FullPassReactorSimulation.MultiThreaded(description, configuration,true);
-            }
-            return new FullPassReactorSimulation(description, configuration);
+            return new biggerreactorsrework.multiblocks.reactor.simulation.base.BaseReactorSimulation(description, configuration);
         }
     }
     
@@ -264,7 +260,7 @@ public class SimulationDescription implements ISerializable {
                 if (map.get("heatConductivity") instanceof Number num) {
                     heatConductivity = num.doubleValue();
                 }
-                moderatorProperties.add(new ReactorModeratorRegistry.ModeratorProperties(absorption, heatEfficiency, moderation, heatConductivity));
+                moderatorProperties.add(new ReactorModeratorRegistry.ModeratorProperties(absorption, heatEfficiency, moderation, heatConductivity, passiveClass(map)));
             }
         }
         List<?> moderatorIndices = compound.getList("moderatorIndices");
@@ -318,7 +314,12 @@ public class SimulationDescription implements ISerializable {
             if (map.get("heatConductivity") instanceof Number num) {
                 heatConductivity = num.doubleValue();
             }
-            setDefaultIModeratorProperties(new ReactorModeratorRegistry.ModeratorProperties(absorption, heatEfficiency, moderation, heatConductivity));
+            setDefaultIModeratorProperties(new ReactorModeratorRegistry.ModeratorProperties(absorption, heatEfficiency, moderation, heatConductivity, passiveClass(map)));
         }
     }
+    private static biggerreactorsrework.thermal.ThermalModel.PassiveClass passiveClass(Map<?,?> map) {
+        try { return biggerreactorsrework.thermal.ThermalModel.PassiveClass.valueOf(String.valueOf(map.get("passiveClass"))); }
+        catch(IllegalArgumentException e) { return biggerreactorsrework.thermal.ThermalModel.PassiveClass.NONE; }
+    }
+
 }

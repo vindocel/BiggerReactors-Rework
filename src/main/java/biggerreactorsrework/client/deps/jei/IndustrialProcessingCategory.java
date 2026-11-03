@@ -4,7 +4,7 @@ import biggerreactorsrework.client.deps.RecipeViewerData.Cyanite;
 import biggerreactorsrework.client.deps.RecipeViewers;
 import biggerreactorsrework.items.ingots.BlutoniumIngot;
 import biggerreactorsrework.items.ingots.CyaniteIngot;
-import biggerreactorsrework.machine.blocks.CyaniteReprocessor;
+import biggerreactorsrework.machine.blocks.IndustrialProcessor;
 import mezz.jei.api.gui.builder.IRecipeLayoutBuilder;
 import mezz.jei.api.gui.builder.ITooltipBuilder;
 import mezz.jei.api.gui.drawable.IDrawable;
@@ -20,8 +20,8 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.material.Fluids;
 
 /** Cyanite reprocessing, drawn like the machine's screen. */
-public class CyaniteReprocessingCategory implements IRecipeCategory<CyaniteReprocessingCategory.Recipe> {
-    public static final RecipeType<Recipe> RECIPE_TYPE = new RecipeType<>(RecipeViewers.CYANITE_REPROCESSING, Recipe.class);
+public class IndustrialProcessingCategory implements IRecipeCategory<IndustrialProcessingCategory.Recipe> {
+    public static final RecipeType<Recipe> RECIPE_TYPE = new RecipeType<>(RecipeViewers.INDUSTRIAL_PROCESSING, Recipe.class);
 
     /** One native world recipe. */
     public record Recipe(biggerreactorsrework.machine.recipe.ReprocessingRecipe value) {
@@ -43,8 +43,8 @@ public class CyaniteReprocessingCategory implements IRecipeCategory<CyaniteRepro
 
     private final IDrawable icon;
 
-    public CyaniteReprocessingCategory(IGuiHelper gui) {
-        this.icon = gui.createDrawableItemStack(new ItemStack(CyaniteReprocessor.INSTANCE));
+    public IndustrialProcessingCategory(IGuiHelper gui) {
+        this.icon = gui.createDrawableItemStack(new ItemStack(IndustrialProcessor.INSTANCE));
     }
 
     @Override
@@ -54,7 +54,7 @@ public class CyaniteReprocessingCategory implements IRecipeCategory<CyaniteRepro
 
     @Override
     public Component getTitle() {
-        return Component.translatable("jei.biggerreactorsrework.cyanite_reprocessing");
+        return Component.translatable("jei.biggerreactorsrework.industrial_processing");
     }
 
     @Override

@@ -2,8 +2,8 @@ package biggerreactorsrework;
 
 // Modified 2026-10-26: scope derived sprites to synchronized generic coolant profiles.
 
-import biggerreactorsrework.machine.client.CyaniteReprocessorScreen;
-import biggerreactorsrework.machine.containers.CyaniteReprocessorContainer;
+import biggerreactorsrework.machine.client.IndustrialProcessorScreen;
+import biggerreactorsrework.machine.containers.IndustrialProcessorContainer;
 import biggerreactorsrework.multiblocks.heatexchanger.client.HeatExchangerFluidPortScreen;
 import biggerreactorsrework.multiblocks.heatexchanger.client.HeatExchangerTerminalScreen;
 import biggerreactorsrework.multiblocks.heatexchanger.containers.HeatExchangerFluidPortContainer;
@@ -70,6 +70,7 @@ public final class BiggerReactorsClient {
             }
         });
         modBus.addListener(biggerreactorsrework.compat.DarkModeCompat::onInterModEnqueue);
+        biggerreactorsrework.compat.DarkModeCompat.register();
         modBus.addListener(BiggerReactorsClient::registerScreens);
         modBus.addListener(BiggerReactorsClient::registerRenderers);
         modBus.addListener(BiggerReactorsClient::registerClientExtensions);
@@ -79,6 +80,12 @@ public final class BiggerReactorsClient {
         modBus.addListener((net.neoforged.fml.event.lifecycle.FMLClientSetupEvent event) -> event.enqueueWork(() ->
                 biggerreactorsrework.items.tools.GuideBookItem.open = biggerreactorsrework.client.guide.GuideBookAnimation::requestOpen));
         net.neoforged.neoforge.common.NeoForge.EVENT_BUS.addListener(biggerreactorsrework.client.guide.GuideBookAnimation::onClientTick);
+        // Added 2026-11-03: a short description of how Frozen Obsidian behaves.
+        net.neoforged.neoforge.common.NeoForge.EVENT_BUS.addListener((net.neoforged.neoforge.event.entity.player.ItemTooltipEvent event) -> {
+            if (event.getItemStack().is(biggerreactorsrework.fluids.FrozenObsidian.INSTANCE.getBucket()))
+                event.getToolTip().add(net.minecraft.network.chat.Component.translatable("fluid.biggerreactorsrework.frozen_obsidian.description")
+                        .withStyle(net.minecraft.ChatFormatting.GRAY, net.minecraft.ChatFormatting.ITALIC));
+        });
         modBus.addListener((net.neoforged.neoforge.client.event.ModelEvent.RegisterAdditional event) -> {
             biggerreactorsrework.client.guide.GuideBookRenderer.models().forEach(id -> event.register(net.minecraft.client.resources.model.ModelResourceLocation.standalone(id)));
         });
@@ -139,7 +146,7 @@ public final class BiggerReactorsClient {
         event.register(TurbineFluidPortContainer.INSTANCE, TurbineFluidPortScreen::new);
         event.register(HeatExchangerTerminalContainer.INSTANCE, HeatExchangerTerminalScreen::new);
         event.register(HeatExchangerFluidPortContainer.INSTANCE, HeatExchangerFluidPortScreen::new);
-        event.register(CyaniteReprocessorContainer.INSTANCE, CyaniteReprocessorScreen::new);
+        event.register(IndustrialProcessorContainer.INSTANCE, IndustrialProcessorScreen::new);
         event.register(biggerreactorsrework.multiblocks.battery.containers.BatteryTerminalContainer.INSTANCE,
                 biggerreactorsrework.multiblocks.battery.client.BatteryTerminalScreen::new);
         event.register(biggerreactorsrework.multiblocks.battery.containers.BatteryEnergyPortContainer.INSTANCE,

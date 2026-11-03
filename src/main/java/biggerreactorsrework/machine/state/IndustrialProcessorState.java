@@ -1,6 +1,6 @@
 package biggerreactorsrework.machine.state;
 
-import biggerreactorsrework.machine.tiles.CyaniteReprocessorTile;
+import biggerreactorsrework.machine.tiles.IndustrialProcessorTile;
 import biggerreactorsrework.core.client.gui.GuiSync;
 
 import javax.annotation.Nonnull;
@@ -8,7 +8,7 @@ import javax.annotation.Nullable;
 import java.util.HashMap;
 import java.util.Map;
 
-public class CyaniteReprocessorState implements GuiSync.IGUIPacket {
+public class IndustrialProcessorState implements GuiSync.IGUIPacket {
 
     /**
      * The number of ticks the current item has processed for.
@@ -59,10 +59,10 @@ public class CyaniteReprocessorState implements GuiSync.IGUIPacket {
     /**
      * The tile whose information this belongs to.
      */
-    CyaniteReprocessorTile cyaniteReprocessorTile;
+    IndustrialProcessorTile industrialProcessorTile;
 
-    public CyaniteReprocessorState(CyaniteReprocessorTile cyaniteReprocessorTile) {
-        this.cyaniteReprocessorTile = cyaniteReprocessorTile;
+    public IndustrialProcessorState(IndustrialProcessorTile industrialProcessorTile) {
+        this.industrialProcessorTile = industrialProcessorTile;
     }
 
     @Override
@@ -91,7 +91,7 @@ public class CyaniteReprocessorState implements GuiSync.IGUIPacket {
     @Nullable
     @Override
     public Map<?, ?> write() {
-        this.cyaniteReprocessorTile.updateState();
+        this.industrialProcessorTile.updateState();
         HashMap<String, Object> data = new HashMap<>();
 
         data.put("workTime", this.workTime);

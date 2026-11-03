@@ -66,7 +66,7 @@ public final class CoolantTransferGameTests {
         var tank = terminal(h).controller().coolantTank();
         h.assertTrue(inlet.fill(new FluidStack(LiquidObsidian.INSTANCE,1000), FluidAction.EXECUTE)==1000, "obsidian insertion failed");
         var internal = (CoolantTank) terminal(h).controller().simulation().coolantTank();
-        internal.absorbRF(-1000.5);
+        internal.absorbRF(-100.05);
         ReactorCoolantPortTile port = h.getBlockEntity(OUTLET);
         port.setDirection(ReactorAccessPort.PortDirection.OUTLET);
         var hot = tank.getFluidInTank(1).copy();
@@ -159,7 +159,7 @@ public final class CoolantTransferGameTests {
                 // A single small batch fits one connection's share: keep producing so distribution can alternate.
                 if(state.rounds<4 && tank.vaporAmount()==0) {
                     state.rounds++;
-                    ((CoolantTank) terminal(h).controller().simulation().coolantTank()).absorbRF(-1000.5);
+                    ((CoolantTank) terminal(h).controller().simulation().coolantTank()).absorbRF(-100.05);
                     state.total += tank.vaporAmount();
                 }
                 h.assertTrue(state.rounds==4 && tank.vaporAmount()==0,"heated coolant still in the reactor: "+tank.vaporAmount()+", round "+state.rounds);

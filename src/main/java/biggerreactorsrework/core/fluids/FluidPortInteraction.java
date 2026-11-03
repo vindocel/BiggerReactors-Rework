@@ -21,12 +21,12 @@ public final class FluidPortInteraction {
             return InteractionResult.CONSUME;
         }
         if (level.isClientSide()) return InteractionResult.SUCCESS;
-        // Plain buckets cannot retain fluid components such as heated-coolant identity.
+        // Plain buckets cannot retain fluid components; only heated coolant has a bucket that keeps its origin.
         if (held.is(net.minecraft.world.item.Items.BUCKET)) {
             var handler = level.getCapability(Capabilities.FluidHandler.BLOCK, pos, hit.getDirection());
             if (handler != null) for (int tank = 0; tank < handler.getTanks(); tank++) {
                 var fluid = handler.getFluidInTank(tank);
-                if (!fluid.isEmpty() && !fluid.getComponentsPatch().isEmpty()) return InteractionResult.CONSUME;
+                if (!fluid.isEmpty() && !fluid.getComponentsPatch().isEmpty() && fluid.getFluid() != biggerreactorsrework.fluids.HeatedCoolant.INSTANCE) return InteractionResult.CONSUME;
             }
         }
         return FluidUtil.interactWithFluidHandler(player, hand, level, pos, hit.getDirection())

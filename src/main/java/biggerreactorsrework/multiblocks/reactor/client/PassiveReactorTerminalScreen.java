@@ -114,7 +114,7 @@ public class PassiveReactorTerminalScreen extends ModScreen<ReactorTerminalConta
 
         // Render the other text:
         CommonReactorTerminalScreen.renderStatusText(graphics, this, reactorState.reactorActivity, reactorState.doAutoEject,
-                reactorState.fuelHeatStored, reactorState.fuelUsageRate, reactorState.reactivityRate,
+                reactorState.heatGenerated, reactorState.fuelUsageRate, reactorState.structuralEfficiency,
                 this.imageWidth - 6);
 
         // Render text for output rate:

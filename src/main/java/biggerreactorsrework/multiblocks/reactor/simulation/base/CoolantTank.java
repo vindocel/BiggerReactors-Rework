@@ -41,70 +41,22 @@ public class CoolantTank extends HeatBody implements IReactorSimulation.ICoolant
         this.setInfinite(true);
     }
     
-    @Override
-    public double transferWith(HeatBody body, double rfkt) {
-        if (transitionProperties == null) {
-            environmentalLossLastTick=0;
-            maxTransitionedLastTick = 0;
-            transitionedLastTick = 0;
-            rfTransferredLastTick = 0;
-            return 0;
-        }
-        
-        rfkt *= transitionProperties.liquidRFMKT();
-        
-        double multiplier = (double) liquidAmount / (double) perSideCapacity;
-        rfkt *= Math.max(multiplier, 0.01);
-        
-        double newTemp = body.temperature() - transitionProperties.boilingPoint();
-        newTemp *= Math.exp(-rfkt / body.rfPerKelvin());
-        newTemp += transitionProperties.boilingPoint();
-        
-        double toTransfer = newTemp - body.temperature();
-        toTransfer *= body.rfPerKelvin();
-        
-        toTransfer = absorbRF(toTransfer);
-        
-        body.absorbRF(toTransfer);
-        return -toTransfer;
+    // Modified 2026-11-02: only this tick's paid budget is processed; no productive thermal remainder.
+    public biggerreactorsrework.thermal.ThermalModel.Conversion convertHeat(double heat, biggerreactorsrework.thermal.ThermalModel.Preset preset) {
+        boolean water=transitionProperties instanceof FluidTransitionRegistry.FluidTransition t && t.liquids.contains(net.minecraft.world.level.material.Fluids.WATER);
+        var result=biggerreactorsrework.thermal.ThermalModel.convert(heat,transitionProperties==null?0:liquidAmount,
+                Math.max(0,perSideCapacity-vaporAmount),preset.heatPerCoolant(),water?preset.steamBudget():preset.heatPerCoolant());
+        maxTransitionedLastTick=biggerreactorsrework.thermal.ThermalModel.wholeUnits(heat/preset.heatPerCoolant());
+        transitionedLastTick=result.volume();rfTransferredLastTick=(long)result.processed();
+        liquidAmount-=result.volume();vaporAmount+=result.volume();
+        environmentalLossLastTick=result.processLoss();thermalRemainder=0;return result;
     }
-    
-    @Override
-    public double absorbRF(double rf) {
-        environmentalLossLastTick=0;
-        if (!Double.isFinite(rf) || rf > 0 || transitionProperties == null) {
-            maxTransitionedLastTick = 0;
-            transitionedLastTick = 0;
-            rfTransferredLastTick = 0;
-            return 0;
-        }
-        
-        rf = Math.abs(rf)*outputPressure.limit();
-    
-        final double effectiveLatentHeat = transitionProperties.latentHeat();
-        
-        double captured=rf*recovery();
-        long toTransition = (long) (captured / effectiveLatentHeat);
-        final long maxTransitionable = Math.min(liquidAmount, perSideCapacity - vaporAmount);
-        
-        maxTransitionedLastTick = toTransition;
-        var result=PhaseChange.accept(captured,effectiveLatentHeat,maxTransitionable,thermalRemainder);
-        toTransition = result.units();
-        thermalRemainder = result.remainder();
-        transitionedLastTick = toTransition;
-        
-        liquidAmount -= transitionedLastTick;
-        vaporAmount += transitionedLastTick;
-        
-        rf = result.accepted();
-        rfTransferredLastTick = (long) rf;
-        environmentalLossLastTick=rf/recovery()-rf;
-        rf+=environmentalLossLastTick;
-        rf *= -1;
-        
-        return rf;
+    @Override public double transferWith(HeatBody body,double rfkt) { return 0; }
+    @Override public double absorbRF(double rf) {
+        if(!Double.isFinite(rf) || rf>=0)return 0;
+        return -convertHeat(-rf,configuration.thermal()).processed();
     }
-    
+
     @Override
     public void dumpLiquid() {
         liquidAmount = 0;
@@ -120,18 +72,21 @@ public class CoolantTank extends HeatBody implements IReactorSimulation.ICoolant
     
     @Override
     public long insertLiquid(long amount) {
+        amount = Math.max(-liquidAmount,Math.min(amount,Math.max(0,perSideCapacity-liquidAmount)));
         liquidAmount += amount;
         return amount;
     }
     
     @Override
     public long extractLiquid(long amount) {
+        amount = Math.max(0,Math.min(amount,liquidAmount));
         liquidAmount -= amount;
         return amount;
     }
     
     @Override
     public long insertVapor(long amount) {
+        amount = Math.max(-vaporAmount,Math.min(amount,Math.max(0,perSideCapacity-vaporAmount)));
         vaporAmount += amount;
         if(amount<0)outputPressure.released(vaporAmount,perSideCapacity);
         return amount;
@@ -139,6 +94,7 @@ public class CoolantTank extends HeatBody implements IReactorSimulation.ICoolant
     
     @Override
     public long extractVapor(long amount) {
+        amount = Math.max(0,Math.min(amount,vaporAmount));
         vaporAmount -= amount;
         if(amount>0)outputPressure.released(vaporAmount,perSideCapacity);
         return amount;
@@ -239,7 +195,7 @@ public class CoolantTank extends HeatBody implements IReactorSimulation.ICoolant
         var compound = new DataCompound();
         compound.put("liquidAmount", liquidAmount);
         compound.put("gasAmount", vaporAmount);
-        compound.put("thermalRemainder",thermalRemainder);
+        compound.put("thermalModelVersion",biggerreactorsrework.thermal.ThermalModel.VERSION);
         compound.put("outputPressure",outputPressure.save());
         return compound;
     }
@@ -250,8 +206,7 @@ public class CoolantTank extends HeatBody implements IReactorSimulation.ICoolant
         vaporAmount = compound.getLong("gasAmount");
         liquidAmount=Math.max(0,liquidAmount);
         vaporAmount=Math.max(0,vaporAmount);
-        thermalRemainder=Math.max(0,compound.getDouble("thermalRemainder"));
-        if(!Double.isFinite(thermalRemainder))thermalRemainder=0;
+        thermalRemainder=0;
         outputPressure.load(compound.getCompound("outputPressure").toROBNMap());
     }
 }

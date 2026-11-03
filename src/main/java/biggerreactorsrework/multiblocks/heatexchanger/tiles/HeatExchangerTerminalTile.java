@@ -72,6 +72,10 @@ public class HeatExchangerTerminalTile extends HeatExchangerBaseTile implements 
         state.evaporatorExhaustFluidAmount = controller().evaporatorTank.fluidAmountInTank(1);
         
         
+        state.balancedOutputs=controller().balancedOutputs;
+        state.thermalInput=controller().thermalExchange.inputKJ;state.thermalUseful=controller().thermalExchange.usefulKJ;
+        var cfg=biggerreactorsrework.Config.CONFIG.Reactor;
+        state.thermalScale=controller().thermalLinks*cfg.Thermal.HotMBPerLink*cfg.Thermal.KJPerCoolant;
         state.condenserChannelTemperature = controller().condenserHeatBody.temperature();
         state.condenserChannelFlowRate = controller().condenserTank.transitionedLastTick();
         

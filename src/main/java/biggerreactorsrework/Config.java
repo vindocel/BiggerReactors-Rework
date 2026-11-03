@@ -38,6 +38,8 @@ public class Config {
     }
     
     public static final class Reactor {
+        // Modified 2026-11-02: replaces legacy radiation/temperature production coefficients.
+        @ConfigValue public final biggerreactorsrework.thermal.ThermalSettings Thermal = new biggerreactorsrework.thermal.ThermalSettings();
         @ConfigValue(comment = "Optional fuel yields in mB per item, separated by semicolons: mod:item=2000;#mod:tag=1000. Zero disables an entry. Existing stored fuel is unchanged.")
         public final String CustomFuelEntries;
         { CustomFuelEntries = ""; }
@@ -239,7 +241,7 @@ public class Config {
         @ConfigValue(range = "(0,)", advanced = ConfigValue.BoolOption.True)
         public final long TankVolumePerBlock;
         @ConfigValue(range = "(0,)", advanced = ConfigValue.BoolOption.True)
-        public final double FluidPerBladeLinerKilometre;
+        public final double BladeSteamPerKilometre;
         @ConfigValue(range = "(0,)", advanced = ConfigValue.BoolOption.True)
         public final double RotorAxialMassPerShaft;
         @ConfigValue(range = "(0,)", advanced = ConfigValue.BoolOption.True)
@@ -256,7 +258,8 @@ public class Config {
         {
             FlowRatePerBlock = 5000;
             TankVolumePerBlock = 10000;
-            FluidPerBladeLinerKilometre = 20;
+            // Modified 2026-11-03: six times the former blade capacity, under a new key so saved values are not inherited.
+            BladeSteamPerKilometre = 120;
             RotorAxialMassPerShaft = 100;
             RotorAxialMassPerBlade = 100;
             FrictionDragMultiplier = 0.0005;
@@ -316,6 +319,9 @@ public class Config {
         
         @ConfigValue(range = "(0,)", advanced = ConfigValue.BoolOption.True)
         public final long ChannelTankVolumePerBlock;
+        // Added 2026-11-03: water/steam channels always hold four times the coolant channel volume per block.
+        public static final int EVAPORATOR_VOLUME_RATIO = 4;
+        public long evaporatorTankVolumePerBlock() { return ChannelTankVolumePerBlock * EVAPORATOR_VOLUME_RATIO; }
         @ConfigValue(range = "(0,)", advanced = ConfigValue.BoolOption.True)
         public final double ChannelToChannelHeatConductivityMultiplier;
         @ConfigValue(range = "(0,)", advanced = ConfigValue.BoolOption.True)
@@ -386,7 +392,7 @@ public class Config {
     @ConfigValue
     public final Battery Battery = new Battery();
     
-    public static final class CyaniteReprocessor {
+    public static final class IndustrialProcessor {
         @ConfigValue(range = "(0,)", comment = "Max transfer rate of fluids and energy.")
         public final int TransferRate;
         @ConfigValue(range = "(0,)", comment = "Max energy capacity.")
@@ -411,5 +417,5 @@ public class Config {
     }
     
     @ConfigValue
-    public final CyaniteReprocessor CyaniteReprocessor = new CyaniteReprocessor();
+    public final IndustrialProcessor IndustrialProcessor = new IndustrialProcessor();
 }

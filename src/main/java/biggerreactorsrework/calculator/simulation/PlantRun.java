@@ -21,7 +21,7 @@ public final class PlantRun {
 
     public record Result(boolean converged, long ticks, int window, double power, double powerMin, double powerMax, double fuel,
                          double steam, double hotFlow, double rpm, double fuelTemperature, double reactorLimit, double exchangerLimit,
-                         double drift, long primaryError, long waterError, VirtualPlant.Stocks stocks) {
+                         double drift, long primaryError, long waterError, VirtualPlant.Stocks stocks, biggerreactorsrework.thermal.ThermalSnapshot thermal) {
         public double efficiency() { return fuel <= 0 ? 0 : power / fuel; }
     }
 
@@ -63,7 +63,7 @@ public final class PlantRun {
         int n = power.size();
         return new Result(false, ticks, window, n == 0 ? 0 : power.get(n - 1), 0, 0, n == 0 ? 0 : fuel.get(n - 1), plant.turbineFlow(),
                 plant.reactorConversion(), plant.rpm(), plant.fuelTemperature(), plant.reactorOutputLimit(), plant.exchangerOutputLimit(),
-                1, primaryError, waterError, plant.stocks());
+                1, primaryError, waterError, plant.stocks(),plant.thermal());
     }
 
     private static Result sample(VirtualPlant plant, Settings settings, int window, long ticks, BooleanSupplier cancelled,
@@ -96,7 +96,7 @@ public final class PlantRun {
         double max = power.stream().mapToDouble(Double::doubleValue).max().orElse(0);
         double drift = mean <= 0 ? 0 : Math.abs(power.getLast() - power.getFirst()) / mean;
         return new Result(true, ticks, window, mean, min, max, fuel / samples, steam / samples, hot / samples, rpm / samples,
-                temperature / samples, reactorLimit / samples, exchangerLimit / samples, drift, primaryError, waterError, plant.stocks());
+                temperature / samples, reactorLimit / samples, exchangerLimit / samples, drift, primaryError, waterError, plant.stocks(),plant.thermal());
     }
 
     private static boolean agree(List<Double> values, int n, double tolerance) {

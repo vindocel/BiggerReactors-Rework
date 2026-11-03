@@ -91,7 +91,7 @@ public class CommonReactorTerminalScreen extends ModScreen<ReactorTerminalContai
         // (Left) Temperature readout tooltip:
         TooltipElement<ReactorTerminalContainer> temperatureReadoutTooltip = new TooltipElement<>(screen, 26, 19, 77, 16, Component.empty());
         temperatureReadoutTooltip.onTick = () -> {
-            temperatureReadoutTooltip.tooltip = Component.literal(String.format("%.3f K", reactorState.fuelHeatStored));
+            temperatureReadoutTooltip.tooltip = Component.literal(String.format("%.3f kJ/t", reactorState.heatGenerated));
         };
         screen.addScreenElement(temperatureReadoutTooltip);
 
@@ -113,7 +113,7 @@ public class CommonReactorTerminalScreen extends ModScreen<ReactorTerminalContai
         // (Left) Reactivity rate readout tooltip:
         TooltipElement<ReactorTerminalContainer> reactivityRateTooltip = new TooltipElement<>(screen, 26, 76, 77, 16, Component.empty());
         reactivityRateTooltip.onTick = () -> {
-            reactivityRateTooltip.tooltip = Component.literal(String.format("%.1f%%", (reactorState.reactivityRate * 100.0)));
+            reactivityRateTooltip.tooltip = Component.literal(String.format("%.1f%%", (reactorState.structuralEfficiency * 100.0)));
         };
         screen.addScreenElement(reactivityRateTooltip);
 
@@ -152,6 +152,11 @@ public class CommonReactorTerminalScreen extends ModScreen<ReactorTerminalContai
             return true;
         };
         screen.addScreenElement(autoEjectToggle);
+
+        Biselector<ReactorTerminalContainer> balance = new Biselector<>(screen,8,130,
+            Component.translatable("thermal.biggerreactorsrework.balanced_outputs"),()->reactorState.balancedOutputs?1:0,SelectorColors.CYAN);
+        balance.onMouseReleased=(mX,mY,btn)->{screen.getMenu().executeRequest("balancedOutputs",!reactorState.balancedOutputs);return true;};
+        screen.addScreenElement(balance);
 
         // (Left) Manual eject button:
         InteractiveElement<ReactorTerminalContainer> manualEjectButton = new InteractiveElement<>(screen, 8, 130, 15, 15, 0, 0, Component.translatable("screen.biggerreactorsrework.reactor_terminal.manual_eject.tooltip"));
@@ -192,12 +197,12 @@ public class CommonReactorTerminalScreen extends ModScreen<ReactorTerminalContai
 
         // (Top) Case heat gauge:
         RenderedElement<ReactorTerminalContainer> caseHeatGauge = new RenderedElement<>(screen, 131, 25, 18, 64, 0, 152, Component.empty());
-        caseHeatGauge.onRender = (@Nonnull GuiGraphics graphics, int mX, int mY) -> CommonReactorTerminalScreen.renderHeatGauge(graphics, caseHeatGauge, reactorState.caseHeatStored, Config.CONFIG.Reactor.GUI.HeatDisplayMax);
+        caseHeatGauge.onRender = (@Nonnull GuiGraphics graphics, int mX, int mY) -> CommonReactorTerminalScreen.renderHeatGauge(graphics, caseHeatGauge, reactorState.heatCapturable, reactorState.heatScale);
         screen.addScreenElement(caseHeatGauge);
 
         // (Top) Fuel heat gauge:
         RenderedElement<ReactorTerminalContainer> fuelHeatGauge = new RenderedElement<>(screen, 153, 25, 18, 64, 0, 152, Component.empty());
-        fuelHeatGauge.onRender = (@Nonnull GuiGraphics graphics, int mX, int mY) -> CommonReactorTerminalScreen.renderHeatGauge(graphics, fuelHeatGauge, reactorState.fuelHeatStored, Config.CONFIG.Reactor.GUI.HeatDisplayMax);
+        fuelHeatGauge.onRender = (@Nonnull GuiGraphics graphics, int mX, int mY) -> CommonReactorTerminalScreen.renderHeatGauge(graphics, fuelHeatGauge, reactorState.heatGenerated, reactorState.heatScale);
         screen.addScreenElement(fuelHeatGauge);
     }
 
@@ -221,7 +226,7 @@ public class CommonReactorTerminalScreen extends ModScreen<ReactorTerminalContai
     public static void renderHeatGauge(@Nonnull GuiGraphics graphics, @Nonnull RenderedElement<ReactorTerminalContainer> symbol, double heatStored, double heatCapacity) {
         GaugeBar.drawHeat(graphics, symbol.x, symbol.y, heatStored, heatCapacity);
         // Update tooltip.
-        symbol.tooltip = Component.literal(String.format("%.1f/%.1f K", heatStored, heatCapacity));
+        symbol.tooltip = Component.literal(String.format("%.1f/%.1f kJ/t", heatStored, heatCapacity));
     }
 
     /**
@@ -265,10 +270,10 @@ public class CommonReactorTerminalScreen extends ModScreen<ReactorTerminalContai
      */
     public static void renderStatusText(@Nonnull GuiGraphics graphics, @Nonnull ModScreen<ReactorTerminalContainer> screen, ReactorActivity reactorActivity, boolean doAutoEject, double heatStored, double fuelUsageRate, double reactivityRate, int statusRight) {
         // Render text for reactor temperature (no fancy suffix for Celsius):
-        renderReadout(graphics, screen, String.format("%.0f K", heatStored), 23);
+        renderReadout(graphics, screen, RenderHelper.formatValue(heatStored,1,"kJ/t",true), 23);
 
         // Render text for fuel consumption rate:
-        renderReadout(graphics, screen, RenderHelper.formatValue(fuelUsageRate, 3, "mB/t", true), 61);
+        renderReadout(graphics, screen, String.format(java.util.Locale.ROOT,"%.4f mB/t",fuelUsageRate), 61);
 
         // Render text for reactivity rate (no fancy suffix for percentages):
         renderReadout(graphics, screen, String.format("%.1f%%", (reactivityRate * 100.0)), 80);
@@ -291,6 +296,8 @@ public class CommonReactorTerminalScreen extends ModScreen<ReactorTerminalContai
             // Text for disabled auto-ejection:
             GuiArt.scrollingText(graphics, screen.getFont(), Component.translatable("screen.biggerreactorsrework.reactor_terminal.auto_eject_toggle.disabled").getString(), screen.getGuiLeft() + 42, screen.getGuiTop() + 118, statusRight - 42, GuiTheme.textColor());
         }
+
+        GuiArt.scrollingText(graphics,screen.getFont(),Component.translatable("thermal.biggerreactorsrework.balanced_outputs").getString(),screen.getGuiLeft()+42,screen.getGuiTop()+134,statusRight-42,GuiTheme.textColor());
 
         // Render text for manual eject button:
         // TODO: Remove with reactor manual eject.

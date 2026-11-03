@@ -497,19 +497,8 @@ public class TurbineMultiblockController extends MultiblockController<TurbineBas
             }
         }
         
-        Matrix4f blockToRotorRelativePos = new Matrix4f();
-        if (rotationAxis.getY() == -1) {
-            blockToRotorRelativePos.rotate((float) (Math.PI), 0, 0, 1);
-        } else {
-            Vector3f cross = new Vector3f();
-            cross.set(rotationAxis.getX(), rotationAxis.getY(), rotationAxis.getZ());
-            cross.cross(0, 1, 0);
-            cross.normalize();
-            blockToRotorRelativePos.rotate((float) (Math.PI / 2.0), cross);
-        }
-        blockToRotorRelativePos.translate(-bearingPos.getX(), -bearingPos.getY(), -bearingPos.getZ());
-        
-        Vector4f translationPos = new Vector4f();
+        // Modified 2026-11-02: floating world-space rotations/truncation changed coil radius at large coordinates.
+        int shaftAxis=rotationAxis.getX()!=0?0:rotationAxis.getY()!=0?1:2;
         Util.chunkCachedBlockStateIteration(new Vector3i(1).add(min()), new Vector3i(-1).add(max()), level, (blockState, pos) -> {
             Block block = blockState.getBlock();
             if (block instanceof AirBlock) {
@@ -517,14 +506,17 @@ public class TurbineMultiblockController extends MultiblockController<TurbineBas
             }
             TurbineCoilRegistry.CoilData coilData = TurbineCoilRegistry.getCoilData(block);
             if (coilData != null) {
-                translationPos.set(pos, 1);
-                translationPos.mul(blockToRotorRelativePos);
-                simulation.setCoilData((int) translationPos.x, (int) translationPos.z, coilData);
+                var radial=biggerreactorsrework.multiblocks.turbine.simulation.CoilCoordinates.relative(
+                    pos.x(),pos.y(),pos.z(),bearingPos.getX(),bearingPos.getY(),bearingPos.getZ(),shaftAxis);
+                simulation.setCoilData(radial.first(),radial.second(),coilData);
             }
         });
         simulation.updateInternalValues();
     }
-    
+
+    public boolean balancedOutputs;
+    private int outputCursor;
+
     @Override
     public void tick() {
         
@@ -545,7 +537,14 @@ public class TurbineMultiblockController extends MultiblockController<TurbineBas
         biggerreactorsrework.core.energy.PowerDistribution.distribute(simulation.battery().stored(), powerTaps,
                 TurbinePowerTapTile::distributePower, simulation.battery()::extract);
 
-        for (TurbineFluidPortTile coolantPort : fluidPorts) {
+        if (balancedOutputs) {
+            var tank = simulation.fluidTank();
+            var targets = fluidPorts.stream().sorted(java.util.Comparator.comparing(TurbineFluidPortTile::getBlockPos))
+                    .<java.util.function.LongUnaryOperator>map(p -> p::offerFluid).toList();
+            var result = biggerreactorsrework.thermal.BalancedOutput.distribute(tank.liquidAmount(), targets, outputCursor);
+            if (result.accepted() > 0) tank.drain(tank.liquidType(), net.minecraft.core.component.DataComponentPatch.EMPTY, result.accepted(), false);
+            outputCursor = result.nextCursor();
+        } else for (TurbineFluidPortTile coolantPort : fluidPorts) {
             if (simulation.fluidTank().liquidAmount() < 0) {
                 break;
             }
@@ -575,6 +574,7 @@ public class TurbineMultiblockController extends MultiblockController<TurbineBas
         turbineState.turbineActivity = simulation.active() ? TurbineActivity.ACTIVE : TurbineActivity.INACTIVE;
         turbineState.ventState = simulation.ventState();
         turbineState.coilStatus = simulation.coilEngaged();
+        turbineState.balancedOutputs = balancedOutputs;
         
         turbineState.flowRate = simulation.nominalFlowRate();
         turbineState.efficiencyRate = simulation.bladeEfficiencyLastTick();
@@ -613,6 +613,11 @@ public class TurbineMultiblockController extends MultiblockController<TurbineBas
         rows.add(biggerreactorsrework.core.util.Statistics.rate("conversion_current",simulation.flowLastTick()));
         rows.add(biggerreactorsrework.core.util.Statistics.row("rpm",String.format(java.util.Locale.ROOT,"%.1f RPM",simulation.RPM())));
         rows.add(biggerreactorsrework.core.util.Statistics.row("efficiency",String.format(java.util.Locale.ROOT,"%.1f %%",100*simulation.bladeEfficiencyLastTick())));
+        if(simulation instanceof biggerreactorsrework.multiblocks.turbine.simulation.modern.ModernTurbineSimulation modern){
+            rows.add(biggerreactorsrework.core.util.Statistics.rate("blade_capacity",(long)modern.bladeCapacity()));
+            rows.add(biggerreactorsrework.core.util.Statistics.rate("coil_capacity",modern.coilCapacity()));
+            rows.add(biggerreactorsrework.core.util.Statistics.row("fe_per_mb",String.format(java.util.Locale.ROOT,"%.2f FE/mB",modern.fePerMB())));
+        }
         rows.add(biggerreactorsrework.core.util.Statistics.power("power_gross",simulation.FEGeneratedLastTick()));
         if(potential!=null){rows.add(biggerreactorsrework.core.util.Statistics.rate("conversion_potential",potential.converted()));rows.add(biggerreactorsrework.core.util.Statistics.rate("flow_efficient",potential.burn()));rows.add(biggerreactorsrework.core.util.Statistics.power("power_potential",potential.power()));}
         else rows.add(biggerreactorsrework.core.util.Statistics.row("power_potential","@status:calculating"));
@@ -661,6 +666,13 @@ public class TurbineMultiblockController extends MultiblockController<TurbineBas
                 setVentState(VentState.fromInt((int) requestData));
                 return;
             }
+            case "balancedOutputs": {
+                if (requestData instanceof Boolean value) {
+                    balancedOutputs = value;
+                    dirty();
+                }
+                return;
+            }
         }
     }
     
@@ -693,11 +705,16 @@ public class TurbineMultiblockController extends MultiblockController<TurbineBas
     
     @Nonnull
     public CompoundTag write() {
-        return simulation().serializeNBT();
+        var nbt = simulation().serializeNBT();
+        nbt.putBoolean("balancedOutputs", balancedOutputs);
+        nbt.putInt("outputCursor", outputCursor);
+        return nbt;
     }
-    
+
     public void read(CompoundTag compound) {
         simulation.deserializeNBT(compound);
+        balancedOutputs = compound.getBoolean("balancedOutputs");
+        outputCursor = compound.getInt("outputCursor");
         updateBlockStates = true;
     }
     

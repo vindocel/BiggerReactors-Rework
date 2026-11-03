@@ -8,7 +8,7 @@ import biggerreactorsrework.client.deps.RecipeViewerData.Stats;
 import biggerreactorsrework.client.deps.RecipeViewers;
 import biggerreactorsrework.items.ingots.BlutoniumIngot;
 import biggerreactorsrework.items.ingots.CyaniteIngot;
-import biggerreactorsrework.machine.blocks.CyaniteReprocessor;
+import biggerreactorsrework.machine.blocks.IndustrialProcessor;
 import biggerreactorsrework.multiblocks.reactor.blocks.ReactorTerminal;
 import biggerreactorsrework.multiblocks.turbine.blocks.TurbineTerminal;
 import dev.emi.emi.api.EmiEntrypoint;
@@ -31,10 +31,10 @@ import java.util.List;
  */
 @EmiEntrypoint
 public class BiggerReactorsEmiPlugin implements EmiPlugin {
-    static final EmiStack REPROCESSOR = EmiStack.of(CyaniteReprocessor.INSTANCE);
+    static final EmiStack PROCESSOR = EmiStack.of(IndustrialProcessor.INSTANCE);
     static final EmiStack REACTOR_TERMINAL = EmiStack.of(ReactorTerminal.INSTANCE);
     static final EmiStack TURBINE_TERMINAL = EmiStack.of(TurbineTerminal.INSTANCE);
-    static final EmiRecipeCategory CYANITE_REPROCESSING = new EmiRecipeCategory(RecipeViewers.CYANITE_REPROCESSING, REPROCESSOR);
+    static final EmiRecipeCategory INDUSTRIAL_PROCESSING = new EmiRecipeCategory(RecipeViewers.INDUSTRIAL_PROCESSING, PROCESSOR);
     static final EmiRecipeCategory MODERATOR_BLOCK = new EmiRecipeCategory(RecipeViewers.MODERATOR_BLOCK, REACTOR_TERMINAL);
     static final EmiRecipeCategory MODERATOR_FLUID = new EmiRecipeCategory(RecipeViewers.MODERATOR_FLUID, REACTOR_TERMINAL);
     static final EmiRecipeCategory TURBINE_COIL = new EmiRecipeCategory(RecipeViewers.TURBINE_COIL, TURBINE_TERMINAL);
@@ -50,12 +50,12 @@ public class BiggerReactorsEmiPlugin implements EmiPlugin {
                 }
             }
         });
-        registry.addCategory(CYANITE_REPROCESSING);
+        registry.addCategory(INDUSTRIAL_PROCESSING);
         registry.addCategory(MODERATOR_BLOCK);
         registry.addCategory(MODERATOR_FLUID);
         registry.addCategory(TURBINE_COIL);
         registry.addCategory(HEAT_EXCHANGE);
-        registry.addWorkstation(CYANITE_REPROCESSING, REPROCESSOR);
+        registry.addWorkstation(INDUSTRIAL_PROCESSING, PROCESSOR);
         registry.addWorkstation(MODERATOR_BLOCK, REACTOR_TERMINAL);
         registry.addWorkstation(MODERATOR_FLUID, REACTOR_TERMINAL);
         registry.addWorkstation(TURBINE_COIL, TURBINE_TERMINAL);
@@ -125,7 +125,7 @@ public class BiggerReactorsEmiPlugin implements EmiPlugin {
     private static final class Reprocessing extends BasicEmiRecipe {
         private final biggerreactorsrework.machine.recipe.ReprocessingRecipe recipe;
         Reprocessing(net.minecraft.world.item.crafting.RecipeHolder<biggerreactorsrework.machine.recipe.ReprocessingRecipe> holder) {
-            super(CYANITE_REPROCESSING, holder.id(),
+            super(INDUSTRIAL_PROCESSING, holder.id(),
                     Cyanite.WIDTH, Cyanite.HEIGHT);
             recipe = holder.value();
             inputs.add(EmiIngredient.of(recipe.ingredient(), recipe.count()));

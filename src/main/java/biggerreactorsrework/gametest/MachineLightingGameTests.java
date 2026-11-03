@@ -5,8 +5,8 @@ import biggerreactorsrework.core.util.Util;
 import biggerreactorsrework.util.GuideStructures;
 import biggerreactorsrework.fluids.*;
 import biggerreactorsrework.items.ingots.CyaniteIngot;
-import biggerreactorsrework.machine.blocks.CyaniteReprocessor;
-import biggerreactorsrework.machine.tiles.CyaniteReprocessorTile;
+import biggerreactorsrework.machine.blocks.IndustrialProcessor;
+import biggerreactorsrework.machine.tiles.IndustrialProcessorTile;
 import biggerreactorsrework.multiblocks.battery.blocks.BatteryTerminal;
 import biggerreactorsrework.multiblocks.battery.state.BatteryActivity;
 import biggerreactorsrework.multiblocks.heatexchanger.blocks.HeatExchangerTerminalBlock;
@@ -54,8 +54,8 @@ public final class MachineLightingGameTests {
 
     @GameTest(template="empty_7x7x7")
     public static void industrialLightFollowsProcessingAndPauses(GameTestHelper h) {
-        var pos=new BlockPos(2,2,2);h.setBlock(pos,CyaniteReprocessor.INSTANCE);
-        var tile=(CyaniteReprocessorTile)h.getBlockEntity(pos);tile.tick();
+        var pos=new BlockPos(2,2,2);h.setBlock(pos,IndustrialProcessor.INSTANCE);
+        var tile=(IndustrialProcessorTile)h.getBlockEntity(pos);tile.tick();
         tile.energyFor(null).receiveEnergy(500,false);
         tile.fluidFor(null).fill(new FluidStack(Fluids.WATER,1000),FluidAction.EXECUTE);
         tile.itemHandlerFor(null).insertItem(0,new ItemStack(CyaniteIngot.INSTANCE,2),false);tile.tick();

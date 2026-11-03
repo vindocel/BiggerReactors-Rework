@@ -1,4 +1,6 @@
+// Modified 2026-11-02: fixed process ratio; legacy turbine properties retained.
 {
+  "steamPerBatch": 20,
   "liquidType": "registry",
   "liquid": "biggerreactorsrework:liquid_obsidian",
   "gasType": "registry",

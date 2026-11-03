@@ -39,12 +39,9 @@ public record SimulationConfiguration(
         double fuelAbsorptionScalingMultiplier,
         double fuelAbsorptionScalingShiftMultiplier,
         double fuelAbsorptionScalingRateExponentMultiplier,
-        double fuelRadScalingMultiplier
-        // TODO: find a way to do this too, maybe
-        //       these aren't reloadable values at all
-        //       SimUtil actually uses these very early in startup
-//        double irradiationDistance
-//        double simulationRays
+        double fuelRadScalingMultiplier,
+        biggerreactorsrework.thermal.ThermalModel.Preset thermal
+
 ) {
     
     public SimulationConfiguration(double ambientTemperature, boolean passivelyCooled) {
@@ -85,7 +82,8 @@ public record SimulationConfiguration(
                 reactorConfig.FuelAbsorptionScalingMultiplier,
                 reactorConfig.FuelAbsorptionScalingShiftMultiplier,
                 reactorConfig.FuelAbsorptionScalingRateExponentMultiplier,
-                reactorConfig.fuelRadScalingMultiplier
+                reactorConfig.fuelRadScalingMultiplier,
+                reactorConfig.Thermal.snapshot(reactorConfig.PerFuelRodCapacity, reactorConfig.CoolantTankAmountPerFuelRod)
         );
     }
     
@@ -125,7 +123,8 @@ public record SimulationConfiguration(
                 ((Number)jsonMap.get("fuelAbsorptionScalingMultiplier")).doubleValue(),
                 ((Number)jsonMap.get("fuelAbsorptionScalingShiftMultiplier")).doubleValue(),
                 ((Number)jsonMap.get("fuelAbsorptionScalingRateExponentMultiplier")).doubleValue(),
-                ((Number)jsonMap.get("fuelRadScalingMultiplier")).doubleValue()
+                ((Number)jsonMap.get("fuelRadScalingMultiplier")).doubleValue(),
+                Config.CONFIG.Reactor.Thermal.snapshot(Config.CONFIG.Reactor.PerFuelRodCapacity,Config.CONFIG.Reactor.CoolantTankAmountPerFuelRod)
         );
     }
 }

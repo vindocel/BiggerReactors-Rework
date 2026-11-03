@@ -41,9 +41,9 @@ public record ReprocessingRecipe(Ingredient ingredient, int count, ItemStack res
             Codec.intRange(-1, Integer.MAX_VALUE).optionalFieldOf("fluid_per_operation", -1).forGetter(ReprocessingRecipe::fluidPerOperation)
     ).apply(i, ReprocessingRecipe::new));
 
-    public int duration() { return ticks < 0 ? Config.CONFIG.CyaniteReprocessor.TotalWorkTime : ticks; }
-    public int energy() { return energyPerTick < 0 ? Config.CONFIG.CyaniteReprocessor.EnergyConsumptionPerTick : energyPerTick; }
-    public int water() { return fluidPerTick < 0 ? Config.CONFIG.CyaniteReprocessor.WaterConsumptionPerTick : fluidPerTick; }
+    public int duration() { return ticks < 0 ? Config.CONFIG.IndustrialProcessor.TotalWorkTime : ticks; }
+    public int energy() { return energyPerTick < 0 ? Config.CONFIG.IndustrialProcessor.EnergyConsumptionPerTick : energyPerTick; }
+    public int water() { return fluidPerTick < 0 ? Config.CONFIG.IndustrialProcessor.WaterConsumptionPerTick : fluidPerTick; }
     public boolean producesFluid() { return !fluidResult.isEmpty(); }
     @Override public FluidStack fluidResult() { return fluidResult.copy(); }
     public long totalFluid() { return fluidPerOperation >= 0 ? fluidPerOperation : (long) water()*duration(); }

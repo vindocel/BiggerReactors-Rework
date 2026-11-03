@@ -59,7 +59,7 @@ public final class ReactorCoolantReassemblyGameTests {
         h.assertTrue(tank.liquidType()==Fluids.WATER && tank.liquidAmount()==1000,"refill has incorrect identity or amount");h.succeed();
     }
     @GameTest(template="empty_7x7x7",timeoutTicks=160)
-    public static void mountedReactorWithLegacyLavaStopsUntilBothTanksAreCleared(GameTestHelper h) {
+    public static void mountedReactorWithLegacyLavaPreservesStockAndDiscardsHeat(GameTestHelper h) {
         build(h);
         h.startSequence().thenWaitUntil(()->h.assertTrue(terminal(h).nullableController()!=null && terminal(h).controller().simulation()!=null,"reactor not ready"))
           .thenExecute(()->{
@@ -70,7 +70,7 @@ public final class ReactorCoolantReassemblyGameTests {
             var old=tank.serializeNBT();old.putString("outFluid","minecraft:lava");tank.deserializeNBT(old);
             c.setActive(biggerreactorsrework.multiblocks.reactor.state.ReactorActivity.ACTIVE);
             for(int i=0;i<40;i++)c.tick();
-            h.assertTrue(c.simulation().fuelTank().fuel()==5000,"invalid mounted reactor burned fuel");
+            h.assertTrue(c.simulation().fuelTank().usableFuel()<5000 && c.simulation().coolantTank().transitionedLastTick()==0,"quarantine saved fuel or processed an invalid profile");
             h.assertTrue(tank.hasUnresolvedProfile() && tank.activeTransition()==null,"invalid reactor reinterpreted lava");
             h.assertTrue(tank.liquidAmount()==5000 && tank.vaporAmount()==1000,"invalid reactor changed its volumes");
             tank.dumpLiquid();

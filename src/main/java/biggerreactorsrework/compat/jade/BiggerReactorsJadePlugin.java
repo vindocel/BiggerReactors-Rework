@@ -2,8 +2,8 @@ package biggerreactorsrework.compat.jade;
 
 import biggerreactorsrework.BiggerReactors;
 import biggerreactorsrework.core.energy.IEnergyHandler;
-import biggerreactorsrework.machine.blocks.CyaniteReprocessor;
-import biggerreactorsrework.machine.tiles.CyaniteReprocessorTile;
+import biggerreactorsrework.machine.blocks.IndustrialProcessor;
+import biggerreactorsrework.machine.tiles.IndustrialProcessorTile;
 import biggerreactorsrework.multiblocks.battery.blocks.BatteryBaseBlock;
 import biggerreactorsrework.multiblocks.battery.tiles.BatteryBaseTile;
 import biggerreactorsrework.multiblocks.reactor.blocks.ReactorPowerTap;
@@ -23,7 +23,7 @@ import snownee.jade.api.view.HideThingsExtensionProvider;
 
 /**
  * Jade integration: replaces Jade's energy line with the mod's own energy bar on the
- * Cyanite Reprocessor, the reactor and turbine power taps and every block of an assembled battery.
+ * Industrial Processor, the reactor and turbine power taps and every block of an assembled battery.
  */
 @WailaPlugin
 public class BiggerReactorsJadePlugin implements IWailaPlugin {
@@ -33,12 +33,12 @@ public class BiggerReactorsJadePlugin implements IWailaPlugin {
 
     @Override
     public void register(IWailaCommonRegistration registration) {
-        registration.registerBlockDataProvider(EnergyData.INSTANCE, CyaniteReprocessorTile.class);
+        registration.registerBlockDataProvider(EnergyData.INSTANCE, IndustrialProcessorTile.class);
         registration.registerBlockDataProvider(EnergyData.INSTANCE, ReactorPowerTapTile.class);
         registration.registerBlockDataProvider(EnergyData.INSTANCE, TurbinePowerTapTile.class);
         registration.registerBlockDataProvider(EnergyData.INSTANCE, BatteryBaseTile.class);
         // The mod's energy bar replaces Jade's own energy line.
-        registration.registerEnergyStorage(HideThingsExtensionProvider.instance(), CyaniteReprocessorTile.class);
+        registration.registerEnergyStorage(HideThingsExtensionProvider.instance(), IndustrialProcessorTile.class);
         registration.registerEnergyStorage(HideThingsExtensionProvider.instance(), ReactorPowerTapTile.class);
         registration.registerEnergyStorage(HideThingsExtensionProvider.instance(), TurbinePowerTapTile.class);
         registration.registerEnergyStorage(HideThingsExtensionProvider.instance(), BatteryBaseTile.class);
@@ -46,7 +46,7 @@ public class BiggerReactorsJadePlugin implements IWailaPlugin {
 
     @Override
     public void registerClient(IWailaClientRegistration registration) {
-        registration.registerBlockComponent(EnergyBarComponent.INSTANCE, CyaniteReprocessor.class);
+        registration.registerBlockComponent(EnergyBarComponent.INSTANCE, IndustrialProcessor.class);
         registration.registerBlockComponent(EnergyBarComponent.INSTANCE, ReactorPowerTap.class);
         registration.registerBlockComponent(EnergyBarComponent.INSTANCE, TurbinePowerTap.class);
         registration.registerBlockComponent(EnergyBarComponent.INSTANCE, BatteryBaseBlock.class);
@@ -57,7 +57,7 @@ public class BiggerReactorsJadePlugin implements IWailaPlugin {
 
         @Override
         public void appendServerData(CompoundTag data, BlockAccessor accessor) {
-            if (accessor.getBlockEntity() instanceof CyaniteReprocessorTile tile) {
+            if (accessor.getBlockEntity() instanceof IndustrialProcessorTile tile) {
                 IEnergyStorage storage = tile.energyFor(null);
                 data.putLong(ENERGY, storage.getEnergyStored());
                 data.putLong(CAPACITY, storage.getMaxEnergyStored());

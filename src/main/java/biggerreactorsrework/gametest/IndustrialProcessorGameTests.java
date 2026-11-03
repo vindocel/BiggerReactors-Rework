@@ -1,8 +1,8 @@
 package biggerreactorsrework.gametest;
 
 import biggerreactorsrework.BiggerReactors;
-import biggerreactorsrework.machine.blocks.CyaniteReprocessor;
-import biggerreactorsrework.machine.tiles.CyaniteReprocessorTile;
+import biggerreactorsrework.machine.blocks.IndustrialProcessor;
+import biggerreactorsrework.machine.tiles.IndustrialProcessorTile;
 import biggerreactorsrework.items.ingots.*;
 import biggerreactorsrework.fluids.*;
 import biggerreactorsrework.registries.*;
@@ -20,9 +20,9 @@ import net.neoforged.neoforge.gametest.*;
 @GameTestHolder(BiggerReactors.modid)
 @PrefixGameTestTemplate(false)
 public final class IndustrialProcessorGameTests {
-    private static CyaniteReprocessorTile machine(GameTestHelper h) {
-        h.setBlock(2,2,2,CyaniteReprocessor.INSTANCE);
-        var t=(CyaniteReprocessorTile)h.getBlockEntity(new BlockPos(2,2,2));t.tick();
+    private static IndustrialProcessorTile machine(GameTestHelper h) {
+        h.setBlock(2,2,2,IndustrialProcessor.INSTANCE);
+        var t=(IndustrialProcessorTile)h.getBlockEntity(new BlockPos(2,2,2));t.tick();
         for(int i=0;i<10;i++)t.energyFor(null).receiveEnergy(500,false);
         t.fluidFor(null).fill(new FluidStack(Fluids.WATER,1000),FluidAction.EXECUTE);return t;
     }
@@ -94,7 +94,7 @@ public final class IndustrialProcessorGameTests {
         for(int i=0;i<199;i++)t.tick();
         t.getItemHandler().setStackInSlot(0,new ItemStack(Items.OBSIDIAN));t.tick();
         h.assertTrue(t.fluidFor(null).getFluidInTank(1).isEmpty(),"cyanite progress reused for obsidian");
-        var tag=t.saveWithFullMetadata(h.getLevel().registryAccess());tag.getCompound("cyaniteReprocessorState").putInt("energyStored",0);
+        var tag=t.saveWithFullMetadata(h.getLevel().registryAccess());tag.getCompound("industrialProcessorState").putInt("energyStored",0);
         t.loadWithComponents(tag,h.getLevel().registryAccess());for(int i=0;i<300;i++)t.tick();
         h.assertTrue(t.fluidFor(null).getFluidInTank(1).isEmpty(),"no-energy processor produced fluid");h.succeed();
     }

@@ -27,7 +27,7 @@ record GuideReprocessing(ResourceLocation id) implements GuideElement {
         screen.itemSlot(g,input,slot,row,mx,my);
         if(usesFluid){slot+=20;screen.fluidSlot(g,recipe.fluid(),slot,row,mx,my);}
         GuideElements.arrow(g,slot+25,row+5);
-        screen.itemSlot(g,new ItemStack(biggerreactorsrework.machine.blocks.CyaniteReprocessor.INSTANCE),slot+48,row,mx,my);
+        screen.itemSlot(g,new ItemStack(biggerreactorsrework.machine.blocks.IndustrialProcessor.INSTANCE),slot+48,row,mx,my);
         GuideElements.arrow(g,slot+73,row+5);
         if(recipe.producesFluid())screen.fluidSlot(g,recipe.fluidResult().getFluid(),slot+96,row,mx,my);
         else screen.itemSlot(g,recipe.result(),slot+96,row,mx,my);

@@ -50,18 +50,19 @@ public final class CoolingGameTests {
         h.succeed();
     }
     @GameTest(template="empty_7x7x7")
-    public static void missingColdAndBlockedHotStopBurning(GameTestHelper h) {
+    public static void missingColdAndBlockedHotWasteFuel(GameTestHelper h) {
         var s=reactor(4,false);
         for(int i=0;i<100;i++)s.tick(true);
-        h.assertTrue(s.fuelTank().fuel()==12000,"reactor burned without cold coolant");
+        h.assertTrue(s.fuelTank().fuel()<12000 && s.thermal().missingCoolant()>0,"starvation incorrectly saved fuel");
         var tank=new ReactorTransitionTank(s.coolantTank());
         tank.fill(LiquidObsidian.INSTANCE,DataComponentPatch.EMPTY,120000,false);
         for(int i=0;i<200;i++)s.tick(true);
+        tank.fill(LiquidObsidian.INSTANCE,DataComponentPatch.EMPTY,120000,false);
         s.coolantTank().insertVapor(120000-s.coolantTank().vaporAmount());
         long fuel=s.fuelTank().fuel();
         for(int i=0;i<100;i++)s.tick(true);
-        h.assertTrue(s.fuelTank().fuel()==fuel,"blocked outlet still consumes fuel");
-        h.assertTrue(s.burnFraction()==0,"blocked outlet did not reduce reaction");
+        h.assertTrue(s.fuelTank().fuel()<fuel && s.thermal().blockedOutput()>0,"blocked output incorrectly saved fuel");
+        h.assertTrue(s.coolantTank().transitionedLastTick()==0,"blocked output overfilled");
         h.succeed();
     }
     @GameTest(template="empty_7x7x7")
@@ -104,8 +105,8 @@ public final class CoolingGameTests {
         var wrapper=new ReactorTransitionTank(s.coolantTank());
         wrapper.fill(LiquidObsidian.INSTANCE,DataComponentPatch.EMPTY,1000,false);
         var tank=(biggerreactorsrework.multiblocks.reactor.simulation.base.CoolantTank)s.coolantTank();
-        double removed=-tank.absorbRF(-100);
-        double stored=tank.vaporAmount()*tank.transition().latentHeat()+tank.save().getDouble("thermalRemainder");
+        double removed=-tank.absorbRF(-10);
+        double stored=tank.vaporAmount()*biggerreactorsrework.thermal.ThermalModel.Preset.DEFAULT.heatPerCoolant();
         h.assertTrue(Math.abs(removed-stored-tank.environmentalLossLastTick)<1e-8,"heat balance includes unaccounted energy");
         h.assertTrue(tank.liquidAmount()+tank.vaporAmount()==1000,"heat recovery created fluid");
         h.succeed();

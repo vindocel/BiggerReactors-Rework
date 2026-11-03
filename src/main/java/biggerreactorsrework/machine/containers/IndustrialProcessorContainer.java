@@ -9,9 +9,9 @@ import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.items.IItemHandler;
 import net.neoforged.neoforge.items.SlotItemHandler;
-import biggerreactorsrework.machine.blocks.CyaniteReprocessor;
-import biggerreactorsrework.machine.tiles.CyaniteReprocessorTile;
-import biggerreactorsrework.machine.tiles.impl.CyaniteReprocessorItemHandler;
+import biggerreactorsrework.machine.blocks.IndustrialProcessor;
+import biggerreactorsrework.machine.tiles.IndustrialProcessorTile;
+import biggerreactorsrework.machine.tiles.impl.IndustrialProcessorItemHandler;
 import biggerreactorsrework.core.client.gui.GuiSync;
 import biggerreactorsrework.core.registry.ContainerSupplier;
 import biggerreactorsrework.core.registry.RegisterContainer;
@@ -19,32 +19,32 @@ import biggerreactorsrework.core.registry.RegisterContainer;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-@RegisterContainer(name = "cyanite_reprocessor")
-public class CyaniteReprocessorContainer extends AbstractContainerMenu implements GuiSync.IGUIPacketProvider {
+@RegisterContainer(name = "industrial_processor")
+public class IndustrialProcessorContainer extends AbstractContainerMenu implements GuiSync.IGUIPacketProvider {
 
     @RegisterContainer.Type
-    public static MenuType<CyaniteReprocessorContainer> INSTANCE;
+    public static MenuType<IndustrialProcessorContainer> INSTANCE;
     @RegisterContainer.Supplier
-    public static final ContainerSupplier SUPPLIER = CyaniteReprocessorContainer::new;
+    public static final ContainerSupplier SUPPLIER = IndustrialProcessorContainer::new;
 
-    private static final int MACHINE_SLOTS = CyaniteReprocessorItemHandler.SLOTS;
+    private static final int MACHINE_SLOTS = IndustrialProcessorItemHandler.SLOTS;
 
     private final Player player;
-    private final CyaniteReprocessorTile tileEntity;
+    private final IndustrialProcessorTile tileEntity;
 
-    public CyaniteReprocessorContainer(int windowId, BlockPos blockPos, Player player) {
-        super(CyaniteReprocessorContainer.INSTANCE, windowId);
+    public IndustrialProcessorContainer(int windowId, BlockPos blockPos, Player player) {
+        super(IndustrialProcessorContainer.INSTANCE, windowId);
         this.player = player;
-        this.tileEntity = (CyaniteReprocessorTile) player.level().getBlockEntity(blockPos);
+        this.tileEntity = (IndustrialProcessorTile) player.level().getBlockEntity(blockPos);
         this.getGuiPacket();
 
         // Populate machine slots.
         if (this.tileEntity != null) {
             IItemHandler handler = tileEntity.getItemHandler();
             // Add input slot.
-            this.addSlot(new SlotItemHandler(handler, CyaniteReprocessorItemHandler.INPUT_SLOT_INDEX, 56, 56));
+            this.addSlot(new SlotItemHandler(handler, IndustrialProcessorItemHandler.INPUT_SLOT_INDEX, 56, 56));
             // Add output slot.
-            this.addSlot(new SlotItemHandler(handler, CyaniteReprocessorItemHandler.OUTPUT_SLOT_INDEX, 116, 56));
+            this.addSlot(new SlotItemHandler(handler, IndustrialProcessorItemHandler.OUTPUT_SLOT_INDEX, 116, 56));
         }
 
         // Populate player inventory.
@@ -57,7 +57,7 @@ public class CyaniteReprocessorContainer extends AbstractContainerMenu implement
     @Nullable
     @Override
     public GuiSync.IGUIPacket getGuiPacket() {
-        return this.tileEntity.cyaniteReprocessorState;
+        return this.tileEntity.industrialProcessorState;
     }
 
     @Override
@@ -74,7 +74,7 @@ public class CyaniteReprocessorContainer extends AbstractContainerMenu implement
     public boolean stillValid(@Nonnull Player player) {
         assert this.tileEntity.getLevel() != null;
         return stillValid(ContainerLevelAccess.create(tileEntity.getLevel(), tileEntity.getBlockPos()),
-                player, CyaniteReprocessor.INSTANCE);
+                player, IndustrialProcessor.INSTANCE);
     }
 
     @Nonnull

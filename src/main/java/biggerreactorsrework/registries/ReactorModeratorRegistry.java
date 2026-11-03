@@ -33,9 +33,12 @@ import java.util.Map;
 import java.util.function.BiConsumer;
 
 
+// Modified 2026-11-02: explicit passive classes travel with authoritative material properties.
 public class ReactorModeratorRegistry {
     
     public interface IModeratorProperties extends ROBNObject {
+        default biggerreactorsrework.thermal.ThermalModel.PassiveClass passiveClass() { return biggerreactorsrework.thermal.ThermalModel.PassiveClass.NONE; }
+
         double absorption();
         
         double heatEfficiency();
@@ -47,6 +50,7 @@ public class ReactorModeratorRegistry {
         @Override
         default Map<String, Object> toROBNMap() {
             final Map<String, Object> map = new HashMap<>();
+            map.put("passiveClass", passiveClass().name());
             map.put("absorption", absorption());
             map.put("heatEfficiency", heatEfficiency());
             map.put("moderation", moderation());
@@ -64,12 +68,19 @@ public class ReactorModeratorRegistry {
         
         public static final ModeratorProperties EMPTY_MODERATOR = new ModeratorProperties(0, 0, 1, 0);
         
+        public final biggerreactorsrework.thermal.ThermalModel.PassiveClass passiveClass;
+        @Override public biggerreactorsrework.thermal.ThermalModel.PassiveClass passiveClass() { return passiveClass; }
         public final double absorption;
         public final double heatEfficiency;
         public final double moderation;
         public final double heatConductivity;
         
         public ModeratorProperties(double absorption, double heatEfficiency, double moderation, double heatConductivity) {
+            this(absorption, heatEfficiency, moderation, heatConductivity, biggerreactorsrework.thermal.ThermalModel.PassiveClass.NONE);
+        }
+
+        public ModeratorProperties(double absorption, double heatEfficiency, double moderation, double heatConductivity, biggerreactorsrework.thermal.ThermalModel.PassiveClass passiveClass) {
+            this.passiveClass = java.util.Objects.requireNonNull(passiveClass);
             this.absorption = absorption;
             this.heatEfficiency = heatEfficiency;
             this.moderation = moderation;
@@ -77,7 +88,7 @@ public class ReactorModeratorRegistry {
         }
         
         public ModeratorProperties(IModeratorProperties properties) {
-            this(properties.absorption(), properties.heatEfficiency(), properties.moderation(), properties.heatConductivity());
+            this(properties.absorption(), properties.heatEfficiency(), properties.moderation(), properties.heatConductivity(), properties.passiveClass());
         }
         
         @Override
@@ -141,6 +152,8 @@ public class ReactorModeratorRegistry {
     
         @ConfigValue(range = "[0,)")
         double conductivity;
+        @ConfigValue
+        biggerreactorsrework.thermal.ThermalModel.PassiveClass passiveClass = biggerreactorsrework.thermal.ThermalModel.PassiveClass.NONE;
     }
     
     private static final DatapackLoader<ReactorModeratorJsonData> dataLoader = new DatapackLoader<>(ReactorModeratorJsonData::new);
@@ -154,7 +167,7 @@ public class ReactorModeratorRegistry {
         
         for (ReactorModeratorJsonData moderatorData : data) {
             
-            ModeratorProperties properties = new ModeratorProperties(moderatorData.absorption, moderatorData.efficiency, moderatorData.moderation, moderatorData.conductivity);
+            ModeratorProperties properties = new ModeratorProperties(moderatorData.absorption, moderatorData.efficiency, moderatorData.moderation, moderatorData.conductivity, moderatorData.passiveClass);
     
             switch (moderatorData.type) {
                 case tag -> {
@@ -241,6 +254,7 @@ public class ReactorModeratorRegistry {
                 properties.add(value.getValue().heatEfficiency);
                 properties.add(value.getValue().moderation);
                 properties.add(value.getValue().heatConductivity);
+                properties.add(value.getValue().passiveClass.ordinal());
                 propertiesList.add(properties);
             }
             final var compound = new DataCompound();
@@ -262,6 +276,7 @@ public class ReactorModeratorRegistry {
             for (int i = 0; i < list.size(); i++) {
                 var blockLocation = list.get(i);
                 var properties = propertiesList.get(i);
+                if(properties.size()!=5 || !Double.isFinite(properties.getDouble(4)) || properties.getDouble(4)!=Math.rint(properties.getDouble(4)) || properties.getDouble(4)<0 || properties.getDouble(4)>=biggerreactorsrework.thermal.ThermalModel.PassiveClass.values().length)continue;
                 var id=ResourceLocation.tryParse(blockLocation);
                 if(id==null||!BuiltInRegistries.BLOCK.containsKey(id))continue;
                 final var block = BuiltInRegistries.BLOCK.get(id);
@@ -272,7 +287,7 @@ public class ReactorModeratorRegistry {
                     BiggerReactors.LOGGER.debug("Block " + block + " added as moderator on client");
                 }
                 moderatorBlocks.add(block);
-                moderatorProperties.put(block, new ModeratorProperties(properties.getDouble(0), properties.getDouble(1), properties.getDouble(2), properties.getDouble(3)));
+                moderatorProperties.put(block, new ModeratorProperties(properties.getDouble(0), properties.getDouble(1), properties.getDouble(2), properties.getDouble(3), biggerreactorsrework.thermal.ThermalModel.PassiveClass.values()[(int)properties.getDouble(4)]));
             }
         }
         

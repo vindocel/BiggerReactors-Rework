@@ -183,7 +183,7 @@ public class ActiveReactorTerminalScreen extends ModScreen<ReactorTerminalContai
 
         // Render the other text:
         CommonReactorTerminalScreen.renderStatusText(graphics, this, reactorState.reactorActivity, reactorState.doAutoEject,
-                reactorState.fuelHeatStored, reactorState.fuelUsageRate, reactorState.reactivityRate, STATUS_RIGHT);
+                reactorState.heatGenerated, reactorState.fuelUsageRate, reactorState.structuralEfficiency, STATUS_RIGHT);
 
         // Render text for output rate:
         CommonReactorTerminalScreen.renderReadout(graphics, this, String.format("%,.1f mB/t", reactorState.reactorOutputRate), 42);

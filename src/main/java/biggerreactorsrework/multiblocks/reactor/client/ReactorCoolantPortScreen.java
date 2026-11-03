@@ -29,7 +29,7 @@ public class ReactorCoolantPortScreen extends ModScreen<ReactorCoolantPortContai
     private ReactorCoolantPortState reactorCoolantPortState;
 
     public ReactorCoolantPortScreen(ReactorCoolantPortContainer container, Inventory playerInventory, Component title) {
-        super(container, playerInventory, title, 142, 56);
+        super(container, playerInventory, title, 142, 76);
 
         // Initialize access port state.
         reactorCoolantPortState = (ReactorCoolantPortState) this.getMenu().getGuiPacket();
@@ -59,6 +59,10 @@ public class ReactorCoolantPortScreen extends ModScreen<ReactorCoolantPortContai
      * Initialize controls.
      */
     public void initControls() {
+        Biselector<ReactorCoolantPortContainer> maintenance=new Biselector<>(this,8,50,Component.translatable("thermal.biggerreactorsrework.maintenance_cold"),()->reactorCoolantPortState.maintenanceCold?1:0,SelectorColors.CYAN);
+        maintenance.onMouseReleased=(mx,my,button)->{getMenu().executeRequest("maintenanceCold",!reactorCoolantPortState.maintenanceCold);return true;};
+        addScreenElement(maintenance);
+
         // (Left) Direction toggle:
         Biselector<ReactorCoolantPortContainer> directionToggle = new Biselector<>(this, 8, 18, Component.translatable("screen.biggerreactorsrework.reactor_coolant_port.direction_toggle.tooltip"),
                 () -> reactorCoolantPortState.direction ? 0 : 1, SelectorColors.RED);
@@ -115,6 +119,7 @@ public class ReactorCoolantPortScreen extends ModScreen<ReactorCoolantPortContai
 
         // Render text for manual tank eject:
         graphics.drawString(this.getFont(), Component.translatable("screen.biggerreactorsrework.reactor_coolant_port.manual_dump").getString(), this.getGuiLeft() + 26, this.getGuiTop() + 38, GuiTheme.textColor(), false);
+        GuiArt.scrollingText(graphics,getFont(),Component.translatable("thermal.biggerreactorsrework.maintenance_label").getString(),getGuiLeft()+42,getGuiTop()+54,92,GuiTheme.textColor());
     }
 
     @Override

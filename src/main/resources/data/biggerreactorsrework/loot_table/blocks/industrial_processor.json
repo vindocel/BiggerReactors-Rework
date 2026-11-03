@@ -1,5 +1,5 @@
 {
-  "neoforge:conditions": [ { "type": "neoforge:item_exists", "item": "biggerreactorsrework:cyanite_reprocessor" } ],
+  "neoforge:conditions": [ { "type": "neoforge:item_exists", "item": "biggerreactorsrework:industrial_processor" } ],
   "type": "minecraft:block",
   "pools": [
     {
@@ -8,7 +8,7 @@
       "entries": [
         {
           "type": "minecraft:item",
-          "name": "biggerreactorsrework:cyanite_reprocessor"
+          "name": "biggerreactorsrework:industrial_processor"
         }
       ],
       "conditions": [

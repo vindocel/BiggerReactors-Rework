@@ -25,6 +25,13 @@ public class Battery extends HeatBody implements IReactorSimulation.IBattery, IS
         this.capacity = capacity;
     }
     
+    // Modified 2026-11-02: accept a paid thermal budget without reusing legacy heat transfer.
+    public long generate(long potential) {
+        generatedLastTick=Math.max(0,potential);
+        long accepted=Math.min(generatedLastTick,Math.max(0,capacity-stored));
+        stored+=accepted;return accepted;
+    }
+
     @Override
     public double transferWith(HeatBody other, double rfkt) {
         double newTemp = other.temperature() - temperature();
@@ -77,6 +84,6 @@ public class Battery extends HeatBody implements IReactorSimulation.IBattery, IS
     
     @Override
     public void load(@Nonnull DataCompound compound) {
-        stored = Math.max(0, Math.min(capacity, compound.getLong("storedPower")));
+        stored = Math.max(0, compound.getLong("storedPower"));
     }
 }

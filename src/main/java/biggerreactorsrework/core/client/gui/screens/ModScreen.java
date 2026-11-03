@@ -66,7 +66,7 @@ public abstract class ModScreen<T extends AbstractContainerMenu> extends Abstrac
         return ((GuiSync.IGUIPacketProvider) this.menu).machinePos();
     }
 
-    /** Left side, away from the reprocessor's existing right-side routing tab. */
+    /** Left side, away from the processor's existing right-side routing tab. */
     public int settingsTabX() { return this.leftPos - GuiFrame.TAB_SIZE; }
     public int settingsTabY() { return this.topPos + 4; }
 

@@ -14,7 +14,7 @@ import biggerreactorsrework.BiggerReactors;
 import biggerreactorsrework.Config;
 import biggerreactorsrework.client.deps.RecipeViewerData;
 import biggerreactorsrework.client.deps.RecipeViewers;
-import biggerreactorsrework.machine.blocks.CyaniteReprocessor;
+import biggerreactorsrework.machine.blocks.IndustrialProcessor;
 import biggerreactorsrework.client.deps.jei.classic.reactor.BlockModeratorCategory;
 import biggerreactorsrework.client.deps.jei.classic.reactor.FluidModeratorCategory;
 import biggerreactorsrework.client.deps.jei.classic.turbine.CoilCategory;
@@ -53,7 +53,7 @@ public class BiggerReactorsJEIPlugin implements IModPlugin {
             return;
         }
         IGuiHelper guiHelper = registration.getJeiHelpers().getGuiHelper();
-        registration.addRecipeCategories(new CyaniteReprocessingCategory(guiHelper));
+        registration.addRecipeCategories(new IndustrialProcessingCategory(guiHelper));
         registration.addRecipeCategories(new BlockModeratorCategory(guiHelper));
         registration.addRecipeCategories(new FluidModeratorCategory(guiHelper));
         registration.addRecipeCategories(new CoilCategory(guiHelper));
@@ -77,7 +77,7 @@ public class BiggerReactorsJEIPlugin implements IModPlugin {
         if (!enabled()) {
             return;
         }
-        registration.addRecipeCatalyst(new ItemStack(CyaniteReprocessor.INSTANCE), CyaniteReprocessingCategory.RECIPE_TYPE);
+        registration.addRecipeCatalyst(new ItemStack(IndustrialProcessor.INSTANCE), IndustrialProcessingCategory.RECIPE_TYPE);
         registration.addRecipeCatalyst(new ItemStack(ReactorTerminal.INSTANCE), BlockModeratorCategory.RECIPE_TYPE);
         registration.addRecipeCatalyst(new ItemStack(ReactorTerminal.INSTANCE), FluidModeratorCategory.RECIPE_TYPE);
         registration.addRecipeCatalyst(new ItemStack(TurbineTerminal.INSTANCE), CoilCategory.RECIPE_TYPE);
@@ -94,7 +94,7 @@ public class BiggerReactorsJEIPlugin implements IModPlugin {
         if (!enabled() || !Config.CONFIG.EnableJEIIntegration) {
             return;
         }
-        registration.addRecipes(CyaniteReprocessingCategory.RECIPE_TYPE, biggerreactorsrework.machine.recipe.ReprocessingRecipes.all(net.minecraft.client.Minecraft.getInstance().level).stream().map(holder -> new CyaniteReprocessingCategory.Recipe(holder.value())).toList());
+        registration.addRecipes(IndustrialProcessingCategory.RECIPE_TYPE, biggerreactorsrework.machine.recipe.ReprocessingRecipes.all(net.minecraft.client.Minecraft.getInstance().level).stream().map(holder -> new IndustrialProcessingCategory.Recipe(holder.value())).toList());
         registration.addRecipes(CoilCategory.RECIPE_TYPE, RecipeViewerData.coils().stream()
                 .map(c -> new CoilCategory.Recipe(c.block(), c.data())).toList());
         registration.addRecipes(FluidModeratorCategory.RECIPE_TYPE, RecipeViewerData.coolants().stream()

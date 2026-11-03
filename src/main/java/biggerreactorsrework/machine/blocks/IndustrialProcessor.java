@@ -19,21 +19,21 @@ import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.DirectionProperty;
 import net.minecraft.world.phys.BlockHitResult;
-import biggerreactorsrework.machine.tiles.CyaniteReprocessorTile;
+import biggerreactorsrework.machine.tiles.IndustrialProcessorTile;
 import biggerreactorsrework.core.registry.RegisterBlock;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-public class CyaniteReprocessor extends Block implements EntityBlock {
+public class IndustrialProcessor extends Block implements EntityBlock {
 
     public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
     public static final BooleanProperty ENABLED = BlockStateProperties.ENABLED;
 
-    @RegisterBlock(name = "cyanite_reprocessor", tileEntityClass = CyaniteReprocessorTile.class)
-    public static final CyaniteReprocessor INSTANCE = new CyaniteReprocessor();
+    @RegisterBlock(name = "industrial_processor", tileEntityClass = IndustrialProcessorTile.class)
+    public static final IndustrialProcessor INSTANCE = new IndustrialProcessor();
 
-    public CyaniteReprocessor() {
+    public IndustrialProcessor() {
         super(Properties.of()
                 .mapColor(net.minecraft.world.level.material.MapColor.COLOR_GRAY)
                 // Modified 2026-10-27: light follows the existing processing animation.
@@ -50,7 +50,7 @@ public class CyaniteReprocessor extends Block implements EntityBlock {
     @Nullable
     @Override
     public BlockEntity newBlockEntity(@Nonnull BlockPos pos, @Nonnull BlockState state) {
-        return CyaniteReprocessorTile.SUPPLIER.create(pos, state);
+        return IndustrialProcessorTile.SUPPLIER.create(pos, state);
     }
 
     @Nullable
@@ -60,8 +60,8 @@ public class CyaniteReprocessor extends Block implements EntityBlock {
             return null;
         }
         return (a, b, c, tile) -> {
-            if (tile instanceof CyaniteReprocessorTile reprocessor) {
-                reprocessor.tick();
+            if (tile instanceof IndustrialProcessorTile processor) {
+                processor.tick();
             }
         };
     }
@@ -82,7 +82,7 @@ public class CyaniteReprocessor extends Block implements EntityBlock {
     @Nonnull
     @Override
     protected ItemInteractionResult useItemOn(@Nonnull ItemStack stack, @Nonnull BlockState state, @Nonnull Level level, @Nonnull BlockPos pos, @Nonnull Player player, @Nonnull InteractionHand hand, @Nonnull BlockHitResult hitResult) {
-        if (level.getBlockEntity(pos) instanceof CyaniteReprocessorTile tile) {
+        if (level.getBlockEntity(pos) instanceof IndustrialProcessorTile tile) {
             return tile.onItemUse(stack, level, player, hand);
         }
         return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
@@ -91,7 +91,7 @@ public class CyaniteReprocessor extends Block implements EntityBlock {
     @Nonnull
     @Override
     protected InteractionResult useWithoutItem(@Nonnull BlockState state, @Nonnull Level level, @Nonnull BlockPos pos, @Nonnull Player player, @Nonnull BlockHitResult hitResult) {
-        if (level.getBlockEntity(pos) instanceof CyaniteReprocessorTile tile) {
+        if (level.getBlockEntity(pos) instanceof IndustrialProcessorTile tile) {
             if (!level.isClientSide) {
                 player.openMenu(tile, pos);
             }
@@ -102,7 +102,7 @@ public class CyaniteReprocessor extends Block implements EntityBlock {
 
     @Override
     protected void onRemove(@Nonnull BlockState state, @Nonnull Level level, @Nonnull BlockPos pos, @Nonnull BlockState newState, boolean isMoving) {
-        if (!state.is(newState.getBlock()) && level.getBlockEntity(pos) instanceof CyaniteReprocessorTile tile) {
+        if (!state.is(newState.getBlock()) && level.getBlockEntity(pos) instanceof IndustrialProcessorTile tile) {
             tile.dropContents(level, pos);
         }
         super.onRemove(state, level, pos, newState, isMoving);

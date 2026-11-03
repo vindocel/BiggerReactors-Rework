@@ -33,7 +33,7 @@ public record TurbineDesign(int arm, int bladeLayers, int spacer, int coils, Blo
     /** Steam the blades take at full efficiency at the given speed. */
     public double bladeCapacity(double rpm) {
         double metres = bladeLayers * 4.0 * arm * (arm + 1) / 2;
-        return metres * Config.CONFIG.Turbine.FluidPerBladeLinerKilometre / 1000 * 2 * Math.PI * rpm;
+        return metres * Config.CONFIG.Turbine.BladeSteamPerKilometre / 1000 * 2 * Math.PI * rpm;
     }
 
     public long flowLimit() { return ((long) side() * side() - 1) * Config.CONFIG.Turbine.FlowRatePerBlock; }
@@ -53,38 +53,14 @@ public record TurbineDesign(int arm, int bladeLayers, int spacer, int coils, Blo
         return coilLayer * perLayer() + index < coils;
     }
 
-    /** Fewest coils, filled in layout order, whose distance factors add up to at least {@code factor}. */
-    public int coilsForFactor(double factor, int maxCoils) {
-        var ring = ring();
-        double sum = 0;
-        for (int n = 0; n < maxCoils; n++) {
-            var p = ring.get(n % ring.size());
-            int d = Math.max(Math.abs(p[0]), Math.abs(p[1]));
-            sum += d < 1 ? 1 : 2.0 / (d + 1);
-            if (sum >= factor) return n + 1;
-        }
-        return maxCoils;
-    }
-
-    /** Sum of the controller's distance factor over every coil: coil torque is proportional to it. */
-    public double coilFactor() {
-        var ring = ring();
-        double factor = 0;
-        for (int layer = 0; layer < coilLayers(); layer++)
-            for (int i = 0; i < ring.size(); i++) if (coilAt(layer, i)) {
-                int d = Math.max(Math.abs(ring.get(i)[0]), Math.abs(ring.get(i)[1]));
-                factor += d < 1 ? 1 : 2.0 / (d + 1);
-            }
-        return factor;
-    }
-
     /** Same configuration the controller builds from the assembled rotor. */
     public ModernTurbineSimulation simulation(TurbineCoilRegistry.CoilData coilData) {
         var sim = new ModernTurbineSimulation();
         sim.resize(side(), shaft(), side());
         var rotor = new ArrayList<Vector4i>();
         for (int layer = shaft() - 1; layer >= 0; layer--)
-            rotor.add(layer < bladeLayers ? new Vector4i(arm, arm, arm, arm) : new Vector4i());
+            // Modified 2026-11-02: JOML's no-argument vector has w=1, which invents a blade in an empty layer.
+            rotor.add(layer < bladeLayers ? new Vector4i(arm, arm, arm, arm) : new Vector4i(0));
         sim.setRotorConfiguration(rotor);
         var ring = ring();
         for (int layer = 0; layer < coilLayers(); layer++)
@@ -103,7 +79,7 @@ public record TurbineDesign(int arm, int bladeLayers, int spacer, int coils, Blo
         var parts = new LinkedHashMap<BlockPos, BlockState>();
         for (int px = 0; px < w; px++) for (int py = 0; py < h; py++) for (int pz = 0; pz < d; pz++)
             if (px == 0 || px == w - 1 || py == 0 || py == h - 1 || pz == 0 || pz == d - 1)
-                parts.put(new BlockPos(px, py, pz), TurbineCasing.INSTANCE.defaultBlockState());
+                parts.put(new BlockPos(px, py, pz), (MachineLayout.frame(px, py, pz, w, h, d) ? TurbineCasing.INSTANCE : TurbineGlass.INSTANCE).defaultBlockState());
         parts.put(new BlockPos(c, 0, c), TurbineRotorBearing.INSTANCE.defaultBlockState());
         parts.put(new BlockPos(c, h - 1, c), TurbineRotorBearing.INSTANCE.defaultBlockState());
         for (int layer = 0; layer < shaft(); layer++) {

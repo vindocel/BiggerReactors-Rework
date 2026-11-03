@@ -1,4 +1,6 @@
+// Modified 2026-11-02: fixed process ratio; legacy turbine properties retained.
 {
+  "steamPerBatch": 10,
   "liquidType": "registry",
   "liquid": "minecraft:water",
   "gasType": "registry",

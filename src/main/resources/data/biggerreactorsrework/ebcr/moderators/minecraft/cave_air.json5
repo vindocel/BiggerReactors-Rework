@@ -1,4 +1,6 @@
+// Modified 2026-11-02: static thermal class.
 {
+    passiveClass: "NONE",
     type: "registry",
     location: "minecraft:cave_air",
     absorption: 0.1,

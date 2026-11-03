@@ -1,5 +1,5 @@
 {
-  "neoforge:conditions": [ { "type": "neoforge:item_exists", "item": "biggerreactorsrework:cyanite_reprocessor" } ],
+  "neoforge:conditions": [ { "type": "neoforge:item_exists", "item": "biggerreactorsrework:industrial_processor" } ],
     "type": "minecraft:crafting_shaped",
     "pattern": [
         "CIC",
@@ -24,6 +24,6 @@
         }
     },
     "result": {
-        "id": "biggerreactorsrework:cyanite_reprocessor"
+        "id": "biggerreactorsrework:industrial_processor"
     }
 }

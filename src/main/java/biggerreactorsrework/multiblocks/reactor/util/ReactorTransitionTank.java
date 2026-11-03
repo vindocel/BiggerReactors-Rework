@@ -117,6 +117,11 @@ public class ReactorTransitionTank extends FluidTransitionTank {
         return drained;
     }
     
+    @Override public long maintenanceDrain(int tank,Fluid fluid,DataComponentPatch components,long amount,boolean simulate) {
+        pullUpdate();long drained=super.maintenanceDrain(tank,fluid,components,amount,simulate);
+        if(!simulate)pushUpdate();return drained;
+    }
+
     @Override
     protected void transitionUpdate() {
         var airProperties = ReactorModeratorRegistry.blockModeratorProperties(Blocks.AIR);

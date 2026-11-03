@@ -242,7 +242,6 @@ public final class TurbineReloadGameTests {
         var sim = new biggerreactorsrework.multiblocks.turbine.simulation.modern.ModernTurbineSimulation();
         sim.resize(3, 3, 3);
         sim.setRotorConfiguration(new java.util.ArrayList<>(java.util.List.of(new org.joml.Vector4i(1, 1, 1, 1))));
-        // Low induction drag ensures the steam supply can actually drive the rotor into the governor.
         sim.setCoilData(1, 0, new biggerreactorsrework.registries.TurbineCoilRegistry.CoilData(1, 1, 0.1));
         sim.updateInternalValues();
         sim.setNominalFlowRate(sim.flowRateLimit());
@@ -251,7 +250,7 @@ public final class TurbineReloadGameTests {
         h.assertTrue(steam != null, "missing steam transition");
         // A legacy save already above the limit must recover before computing generation.
         var saved = sim.serializeNBT();
-        saved.putDouble("rotorEnergy", sim.rotorMass() * 10000);
+        saved.putDouble("rpm", 10000);
         sim.deserializeNBT(saved);
         for (boolean coils : new boolean[]{false, true}) {
             sim.setCoilEngaged(coils);
@@ -259,12 +258,12 @@ public final class TurbineReloadGameTests {
                 sim.idealSupply(steam);
                 sim.tick();
                 h.assertTrue(sim.RPM() <= 2200 && sim.RPM() >= 0, "rotor exceeded speed limit");
-                h.assertTrue(sim.serializeNBT().getDouble("rotorEnergy") <= sim.rotorMass() * 2200,
-                        "excess rotor energy accumulated behind the RPM display");
+                h.assertTrue(sim.serializeNBT().getDouble("rpm") <= 2200, "excess rotor speed was saved");
                 if (coils) h.assertTrue(sim.FEGeneratedLastTick() > 0, "generation stopped at the speed limit");
                 sim.battery().extract(Long.MAX_VALUE);
             }
-            h.assertTrue(sim.RPM() == 2200, "excess steam did not reach the speed limit: " + sim.RPM());
+            // Engaged coils hold the rotor at nominal speed; free rotors run up to the limit.
+            h.assertTrue(sim.RPM() == (coils ? 1800 : 2200), "rotor did not settle at its speed: " + sim.RPM());
         }
         sim.setActive(false);
         sim.tick();

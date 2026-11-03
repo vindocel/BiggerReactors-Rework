@@ -21,6 +21,7 @@ import net.neoforged.neoforge.fluids.FluidStack;
  */
 public final class HeatedFluidSprites implements SpriteSource {
     private static SpriteSourceType TYPE;
+    private static final double FROZEN_LUMA=0x05*.3+0xEB*.59+0xDB*.11;
     private static final java.util.Set<ResourceLocation> AVAILABLE=java.util.concurrent.ConcurrentHashMap.newKeySet();
     public static void register(RegisterSpriteSourceTypesEvent event){TYPE=new SpriteSourceType(MapCodec.unit(HeatedFluidSprites::new));event.register(ResourceLocation.fromNamespaceAndPath(BiggerReactors.modid,"heated_fluids"),TYPE);}
     public SpriteSourceType type(){return TYPE;}
@@ -43,6 +44,7 @@ public final class HeatedFluidSprites implements SpriteSource {
         // Modified 2026-10-27: preload built-in generic outputs before server profiles arrive.
         var eligible=new java.util.HashSet<Fluid>();
         eligible.add(biggerreactorsrework.fluids.LiquidObsidian.INSTANCE);
+        eligible.add(biggerreactorsrework.fluids.FrozenObsidian.INSTANCE);
         var cryo=ResourceLocation.fromNamespaceAndPath("ad_astra","cryo_fuel");
         if(BuiltInRegistries.FLUID.containsKey(cryo))eligible.add(BuiltInRegistries.FLUID.get(cryo));
         for(var profile:biggerreactorsrework.registries.CoolantSync.profiles())if(profile.genericHot())eligible.addAll(profile.liquids);
@@ -74,6 +76,8 @@ public final class HeatedFluidSprites implements SpriteSource {
                 if(sourceTexture==null)continue;
                 final var texture=sourceTexture;
                 final int tint=sourceTint;
+                // Added 2026-11-03: Frozen Obsidian heats to its own red, keeping each pixel's relative brightness.
+                final boolean frozen=source==biggerreactorsrework.fluids.FrozenObsidian.INSTANCE;
                 var resource=resources.getResource(texture.withPath(p->"textures/"+p+".png"));
                 if(resource.isEmpty())continue;
                 var target=id(source,flowing);
@@ -88,6 +92,10 @@ public final class HeatedFluidSprites implements SpriteSource {
                             double r=(pixel&255)*((tint>>16)&255)/255d,g=((pixel>>8)&255)*((tint>>8)&255)/255d,b=((pixel>>16)&255)*(tint&255)/255d;
                             double light=Math.max(r,Math.max(g,b));
                             int red=(int)Math.min(255,Math.max(r*.45,light*.8)+48),green=(int)(g*.42),blue=(int)(b*.36);
+                            if(frozen){
+                                double scale=(r*.3+g*.59+b*.11)/FROZEN_LUMA;
+                                red=(int)Math.min(255,0xEB*scale);green=(int)Math.min(255,0x05*scale);blue=(int)Math.min(255,0x2E*scale);
+                            }
                             image.setPixelRGBA(x,y,(alpha<<24)|(blue<<16)|(green<<8)|red);
                         }
                         return new SpriteContents(target,new FrameSize(original.width(),original.height()),image,original.metadata());

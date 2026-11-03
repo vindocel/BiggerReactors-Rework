@@ -8,7 +8,7 @@ import biggerreactorsrework.items.ingots.CyaniteIngot;
 
 import javax.annotation.Nonnull;
 
-public class CyaniteReprocessorItemHandler extends ItemStackHandler {
+public class IndustrialProcessorItemHandler extends ItemStackHandler {
     
     public static final int INPUT_SLOT_INDEX = 0;
     public static final int OUTPUT_SLOT_INDEX = 1;
@@ -21,7 +21,7 @@ public class CyaniteReprocessorItemHandler extends ItemStackHandler {
     private final IItemHandler inputHandler = this.createPipeHandler(true, false);
     private final IItemHandler outputHandler = this.createPipeHandler(false, true);
     
-    public CyaniteReprocessorItemHandler(Runnable onChanged) {
+    public IndustrialProcessorItemHandler(Runnable onChanged) {
         super(SLOTS);
         this.onChanged = onChanged;
     }
@@ -62,7 +62,7 @@ public class CyaniteReprocessorItemHandler extends ItemStackHandler {
     }
     
     private IItemHandler createPipeHandler(boolean insert, boolean extract) {
-        final CyaniteReprocessorItemHandler realHandler = this;
+        final IndustrialProcessorItemHandler realHandler = this;
         return new IItemHandler() {
             @Override
             public int getSlots() {

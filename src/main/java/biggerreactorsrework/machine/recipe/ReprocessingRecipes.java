@@ -13,8 +13,8 @@ import java.util.List;
 public final class ReprocessingRecipes {
     private static final DeferredRegister<RecipeType<?>> TYPES = DeferredRegister.create(Registries.RECIPE_TYPE, BiggerReactors.modid);
     private static final DeferredRegister<RecipeSerializer<?>> SERIALIZERS = DeferredRegister.create(Registries.RECIPE_SERIALIZER, BiggerReactors.modid);
-    public static final DeferredHolder<RecipeType<?>, RecipeType<ReprocessingRecipe>> TYPE = TYPES.register("cyanite_reprocessing", () -> new RecipeType<>() { public String toString() { return BiggerReactors.modid + ":cyanite_reprocessing"; } });
-    public static final DeferredHolder<RecipeSerializer<?>, ReprocessingRecipe.Serializer> SERIALIZER = SERIALIZERS.register("cyanite_reprocessing", ReprocessingRecipe.Serializer::new);
+    public static final DeferredHolder<RecipeType<?>, RecipeType<ReprocessingRecipe>> TYPE = TYPES.register("industrial_processing", () -> new RecipeType<>() { public String toString() { return BiggerReactors.modid + ":cyanite_reprocessing"; } });
+    public static final DeferredHolder<RecipeSerializer<?>, ReprocessingRecipe.Serializer> SERIALIZER = SERIALIZERS.register("industrial_processing", ReprocessingRecipe.Serializer::new);
     public static void register(IEventBus bus) { TYPES.register(bus); SERIALIZERS.register(bus); }
     private record Snapshot(java.util.Collection<RecipeHolder<?>> source,List<RecipeHolder<ReprocessingRecipe>> sorted) { }
     private static final java.util.Map<RecipeManager,Snapshot> CACHE = new java.util.WeakHashMap<>();

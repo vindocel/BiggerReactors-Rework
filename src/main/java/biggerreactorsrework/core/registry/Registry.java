@@ -552,9 +552,19 @@ public class Registry {
             
             Supplier<? extends ModFluid> stillSupplier = () -> fluids[0];
             Supplier<? extends ModFluid> flowingSupplier = () -> fluids[1];
-            final var fluidType = new FluidType(FluidType.Properties.create().descriptionId("fluid." + modid + "." + name)) {
+            final var fluidType = new FluidType(FluidType.Properties.create().descriptionId("fluid." + modid + "." + name).lightLevel(annotation.light())) {
                 @Override public net.minecraft.network.chat.Component getDescription(net.neoforged.neoforge.fluids.FluidStack stack) {
                     return name.equals("heated_coolant") ? biggerreactorsrework.registries.CoolantComponents.name(stack) : super.getDescription(stack);
+                }
+                // Added 2026-11-03: a filled bucket keeps the heated coolant's origin.
+                @Override public net.minecraft.world.item.ItemStack getBucket(net.neoforged.neoforge.fluids.FluidStack stack) {
+                    return name.equals("heated_coolant") ? biggerreactorsrework.fluids.HeatedCoolantBucket.filled(stack) : super.getBucket(stack);
+                }
+                // Added 2026-11-03: heated coolant glows like the coolant it came from.
+                @Override public int getLightLevel(net.neoforged.neoforge.fluids.FluidStack stack) {
+                    if (!name.equals("heated_coolant")) return super.getLightLevel(stack);
+                    var source = biggerreactorsrework.registries.CoolantComponents.sourceFluid(stack);
+                    return source == null ? 0 : source.getFluidType().getLightLevel();
                 }
             };
             FLUID_CLIENT_INFO.add(new FluidClientInfo(fluidType,
@@ -585,7 +595,19 @@ public class Registry {
             
             fluids[0] = stillInstance;
             fluids[1] = flowingInstance;
-            blockArray[0] = new LiquidBlock(stillInstance, Block.Properties.of().replaceable().noCollission().explosionResistance(100.0F).noLootTable());
+            // Modified 2026-11-03: placed fluids show the fluid's name instead of a missing block key.
+            blockArray[0] = new LiquidBlock(stillInstance, Block.Properties.of().replaceable().noCollission().explosionResistance(100.0F).noLootTable()) {
+                @Override public String getDescriptionId() { return "fluid." + modid + "." + name; }
+                @Override public net.minecraft.world.item.ItemStack pickupBlock(@javax.annotation.Nullable net.minecraft.world.entity.player.Player player, net.minecraft.world.level.LevelAccessor level, net.minecraft.core.BlockPos pos, BlockState state) {
+                    var bucket = super.pickupBlock(player, level, pos, state);
+                    return name.equals("heated_coolant") ? biggerreactorsrework.fluids.HeatedCoolantBucket.pickup(level, pos, bucket) : bucket;
+                }
+                @Override protected void entityInside(BlockState state, net.minecraft.world.level.Level level, net.minecraft.core.BlockPos pos, net.minecraft.world.entity.Entity entity) {
+                    super.entityInside(state, level, pos, entity);
+                    if (annotation.freezes()) entity.setIsInPowderSnow(true);
+                    if (annotation.burns()) entity.lavaHurt();
+                }
+            };
             
             for (Field declaredField : fluidClazz.getDeclaredFields()) {
                 if (declaredField.isAnnotationPresent(RegisterFluid.Instance.class)) {
@@ -627,8 +649,10 @@ public class Registry {
             
             if (annotation.registerBucket()) {
                 itemRegistrationQueue.enqueue(() -> {
-                    BucketItem bucket = new BucketItem(fluids[0], new Item.Properties().craftRemainder(Items.BUCKET).stacksTo(1));
-                    creativeTabItems.add(bucket);
+                    var bucketProperties = new Item.Properties().craftRemainder(Items.BUCKET).stacksTo(1);
+                    BucketItem bucket = name.equals("heated_coolant") ? new biggerreactorsrework.fluids.HeatedCoolantBucket.BucketWithOrigin(fluids[0], bucketProperties)
+                            : new BucketItem(fluids[0], bucketProperties);
+                    if (annotation.creativeTab()) creativeTabItems.add(bucket);
                     bucketArray[0] = bucket;
                     itemRegistryEvent.register(ResourceLocation.parse(baseRegistryName + "_bucket"), bucket);
                     if (LOGGER.isDebugEnabled()) {

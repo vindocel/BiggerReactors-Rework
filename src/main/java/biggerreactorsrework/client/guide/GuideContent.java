@@ -59,7 +59,7 @@ final class GuideContent {
           elements.add(new GuideProcesses.ReactorCycle());
           elements.add(new GuideElements.Heading(Component.translatable("guide.biggerreactorsrework.material.blutonium")));
           elements.add(new GuideElements.Text(Component.translatable("guide.biggerreactorsrework.material.blutonium.text")));
-          elements.add(new GuideElements.Crafting(GuideIds.id("crafting/cyanite_reprocessor")));
+          elements.add(new GuideElements.Crafting(GuideIds.id("crafting/industrial_processor")));
           addReprocessing(elements);
           elements.add(new GuideElements.Text(Component.translatable("guide.biggerreactorsrework.content.reprocessing")));
           elements.add(new GuideElements.Heading(Component.translatable("guide.biggerreactorsrework.material.ludicrite")));
@@ -168,7 +168,23 @@ final class GuideContent {
     private static void addReprocessing(List<GuideElement> elements){
         var recipes=ReprocessingRecipes.all(Minecraft.getInstance().level);
         if(recipes.isEmpty())elements.add(new GuideReprocessing(GuideIds.id("cyanite_reprocessing")));
-        else recipes.forEach(holder->elements.add(new GuideReprocessing(holder.id())));
+        // Modified 2026-11-03: a recipe whose input fluid another recipe makes comes after it, following progression.
+        else progression(recipes).forEach(holder->elements.add(new GuideReprocessing(holder.id())));
+    }
+    private static List<net.minecraft.world.item.crafting.RecipeHolder<biggerreactorsrework.machine.recipe.ReprocessingRecipe>> progression(
+            List<net.minecraft.world.item.crafting.RecipeHolder<biggerreactorsrework.machine.recipe.ReprocessingRecipe>> recipes) {
+        java.util.function.ToIntFunction<net.minecraft.world.item.crafting.RecipeHolder<biggerreactorsrework.machine.recipe.ReprocessingRecipe>> depth=new java.util.function.ToIntFunction<>() {
+            public int applyAsInt(net.minecraft.world.item.crafting.RecipeHolder<biggerreactorsrework.machine.recipe.ReprocessingRecipe> holder) {
+                return depth(holder,recipes.size());
+            }
+            private int depth(net.minecraft.world.item.crafting.RecipeHolder<biggerreactorsrework.machine.recipe.ReprocessingRecipe> holder,int limit) {
+                if(limit<=0)return 0;
+                for(var other:recipes)if(other!=holder && other.value().producesFluid() && other.value().fluidResult().getFluid()==holder.value().fluid())
+                    return 1+depth(other,limit-1);
+                return 0;
+            }
+        };
+        return recipes.stream().sorted(java.util.Comparator.comparingInt(depth)).toList();
     }
     private static GuideElements.Table coolantTable() {
         return GuideElements.Table.named(List.of(Component.translatable("guide.biggerreactorsrework.coolants.cold"),Component.translatable("guide.biggerreactorsrework.coolants.hot")),
@@ -204,13 +220,13 @@ final class GuideContent {
     private static GuideElements.Table propertyTable(boolean moderator) {
         var headers=new ArrayList<Component>();headers.add(Component.translatable("guide.biggerreactorsrework.table.material"));
         var tips=new ArrayList<List<Component>>();tips.add(List.of(Component.translatable("guide.biggerreactorsrework.table.material.tip")));
-        String[] keys=moderator?new String[]{"absorption","efficiency","moderation","conductivity"}:new String[]{"coil_efficiency","extraction","bonus"};
-        String[] symbols=moderator?new String[]{"A","E","M","C"}:new String[]{"E","X","B"};
+        String[] keys=moderator?new String[]{"passive_class","passive_cooling","passive_rate"}:new String[]{"fe_per_mb","steam_capacity"};
+        String[] symbols=moderator?new String[]{"T","C","RF"}:new String[]{"FE","mB"};
         for(int i=0;i<keys.length;i++){
             headers.add(Component.literal(symbols[i]));
             tips.add(List.of(Component.translatable("guide.biggerreactorsrework.table."+keys[i]+".title"),Component.translatable("guide.biggerreactorsrework.table."+keys[i]+".tip")));
         }
-        return new GuideElements.Table(headers,moderator?new float[]{3,1,1,1,1}:new float[]{3,1,1,1},moderator?GuideContent::moderators:GuideContent::coils,tips,cells->materialReference(moderator,cells));
+        return new GuideElements.Table(headers,moderator?new float[]{3,1,1,1}:new float[]{3,1,1},moderator?GuideContent::moderators:GuideContent::coils,tips,cells->materialReference(moderator,cells));
     }
     private static List<String> materialCells(MaterialTableRows.Entry entry){
         var row=new ArrayList<String>();row.add(entry.name());entry.values().forEach(value->row.add(number(value)));return List.copyOf(row);
@@ -220,9 +236,9 @@ final class GuideContent {
     private static List<MaterialTableRows.Entry> materialEntries(boolean moderator){
         var entries=new ArrayList<MaterialTableRows.Entry>();
         if(moderator)biggerreactorsrework.registries.ReactorModeratorRegistry.Client.forEach((block,p)->GuideMaterialNames.resolve(block).ifPresent(name->
-            entries.add(new MaterialTableRows.Entry(name.material(),name.label(),List.of(p.absorption(),p.heatEfficiency(),p.moderation(),p.heatConductivity()),BuiltInRegistries.BLOCK.getKey(block).toString()))));
+            entries.add(new MaterialTableRows.Entry(name.material(),name.label(),List.of((double)p.passiveClass().ordinal(),p.passiveClass().coolingWeight*100,p.passiveClass().rfPerKJ*100),BuiltInRegistries.BLOCK.getKey(block).toString()))));
         else biggerreactorsrework.registries.TurbineCoilRegistry.Client.getImmutableRegistry().forEach((block,p)->GuideMaterialNames.resolve(block).ifPresent(name->
-            entries.add(new MaterialTableRows.Entry(name.material(),name.label(),List.of(p.efficiency,p.extractionRate,p.bonus),BuiltInRegistries.BLOCK.getKey(block).toString()))));
+            entries.add(new MaterialTableRows.Entry(name.material(),name.label(),List.of(p.fePerMB(),(double)p.steamPerTick()),BuiltInRegistries.BLOCK.getKey(block).toString()))));
         return MaterialTableRows.byEfficiency(entries,moderator?1:0);
     }
     private static GuideReferences.Target materialReference(boolean moderator,List<String> cells){

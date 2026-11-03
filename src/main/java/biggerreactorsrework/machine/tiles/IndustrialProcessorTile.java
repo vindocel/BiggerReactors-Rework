@@ -32,15 +32,15 @@ import net.neoforged.neoforge.fluids.capability.templates.FluidTank;
 import biggerreactorsrework.BiggerReactors;
 import biggerreactorsrework.Config;
 import biggerreactorsrework.api.WorkHandler;
-import biggerreactorsrework.machine.blocks.CyaniteReprocessor;
-import biggerreactorsrework.machine.containers.CyaniteReprocessorContainer;
+import biggerreactorsrework.machine.blocks.IndustrialProcessor;
+import biggerreactorsrework.machine.containers.IndustrialProcessorContainer;
 import biggerreactorsrework.machine.side.RelativeFace;
 import biggerreactorsrework.machine.side.SideConfiguration;
 import biggerreactorsrework.machine.side.SideRoute;
 import biggerreactorsrework.machine.side.SideRules;
 import biggerreactorsrework.machine.side.Transmission;
-import biggerreactorsrework.machine.state.CyaniteReprocessorState;
-import biggerreactorsrework.machine.tiles.impl.CyaniteReprocessorItemHandler;
+import biggerreactorsrework.machine.state.IndustrialProcessorState;
+import biggerreactorsrework.machine.tiles.impl.IndustrialProcessorItemHandler;
 import biggerreactorsrework.items.ingots.BlutoniumIngot;
 import biggerreactorsrework.core.client.gui.api.IHasUpdatableState;
 import biggerreactorsrework.core.debug.DebugTool;
@@ -56,17 +56,17 @@ import javax.annotation.Nullable;
  * Each face is configured per material (items, water, energy) and can pull and push items and water by itself.
  */
 // Modified 2026-10-27: industrial processing with independent item/fluid products and legacy saves.
-public class CyaniteReprocessorTile extends BlockEntity implements MenuProvider, IHasUpdatableState<CyaniteReprocessorState> {
+public class IndustrialProcessorTile extends BlockEntity implements MenuProvider, IHasUpdatableState<IndustrialProcessorState> {
 
-    @RegisterTile("cyanite_reprocessor")
-    public static final BlockEntityType.BlockEntitySupplier<CyaniteReprocessorTile> SUPPLIER = new RegisterTile.Producer<>(CyaniteReprocessorTile::new);
+    @RegisterTile("industrial_processor")
+    public static final BlockEntityType.BlockEntitySupplier<IndustrialProcessorTile> SUPPLIER = new RegisterTile.Producer<>(IndustrialProcessorTile::new);
 
     @RegisterCapability
-    private static final CapabilityRegistration ITEM_HANDLER_CAP_REGISTRATION = CapabilityRegistration.tileCap(Capabilities.ItemHandler.BLOCK, CyaniteReprocessorTile.class, (CyaniteReprocessorTile tile, @Nullable Direction side) -> tile.itemHandlerFor(side));
+    private static final CapabilityRegistration ITEM_HANDLER_CAP_REGISTRATION = CapabilityRegistration.tileCap(Capabilities.ItemHandler.BLOCK, IndustrialProcessorTile.class, (IndustrialProcessorTile tile, @Nullable Direction side) -> tile.itemHandlerFor(side));
     @RegisterCapability
-    private static final CapabilityRegistration ENERGY_CAP_REGISTRATION = CapabilityRegistration.tileCap(Capabilities.EnergyStorage.BLOCK, CyaniteReprocessorTile.class, (CyaniteReprocessorTile tile, @Nullable Direction side) -> tile.energyFor(side));
+    private static final CapabilityRegistration ENERGY_CAP_REGISTRATION = CapabilityRegistration.tileCap(Capabilities.EnergyStorage.BLOCK, IndustrialProcessorTile.class, (IndustrialProcessorTile tile, @Nullable Direction side) -> tile.energyFor(side));
     @RegisterCapability
-    private static final CapabilityRegistration FLUID_HANDLER_CAP_REGISTRATION = CapabilityRegistration.tileCap(Capabilities.FluidHandler.BLOCK, CyaniteReprocessorTile.class, (CyaniteReprocessorTile tile, @Nullable Direction side) -> tile.fluidFor(side));
+    private static final CapabilityRegistration FLUID_HANDLER_CAP_REGISTRATION = CapabilityRegistration.tileCap(Capabilities.FluidHandler.BLOCK, IndustrialProcessorTile.class, (IndustrialProcessorTile tile, @Nullable Direction side) -> tile.fluidFor(side));
 
     /**
      * Cyanite ingots consumed per blutonium ingot produced.
@@ -76,15 +76,15 @@ public class CyaniteReprocessorTile extends BlockEntity implements MenuProvider,
     /**
      * The (mostly) current state of the machine.
      */
-    public final CyaniteReprocessorState cyaniteReprocessorState = new CyaniteReprocessorState(this);
+    public final IndustrialProcessorState industrialProcessorState = new IndustrialProcessorState(this);
     /**
      * The work handler.
      */
-    private WorkHandler workHandler = new WorkHandler(Config.CONFIG.CyaniteReprocessor.TotalWorkTime);
+    private WorkHandler workHandler = new WorkHandler(Config.CONFIG.IndustrialProcessor.TotalWorkTime);
     /**
      * The item handler.
      */
-    private final CyaniteReprocessorItemHandler itemHandler = new CyaniteReprocessorItemHandler(this::setChanged);
+    private final IndustrialProcessorItemHandler itemHandler = new IndustrialProcessorItemHandler(this::setChanged);
     // Added 2026-11-01: award only a completed cyanite-to-blutonium operation.
     private final biggerreactorsrework.advancement.ReworkAdvancements.Reporter advancements = new biggerreactorsrework.advancement.ReworkAdvancements.Reporter();
     /**
@@ -94,10 +94,10 @@ public class CyaniteReprocessorTile extends BlockEntity implements MenuProvider,
     /**
      * The water tank.
      */
-    private final FluidTank fluidTank = new FluidTank(Config.CONFIG.CyaniteReprocessor.WaterTankCapacity, this::acceptsFluid) {
+    private final FluidTank fluidTank = new FluidTank(Config.CONFIG.IndustrialProcessor.WaterTankCapacity, this::acceptsFluid) {
         @Override
         protected void onContentsChanged() {
-            CyaniteReprocessorTile.this.setChanged();
+            IndustrialProcessorTile.this.setChanged();
         }
     };
     /**
@@ -145,14 +145,14 @@ public class CyaniteReprocessorTile extends BlockEntity implements MenuProvider,
     /**
      * Which faces take or give each material.
      */
-    private final SideConfiguration sides = new SideConfiguration(SideRules.CYANITE_REPROCESSOR);
+    private final SideConfiguration sides = new SideConfiguration(SideRules.INDUSTRIAL_PROCESSOR);
     /**
      * Automation: pull cyanite from item input sides, push blutonium through item output sides, pull water from water
      * input sides.
      */
     private boolean autoEjectFluid = false;
-    private final FluidTank outputTank = new FluidTank(Config.CONFIG.CyaniteReprocessor.WaterTankCapacity) {
-        @Override protected void onContentsChanged() { CyaniteReprocessorTile.this.setChanged(); }
+    private final FluidTank outputTank = new FluidTank(Config.CONFIG.IndustrialProcessor.WaterTankCapacity) {
+        @Override protected void onContentsChanged() { IndustrialProcessorTile.this.setChanged(); }
     };
     private final IFluidHandler combinedFluids = fluidView(true,true);
     private IFluidHandler fluidView(boolean input,boolean output) {
@@ -172,11 +172,11 @@ public class CyaniteReprocessorTile extends BlockEntity implements MenuProvider,
     /**
      * "Anti-cheat" item stack, to ensure players don't swap items mid-process.
      *
-     * @see CyaniteReprocessorTile#tick()
+     * @see IndustrialProcessorTile#tick()
      */
     private ItemStack itemPresentLastTick = ItemStack.EMPTY;
 
-    public CyaniteReprocessorTile(BlockEntityType<CyaniteReprocessorTile> TYPE, BlockPos pos, BlockState state) {
+    public IndustrialProcessorTile(BlockEntityType<IndustrialProcessorTile> TYPE, BlockPos pos, BlockState state) {
         super(TYPE, pos, state);
         this.updateState();
     }
@@ -186,14 +186,14 @@ public class CyaniteReprocessorTile extends BlockEntity implements MenuProvider,
      */
     private final class Battery extends EnergyStorage {
         Battery() {
-            super(Config.CONFIG.CyaniteReprocessor.EnergyTankCapacity, Config.CONFIG.CyaniteReprocessor.TransferRate, 0);
+            super(Config.CONFIG.IndustrialProcessor.EnergyTankCapacity, Config.CONFIG.IndustrialProcessor.TransferRate, 0);
         }
 
         // Modified 2026-10-30: persist positive external charging even while idle.
         @Override
         public int receiveEnergy(int amount, boolean simulate) {
             int accepted = super.receiveEnergy(amount, simulate);
-            if (!simulate && accepted > 0) CyaniteReprocessorTile.this.setChanged();
+            if (!simulate && accepted > 0) IndustrialProcessorTile.this.setChanged();
             return accepted;
         }
 
@@ -214,7 +214,7 @@ public class CyaniteReprocessorTile extends BlockEntity implements MenuProvider,
 
     private Direction facing() {
         BlockState state = this.getBlockState();
-        return state.hasProperty(CyaniteReprocessor.FACING) ? state.getValue(CyaniteReprocessor.FACING) : Direction.NORTH;
+        return state.hasProperty(IndustrialProcessor.FACING) ? state.getValue(IndustrialProcessor.FACING) : Direction.NORTH;
     }
 
     public SideRoute route(RelativeFace face, Transmission transmission) {
@@ -352,15 +352,15 @@ public class CyaniteReprocessorTile extends BlockEntity implements MenuProvider,
             }
             for (int slot = 0; slot < source.getSlots(); slot++) {
                 ItemStack available = source.extractItem(slot, Integer.MAX_VALUE, true);
-                if (available.isEmpty() || !this.itemHandler.isItemValid(CyaniteReprocessorItemHandler.INPUT_SLOT_INDEX, available)) {
+                if (available.isEmpty() || !this.itemHandler.isItemValid(IndustrialProcessorItemHandler.INPUT_SLOT_INDEX, available)) {
                     continue;
                 }
-                ItemStack remainder = this.itemHandler.insertItem(CyaniteReprocessorItemHandler.INPUT_SLOT_INDEX, available, true);
+                ItemStack remainder = this.itemHandler.insertItem(IndustrialProcessorItemHandler.INPUT_SLOT_INDEX, available, true);
                 int moved = available.getCount() - remainder.getCount();
                 if (moved <= 0) {
                     return;
                 }
-                this.itemHandler.insertItem(CyaniteReprocessorItemHandler.INPUT_SLOT_INDEX, source.extractItem(slot, moved, false), false);
+                this.itemHandler.insertItem(IndustrialProcessorItemHandler.INPUT_SLOT_INDEX, source.extractItem(slot, moved, false), false);
             }
         }
     }
@@ -370,7 +370,7 @@ public class CyaniteReprocessorTile extends BlockEntity implements MenuProvider,
      */
     private void autoEjectCycle() {
         for (RelativeFace face : RelativeFace.VALUES) {
-            if (this.itemHandler.getStackInSlot(CyaniteReprocessorItemHandler.OUTPUT_SLOT_INDEX).isEmpty()) {
+            if (this.itemHandler.getStackInSlot(IndustrialProcessorItemHandler.OUTPUT_SLOT_INDEX).isEmpty()) {
                 return;
             }
             if (!this.route(face, Transmission.ITEM).extractsItems()) {
@@ -380,10 +380,10 @@ public class CyaniteReprocessorTile extends BlockEntity implements MenuProvider,
             if (destination == null) {
                 continue;
             }
-            ItemStack available = this.itemHandler.extractItem(CyaniteReprocessorItemHandler.OUTPUT_SLOT_INDEX, Integer.MAX_VALUE, true);
+            ItemStack available = this.itemHandler.extractItem(IndustrialProcessorItemHandler.OUTPUT_SLOT_INDEX, Integer.MAX_VALUE, true);
             int moved = available.getCount() - ItemHandlerHelper.insertItem(destination, available, true).getCount();
             if (moved > 0) {
-                ItemHandlerHelper.insertItem(destination, this.itemHandler.extractItem(CyaniteReprocessorItemHandler.OUTPUT_SLOT_INDEX, moved, false), false);
+                ItemHandlerHelper.insertItem(destination, this.itemHandler.extractItem(IndustrialProcessorItemHandler.OUTPUT_SLOT_INDEX, moved, false), false);
             }
         }
     }
@@ -397,12 +397,12 @@ public class CyaniteReprocessorTile extends BlockEntity implements MenuProvider,
             var route=this.route(face,Transmission.FLUID);
             if(route!=SideRoute.FLUID_OUTPUT && route!=SideRoute.FLUID_INPUT_OUTPUT)continue;
             var target=neighbor(Capabilities.FluidHandler.BLOCK,face.toDirection(facing()));
-            if(target!=null)FluidUtil.tryFluidTransfer(target,outputTank,Config.CONFIG.CyaniteReprocessor.TransferRate,true);
+            if(target!=null)FluidUtil.tryFluidTransfer(target,outputTank,Config.CONFIG.IndustrialProcessor.TransferRate,true);
         }
     }
 
     private int pullRecipeFluid(IFluidHandler source,int space) {
-        var input=itemHandler.getStackInSlot(CyaniteReprocessorItemHandler.INPUT_SLOT_INDEX);
+        var input=itemHandler.getStackInSlot(IndustrialProcessorItemHandler.INPUT_SLOT_INDEX);
         for(var entry:biggerreactorsrework.machine.recipe.ReprocessingRecipes.all(level)) {
             var recipe=entry.value();
             if(!recipe.matches(new net.minecraft.world.item.crafting.SingleRecipeInput(input),level) || recipe.totalFluid()==0)continue;
@@ -414,7 +414,7 @@ public class CyaniteReprocessorTile extends BlockEntity implements MenuProvider,
 
     private void autoInputFluidCycle() {
         for (RelativeFace face : RelativeFace.VALUES) {
-            int space = Math.min(this.fluidTank.getSpace(), Config.CONFIG.CyaniteReprocessor.TransferRate);
+            int space = Math.min(this.fluidTank.getSpace(), Config.CONFIG.IndustrialProcessor.TransferRate);
             if (space <= 0) {
                 return;
             }
@@ -475,7 +475,7 @@ public class CyaniteReprocessorTile extends BlockEntity implements MenuProvider,
     @Nonnull
     @Override
     public Component getDisplayName() {
-        return Component.translatable("block.biggerreactorsrework.cyanite_reprocessor");
+        return Component.translatable("block.biggerreactorsrework.industrial_processor");
     }
 
     /**
@@ -488,7 +488,7 @@ public class CyaniteReprocessorTile extends BlockEntity implements MenuProvider,
     @Nullable
     @Override
     public AbstractContainerMenu createMenu(int windowId, @Nonnull Inventory playerInventory, @Nonnull Player player) {
-        return new CyaniteReprocessorContainer(windowId, this.getBlockPos(), player);
+        return new IndustrialProcessorContainer(windowId, this.getBlockPos(), player);
     }
 
     /**
@@ -496,9 +496,9 @@ public class CyaniteReprocessorTile extends BlockEntity implements MenuProvider,
      */
     @Override
     @Nonnull
-    public CyaniteReprocessorState getState() {
+    public IndustrialProcessorState getState() {
         this.updateState();
-        return this.cyaniteReprocessorState;
+        return this.industrialProcessorState;
     }
 
     /**
@@ -506,17 +506,17 @@ public class CyaniteReprocessorTile extends BlockEntity implements MenuProvider,
      */
     @Override
     public void updateState() {
-        this.cyaniteReprocessorState.workTime = this.workHandler.getProgress();
-        this.cyaniteReprocessorState.workTimeTotal = this.workHandler.getGoal();
-        this.cyaniteReprocessorState.energyStored = this.energyStorage.getEnergyStored();
-        this.cyaniteReprocessorState.energyCapacity = this.energyStorage.getMaxEnergyStored();
-        this.cyaniteReprocessorState.waterStored = this.fluidTank.getFluidAmount();
-        this.cyaniteReprocessorState.waterCapacity = this.fluidTank.getCapacity();
-        this.cyaniteReprocessorState.outputStored = outputTank.getFluidAmount();
-        this.cyaniteReprocessorState.outputCapacity = outputTank.getCapacity();
-        this.cyaniteReprocessorState.outputFluid = net.minecraft.core.registries.BuiltInRegistries.FLUID.getKey(outputTank.getFluid().getFluid()).toString();
-        this.cyaniteReprocessorState.inputFluid = net.minecraft.core.registries.BuiltInRegistries.FLUID.getKey(fluidTank.getFluid().getFluid()).toString();
-        this.cyaniteReprocessorState.autoEjectFluid = autoEjectFluid;
+        this.industrialProcessorState.workTime = this.workHandler.getProgress();
+        this.industrialProcessorState.workTimeTotal = this.workHandler.getGoal();
+        this.industrialProcessorState.energyStored = this.energyStorage.getEnergyStored();
+        this.industrialProcessorState.energyCapacity = this.energyStorage.getMaxEnergyStored();
+        this.industrialProcessorState.waterStored = this.fluidTank.getFluidAmount();
+        this.industrialProcessorState.waterCapacity = this.fluidTank.getCapacity();
+        this.industrialProcessorState.outputStored = outputTank.getFluidAmount();
+        this.industrialProcessorState.outputCapacity = outputTank.getCapacity();
+        this.industrialProcessorState.outputFluid = net.minecraft.core.registries.BuiltInRegistries.FLUID.getKey(outputTank.getFluid().getFluid()).toString();
+        this.industrialProcessorState.inputFluid = net.minecraft.core.registries.BuiltInRegistries.FLUID.getKey(fluidTank.getFluid().getFluid()).toString();
+        this.industrialProcessorState.autoEjectFluid = autoEjectFluid;
         var entry=biggerreactorsrework.machine.recipe.ReprocessingRecipes.all(level).stream()
             .filter(r->r.value().matches(new net.minecraft.world.item.crafting.SingleRecipeInput(itemHandler.getStackInSlot(0)),level)).findFirst().orElse(null);
         String condition="no_item";
@@ -526,13 +526,13 @@ public class CyaniteReprocessorTile extends BlockEntity implements MenuProvider,
             condition=!space?"output_full":energyStorage.getEnergyStored()<recipe.energy()?"no_energy":
                 needed>0 && (fluidTank.getFluid().getFluid()!=recipe.fluid() || fluidTank.getFluidAmount()<needed)?"no_water":"working";
         }
-        cyaniteReprocessorState.condition=condition;
-        this.cyaniteReprocessorState.itemSides = this.sides.pack(Transmission.ITEM);
-        this.cyaniteReprocessorState.fluidSides = this.sides.pack(Transmission.FLUID);
-        this.cyaniteReprocessorState.energySides = this.sides.pack(Transmission.ENERGY);
-        this.cyaniteReprocessorState.autoInput = this.autoInput;
-        this.cyaniteReprocessorState.autoEject = this.autoEject;
-        this.cyaniteReprocessorState.autoInputFluid = this.autoInputFluid;
+        industrialProcessorState.condition=condition;
+        this.industrialProcessorState.itemSides = this.sides.pack(Transmission.ITEM);
+        this.industrialProcessorState.fluidSides = this.sides.pack(Transmission.FLUID);
+        this.industrialProcessorState.energySides = this.sides.pack(Transmission.ENERGY);
+        this.industrialProcessorState.autoInput = this.autoInput;
+        this.industrialProcessorState.autoEject = this.autoEject;
+        this.industrialProcessorState.autoInputFluid = this.autoInputFluid;
     }
 
     /**
@@ -557,16 +557,16 @@ public class CyaniteReprocessorTile extends BlockEntity implements MenuProvider,
     @Override
     protected void loadAdditional(@Nonnull CompoundTag parentCompound, @Nonnull HolderLookup.Provider registries) {
         super.loadAdditional(parentCompound, registries);
-        CompoundTag childCompound = parentCompound.getCompound("cyaniteReprocessorState");
+        CompoundTag childCompound = parentCompound.getCompound("industrialProcessorState");
 
         // Read work.
-        this.workHandler = new WorkHandler(Config.CONFIG.CyaniteReprocessor.TotalWorkTime, Math.max(0, childCompound.getInt("workTime")));
+        this.workHandler = new WorkHandler(Config.CONFIG.IndustrialProcessor.TotalWorkTime, Math.max(0, childCompound.getInt("workTime")));
         activeRecipeId = net.minecraft.resources.ResourceLocation.tryParse(childCompound.getString("recipe"));
         restoredRecipeSignature = childCompound.getString("recipeSignature");
         // Read items.
         this.itemHandler.deserializeNBT(registries, childCompound.getCompound("inventory"));
-        if (this.itemHandler.getSlots() != CyaniteReprocessorItemHandler.SLOTS) {
-            this.itemHandler.setSize(CyaniteReprocessorItemHandler.SLOTS);
+        if (this.itemHandler.getSlots() != IndustrialProcessorItemHandler.SLOTS) {
+            this.itemHandler.setSize(IndustrialProcessorItemHandler.SLOTS);
         }
         // Read energy.
         this.energyStorage.set(childCompound.getInt("energyStored"));
@@ -574,7 +574,7 @@ public class CyaniteReprocessorTile extends BlockEntity implements MenuProvider,
         this.fluidTank.readFromNBT(registries, childCompound.getCompound("fluidTank"));
         this.outputTank.readFromNBT(registries, childCompound.getCompound("outputTank"));
         this.autoEjectFluid = childCompound.getBoolean("autoEjectFluid");
-        this.itemPresentLastTick = this.itemHandler.getStackInSlot(CyaniteReprocessorItemHandler.INPUT_SLOT_INDEX).copy();
+        this.itemPresentLastTick = this.itemHandler.getStackInSlot(IndustrialProcessorItemHandler.INPUT_SLOT_INDEX).copy();
         // Read sides and automation.
         this.sides.load(childCompound.getCompound("sides"));
         this.autoInput = childCompound.getBoolean("autoInput");
@@ -609,12 +609,12 @@ public class CyaniteReprocessorTile extends BlockEntity implements MenuProvider,
         childCompound.putBoolean("autoEject", this.autoEject);
         childCompound.putBoolean("autoInputFluid", this.autoInputFluid);
 
-        parentCompound.put("cyaniteReprocessorState", childCompound);
+        parentCompound.put("industrialProcessorState", childCompound);
     }
 
     /**
      * @return Whether or not the machine can perform work.
-     * @see CyaniteReprocessorTile#tick()
+     * @see IndustrialProcessorTile#tick()
      */
     private net.minecraft.resources.ResourceLocation activeRecipeId;
     private String activeRecipeSignature = "";
@@ -640,7 +640,7 @@ public class CyaniteReprocessorTile extends BlockEntity implements MenuProvider,
 
     private boolean canWork(biggerreactorsrework.machine.recipe.ReprocessingRecipe recipe) {
         boolean room=recipe.producesFluid() ? outputTank.fill(recipe.fluidResult(),IFluidHandler.FluidAction.SIMULATE)==recipe.fluidResult().getAmount() :
-            itemHandler.insertItem(CyaniteReprocessorItemHandler.OUTPUT_SLOT_INDEX,recipe.result(),true).isEmpty();
+            itemHandler.insertItem(IndustrialProcessorItemHandler.OUTPUT_SLOT_INDEX,recipe.result(),true).isEmpty();
         int water=recipe.fluidCostAt(workHandler.getProgress());
         return room && energyStorage.getEnergyStored()>=recipe.energy() && (water==0 ||
             fluidTank.getFluid().getFluid()==recipe.fluid() && fluidTank.getFluidAmount()>=water);
@@ -664,7 +664,7 @@ public class CyaniteReprocessorTile extends BlockEntity implements MenuProvider,
 
         boolean doUpdate = false;
         boolean isActive = false;
-        ItemStack inputStack = this.itemHandler.getStackInSlot(CyaniteReprocessorItemHandler.INPUT_SLOT_INDEX);
+        ItemStack inputStack = this.itemHandler.getStackInSlot(IndustrialProcessorItemHandler.INPUT_SLOT_INDEX);
 
         // Check to make sure the player doesn't try to pull a fast one.
         if (restoredRecipeSignature.isEmpty() && !ItemStack.isSameItemSameComponents(this.itemPresentLastTick, inputStack)) {
@@ -698,19 +698,19 @@ public class CyaniteReprocessorTile extends BlockEntity implements MenuProvider,
             }
             if (workHandler.isFinished()) {
                 boolean reprocessedCyanite = !recipe.producesFluid() && recipe.result().is(BlutoniumIngot.INSTANCE)
-                        && itemHandler.getStackInSlot(CyaniteReprocessorItemHandler.INPUT_SLOT_INDEX).is(biggerreactorsrework.items.ingots.CyaniteIngot.INSTANCE);
-                itemHandler.extractItem(CyaniteReprocessorItemHandler.INPUT_SLOT_INDEX, recipe.count(), false);
+                        && itemHandler.getStackInSlot(IndustrialProcessorItemHandler.INPUT_SLOT_INDEX).is(biggerreactorsrework.items.ingots.CyaniteIngot.INSTANCE);
+                itemHandler.extractItem(IndustrialProcessorItemHandler.INPUT_SLOT_INDEX, recipe.count(), false);
                 if(recipe.producesFluid())outputTank.fill(recipe.fluidResult(),IFluidHandler.FluidAction.EXECUTE);
-                else itemHandler.insertItem(CyaniteReprocessorItemHandler.OUTPUT_SLOT_INDEX, recipe.result(), false);
+                else itemHandler.insertItem(IndustrialProcessorItemHandler.OUTPUT_SLOT_INDEX, recipe.result(), false);
                 if (reprocessedCyanite) advancements.report(level, new net.minecraft.world.phys.AABB(getBlockPos()), "cyanite_reprocessed");
                 workHandler.clear();
-                itemPresentLastTick = itemHandler.getStackInSlot(CyaniteReprocessorItemHandler.INPUT_SLOT_INDEX).copy();
+                itemPresentLastTick = itemHandler.getStackInSlot(IndustrialProcessorItemHandler.INPUT_SLOT_INDEX).copy();
             }
         }
 
         BlockState currentBlockState = this.level.getBlockState(this.getBlockPos());
-        if (currentBlockState.hasProperty(CyaniteReprocessor.ENABLED) && currentBlockState.getValue(CyaniteReprocessor.ENABLED) != isActive) {
-            this.level.setBlock(this.getBlockPos(), currentBlockState.setValue(CyaniteReprocessor.ENABLED, isActive), 3);
+        if (currentBlockState.hasProperty(IndustrialProcessor.ENABLED) && currentBlockState.getValue(IndustrialProcessor.ENABLED) != isActive) {
+            this.level.setBlock(this.getBlockPos(), currentBlockState.setValue(IndustrialProcessor.ENABLED, isActive), 3);
             doUpdate = true;
         }
 
@@ -728,7 +728,7 @@ public class CyaniteReprocessorTile extends BlockEntity implements MenuProvider,
         this.updateState();
     }
 
-    public CyaniteReprocessorItemHandler getItemHandler() {
+    public IndustrialProcessorItemHandler getItemHandler() {
         return this.itemHandler;
     }
 }
