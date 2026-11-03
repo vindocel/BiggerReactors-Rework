@@ -16,14 +16,82 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
+import net.minecraft.core.BlockPos;
 import java.util.*;
 
 /** Models and materials on facing pages. */
 final class GuideMultiblock {
     private static final String FRAME="frame",WALLS="walls";
     private static final Map<String,ViewState> STATES=new HashMap<>();
-    private static final class ViewState {float yaw=35,pitch=28,zoom=1;int layer=-1;boolean rotating=true;long lastFrame;String highlight;}
-    record Box(int x,int y,int z,int w,int h,int d,BlockState block,String group){long count(){return (long)w*h*d;}}
+    // Modified 2026-11-03: walls alternate, or stay casing or glass by the reader's choice.
+    private static final class ViewState {float yaw=35,pitch=28,zoom=1;int layer=-1,walls=0;boolean rotating=true;long lastFrame;String highlight;
+        boolean glassWalls(){return walls==2||walls==0&&(net.minecraft.Util.getMillis()/2500)%2==1;}}
+    private static final String[] WALL_MODES={"walls_alternate","walls_casing","walls_glass"};
+    static Block glassFor(Block casing){
+        if(casing==ReactorCasing.INSTANCE)return ReactorGlass.INSTANCE;
+        if(casing==TurbineCasing.INSTANCE)return TurbineGlass.INSTANCE;
+        if(casing==BatteryCasing.INSTANCE)return BatteryGlass.INSTANCE;
+        if(casing==biggerreactorsrework.multiblocks.heatexchanger.blocks.HeatExchangerCasingBlock.INSTANCE)return biggerreactorsrework.multiblocks.heatexchanger.blocks.HeatExchangerGlassBlock.INSTANCE;
+        return casing;
+    }
+    record Box(int x,int y,int z,int w,int h,int d,BlockState block,String group,BlockState glass,BlockState plain){long count(){return (long)w*h*d;}
+        // Modified 2026-11-03: the whole model shows finished, connected textures; a single layer shows each block on its own.
+        BlockState shown(boolean glassWalls,boolean layer){
+            if(layer)return glassWalls&&glass!=null?glassFor(plain.getBlock()).defaultBlockState():separate(plain);
+            return glassWalls&&glass!=null?glass:block;
+        }
+    }
+    /**
+     * Added 2026-11-03: parts as they look in a finished machine, assembled with framed casing, plus the same
+     * shell with glass walls connected to each other.
+     */
+    private static Map<BlockPos,BlockState[]> finished(Map<BlockPos,BlockState> parts,int w,int h,int d){
+        var glassy=new LinkedHashMap<>(parts);
+        parts.forEach((pos,state)->{if(wall(pos,w,h,d)&&glassFor(state.getBlock())!=state.getBlock())glassy.put(pos,glassFor(state.getBlock()).defaultBlockState());});
+        biggerreactorsrework.util.GuideStructures.connect(glassy);
+        var result=new LinkedHashMap<BlockPos,BlockState[]>();
+        parts.forEach((pos,state)->result.put(pos,new BlockState[]{assembled(state,pos,w,h,d),wall(pos,w,h,d)&&glassFor(state.getBlock())!=state.getBlock()?assembled(glassy.get(pos),pos,w,h,d):null}));
+        return result;
+    }
+    private static BlockState separate(BlockState state){
+        for(var side:List.of(biggerreactorsrework.core.modular.block.IConnectedTexture.Module.NORTH_CONNECTED_PROPERTY,
+                biggerreactorsrework.core.modular.block.IConnectedTexture.Module.SOUTH_CONNECTED_PROPERTY,
+                biggerreactorsrework.core.modular.block.IConnectedTexture.Module.WEST_CONNECTED_PROPERTY,
+                biggerreactorsrework.core.modular.block.IConnectedTexture.Module.EAST_CONNECTED_PROPERTY,
+                biggerreactorsrework.core.modular.block.IConnectedTexture.Module.TOP_CONNECTED_PROPERTY,
+                biggerreactorsrework.core.modular.block.IConnectedTexture.Module.BOTTOM_CONNECTED_PROPERTY))
+            if(state.hasProperty(side))state=state.setValue(side,false);
+        return state;
+    }
+    private static boolean wall(BlockPos pos,int w,int h,int d){
+        int bounds=(pos.getX()==0||pos.getX()==w-1?1:0)+(pos.getY()==0||pos.getY()==h-1?1:0)+(pos.getZ()==0||pos.getZ()==d-1?1:0);
+        return bounds==1;
+    }
+    private static BlockState assembled(BlockState state,BlockPos pos,int w,int h,int d){
+        // Only the shell takes its assembled look; assembled rotor parts are drawn by their own renderer.
+        boolean shell=pos.getX()==0||pos.getX()==w-1||pos.getY()==0||pos.getY()==h-1||pos.getZ()==0||pos.getZ()==d-1;
+        var flag=biggerreactorsrework.core.multiblock.IAssemblyStateBlock.ASSEMBLED;
+        if(!shell)return state;
+        if(state.hasProperty(flag))state=state.setValue(flag,true);
+        // Ports and terminals face outwards from the wall they sit on, as when placed by a player.
+        var outward=pos.getX()==0?net.minecraft.core.Direction.WEST:pos.getX()==w-1?net.minecraft.core.Direction.EAST:
+                pos.getZ()==0?net.minecraft.core.Direction.NORTH:pos.getZ()==d-1?net.minecraft.core.Direction.SOUTH:
+                pos.getY()==0?net.minecraft.core.Direction.DOWN:net.minecraft.core.Direction.UP;
+        for(var property:state.getProperties())
+            if(property.getName().equals("facing")&&property.getPossibleValues().contains(outward))state=facing(state,property,outward);
+        var x=biggerreactorsrework.core.multiblock.rectangular.IAxisPositionBlock.AxisPosition.X_AXIS_POSITION;
+        var y=biggerreactorsrework.core.multiblock.rectangular.IAxisPositionBlock.AxisPosition.Y_AXIS_POSITION;
+        var z=biggerreactorsrework.core.multiblock.rectangular.IAxisPositionBlock.AxisPosition.Z_AXIS_POSITION;
+        if(state.hasProperty(x))state=state.setValue(x,axis(pos.getX(),w)).setValue(y,axis(pos.getY(),h)).setValue(z,axis(pos.getZ(),d));
+        return state;
+    }
+    @SuppressWarnings("unchecked")
+    private static <T extends Comparable<T>> BlockState facing(BlockState state,net.minecraft.world.level.block.state.properties.Property<T> property,Object value){
+        return state.setValue(property,(T)value);
+    }
+    private static biggerreactorsrework.core.multiblock.rectangular.IAxisPositionBlock.AxisPosition axis(int v,int size){
+        return v==0?biggerreactorsrework.core.multiblock.rectangular.IAxisPositionBlock.AxisPosition.LOWER:v==size-1?biggerreactorsrework.core.multiblock.rectangular.IAxisPositionBlock.AxisPosition.UPPER:biggerreactorsrework.core.multiblock.rectangular.IAxisPositionBlock.AxisPosition.MIDDLE;
+    }
     record Preview(String id,int width,int height,int depth,List<Box> boxes,Block glass){}
     record Part(String group,Item item,long count){}
     static final class Spread implements GuideElement {
@@ -41,14 +109,16 @@ final class GuideMultiblock {
     static List<GuideElement> elements(Example e){
         var boxes=new ArrayList<Box>();Block glass=e.id().equals("turbine")?TurbineGlass.INSTANCE:e.id().equals("battery")?BatteryGlass.INSTANCE:e.id().equals("exchanger")?null:ReactorGlass.INSTANCE;
         boolean[] inlet={false};
-        e.parts().forEach((pos,placed)->{
-            if(placed.isAir())return;
-            var block=display(placed,inlet);
+        var shown=new LinkedHashMap<BlockPos,BlockState>();
+        e.parts().forEach((pos,placed)->{if(!placed.isAir())shown.put(pos,display(placed,inlet));});
+        var looks=finished(shown,e.width(),e.height(),e.depth());
+        shown.forEach((pos,placed)->{
+            var block=looks.get(pos)[0];
             String group=key(block.getBlock());
             if(block.getBlock()==ReactorCasing.INSTANCE||block.getBlock()==TurbineCasing.INSTANCE||block.getBlock()==BatteryCasing.INSTANCE){
                 int bounds=(pos.getX()==0||pos.getX()==e.width()-1?1:0)+(pos.getY()==0||pos.getY()==e.height()-1?1:0)+(pos.getZ()==0||pos.getZ()==e.depth()-1?1:0);group=bounds>=2?FRAME:WALLS;
             }
-            boxes.add(new Box(pos.getX(),pos.getY(),pos.getZ(),1,1,1,block,group));
+            boxes.add(new Box(pos.getX(),pos.getY(),pos.getZ(),1,1,1,block,group,looks.get(pos)[1],placed));
         });
         return List.of(new Spread(new Preview(e.id(),e.width(),e.height(),e.depth(),List.copyOf(boxes),glass),Component.translatable("guide.biggerreactorsrework.viewer."+(e.id().equals("minimal")?"minimum":"dimensions"),e.width(),e.height(),e.depth())));
     }
@@ -88,11 +158,11 @@ final class GuideMultiblock {
                 g.enableScissor(x,y,x+width,y+vh);var pose=g.pose();pose.pushPose();pose.translate(x+width/2f,y+vh/2f,200);
                 float scale=state.zoom*Math.min(width,vh)/(Math.max(example.width(),Math.max(example.depth(),example.height()))*1.8f);
                 pose.scale(scale,-scale,scale);pose.mulPose(Axis.XP.rotationDegrees(state.pitch));pose.mulPose(Axis.YP.rotationDegrees(state.yaw));pose.translate(-example.width()/2f,-example.height()/2f,-example.depth()/2f);
-                Lighting.setupFor3DItems();boolean glass=(now/2500)%2==1;
+                Lighting.setupFor3DItems();boolean glass=state.glassWalls();
                 for(var box:example.boxes()){
                     if(state.layer>=0&&(state.layer<box.y||state.layer>=box.y+box.h))continue;
                     int by=state.layer<0?box.y:state.layer,bh=state.layer<0?box.h:1;
-                    var block=WALLS.equals(box.group)&&example.glass()!=null&&glass?example.glass().defaultBlockState():box.block;
+                    var block=box.shown(glass,state.layer>=0);
                     pose.pushPose();pose.translate(box.x,by,box.z);pose.scale(box.w,bh,box.d);
                     Minecraft.getInstance().getBlockRenderer().renderSingleBlock(block,pose,g.bufferSource(),LightTexture.FULL_BRIGHT,OverlayTexture.NO_OVERLAY);
                     // Coolant inside, as in a working reactor; the frame alone shows only its outer faces.
@@ -108,13 +178,17 @@ final class GuideMultiblock {
                     LevelRenderer.renderLineBox(pose,g.bufferSource().getBuffer(RenderType.lines()),new AABB(box.x-0.015,by-0.015,box.z-0.015,box.x+box.w+0.015,by+bh+0.015,box.z+box.d+0.015),1f,0.85f,0.1f,1f);
                 }g.flush();pose.popPose();Lighting.setupForFlatItems();g.disableScissor();
             }
-            int bw=(width-4)/2;
+            int bw=(width-8)/3;
             var layer=state.layer<0?Component.translatable("guide.biggerreactorsrework.viewer.layer_all"):Component.translatable("guide.biggerreactorsrework.viewer.layer",state.layer+1);
-            s.textButton(g,x,y+vh+4,bw,14,layer,mx,my,true);s.textButton(g,x+bw+4,y+vh+4,width-bw-4,14,Component.translatable("guide.biggerreactorsrework.viewer."+(state.rotating?"rotate_on":"rotate_off")),mx,my,true);
+            s.textButton(g,x,y+vh+4,bw,14,layer,mx,my,true);
+            s.textButton(g,x+bw+4,y+vh+4,bw,14,Component.translatable("guide.biggerreactorsrework.viewer."+WALL_MODES[state.walls]),mx,my,true);
+            s.textButton(g,x+2*bw+8,y+vh+4,width-2*bw-8,14,Component.translatable("guide.biggerreactorsrework.viewer."+(state.rotating?"rotate_on":"rotate_off")),mx,my,true);
         }
         public boolean click(GuideScreen s,double mx,double my,int x,int y,int width,int button){
             int vh=viewHeight(s,width);if(mx<x||mx>=x+width||my<y)return false;
-            if(my>=y+vh+4&&my<y+vh+18){if(mx<x+(width-4)/2)state.layer=(state.layer+2)%(example.height()+1)-1;else state.rotating=!state.rotating;s.playClick();return true;}
+            if(my>=y+vh+4&&my<y+vh+18){int bw=(width-8)/3;
+                if(mx<x+bw+2)state.layer=(state.layer+2)%(example.height()+1)-1;else if(mx<x+2*bw+6)state.walls=(state.walls+1)%WALL_MODES.length;else state.rotating=!state.rotating;
+                s.playClick();return true;}
             if(my<y+vh){dragging=true;return true;}return false;
         }
         public boolean drag(GuideScreen s,double dx,double dy){if(!dragging)return false;state.yaw+=(float)dx*1.5f;state.pitch=net.minecraft.util.Mth.clamp(state.pitch+(float)dy*1.2f,-10,85);return true;}
@@ -136,12 +210,15 @@ final class GuideMultiblock {
         for(var placed:machines){
             var m=placed.machine();int ox=placed.offset().getX()-minX,oy=placed.offset().getY()-minY,oz=placed.offset().getZ()-minZ;
             w=Math.max(w,ox+m.width());h=Math.max(h,oy+m.height());d=Math.max(d,oz+m.depth());
-            m.blocks().forEach((pos,placedState)->{
-                var block=display(placedState,inlet);String group=key(block.getBlock());
+            var shown=new LinkedHashMap<BlockPos,BlockState>();
+            m.blocks().forEach((pos,placedState)->shown.put(pos,display(placedState,inlet)));
+            var looks=finished(shown,m.width(),m.height(),m.depth());
+            shown.forEach((pos,placedState)->{
+                var block=looks.get(pos)[0];String group=key(block.getBlock());
                 if(block.getBlock()==ReactorCasing.INSTANCE||block.getBlock()==TurbineCasing.INSTANCE||block.getBlock()==biggerreactorsrework.multiblocks.heatexchanger.blocks.HeatExchangerCasingBlock.INSTANCE){
                     int bounds=(pos.getX()==0||pos.getX()==m.width()-1?1:0)+(pos.getY()==0||pos.getY()==m.height()-1?1:0)+(pos.getZ()==0||pos.getZ()==m.depth()-1?1:0);group=bounds>=2?FRAME:WALLS;
                 }
-                boxes.add(new Box(pos.getX()+ox,pos.getY()+oy,pos.getZ()+oz,1,1,1,block,group));
+                boxes.add(new Box(pos.getX()+ox,pos.getY()+oy,pos.getZ()+oz,1,1,1,block,group,looks.get(pos)[1],placedState));
             });
         }
         var spread=new Spread(new Preview(id,w,h,d,List.copyOf(boxes),null),title);
@@ -158,8 +235,8 @@ final class GuideMultiblock {
         @Override public void prepare(GuideScreen s,int x,int y,int width,int mx,int my){int row=row(s,width),index=(my-y)/Math.max(1,row);if(mx>=x&&mx<x+width&&my>=y&&index<parts.size())state.highlight=parts.get(index).group;}
         public void render(GuideScreen s,GuiGraphics g,int x,int y,int width,int mx,int my){
             int row=row(s,width);for(int i=0;i<parts.size();i++){
-                var part=parts.get(i);int py=y+i*row;boolean walls=WALLS.equals(part.group)&&example.glass()!=null,hover=part.group.equals(state.highlight);
-                var stack=new ItemStack(walls&&(net.minecraft.Util.getMillis()/2500)%2==1?example.glass().asItem():part.item);
+                var part=parts.get(i);int py=y+i*row;boolean walls=WALLS.equals(part.group),hover=part.group.equals(state.highlight);
+                var stack=new ItemStack(walls&&state.glassWalls()?glassFor(Block.byItem(part.item)).asItem():part.item);
                 if(hover)g.fill(x,py,x+width,py+row,0x40FFE033);s.itemSlot(g,stack,x,py,mx,my);
                 Component name=walls?Component.translatable("guide.biggerreactorsrework.viewer.walls",part.count):FRAME.equals(part.group)?Component.translatable("guide.biggerreactorsrework.viewer.frame",part.count):Component.literal(part.count+"\u00d7 ").append(stack.getHoverName());
                 s.fixedText(g,name,x+23,py+5,width-23,hover?0xFF8A6500:GuideElements.BODY);

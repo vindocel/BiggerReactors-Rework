@@ -83,7 +83,7 @@ The exchanger's separate water circuit supplies your turbine:
 
 **Do the math before you build.** Each mB of fuel gives **12,500 kJ**, and with water each kJ makes one steam mB. Multiply by the structure percentage, by your coolant's steam per batch and by your coil's FE per steam mB, and you have your FE/t.
 
-Fuel consumption creates a fixed heat budget. Full outputs, missing coolant and full passive buffers discard unused production rather than saving fuel. Solid moderators use four explicit cooling/output classes. Optional balanced outputs on reactors, exchangers and turbines share flow between accepting destinations, and maintenance extraction recovers preserved input stock.
+Fuel consumption creates a fixed heat budget. Full outputs, missing coolant and full passive buffers discard unused production rather than saving fuel. Each solid moderator cools by its own conductivity, so every material has its own output. Optional balanced outputs on reactors, exchangers and turbines share flow between accepting destinations, and maintenance extraction recovers preserved input stock.
 
 Every coolant circuit needs enough water, effective heat exchange and clear outputs. Empty both sides of a coolant circuit before changing its fluid pair.
 

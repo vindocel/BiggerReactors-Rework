@@ -220,13 +220,13 @@ final class GuideContent {
     private static GuideElements.Table propertyTable(boolean moderator) {
         var headers=new ArrayList<Component>();headers.add(Component.translatable("guide.biggerreactorsrework.table.material"));
         var tips=new ArrayList<List<Component>>();tips.add(List.of(Component.translatable("guide.biggerreactorsrework.table.material.tip")));
-        String[] keys=moderator?new String[]{"passive_class","passive_cooling","passive_rate"}:new String[]{"fe_per_mb","steam_capacity"};
-        String[] symbols=moderator?new String[]{"T","C","RF"}:new String[]{"FE","mB"};
+        String[] keys=moderator?new String[]{"passive_cooling","passive_rate"}:new String[]{"fe_per_mb","steam_capacity"};
+        String[] symbols=moderator?new String[]{"C","RF"}:new String[]{"FE","mB"};
         for(int i=0;i<keys.length;i++){
             headers.add(Component.literal(symbols[i]));
             tips.add(List.of(Component.translatable("guide.biggerreactorsrework.table."+keys[i]+".title"),Component.translatable("guide.biggerreactorsrework.table."+keys[i]+".tip")));
         }
-        return new GuideElements.Table(headers,moderator?new float[]{3,1,1,1}:new float[]{3,1,1},moderator?GuideContent::moderators:GuideContent::coils,tips,cells->materialReference(moderator,cells));
+        return new GuideElements.Table(headers,new float[]{3,1,1},moderator?GuideContent::moderators:GuideContent::coils,tips,cells->materialReference(moderator,cells));
     }
     private static List<String> materialCells(MaterialTableRows.Entry entry){
         var row=new ArrayList<String>();row.add(entry.name());entry.values().forEach(value->row.add(number(value)));return List.copyOf(row);
@@ -236,10 +236,10 @@ final class GuideContent {
     private static List<MaterialTableRows.Entry> materialEntries(boolean moderator){
         var entries=new ArrayList<MaterialTableRows.Entry>();
         if(moderator)biggerreactorsrework.registries.ReactorModeratorRegistry.Client.forEach((block,p)->GuideMaterialNames.resolve(block).ifPresent(name->
-            entries.add(new MaterialTableRows.Entry(name.material(),name.label(),List.of((double)p.passiveClass().ordinal(),p.passiveClass().coolingWeight*100,p.passiveClass().rfPerKJ*100),BuiltInRegistries.BLOCK.getKey(block).toString()))));
+            entries.add(new MaterialTableRows.Entry(name.material(),name.label(),List.of(biggerreactorsrework.client.deps.RecipeViewerData.passiveCooling(p)*100,biggerreactorsrework.client.deps.RecipeViewerData.passiveFuelRF(p)),BuiltInRegistries.BLOCK.getKey(block).toString()))));
         else biggerreactorsrework.registries.TurbineCoilRegistry.Client.getImmutableRegistry().forEach((block,p)->GuideMaterialNames.resolve(block).ifPresent(name->
             entries.add(new MaterialTableRows.Entry(name.material(),name.label(),List.of(p.fePerMB(),(double)p.steamPerTick()),BuiltInRegistries.BLOCK.getKey(block).toString()))));
-        return MaterialTableRows.byEfficiency(entries,moderator?1:0);
+        return MaterialTableRows.byEfficiency(entries,0);
     }
     private static GuideReferences.Target materialReference(boolean moderator,List<String> cells){
         for(var entry:materialEntries(moderator))if(materialCells(entry).equals(cells)){

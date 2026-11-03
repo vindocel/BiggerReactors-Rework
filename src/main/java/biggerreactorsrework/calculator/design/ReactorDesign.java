@@ -110,7 +110,7 @@ public record ReactorDesign(int x, int y, int z, Pattern pattern, @Nullable Bloc
         for (int px = 0; px < w; px++) for (int py = 0; py < h; py++) for (int pz = 0; pz < d; pz++) {
             boolean wall = px == 0 || px == w - 1 || py == 0 || py == h - 1 || pz == 0 || pz == d - 1;
             if (wall) {
-                parts.put(new BlockPos(px, py, pz), (MachineLayout.frame(px, py, pz, w, h, d) ? ReactorCasing.INSTANCE : ReactorGlass.INSTANCE).defaultBlockState());
+                parts.put(new BlockPos(px, py, pz), ReactorCasing.INSTANCE.defaultBlockState());
                 continue;
             }
             int i = px - 1, k = pz - 1;

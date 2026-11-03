@@ -80,10 +80,15 @@ class ThermalModelTest {
         assertEquals(1,ThermalModel.gapFactor(0)); assertEquals(.5,ThermalModel.gapFactor(1));
         assertEquals(.25,ThermalModel.gapFactor(2)); assertEquals(.1,ThermalModel.gapFactor(3));
         assertEquals(0,ThermalModel.gapFactor(4));
-        assertEquals(0,ThermalModel.PassiveClass.NONE.coolingWeight);
+        assertEquals(0,ThermalModel.passiveCooling(ThermalModel.PassiveClass.NONE,5));
+        assertEquals(.6,ThermalModel.passiveCooling(ThermalModel.PassiveClass.SUPERIOR,3),1e-12);
+        assertEquals(1,ThermalModel.passiveCooling(ThermalModel.PassiveClass.BASIC,9));
         for(var c:ThermalModel.PassiveClass.values()) {
-            assertTrue(c.coolingWeight<=1); assertTrue(c.rfPerKJ<=.24);
+            assertTrue(ThermalModel.passiveCooling(c,100)<=1);
         }
+        assertEquals(.6,ThermalModel.passiveYield(ThermalModel.PassiveClass.SUPERIOR,3),1e-12);
+        assertEquals(1.2,ThermalModel.passiveYield(ThermalModel.PassiveClass.SUPERIOR,5),1e-12);
+        assertEquals(1.2,ThermalModel.passiveYield(ThermalModel.PassiveClass.SUPERIOR,50),1e-12);
         assertThrows(IllegalArgumentException.class,()->ThermalModel.convert(1,1,1,10,11));
     }
 

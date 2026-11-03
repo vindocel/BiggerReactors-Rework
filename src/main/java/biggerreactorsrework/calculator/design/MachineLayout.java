@@ -28,10 +28,4 @@ public record MachineLayout(Kind kind, int width, int height, int depth, Map<Blo
     public Port port(Role role) {
         return ports.stream().filter(p -> p.role() == role).findFirst().orElseThrow();
     }
-
-    /** Added 2026-11-03: edges of the shell take casing; the faces between them take glass so the interior shows. */
-    public static boolean frame(int x, int y, int z, int w, int h, int d) {
-        int sides = (x == 0 || x == w - 1 ? 1 : 0) + (y == 0 || y == h - 1 ? 1 : 0) + (z == 0 || z == d - 1 ? 1 : 0);
-        return sides >= 2;
-    }
 }

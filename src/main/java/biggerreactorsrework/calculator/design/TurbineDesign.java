@@ -79,7 +79,7 @@ public record TurbineDesign(int arm, int bladeLayers, int spacer, int coils, Blo
         var parts = new LinkedHashMap<BlockPos, BlockState>();
         for (int px = 0; px < w; px++) for (int py = 0; py < h; py++) for (int pz = 0; pz < d; pz++)
             if (px == 0 || px == w - 1 || py == 0 || py == h - 1 || pz == 0 || pz == d - 1)
-                parts.put(new BlockPos(px, py, pz), (MachineLayout.frame(px, py, pz, w, h, d) ? TurbineCasing.INSTANCE : TurbineGlass.INSTANCE).defaultBlockState());
+                parts.put(new BlockPos(px, py, pz), TurbineCasing.INSTANCE.defaultBlockState());
         parts.put(new BlockPos(c, 0, c), TurbineRotorBearing.INSTANCE.defaultBlockState());
         parts.put(new BlockPos(c, h - 1, c), TurbineRotorBearing.INSTANCE.defaultBlockState());
         for (int layer = 0; layer < shaft(); layer++) {

@@ -127,7 +127,7 @@ public final class CoolingCircuitComparisonGameTests {
         rows.add(measure(h,"water_direct",null,reactor(3),FluidTransitionRegistry.liquidTransition(Fluids.WATER)));
         for(var fluid:List.of(biggerreactorsrework.fluids.LiquidObsidian.INSTANCE,registry.get(cryoKey),registry.get(sodiumKey)))
             rows.add(measure(h,registry.getKey(fluid).toString(),g,reactor(3),FluidTransitionRegistry.liquidTransition(fluid)));
-        java.nio.file.Files.writeString(java.nio.file.Path.of("C:/Users/victo/Documents/Instrucoes/BiggerReactors-Rework/reports/coolant-progression.json"),new com.google.gson.GsonBuilder().setPrettyPrinting().create().toJson(rows));
+        StudyReports.write("coolant-progression.json",new com.google.gson.GsonBuilder().setPrettyPrinting().create().toJson(rows));
         BiggerReactors.LOGGER.info("Same-setup coolant progression: {}",rows);
         double water=((Number)rows.getFirst().get("steam_mB_t")).doubleValue();
         var sodium=rows.getLast();
@@ -160,7 +160,7 @@ public final class CoolingCircuitComparisonGameTests {
         report.put("external_dimensions",List.of(6,6,6));report.put("fuel_rod_blocks",32);report.put("manifolds",28);report.put("contact_faces",80);
         report.put("rod_insertions","42% on seven rods; 45% at local x=2,z=0");report.put("warmup_ticks",WARM);report.put("sample_ticks",2*WINDOW);
         report.put("conditions","Full fuel; water supplied externally; steam removed freely; closed finite primary charge 280000 mB; no pipe rate limits; no turbine; native production simulations and registry profiles");report.put("cases",cases);
-        java.nio.file.Files.writeString(java.nio.file.Path.of("C:/Users/victo/Documents/Instrucoes/BiggerReactors-Rework/reports/cooling-circuit-comparison.json"),new com.google.gson.GsonBuilder().setPrettyPrinting().create().toJson(report));
+        StudyReports.write("cooling-circuit-comparison.json",new com.google.gson.GsonBuilder().setPrettyPrinting().create().toJson(report));
         BiggerReactors.LOGGER.info("Cooling circuit A/B comparison: {}",cases);
         h.succeed();
     }

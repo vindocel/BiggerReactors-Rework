@@ -202,9 +202,8 @@ public final class RecipeViewerData {
                 }
             });
             return List.of(
-                stat("passive_class",properties.passiveClass().ordinal(),all,p->p.passiveClass().ordinal(),false),
-                stat("passive_cooling",properties.passiveClass().coolingWeight*100,all,p->p.passiveClass().coolingWeight*100,false),
-                stat("passive_rate",properties.passiveClass().rfPerKJ*100,all,p->p.passiveClass().rfPerKJ*100,false));
+                stat("passive_cooling",passiveCooling(properties)*100,all,p->passiveCooling(p)*100,false),
+                stat("passive_rate",passiveFuelRF(properties),all,RecipeViewerData::passiveFuelRF,false));
         }
 
         public static List<Stat> coil(TurbineCoilRegistry.CoilData data) {
@@ -438,5 +437,13 @@ public final class RecipeViewerData {
             return List.of(Component.translatable("recipe_viewer.biggerreactorsrework.industrial_processing.time",
                     String.format(java.util.Locale.ROOT, "%.1f", ticks / 20.0)));
         }
+    }
+
+    // Added 2026-11-03: each moderator's own cooling share and the RF one fuel mB gives through it at full structure.
+    public static double passiveCooling(ReactorModeratorRegistry.IModeratorProperties p) {
+        return biggerreactorsrework.thermal.ThermalModel.passiveCooling(p.passiveClass(), p.heatConductivity());
+    }
+    public static double passiveFuelRF(ReactorModeratorRegistry.IModeratorProperties p) {
+        return Math.round(biggerreactorsrework.thermal.ThermalModel.passiveYield(p.passiveClass(), p.heatConductivity()) * Config.CONFIG.Reactor.Thermal.KJPerFuel * biggerreactorsrework.thermal.ThermalModel.PASSIVE_RF_PER_KJ);
     }
 }

@@ -117,7 +117,7 @@ public record ExchangerDesign(int length, int rows, int layers) {
         var parts = new LinkedHashMap<BlockPos, BlockState>();
         for (int px = 0; px < w; px++) for (int py = 0; py < h; py++) for (int pz = 0; pz < d; pz++)
             if (px == 0 || px == w - 1 || py == 0 || py == h - 1 || pz == 0 || pz == d - 1)
-                parts.put(new BlockPos(px, py, pz), (MachineLayout.frame(px, py, pz, w, h, d) ? HeatExchangerCasingBlock.INSTANCE : HeatExchangerGlassBlock.INSTANCE).defaultBlockState());
+                parts.put(new BlockPos(px, py, pz), HeatExchangerCasingBlock.INSTANCE.defaultBlockState());
         channels().forEach((pos, block) -> parts.put(pos, block.defaultBlockState()));
         var ports = List.of(new MachineLayout.Port(hotIn(), MachineLayout.Role.EXCHANGER_HOT_IN),
                 new MachineLayout.Port(coldOut(), MachineLayout.Role.EXCHANGER_COLD_OUT),

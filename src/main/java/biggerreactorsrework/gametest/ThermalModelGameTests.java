@@ -93,17 +93,18 @@ public final class ThermalModelGameTests {
         for(var type:ThermalModel.PassiveClass.values()) {
             var s=simulation(checker(3,1,3,false,type),true,1);s.tick(true);
             if(fuel<0)fuel=s.fuelTank().burnedLastTick();else close(h,fuel,s.fuelTank().burnedLastTick(),"Material multiplied nuclear energy");
-            close(h,type.coolingWeight,s.thermal().structuralEfficiency(),"Wrong passive weight");balance(h,s);
-            close(h,Math.floor(s.thermal().generated()*type.coolingWeight*type.rfPerKJ),s.thermal().potentialRF(),"Passive heat was allocated twice");
+            double cooling=ThermalModel.passiveCooling(type,3);
+            close(h,cooling,s.thermal().structuralEfficiency(),"Wrong passive weight");balance(h,s);
+            close(h,Math.floor(s.thermal().generated()*cooling*ThermalModel.PASSIVE_RF_PER_KJ),s.thermal().potentialRF(),"Passive heat was allocated twice");
             var n=s.save();var battery=n.getCompound("battery");battery.put("storedPower",s.battery().capacity()+500);n.put("battery",battery);s.load(n);s.tick(true);
             h.assertTrue(s.battery().stored()==s.battery().capacity()+500,"Legacy battery overfill was clamped");
             if(type!=ThermalModel.PassiveClass.NONE)h.assertTrue(s.thermal().discardedRF()>0 && s.thermal().acceptedRF()==0,"Full battery banked productive power");
         }
-        // Two superior and two basic contacts per rod must split one paid budget.
+        // Two conductive and two weakly conductive contacts per rod must split one paid budget.
         var d=checker(3,1,3,false,ThermalModel.PassiveClass.SUPERIOR);
         d.setModeratorProperties(1,0,0,new ReactorModeratorRegistry.ModeratorProperties(.1,.25,1.1,.3,ThermalModel.PassiveClass.BASIC));
         var mixed=simulation(d,true,1);mixed.tick(true);balance(h,mixed);
-        h.assertTrue(mixed.thermal().potentialRF()<=mixed.thermal().processed()*ThermalModel.PassiveClass.SUPERIOR.rfPerKJ,"Mixture exceeded superior cap");h.succeed();
+        h.assertTrue(mixed.thermal().potentialRF()<=mixed.thermal().processed()*ThermalModel.PASSIVE_RF_PER_KJ,"Mixture exceeded the passive cap");h.succeed();
     }
 
     @GameTest(template="empty_7x7x7")

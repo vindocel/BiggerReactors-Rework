@@ -109,8 +109,8 @@ public final class OutputBottleneckStudyGameTests {
         var recovered=stage(machine,"recovered",Integer.MAX_VALUE,csv);rows.add(recovered);
         var json=new LinkedHashMap<String,Object>();json.put("machine",name);json.put("stages",rows);
         json.put("conditions","Native reactor/thermal bodies/tanks/controllers; externally supplied inputs; no shared player level; each stage 160000 ticks, final 20000 sampled; restricted extraction fixed at half baseline; primary cold output freely drained");
-        Files.writeString(Path.of("C:/Users/victo/Documents/Instrucoes/BiggerReactors-Rework/reports/output-bottleneck-"+name+".json"),new com.google.gson.GsonBuilder().setPrettyPrinting().create().toJson(json));
-        Files.writeString(Path.of("C:/Users/victo/Documents/Instrucoes/BiggerReactors-Rework/reports/output-bottleneck-"+name+".csv"),csv);
+        StudyReports.write("output-bottleneck-"+name+".json",new com.google.gson.GsonBuilder().setPrettyPrinting().create().toJson(json));
+        StudyReports.write("output-bottleneck-"+name+".csv",csv);
         BiggerReactors.LOGGER.info("Output bottleneck study {}: {}",name,rows);
         h.assertTrue(value(free,"production_mB_t")>0,"reference produced nothing");
         h.assertTrue(value(limited,"output_stored_mB")>0,"restricted extraction did not build backlog or limit operation");

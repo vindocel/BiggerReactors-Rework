@@ -41,11 +41,21 @@ public final class ThermalModel {
         }
     }
 
-    public enum PassiveClass {
-        NONE(0, 0), BASIC(.25, .04), INTERMEDIATE(.5, .08), ADVANCED(.75, .16), SUPERIOR(1, .24);
-        public final double coolingWeight;
-        public final double rfPerKJ;
-        PassiveClass(double weight, double rate) { coolingWeight = weight; rfPerKJ = rate; }
+    /** Modified 2026-11-03: a class only marks a material as productive; its cooling follows its own conductivity. */
+    public enum PassiveClass { NONE, BASIC, INTERMEDIATE, ADVANCED, SUPERIOR }
+    public static final double PASSIVE_RF_PER_KJ = 8.9;
+    public static final double FULL_COOLING_CONDUCTIVITY = 5;
+    public static final double AIR_COOLING = .05;
+    public static final double RARE_BONUS_FROM = 3, RARE_BONUS_PER_CONDUCTIVITY = .1, RARE_BONUS_UNTIL = 5;
+
+    public static double passiveCooling(PassiveClass type, double conductivity) {
+        return type == PassiveClass.NONE ? 0 : fraction(conductivity / FULL_COOLING_CONDUCTIVITY);
+    }
+
+    /** Materials above Ludicrite's conductivity turn each removed kJ into up to 20% more RF. */
+    public static double passiveYield(PassiveClass type, double conductivity) {
+        double above = Math.max(0, Math.min(conductivity, RARE_BONUS_UNTIL) - RARE_BONUS_FROM);
+        return passiveCooling(type, conductivity) * (1 + above * RARE_BONUS_PER_CONDUCTIVITY);
     }
 
     public enum Cell { EMPTY, ROD, MANIFOLD }

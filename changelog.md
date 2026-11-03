@@ -22,7 +22,7 @@
 - The Industrial Processor now uses `industrial_processor` and `industrial_processing` identifiers throughout.
 - Heat is measured in kJ: one mB of fuel gives 12,500 kJ, and with water each kJ makes one steam mB.
 - Turbines generate a fixed amount of FE per steam mB set by the coil material (for example iron 2.75, gold 5.25, ludicrite 9.25), limited by blade and coil capacity. Turbines only draw the steam they can use, and their flow limit shows that usable amount. Each coil block handles a fixed steam flow, the rotor reaches 1,800 RPM in 20 seconds, and the guide, recipe viewers and statistics show these values.
-- Passive reactor classes now give 4, 8, 16 or 24 RF per 100 kJ removed.
+- Each passive moderator now cools by its own conductivity (conductivity ÷ 5, up to 100%) and every kJ removed gives 8.9 RF, so a Ludicrite-cooled reactor makes about 42% less than the same reactor on water with a Ludicrite-coil turbine, while the rarest materials beat it by about 15%, so materials no longer share four fixed classes. Air cools 5% in solid reactors, so even a 3×3×3 reactor makes a little power. The guide and recipe viewers show each material's cooling and RF per fuel mB.
 - Each directly touching heat-exchanger channel pair processes 2,000 hot mB/t, four times as much as before, and water/steam channels hold four times as much as coolant channels.
 - Added persistent optional balanced outputs for reactors, heat exchangers and turbine water, plus input-stock maintenance extraction. Thermal migration preserves fuel fractions, cold/hot stock, overfill, controls and stored FE; known legacy coolant signatures adopt the new recipes, while unknown stock remains recoverable.
 

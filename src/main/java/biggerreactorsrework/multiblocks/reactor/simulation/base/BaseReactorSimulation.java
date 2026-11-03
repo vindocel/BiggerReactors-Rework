@@ -30,7 +30,7 @@ public class BaseReactorSimulation implements IReactorSimulation {
             insertion=value;
         }
     }
-    private record Column(Rod rod, int blocks, double covered, int isolated, double[] passive) { }
+    private record Column(Rod rod, int blocks, double covered, int isolated, double passive, double output) { }
 
     public BaseReactorSimulation(SimulationDescription d, SimulationConfiguration configuration) {
         d.ensureValid(); this.configuration=configuration; preset=configuration.thermal(); geometry=d.thermalGeometry();
@@ -42,7 +42,7 @@ public class BaseReactorSimulation implements IReactorSimulation {
         }
         for(var column:geometry.columns()) {
             Rod rod=new Rod(); rods[column.x()][column.z()]=rod;
-            double[] passive=new double[ThermalModel.PassiveClass.values().length];
+            double passive=0,output=0;
             int passiveIsolated=0;
             for(int y=0;y<d.y();y++) {
                 int possible=0; double weight=0;
@@ -50,20 +50,22 @@ public class BaseReactorSimulation implements IReactorSimulation {
                     int nx=column.x()+direction[0],nz=column.z()+direction[1];
                     if(nx>=0 && nx<d.x() && nz>=0 && nz<d.z()) possible++;
                 }
-                if(possible==0) { passiveIsolated++; continue; }
+                // Modified 2026-11-03: a rod with no interior neighbour (a 3×3×3 reactor) cools as if surrounded by air.
+                if(possible==0) { if(configuration.passivelyCooled()) { passive+=ThermalModel.AIR_COOLING; output+=ThermalModel.AIR_COOLING; } else passiveIsolated++; continue; }
                 for(int[] direction:DIRECTIONS) {
                     int nx=column.x()+direction[0],nz=column.z()+direction[1];
                     if(nx<0 || nx>=d.x() || nz<0 || nz>=d.z() || d.isControlRodAt(nx,nz)) continue;
                     ReactorModeratorRegistry.IModeratorProperties p=d.moderatorPropertiesAt(nx,y,nz);
-                    var type=p==null || d.isManifoldAt(nx,y,nz) ? ThermalModel.PassiveClass.NONE : p.passiveClass();
-                    double contribution=type.coolingWeight/possible;
-                    passive[type.ordinal()]+=contribution; weight+=contribution;
+                    double cooling=p==null || d.isManifoldAt(nx,y,nz) ? 0 : ThermalModel.passiveCooling(p.passiveClass(),p.heatConductivity());
+                    double contribution=cooling/possible;
+                    passive+=contribution; weight+=contribution;
+                    if(cooling>0) output+=ThermalModel.passiveYield(p.passiveClass(),p.heatConductivity())/possible;
                 }
                 if(weight==0) passiveIsolated++;
             }
-            double covered=configuration.passivelyCooled()?Arrays.stream(passive).sum():column.coveredRods();
+            double covered=configuration.passivelyCooled()?passive:column.coveredRods();
             totalPassiveWeight+=covered;
-            columns.add(new Column(rod,column.rods(),covered,configuration.passivelyCooled()?passiveIsolated:column.isolatedRods(),passive));
+            columns.add(new Column(rod,column.rods(),covered,configuration.passivelyCooled()?passiveIsolated:column.isolatedRods(),passive,output));
         }
         efficiency=configuration.passivelyCooled()? geometry.rods()==0?0:Math.min(totalPassiveWeight/geometry.rods(),
                 (double)(geometry.rods()+productiveCells)/geometry.volume()):geometry.efficiency();
@@ -81,7 +83,7 @@ public class BaseReactorSimulation implements IReactorSimulation {
         for(var c:columns) {
             double opening=1-c.rod.insertion/100;
             open+=c.blocks*opening; coveredOpen+=c.covered*opening; isolatedOpen+=c.isolated*opening;
-            for(var type:ThermalModel.PassiveClass.values()) rfOpen+=c.passive[type.ordinal()]*opening*type.rfPerKJ;
+            rfOpen+=c.output*opening*ThermalModel.PASSIVE_RF_PER_KJ;
         }
         double requested=active?preset.requestedBurn(usable,geometry.rods(),open):0;
         fuelTank.burn(requested);

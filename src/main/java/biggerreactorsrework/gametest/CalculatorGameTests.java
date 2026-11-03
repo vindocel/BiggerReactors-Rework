@@ -378,7 +378,7 @@ public final class CalculatorGameTests {
             h.assertTrue(outcome.validation().primaryError() == 0 && outcome.validation().waterError() == 0, "high-target circuit lost fluid");
         }
         }
-        java.nio.file.Files.writeString(java.nio.file.Path.of("C:/Users/victo/Documents/Instrucoes/BiggerReactors-Rework/reports/thermal-calculator-sodium.json"), new com.google.gson.GsonBuilder().setPrettyPrinting().create().toJson(rows));
+        StudyReports.write("thermal-calculator-sodium.json", new com.google.gson.GsonBuilder().setPrettyPrinting().create().toJson(rows));
         h.succeed();
     }
 }
