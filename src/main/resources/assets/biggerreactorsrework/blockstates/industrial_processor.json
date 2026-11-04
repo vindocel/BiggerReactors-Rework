@@ -1,0 +1,12 @@
+{
+  "variants": {
+    "facing=north,enabled=false": { "model": "biggerreactorsrework:block/industrial_processor" },
+    "facing=south,enabled=false": { "model": "biggerreactorsrework:block/industrial_processor", "y": 180 },
+    "facing=west,enabled=false":  { "model": "biggerreactorsrework:block/industrial_processor", "y": 270 },
+    "facing=east,enabled=false":  { "model": "biggerreactorsrework:block/industrial_processor", "y": 90 },
+    "facing=north,enabled=true":  { "model": "biggerreactorsrework:block/industrial_processor_active" },
+    "facing=south,enabled=true":  { "model": "biggerreactorsrework:block/industrial_processor_active", "y": 180 },
+    "facing=west,enabled=true":   { "model": "biggerreactorsrework:block/industrial_processor_active", "y": 270 },
+    "facing=east,enabled=true":   { "model": "biggerreactorsrework:block/industrial_processor_active", "y": 90 }
+  }
+}

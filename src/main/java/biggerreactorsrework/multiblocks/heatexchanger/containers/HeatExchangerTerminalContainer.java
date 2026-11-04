@@ -51,6 +51,14 @@ public class HeatExchangerTerminalContainer extends AbstractContainerMenu implem
     public ItemStack quickMoveStack(Player p_38941_, int p_38942_) {
         return ItemStack.EMPTY;
     }
+
+    // Modified 2026-11-02: this terminal now has a server-authoritative balanced-output control.
+    @Override
+    public void executeRequest(String name, Object data) {
+        if (tileEntity.getLevel() == null) return;
+        if (tileEntity.getLevel().isClientSide()) runRequest(name, data);
+        else tileEntity.runRequest(name, data);
+    }
     @Override
     public BlockPos machinePos() {
         return this.tileEntity.getBlockPos();

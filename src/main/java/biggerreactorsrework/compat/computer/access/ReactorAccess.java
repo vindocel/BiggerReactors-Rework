@@ -35,6 +35,9 @@ public class ReactorAccess {
         fuelTank = new FuelTank(controllerSupplier, simulationSupplier);
     }
     
+    // Added 2026-11-02: detached thermal telemetry; heat is kJ/t, electrical quantities RF/t.
+    public java.util.Map<String,Object> thermal() { return getSimulation().thermal().values(); }
+
     public final String apiVersion() {
         return BiggerReactors.modVersion();
     }

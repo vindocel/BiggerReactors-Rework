@@ -13,6 +13,12 @@ public final class ModParticles {
     private static final DeferredRegister<ParticleType<?>> TYPES = DeferredRegister.create(Registries.PARTICLE_TYPE, BiggerReactors.modid);
     public static final DeferredHolder<ParticleType<?>, SimpleParticleType> STEAM_DROPLET =
             TYPES.register("steam_droplet", () -> new SimpleParticleType(false));
+    public static final DeferredHolder<ParticleType<?>, SimpleParticleType> COOLANT_BUBBLE =
+            TYPES.register("coolant_bubble", () -> new SimpleParticleType(false));
+    public static final DeferredHolder<ParticleType<?>, SimpleParticleType> COOLANT_BUBBLE_POP =
+            TYPES.register("coolant_bubble_pop", () -> new SimpleParticleType(false));
+    public static final DeferredHolder<ParticleType<?>, SimpleParticleType> COOLANT_SPLASH =
+            TYPES.register("coolant_splash", () -> new SimpleParticleType(false));
 
     public static void register(IEventBus bus) { TYPES.register(bus); }
     private ModParticles() {}

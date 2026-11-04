@@ -250,7 +250,7 @@ public class ReactorRedstonePortScreen extends ModScreen<ReactorRedstonePortCont
         this.addScreenElement(triggerTypeToggle);
 
         // (Left) Trigger mode toggle:
-        this.triggerModeToggle = new Triselector<>(this, 29, 58, Component.translatable("screen.biggerreactorsrework.reactor_terminal.auto_eject_toggle.tooltip"),
+        this.triggerModeToggle = new Triselector<>(this, 29, 58, Component.translatable("screen.biggerreactorsrework.reactor_redstone_port.trigger_mode_toggle.tooltip"),
                 () -> this.reactorRedstonePortState.triggerMode, SelectorColors.GREEN, SelectorColors.RED, SelectorColors.YELLOW);
         this.triggerModeToggle.onMouseReleased = (mX, mY, btn) -> {
             // Click logic.

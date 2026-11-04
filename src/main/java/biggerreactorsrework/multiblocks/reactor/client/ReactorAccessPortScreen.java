@@ -6,18 +6,15 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
-import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.entity.player.Inventory;
 import biggerreactorsrework.BiggerReactors;
 import biggerreactorsrework.client.Biselector;
 import biggerreactorsrework.client.SelectorColors;
 import biggerreactorsrework.client.GuiArt;
 import biggerreactorsrework.client.GuiFrame;
-import biggerreactorsrework.client.GuiIcon;
 import biggerreactorsrework.multiblocks.reactor.containers.ReactorAccessPortContainer;
 import biggerreactorsrework.multiblocks.reactor.state.ReactorAccessPortState;
 import biggerreactorsrework.core.client.gui.screens.ModScreen;
-import biggerreactorsrework.core.client.gui.elements.InteractiveElement;
 
 import javax.annotation.Nonnull;
 
@@ -56,10 +53,12 @@ public class ReactorAccessPortScreen extends ModScreen<ReactorAccessPortContaine
     /**
      * Initialize controls.
      */
+    private Biselector<ReactorAccessPortContainer> recoveryToggle;
+
     public void initControls() {
         // (Left) Direction toggle:
         Biselector<ReactorAccessPortContainer> directionToggle = new Biselector<>(this, 8, 18, Component.translatable("screen.biggerreactorsrework.reactor_access_port.direction_toggle.tooltip"),
-                () -> reactorAccessPortState.direction ? 0 : 1, SelectorColors.BLUE);
+                () -> reactorAccessPortState.direction ? 0 : 1, SelectorColors.GREEN, SelectorColors.BLUE);
         directionToggle.onMouseReleased = (mX, mY, btn) -> {
             // Click logic.
             this.getMenu().executeRequest("setDirection", directionToggle.getState() == 0 ? 1 : 0);
@@ -67,40 +66,16 @@ public class ReactorAccessPortScreen extends ModScreen<ReactorAccessPortContaine
         };
         this.addScreenElement(directionToggle);
 
-        // (Left) Fuel mode toggle:
-        Biselector<ReactorAccessPortContainer> fuelModeToggle = new Biselector<>(this, 8, 34, Component.translatable("screen.biggerreactorsrework.reactor_access_port.fuel_mode_toggle.tooltip"),
-                () -> reactorAccessPortState.fuelMode ? 1 : 0, SelectorColors.YELLOW);
-        fuelModeToggle.onMouseReleased = (mX, mY, btn) -> {
-            // Click logic.
-            this.getMenu().executeRequest("setFuelMode", fuelModeToggle.getState() == 0 ? 1 : 0);
+        recoveryToggle = new Biselector<>(this, 8, 34,
+                Component.translatable("screen.biggerreactorsrework.reactor_access_port.recover_fuel.tooltip"),
+                () -> reactorAccessPortState.recoverFuel ? 1 : 0, SelectorColors.GREEN);
+        recoveryToggle.onMouseReleased = (mouseX, mouseY, button) -> {
+            if (!reactorAccessPortState.direction) return false;
+            getMenu().executeRequest("recoverFuel", recoveryToggle.getState() == 0);
             return true;
         };
-        fuelModeToggle.onTick = () -> {
-            // Check if the element should be enabled.
-            fuelModeToggle.actionEnable = (directionToggle.getState() != 0);
-        };
-        this.addScreenElement(fuelModeToggle);
-
-        // (Left) Manual eject button:
-        InteractiveElement<ReactorAccessPortContainer> manualEjectButton = new InteractiveElement<>(this, 8, 50, 15, 15, 0, 0, Component.translatable("screen.biggerreactorsrework.reactor_access_port.manual_eject.tooltip"));
-        manualEjectButton.onMouseReleased = (mX, mY, btn) -> {
-            // Click logic. Extra check necessary since this is an "in-class" button.
-            if (manualEjectButton.isMouseOver(mX, mY)) {
-                // Mouse is hovering, do the thing.
-                this.getMenu().executeRequest("ejectWaste", true);
-                // Play the selection sound.
-                manualEjectButton.playSound(SoundEvents.UI_BUTTON_CLICK);
-                return true;
-            } else {
-                // It ain't hovered, don't do the thing.
-                return false;
-            }
-        };
-        manualEjectButton.onRender = ((mS, mX, mY) -> {
-            // Custom rendering.
-            GuiArt.button(mS, manualEjectButton.x, manualEjectButton.y, manualEjectButton.width, manualEjectButton.height, manualEjectButton.isMouseOver(mX, mY), GuiIcon.EJECT, this.frame());
-        });
-        this.addScreenElement(manualEjectButton);
+        recoveryToggle.disable();
+        addScreenElement(recoveryToggle);
     }
 
     /**
@@ -113,6 +88,8 @@ public class ReactorAccessPortScreen extends ModScreen<ReactorAccessPortContaine
      */
     @Override
     public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTicks) {
+        if (reactorAccessPortState.direction) recoveryToggle.enable();
+        else recoveryToggle.disable();
         super.extractRenderState(graphics, mouseX, mouseY, partialTicks);
 
         // Render text for input/output direction:
@@ -125,24 +102,11 @@ public class ReactorAccessPortScreen extends ModScreen<ReactorAccessPortContaine
             graphics.text(this.getFont(), Component.translatable("screen.biggerreactorsrework.reactor_access_port.direction_toggle.output").getString(), this.getLeftPos() + 42, this.getTopPos() + 22, GuiTheme.textColor(), false);
         }
 
-        // Check if we render output type:
-        if (!reactorAccessPortState.direction) {
-            // Render text for fuel/waste mode:
-            if (reactorAccessPortState.fuelMode) {
-                // Text for an inlet:
-                graphics.text(this.getFont(), Component.translatable("screen.biggerreactorsrework.reactor_access_port.fuel_mode_toggle.fuel").getString(), this.getLeftPos() + 42, this.getTopPos() + 38, GuiTheme.textColor(), false);
-
-            } else {
-                // Text for an outlet:
-                graphics.text(this.getFont(), Component.translatable("screen.biggerreactorsrework.reactor_access_port.fuel_mode_toggle.waste").getString(), this.getLeftPos() + 42, this.getTopPos() + 38, GuiTheme.textColor(), false);
-            }
-        } else {
-            // Text for no output:
-            graphics.text(this.getFont(), Component.translatable("screen.biggerreactorsrework.reactor_access_port.fuel_mode_toggle.nope").getString(), this.getLeftPos() + 42, this.getTopPos() + 38, GuiTheme.textColor(), false);
+        if (reactorAccessPortState.direction) {
+            GuiArt.scrollingText(graphics, getFont(),
+                    Component.translatable("screen.biggerreactorsrework.reactor_access_port.recover_fuel"),
+                    getLeftPos() + 42, getTopPos() + 38, imageWidth - 50, GuiTheme.textColor());
         }
-
-        // Render text for manual waste eject:
-        graphics.text(this.getFont(), Component.translatable("screen.biggerreactorsrework.reactor_access_port.manual_eject").getString(), this.getLeftPos() + 26, this.getTopPos() + 54, GuiTheme.textColor(), false);
     }
 
     @Override

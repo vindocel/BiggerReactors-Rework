@@ -100,10 +100,10 @@ public final class AuditRegressionGameTests {
         var tank=new biggerreactorsrework.multiblocks.reactor.util.ReactorTransitionTank(sim.coolantTank());
         tank.fill(net.minecraft.world.level.material.Fluids.WATER,net.minecraft.core.component.DataComponentPatch.EMPTY,1000,false);
         sim.coolantTank().insertVapor(sim.coolantTank().perSideCapacity());
-        sim.tick(true);long fuel=sim.fuelTank().fuel();double heat=sim.fuelHeat();
+        sim.tick(true);double fuel=sim.fuelTank().usableFuel();var thermal=sim.thermal();
         sim.settle();
-        h.assertTrue(sim.fuelTank().fuel()==fuel && sim.fuelTank().burnedLastTick()==0,"settle burned fuel into a full output");
-        h.assertTrue(sim.fuelHeat()==heat,"settle added heat despite blocked output");h.succeed();
+        h.assertTrue(thermal.generated()>0 && thermal.blockedOutput()>0,"full output did not discard paid heat");
+        h.assertTrue(sim.fuelTank().usableFuel()==fuel && sim.thermal().equals(thermal),"settle repeated a paid tick");h.succeed();
     }
     @GameTest(template="empty_7x7x7")
     public static void pendingStockIsDetectedBeforeControllerLoad(GameTestHelper h) {
@@ -132,8 +132,8 @@ public final class AuditRegressionGameTests {
             recipes.add(new net.minecraft.world.item.crafting.RecipeHolder<>(net.minecraft.resources.ResourceKey.create(net.minecraft.core.registries.Registries.RECIPE,net.minecraft.resources.Identifier.fromNamespaceAndPath(BiggerReactors.modid,"audit_a_water")),water));
             recipes.add(new net.minecraft.world.item.crafting.RecipeHolder<>(net.minecraft.resources.ResourceKey.create(net.minecraft.core.registries.Registries.RECIPE,net.minecraft.resources.Identifier.fromNamespaceAndPath(BiggerReactors.modid,"audit_b_lava")),lava));
             biggerreactorsrework.machine.recipe.RecipeAccess.overrideRecipes(net.minecraft.world.item.crafting.RecipeMap.createClient(recipes));
-            h.setBlock(2,2,2,biggerreactorsrework.machine.blocks.CyaniteReprocessor.INSTANCE);
-            var tile=(biggerreactorsrework.machine.tiles.CyaniteReprocessorTile)GameTestSupport.be(h,new BlockPos(2,2,2));tile.tick();
+            h.setBlock(2,2,2,biggerreactorsrework.machine.blocks.IndustrialProcessor.INSTANCE);
+            var tile=(biggerreactorsrework.machine.tiles.IndustrialProcessorTile)GameTestSupport.be(h,new BlockPos(2,2,2));tile.tick();
             tile.itemHandlerFor(null).insertItem(0,new net.minecraft.world.item.ItemStack(biggerreactorsrework.items.ingots.CyaniteIngot.INSTANCE),false);
             var source=new biggerreactorsrework.core.transfer.SimpleTank(1000);
             source.fill(new net.neoforged.neoforge.fluids.FluidStack(net.minecraft.world.level.material.Fluids.LAVA,1000),biggerreactorsrework.core.transfer.FluidTanks.FluidAction.EXECUTE);

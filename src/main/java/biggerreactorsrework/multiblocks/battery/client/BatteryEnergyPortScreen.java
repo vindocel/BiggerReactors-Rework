@@ -31,7 +31,7 @@ public class BatteryEnergyPortScreen extends ModScreen<BatteryEnergyPortContaine
         this.titleLabelX = (this.imageWidth - this.font.width(this.getTitle())) / 2;
         
         Biselector<BatteryEnergyPortContainer> directionToggle = new Biselector<>(this, 8, 18, Component.translatable("screen.biggerreactorsrework.battery_energy_port.direction_toggle.tooltip"),
-                () -> portState.direction ? 0 : 1, SelectorColors.BLUE);
+                () -> portState.direction ? 0 : 1, SelectorColors.CYAN, SelectorColors.RED);
         directionToggle.onMouseReleased = (mX, mY, btn) -> {
             this.getMenu().executeRequest("setDirection", directionToggle.getState() == 0 ? 1 : 0);
             return true;

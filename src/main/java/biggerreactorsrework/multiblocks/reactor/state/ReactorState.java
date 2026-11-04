@@ -19,10 +19,6 @@ public class ReactorState implements GuiSync.IGUIPacket {
      */
     public ReactorType reactorType = ReactorType.PASSIVE;
 
-    /**
-     * Is auto-ejection of waste enabled.
-     */
-    public boolean doAutoEject = false;
 
     /**
      * The amount of energy stored in the reactor.
@@ -105,16 +101,23 @@ public class ReactorState implements GuiSync.IGUIPacket {
         this.reactorTerminalTile = reactorTerminalTile;
     }
 
+    public boolean balancedOutputs;
+    public double heatGenerated,heatCapturable,heatScale,structuralEfficiency;
     public String exhaustOrigin="";
     @Override
     public void read(@Nonnull Map<?, ?> data) {
         reactorTerminalTile.readAppearance(data);
+        balancedOutputs=Boolean.TRUE.equals(data.get("balancedOutputs"));
+        heatGenerated=((Number)data.get("heatGenerated")).doubleValue();
+        heatCapturable=((Number)data.get("heatCapturable")).doubleValue();
+        heatScale=((Number)data.get("heatScale")).doubleValue();
+        structuralEfficiency=((Number)data.get("structuralEfficiency")).doubleValue();
+
         exhaustOrigin = data.get("exhaustOrigin") instanceof String v ? v : "";
 
         reactorActivity = ReactorActivity.fromInt((Integer) data.get("reactorActivity"));
         reactorType = ReactorType.fromInt((Integer) data.get("reactorType"));
 
-        doAutoEject = (Boolean) data.get("doAutoEject");
 
         energyStored = (Long) data.get("energyStored");
         energyCapacity = (Long) data.get("energyCapacity");
@@ -146,11 +149,16 @@ public class ReactorState implements GuiSync.IGUIPacket {
         HashMap<String, Object> data = new HashMap<>();
         data.put("appearancePos", reactorTerminalTile.writeAppearance());
         data.put("exhaustOrigin",exhaustOrigin);
+        data.put("balancedOutputs",balancedOutputs);
+        data.put("heatGenerated",heatGenerated);
+        data.put("heatCapturable",heatCapturable);
+        data.put("heatScale",heatScale);
+        data.put("structuralEfficiency",structuralEfficiency);
+
 
         data.put("reactorActivity", reactorActivity.toInt());
         data.put("reactorType", reactorType.toInt());
 
-        data.put("doAutoEject", doAutoEject);
 
         data.put("energyStored", energyStored);
         data.put("energyCapacity", energyCapacity);

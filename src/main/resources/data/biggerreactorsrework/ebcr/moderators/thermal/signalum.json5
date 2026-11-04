@@ -1,4 +1,6 @@
+// Modified 2026-11-02: static thermal class.
 {
+    passiveClass: "ADVANCED",
     type: "tag",
     location: "c:storage_blocks/signalum",
     absorption:  0.63,

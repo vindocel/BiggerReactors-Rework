@@ -54,8 +54,7 @@ final class GuideStructureRenderer extends PictureInPictureRenderer<GuideStructu
             }
             int by = state.layer() < 0 ? box.y() : state.layer();
             int bh = state.layer() < 0 ? box.h() : 1;
-            BlockState block = GuideMultiblock.WALLS.equals(box.group()) && preview.glass() != null && state.glass()
-                    ? preview.glass().defaultBlockState() : box.block();
+            BlockState block = box.shown(state.glass(), state.layer() >= 0);
             BlockStateModel model = Minecraft.getInstance().getModelManager().getBlockStateModelSet().get(block);
             List<BlockStateModelPart> parts = new ArrayList<>();
             model.collectParts(random, parts);

@@ -2,6 +2,19 @@
 
 ## Changed
 
+- Fluid outlets automatically push into compatible adjacent pipes or tanks. The Industrial Processor now always pushes from configured fluid output faces.
+- Coolant recovery moved to the reactor's cold inlet and both heat exchanger inlets (hot coolant and water). Product outlets always send the processed fluid.
+- Reactor item outlets automatically send cyanite. Fuel inlets can recover stored fuel. Direction selectors and labels show the current port mode in color. The Industrial Processor automatically sends finished items through configured item output faces.
+- Reactor heat follows fuel actually consumed. Manifold contact and useful occupancy set a permanent efficiency percentage. The terminal shows heat in kJ and the reasons for losses.
+- Heat exchangers use fixed batches and accept multiple paths per circuit. A direct channel link processes 2,000 hot mB/t, and blue channels hold four times as much fluid as red channels.
+- Turbine speed follows steam flow up to 2,200 RPM. The default efficiency peaks are 900 and 1,800 RPM, with a penalty above 1,800 RPM. Coil material sets the base FE per steam mB. Reactors, exchangers and turbine water outlets can optionally balance their output.
+- Passive moderators have individual cooling and fuel yields. Air provides 5% cooling in passive reactors.
+- The Industrial Processor uses the `industrial_processor` block ID and `industrial_processing` recipe type. It recycles cyanite, makes Liquid Obsidian, and converts 1 Blue Ice and 200 mB of Liquid Obsidian into 100 mB of Frozen Obsidian.
+- Frozen Obsidian glows and freezes entities when placed. Heated coolant burns entities and keeps its origin in a filled bucket. Steam uses tanks and pipes and has a translucent white animation.
+- The guide shows finished machines with a choice of casing or glass walls. Inspecting a single layer shows each block separately.
+- The battery terminal has a compact Statistics tab with a charge bar and can recover energy from charged battery cells in its lower slot.
+- Moved Balanced Outputs below the reactor activity control and shortened the terminal panel.
+
 - Industrial Processor guide recipes now group item and fluid inputs together, use a single output slot, and label fluid, energy and time requirements.
 - Turbine shafts and blades now use slimmer targeting outlines so players can aim past their corners, while retaining full-block collision.
 
@@ -15,6 +28,14 @@
 - Machine and guide screens, fluids, rotors, connected glass, fuel columns and heat-exchanger channels were rebuilt on the new rendering system without changing their appearance or behaviour.
 
 ## Fixed
+
+- Heated coolant keeps its source appearance in tanks, recipe cards and placed flows. Unknown sources use a red heated texture.
+- Placed Liquid Obsidian, Frozen Obsidian and heated coolant allow water-like movement and currents.
+- Liquid Obsidian and Frozen Obsidian color their splashes and bubbles to match the fluid.
+- Assembled battery cells show steady blue bars when empty and animated bars when charged.
+- Removed the brown stripe that repeated where battery cells joined vertically.
+- Prevent a missing overlay texture from crashing shader rendering when a broken block drops an item in development runs.
+- Long numeric values in recipe viewers scroll within their own column.
 
 - The first turbine shaft now aligns with its bearing immediately, with correctly culled end faces.
 - Placed Liquid Obsidian can now be replaced by ordinary blocks, like vanilla liquids.
@@ -34,6 +55,8 @@
 - Turbine rotors now stop accelerating at 2,200 RPM, including with disengaged coils or excess steam. Existing overspeed saves recover on the next simulation tick.
 
 ## Added
+
+- Heated Coolant Buckets preserve the coolant origin in ports, tanks and placed sources.
 
 - Blue Ice is now a solid reactor moderator with the same default properties as diamond blocks, listed in the guide's moderator table.
 - Added a customization guide for modpack creators and server administrators.

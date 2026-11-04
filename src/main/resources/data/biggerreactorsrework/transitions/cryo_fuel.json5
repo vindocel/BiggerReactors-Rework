@@ -1,4 +1,6 @@
+// Modified 2026-11-02: fixed process ratio; legacy turbine properties retained.
 {
+  "steamPerBatch": 17,
   "liquidType": "registry",
   "liquid": "ad_astra:cryo_fuel",
   "gasType": "registry",

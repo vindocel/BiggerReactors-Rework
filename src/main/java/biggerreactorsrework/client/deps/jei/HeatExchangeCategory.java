@@ -56,9 +56,9 @@ public final class HeatExchangeCategory implements IRecipeCategory<RecipeViewerD
     public void setRecipe(IRecipeLayoutBuilder builder, RecipeViewerData.HeatExchange recipe, IFocusGroup focus) {
         var card = recipe.card();
         builder.addSlot(RecipeIngredientRole.INPUT, 1, FluidCard.inputY() + 1)
-                .addFluidStack(recipe.input().getFluid(), 1000, recipe.input().getComponentsPatch()).setFluidRenderer(1000, false, 16, 16);
+                .addFluidStack(recipe.input().getFluid(), 1000, recipe.input().getComponentsPatch()).setCustomRenderer(mezz.jei.api.neoforge.NeoForgeTypes.FLUID_STACK, biggerreactorsrework.client.deps.jei.CoolantIngredientRenderer.INSTANCE);
         builder.addSlot(RecipeIngredientRole.OUTPUT, 1, card.outputY() + 1)
-                .addFluidStack(recipe.output().getFluid(), 1000, recipe.output().getComponentsPatch()).setFluidRenderer(1000, false, 16, 16);
+                .addFluidStack(recipe.output().getFluid(), 1000, recipe.output().getComponentsPatch()).setCustomRenderer(mezz.jei.api.neoforge.NeoForgeTypes.FLUID_STACK, biggerreactorsrework.client.deps.jei.CoolantIngredientRenderer.INSTANCE);
     }
 
     @Override

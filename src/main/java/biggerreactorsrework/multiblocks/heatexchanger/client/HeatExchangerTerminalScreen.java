@@ -39,7 +39,7 @@ public class HeatExchangerTerminalScreen extends ModScreen<HeatExchangerTerminal
     private Fluid evaporatorExhaustFluid = Fluids.EMPTY;
 
     public HeatExchangerTerminalScreen(HeatExchangerTerminalContainer container, Inventory playerInventory, Component title) {
-        super(container, playerInventory, Component.translatable("screen.biggerreactorsrework.heat_exchanger_terminal"), 168, 144);
+        super(container, playerInventory, Component.translatable("screen.biggerreactorsrework.heat_exchanger_terminal"), 168, 164);
 
         // Initialize heat exchanger state.
         this.heatExchangerState = (HeatExchangerState) this.getMenu().getGuiPacket();
@@ -61,6 +61,11 @@ public class HeatExchangerTerminalScreen extends ModScreen<HeatExchangerTerminal
 
         // Initialize tooltips:
         this.initTooltips();
+
+        var balance=new biggerreactorsrework.client.Biselector<HeatExchangerTerminalContainer>(this,8,145,
+            Component.translatable("thermal.biggerreactorsrework.balanced_outputs"),()->heatExchangerState.balancedOutputs?1:0,biggerreactorsrework.client.SelectorColors.CYAN);
+        balance.onMouseReleased=(mx,my,button)->{getMenu().executeRequest("balancedOutputs",!heatExchangerState.balancedOutputs);return true;};
+        addScreenElement(balance);
 
         // Initialize gauges:
         this.initGauges();
@@ -119,12 +124,12 @@ public class HeatExchangerTerminalScreen extends ModScreen<HeatExchangerTerminal
 
         // (Top) Condenser heat gauge:
         RenderedElement<HeatExchangerTerminalContainer> condenserHeatGauge = new RenderedElement<>(this, 62, 36, 18, 64, 0, 144, Component.empty());
-        condenserHeatGauge.onRender = (@Nonnull GuiGraphicsExtractor graphics, int mX, int mY) -> HeatExchangerTerminalScreen.renderHeatGauge(graphics, condenserHeatGauge, heatExchangerState.condenserChannelTemperature, Config.CONFIG.HeatExchanger.gui.HeatDisplayMax);
+        condenserHeatGauge.onRender = (@Nonnull GuiGraphicsExtractor graphics, int mX, int mY) -> HeatExchangerTerminalScreen.renderHeatGauge(graphics, condenserHeatGauge, heatExchangerState.thermalInput, heatExchangerState.thermalScale);
         this.addScreenElement(condenserHeatGauge);
 
         // (Top) Evaporator heat gauge:
         RenderedElement<HeatExchangerTerminalContainer> evaporatorHeatGauge = new RenderedElement<>(this, 88, 36, 18, 64, 0, 144, Component.empty());
-        evaporatorHeatGauge.onRender = (@Nonnull GuiGraphicsExtractor graphics, int mX, int mY) -> HeatExchangerTerminalScreen.renderHeatGauge(graphics, evaporatorHeatGauge, heatExchangerState.evaporatorChannelTemperature, Config.CONFIG.HeatExchanger.gui.HeatDisplayMax);
+        evaporatorHeatGauge.onRender = (@Nonnull GuiGraphicsExtractor graphics, int mX, int mY) -> HeatExchangerTerminalScreen.renderHeatGauge(graphics, evaporatorHeatGauge, heatExchangerState.thermalUseful, heatExchangerState.thermalScale);
         this.addScreenElement(evaporatorHeatGauge);
 
         // (Top) Condenser exhaust tank:
@@ -177,7 +182,7 @@ public class HeatExchangerTerminalScreen extends ModScreen<HeatExchangerTerminal
     public static void renderHeatGauge(@Nonnull GuiGraphicsExtractor graphics, @Nonnull RenderedElement<HeatExchangerTerminalContainer> symbol, double heatStored, double heatCapacity) {
         GaugeBar.drawHeat(graphics, symbol.x, symbol.y, heatStored, heatCapacity);
         // Update tooltip.
-        symbol.tooltip = Component.literal(String.format("%.1f/%.1f K", heatStored, heatCapacity));
+        symbol.tooltip = Component.literal(String.format("%.1f/%.1f kJ/t", heatStored, heatCapacity));
     }
 
     /**
@@ -189,14 +194,16 @@ public class HeatExchangerTerminalScreen extends ModScreen<HeatExchangerTerminal
      * @param partialTicks Partial ticks.
      */
     @Override
-    public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTicks) {
+    public void extractRenderState(@Nonnull GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTicks) {
         super.extractRenderState(graphics, mouseX, mouseY, partialTicks);
 
+        GuiArt.scrollingText(graphics,getFont(),Component.translatable("thermal.biggerreactorsrework.balanced_outputs").getString(),getLeftPos()+42,getTopPos()+149,116,GuiTheme.textColor());
+
         // Render text for condenser channel temperature:
-        GuiArt.scrollingText(graphics, this.getFont(), String.format("%.0f K", this.heatExchangerState.condenserChannelTemperature), this.getLeftPos() + 28, this.getTopPos() + 107, 52, GuiTheme.textColor());
+        GuiArt.scrollingText(graphics, this.getFont(), RenderHelper.formatValue(heatExchangerState.thermalInput,1,"kJ/t",true), this.getLeftPos() + 28, this.getTopPos() + 107, 52, GuiTheme.textColor());
 
         // Render text for evaporator channel temperature:
-        GuiArt.scrollingText(graphics, this.getFont(), String.format("%.0f K", this.heatExchangerState.evaporatorChannelTemperature), this.getLeftPos() + 28, this.getTopPos() + 127, 52, GuiTheme.textColor());
+        GuiArt.scrollingText(graphics, this.getFont(), RenderHelper.formatValue(heatExchangerState.thermalUseful,1,"kJ/t",true), this.getLeftPos() + 28, this.getTopPos() + 127, 52, GuiTheme.textColor());
 
         // Render text for condenser channel flow rate:
         GuiArt.scrollingText(graphics, this.getFont(), RenderHelper.formatValue((this.heatExchangerState.condenserChannelFlowRate / 1000.0), 1, "B/t", true), this.getLeftPos() + 105, this.getTopPos() + 107, 53, GuiTheme.textColor());
@@ -210,7 +217,7 @@ public class HeatExchangerTerminalScreen extends ModScreen<HeatExchangerTerminal
      */
     @Override
     protected void drawBackground(@Nonnull GuiGraphicsExtractor graphics, int x, int y) {
-        GuiArt.panel(graphics, x, y, 168, 144, this.frame());
+        GuiArt.panel(graphics, x, y, 168, 164, this.frame());
         GuiArt.fill(graphics, x + 10, y + 120, x + 80, y + 121, GuiArt.SEPARATOR);
         GuiArt.fill(graphics, x + 86, y + 120, x + 158, y + 121, GuiArt.SEPARATOR);
         GuiIcon.CONDENSER_INTAKE.draw(graphics, x + 11, y + 17);

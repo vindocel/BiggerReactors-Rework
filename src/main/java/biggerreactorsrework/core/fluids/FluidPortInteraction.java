@@ -30,7 +30,9 @@ public final class FluidPortInteraction {
             var handler = level.getCapability(Capabilities.Fluid.BLOCK, pos, hit.getDirection());
             if (handler != null) for (int slot = 0; slot < handler.size(); slot++) {
                 var fluid = handler.getResource(slot);
-                if (!fluid.isEmpty() && handler.getAmountAsLong(slot) > 0 && !fluid.toStack(1).getComponentsPatch().isEmpty()) {
+                if (!fluid.isEmpty() && handler.getAmountAsLong(slot) > 0
+                        && fluid.toStack(1).getFluid() != biggerreactorsrework.fluids.HeatedCoolant.INSTANCE
+                        && !fluid.toStack(1).getComponentsPatch().isEmpty()) {
                     return InteractionResult.FAIL;
                 }
             }

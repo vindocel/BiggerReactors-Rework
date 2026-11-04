@@ -37,3 +37,6 @@ ${optional_dependencies}
 
 [[mixins]]
 config="biggerreactorsrework.client.mixins.json"
+
+[[mixins]]
+config="biggerreactorsrework.coolant-particles.mixins.json"

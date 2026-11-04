@@ -8,7 +8,7 @@ import biggerreactorsrework.client.deps.RecipeViewerData.Stats;
 import biggerreactorsrework.client.deps.RecipeViewers;
 import biggerreactorsrework.items.ingots.BlutoniumIngot;
 import biggerreactorsrework.items.ingots.CyaniteIngot;
-import biggerreactorsrework.machine.blocks.CyaniteReprocessor;
+import biggerreactorsrework.machine.blocks.IndustrialProcessor;
 import biggerreactorsrework.multiblocks.reactor.blocks.ReactorTerminal;
 import biggerreactorsrework.multiblocks.turbine.blocks.TurbineTerminal;
 import dev.emi.emi.api.EmiEntrypoint;
@@ -31,10 +31,10 @@ import java.util.List;
  */
 @EmiEntrypoint
 public class BiggerReactorsEmiPlugin implements EmiPlugin {
-    static final EmiStack REPROCESSOR = EmiStack.of(CyaniteReprocessor.INSTANCE);
+    static final EmiStack REPROCESSOR = EmiStack.of(IndustrialProcessor.INSTANCE);
     static final EmiStack REACTOR_TERMINAL = EmiStack.of(ReactorTerminal.INSTANCE);
     static final EmiStack TURBINE_TERMINAL = EmiStack.of(TurbineTerminal.INSTANCE);
-    static final EmiRecipeCategory CYANITE_REPROCESSING = new EmiRecipeCategory(RecipeViewers.CYANITE_REPROCESSING, REPROCESSOR);
+    static final EmiRecipeCategory CYANITE_REPROCESSING = new EmiRecipeCategory(RecipeViewers.INDUSTRIAL_PROCESSING, REPROCESSOR);
     static final EmiRecipeCategory MODERATOR_BLOCK = new EmiRecipeCategory(RecipeViewers.MODERATOR_BLOCK, REACTOR_TERMINAL);
     static final EmiRecipeCategory MODERATOR_FLUID = new EmiRecipeCategory(RecipeViewers.MODERATOR_FLUID, REACTOR_TERMINAL);
     static final EmiRecipeCategory TURBINE_COIL = new EmiRecipeCategory(RecipeViewers.TURBINE_COIL, TURBINE_TERMINAL);

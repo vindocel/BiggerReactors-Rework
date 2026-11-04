@@ -1,8 +1,8 @@
 package biggerreactorsrework.gametest;
 
 import biggerreactorsrework.BiggerReactors;
-import biggerreactorsrework.machine.blocks.CyaniteReprocessor;
-import biggerreactorsrework.machine.tiles.CyaniteReprocessorTile;
+import biggerreactorsrework.machine.blocks.IndustrialProcessor;
+import biggerreactorsrework.machine.tiles.IndustrialProcessorTile;
 import biggerreactorsrework.machine.recipe.ReprocessingRecipes;
 import biggerreactorsrework.items.ingots.CyaniteIngot;
 import biggerreactorsrework.items.ingots.BlutoniumIngot;
@@ -20,8 +20,8 @@ import net.neoforged.neoforge.gametest.*;
 public final class ProcessingGameTests {
     @GameTest(template="empty_7x7x7")
     public static void reprocessingSurvivesSave(GameTestHelper h) {
-        var pos=new BlockPos(2,2,2);h.setBlock(pos,CyaniteReprocessor.INSTANCE);
-        var tile=(CyaniteReprocessorTile)GameTestSupport.be(h,pos);tile.tick();
+        var pos=new BlockPos(2,2,2);h.setBlock(pos,IndustrialProcessor.INSTANCE);
+        var tile=(IndustrialProcessorTile)GameTestSupport.be(h,pos);tile.tick();
         var recipe=ReprocessingRecipes.all(h.getLevel()).getFirst().value();
         var items=tile.itemHandlerFor(null);items.insertItem(0,new ItemStack(CyaniteIngot.INSTANCE,recipe.count()+1),false);
         int energy=recipe.energy()*recipe.duration(),water=recipe.water()*recipe.duration();

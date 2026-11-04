@@ -2,8 +2,8 @@ package biggerreactorsrework;
 
 // Modified 2026-10-26: scope derived sprites to synchronized generic coolant profiles.
 
-import biggerreactorsrework.machine.client.CyaniteReprocessorScreen;
-import biggerreactorsrework.machine.containers.CyaniteReprocessorContainer;
+import biggerreactorsrework.machine.client.IndustrialProcessorScreen;
+import biggerreactorsrework.machine.containers.IndustrialProcessorContainer;
 import biggerreactorsrework.multiblocks.heatexchanger.client.HeatExchangerFluidPortScreen;
 import biggerreactorsrework.multiblocks.heatexchanger.client.HeatExchangerTerminalScreen;
 import biggerreactorsrework.multiblocks.heatexchanger.containers.HeatExchangerFluidPortContainer;
@@ -33,6 +33,22 @@ public final class BiggerReactorsClient {
     }
 
     public static boolean connected() { return net.minecraft.client.Minecraft.getInstance().getConnection()!=null; }
+
+    public static void refreshPlacedCoolant(net.neoforged.neoforge.attachment.IAttachmentHolder holder,
+                                           java.util.Map<String, String> previous, java.util.Map<String, String> next) {
+        if (!(holder instanceof net.minecraft.world.level.chunk.LevelChunk chunk)) return;
+        var client = net.minecraft.client.Minecraft.getInstance();
+        if (client.level != chunk.getLevel()) return;
+        var dirtySections = new java.util.HashSet<net.minecraft.core.SectionPos>();
+        var changed = new java.util.HashSet<>(next.keySet());
+        if (previous != null) changed.addAll(previous.keySet());
+        for (String key : changed) {
+            if (!java.util.Objects.equals(previous == null ? null : previous.get(key), next.get(key))) {
+                dirtySections.add(net.minecraft.core.SectionPos.of(net.minecraft.core.BlockPos.of(Long.parseLong(key))));
+            }
+        }
+        for (var section : dirtySections) client.levelExtractor.setSectionDirtyWithNeighbors(section.x(), section.y(), section.z());
+    }
     private static boolean coolantReloadPending;
     public static void refreshCoolantSprites(java.util.List<biggerreactorsrework.registries.FluidTransitionRegistry.FluidTransition> profiles) {
         if (!coolantReloadPending && biggerreactorsrework.client.HeatedFluidSprites.missing(profiles)) {
@@ -43,6 +59,11 @@ public final class BiggerReactorsClient {
 
     static void init(IEventBus modBus) {
         modBus.addListener(biggerreactorsrework.multiblocks.turbine.client.TurbineAtmosphereEffects::registerParticles);
+        modBus.addListener((net.neoforged.neoforge.client.event.RegisterParticleProvidersEvent event) -> {
+            event.registerSpriteSet(biggerreactorsrework.registries.ModParticles.COOLANT_BUBBLE.get(), net.minecraft.client.particle.BubbleParticle.Provider::new);
+            event.registerSpriteSet(biggerreactorsrework.registries.ModParticles.COOLANT_BUBBLE_POP.get(), net.minecraft.client.particle.BubblePopParticle.Provider::new);
+            event.registerSpriteSet(biggerreactorsrework.registries.ModParticles.COOLANT_SPLASH.get(), net.minecraft.client.particle.SplashParticle.Provider::new);
+        });
         modBus.addListener((net.neoforged.neoforge.client.event.RegisterRenderPipelinesEvent event) ->
                 biggerreactorsrework.multiblocks.turbine.client.TurbineSteamRenderer.registerPipelines(event));
         // Modified 2026-10-28: positional loops and per-machine local volume.
@@ -68,6 +89,13 @@ public final class BiggerReactorsClient {
         modBus.addListener((net.neoforged.neoforge.client.event.RegisterPictureInPictureRenderersEvent event) ->
                 biggerreactorsrework.client.guide.GuidePictures.register(event));
         modBus.addListener(biggerreactorsrework.compat.DarkModeCompat::onInterModEnqueue);
+        biggerreactorsrework.compat.DarkModeCompat.register();
+        // Added 2026-11-03: describe the Frozen Obsidian process on its bucket.
+        net.neoforged.neoforge.common.NeoForge.EVENT_BUS.addListener((net.neoforged.neoforge.event.entity.player.ItemTooltipEvent event) -> {
+            if (event.getItemStack().is(biggerreactorsrework.fluids.FrozenObsidian.INSTANCE.getBucket()))
+                event.getToolTip().add(net.minecraft.network.chat.Component.translatable("fluid.biggerreactorsrework.frozen_obsidian.description")
+                        .withStyle(net.minecraft.ChatFormatting.GRAY, net.minecraft.ChatFormatting.ITALIC));
+        });
         modBus.addListener(BiggerReactorsClient::registerScreens);
         modBus.addListener(BiggerReactorsClient::registerRenderers);
         modBus.addListener(BiggerReactorsClient::registerClientExtensions);
@@ -94,14 +122,13 @@ public final class BiggerReactorsClient {
     }
 
     private static void registerFluidModels(net.neoforged.neoforge.client.event.RegisterFluidModelsEvent event) {
-        var obsidianStill = Identifier.fromNamespaceAndPath(BiggerReactors.modid, "block/fluid/liquid_obsidian_still");
-        var obsidianFlowing = Identifier.fromNamespaceAndPath(BiggerReactors.modid, "block/fluid/liquid_obsidian_flowing");
         for (var info : Registry.FLUID_CLIENT_INFO) {
-            boolean heated = info.type() == biggerreactorsrework.fluids.HeatedCoolant.INSTANCE.getFluidType();
+            var heated = info.type() == biggerreactorsrework.fluids.HeatedCoolant.INSTANCE.getFluidType();
             var model = new net.minecraft.client.renderer.block.FluidModel.Unbaked(
-                    new net.minecraft.client.resources.model.sprite.Material(heated ? obsidianStill : info.stillTexture(), true),
-                    new net.minecraft.client.resources.model.sprite.Material(heated ? obsidianFlowing : info.flowingTexture(), true),
-                    null, net.neoforged.neoforge.client.fluid.FluidTintSources.constant(info.tintColor()));
+                    new net.minecraft.client.resources.model.sprite.Material(info.stillTexture(), true),
+                    new net.minecraft.client.resources.model.sprite.Material(info.flowingTexture(), true),
+                    null, net.neoforged.neoforge.client.fluid.FluidTintSources.constant(info.tintColor()),
+                    heated ? biggerreactorsrework.client.HeatedFluidSprites::renderPlaced : null);
             net.minecraft.core.registries.BuiltInRegistries.FLUID.stream().filter(fluid -> fluid.getFluidType() == info.type()).forEach(fluid -> event.register(model, fluid));
         }
     }
@@ -118,7 +145,7 @@ public final class BiggerReactorsClient {
         event.register(TurbineFluidPortContainer.INSTANCE, TurbineFluidPortScreen::new);
         event.register(HeatExchangerTerminalContainer.INSTANCE, HeatExchangerTerminalScreen::new);
         event.register(HeatExchangerFluidPortContainer.INSTANCE, HeatExchangerFluidPortScreen::new);
-        event.register(CyaniteReprocessorContainer.INSTANCE, CyaniteReprocessorScreen::new);
+        event.register(IndustrialProcessorContainer.INSTANCE, IndustrialProcessorScreen::new);
         event.register(biggerreactorsrework.multiblocks.battery.containers.BatteryTerminalContainer.INSTANCE,
                 biggerreactorsrework.multiblocks.battery.client.BatteryTerminalScreen::new);
         event.register(biggerreactorsrework.multiblocks.battery.containers.BatteryEnergyPortContainer.INSTANCE,

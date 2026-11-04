@@ -47,6 +47,7 @@ public abstract class ModScreen<T extends AbstractContainerMenu> extends Abstrac
     private final biggerreactorsrework.client.GuiStatisticsWindow statisticsWindow=new biggerreactorsrework.client.GuiStatisticsWindow(this);
     public biggerreactorsrework.client.GuiStatisticsWindow statisticsWindow(){return statisticsWindow;}
     public boolean hasStatistics(){return menu instanceof biggerreactorsrework.multiblocks.reactor.containers.ReactorTerminalContainer || menu instanceof biggerreactorsrework.multiblocks.heatexchanger.containers.HeatExchangerTerminalContainer || menu instanceof biggerreactorsrework.multiblocks.turbine.containers.TurbineTerminalContainer;}
+    public int statisticsHeight(){return 236;}
 
     public GuiSettingsWindow settingsWindow() { return settingsWindow; }
 
@@ -65,7 +66,7 @@ public abstract class ModScreen<T extends AbstractContainerMenu> extends Abstrac
         return ((GuiSync.IGUIPacketProvider) this.menu).machinePos();
     }
 
-    /** Left side, away from the reprocessor's existing right-side routing tab. */
+    /** Left side, away from the Industrial Processor's routing tab. */
     public int settingsTabX() { return this.leftPos - GuiFrame.TAB_SIZE; }
     public int settingsTabY() { return this.topPos + 4; }
 

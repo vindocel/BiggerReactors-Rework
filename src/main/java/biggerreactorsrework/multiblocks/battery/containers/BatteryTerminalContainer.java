@@ -21,6 +21,8 @@ import biggerreactorsrework.core.transfer.ItemSlots;
 import biggerreactorsrework.core.transfer.SlotsSlot;
 
 import javax.annotation.Nonnull;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Battery terminal menu: the battery's two item slots, the player's inventory and the armor and offhand slots.
@@ -139,6 +141,12 @@ public class BatteryTerminalContainer extends AbstractContainerMenu implements G
     @Override
     public GuiSync.IGUIPacket getGuiPacket() {
         return this.tileEntity.batteryState();
+    }
+
+    @Override
+    public List<Map<String, Object>> statistics() {
+        var controller = tileEntity.nullableController();
+        return controller == null ? List.of() : controller.statistics();
     }
 
     /** Modified 2026-10-27: charge only the equipment displayed by this open, valid server menu. */

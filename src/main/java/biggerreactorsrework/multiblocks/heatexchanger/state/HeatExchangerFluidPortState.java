@@ -14,6 +14,7 @@ public class HeatExchangerFluidPortState implements GuiSync.IGUIPacket {
      * The direction of the port. True for input, false for output.
      */
     public boolean direction = false;
+    public boolean maintenanceCold;
 
     /**
      * The channel type this is connected to.
@@ -33,6 +34,7 @@ public class HeatExchangerFluidPortState implements GuiSync.IGUIPacket {
 
     @Override
     public void read(@Nonnull Map<?, ?> data) {
+        maintenanceCold=Boolean.TRUE.equals(data.get("maintenanceCold"));
         // Modified 2026-10-30: resource ports share the terminal's appearance, not its menu origin.
         heatExchangerFluidPortTile.readAppearance(data);
         this.direction = (Boolean) data.get("direction");
@@ -49,6 +51,7 @@ public class HeatExchangerFluidPortState implements GuiSync.IGUIPacket {
         data.put("direction", this.direction);
         data.put("condenser", this.condenser);
 
+        data.put("maintenanceCold",maintenanceCold);
         return data;
     }
 }

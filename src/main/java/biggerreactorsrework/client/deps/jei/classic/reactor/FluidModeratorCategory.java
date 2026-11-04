@@ -57,9 +57,9 @@ public class FluidModeratorCategory implements IRecipeCategory<FluidModeratorCat
     public void setRecipe(IRecipeLayoutBuilder builder, Recipe recipe, IFocusGroup focuses) {
         var card = recipe.card();
         builder.addSlot(RecipeIngredientRole.INPUT, 1, FluidCard.inputY() + 1)
-                .addFluidStack(card.input().getFluid(), 1000, card.input().getComponentsPatch()).setFluidRenderer(1000, false, 16, 16);
+                .addFluidStack(card.input().getFluid(), 1000, card.input().getComponentsPatch()).setCustomRenderer(mezz.jei.api.neoforge.NeoForgeTypes.FLUID_STACK, biggerreactorsrework.client.deps.jei.CoolantIngredientRenderer.INSTANCE);
         builder.addSlot(RecipeIngredientRole.OUTPUT, 1, card.outputY() + 1)
-                .addFluidStack(card.output().getFluid(), 1000, card.output().getComponentsPatch()).setFluidRenderer(1000, false, 16, 16);
+                .addFluidStack(card.output().getFluid(), 1000, card.output().getComponentsPatch()).setCustomRenderer(mezz.jei.api.neoforge.NeoForgeTypes.FLUID_STACK, biggerreactorsrework.client.deps.jei.CoolantIngredientRenderer.INSTANCE);
     }
 
     @Override

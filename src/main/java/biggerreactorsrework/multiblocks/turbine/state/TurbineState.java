@@ -22,7 +22,8 @@ public class TurbineState implements GuiSync.IGUIPacket {
      * Status of the induction coils.
      */
     public boolean coilStatus = false;
-    
+    public boolean balancedOutputs = false;
+
     /**
      * The current max flow rate.
      */
@@ -96,6 +97,7 @@ public class TurbineState implements GuiSync.IGUIPacket {
         turbineActivity = ((Boolean) data.get("turbineActivity")) ? TurbineActivity.ACTIVE : TurbineActivity.INACTIVE;
         ventState = VentState.fromInt((Integer) data.get("ventState"));
         coilStatus = (Boolean) data.get("coilStatus");
+        balancedOutputs = Boolean.TRUE.equals(data.get("balancedOutputs"));
         
         flowRate = (Long) data.get("flowRate");
         
@@ -127,6 +129,7 @@ public class TurbineState implements GuiSync.IGUIPacket {
         data.put("turbineActivity", turbineActivity == TurbineActivity.ACTIVE);
         data.put("ventState", ventState.toInt());
         data.put("coilStatus", coilStatus);
+        data.put("balancedOutputs", balancedOutputs);
         
         data.put("flowRate", flowRate);
         

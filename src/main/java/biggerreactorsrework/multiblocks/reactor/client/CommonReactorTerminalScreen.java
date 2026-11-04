@@ -3,10 +3,8 @@ package biggerreactorsrework.multiblocks.reactor.client;
 import biggerreactorsrework.client.GuiTheme;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.network.chat.Component;
-import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.entity.player.Inventory;
 import biggerreactorsrework.Config;
 import biggerreactorsrework.client.Biselector;
@@ -14,14 +12,12 @@ import biggerreactorsrework.client.GaugeBar;
 import biggerreactorsrework.client.SelectorColors;
 import biggerreactorsrework.client.GuiArt;
 import biggerreactorsrework.client.GuiFrame;
-import biggerreactorsrework.client.GuiIcon;
 import biggerreactorsrework.multiblocks.reactor.containers.ReactorTerminalContainer;
 import biggerreactorsrework.multiblocks.reactor.state.ReactorActivity;
 import biggerreactorsrework.multiblocks.reactor.state.ReactorState;
 import biggerreactorsrework.multiblocks.reactor.state.ReactorType;
 import biggerreactorsrework.core.client.gui.screens.ModScreen;
 import biggerreactorsrework.core.client.gui.RenderHelper;
-import biggerreactorsrework.core.client.gui.elements.InteractiveElement;
 import biggerreactorsrework.core.client.gui.elements.RenderedElement;
 import biggerreactorsrework.core.client.gui.elements.TooltipElement;
 
@@ -46,6 +42,7 @@ public class CommonReactorTerminalScreen extends ModScreen<ReactorTerminalContai
      * Width of the readouts in the left column, up to the end of its separators.
      */
     public static final int READOUT_WIDTH = 78;
+    static final int HEIGHT = 136;
     /**
      * The title ends before the icons over the gauges.
      */
@@ -56,7 +53,7 @@ public class CommonReactorTerminalScreen extends ModScreen<ReactorTerminalContai
 
     public CommonReactorTerminalScreen(ReactorTerminalContainer container, Inventory playerInventory, Component title) {
         // We override whatever Minecraft wants to set the title to. It wants "Reactor Terminal," but that's too long.
-        super(container, playerInventory, Component.translatable("screen.biggerreactorsrework.reactor_terminal"), RenderHelper.getBlankTextureResource(), 200, 152);
+        super(container, playerInventory, Component.translatable("screen.biggerreactorsrework.reactor_terminal"), RenderHelper.getBlankTextureResource(), 200, HEIGHT);
 
         // Initialize reactor terminal state.
         initialState = (ReactorState) this.getMenu().getGuiPacket();
@@ -88,7 +85,7 @@ public class CommonReactorTerminalScreen extends ModScreen<ReactorTerminalContai
         // (Left) Temperature readout tooltip:
         TooltipElement<ReactorTerminalContainer> temperatureReadoutTooltip = new TooltipElement<>(screen, 26, 19, 77, 16, Component.empty());
         temperatureReadoutTooltip.onTick = () -> {
-            temperatureReadoutTooltip.tooltip = Component.literal(String.format("%.3f K", reactorState.fuelHeatStored));
+            temperatureReadoutTooltip.tooltip = Component.literal(String.format("%.3f kJ/t", reactorState.heatGenerated));
         };
         screen.addScreenElement(temperatureReadoutTooltip);
 
@@ -110,7 +107,7 @@ public class CommonReactorTerminalScreen extends ModScreen<ReactorTerminalContai
         // (Left) Reactivity rate readout tooltip:
         TooltipElement<ReactorTerminalContainer> reactivityRateTooltip = new TooltipElement<>(screen, 26, 76, 77, 16, Component.empty());
         reactivityRateTooltip.onTick = () -> {
-            reactivityRateTooltip.tooltip = Component.literal(String.format("%.1f%%", (reactorState.reactivityRate * 100.0)));
+            reactivityRateTooltip.tooltip = Component.literal(String.format("%.1f%%", (reactorState.structuralEfficiency * 100.0)));
         };
         screen.addScreenElement(reactivityRateTooltip);
 
@@ -140,40 +137,11 @@ public class CommonReactorTerminalScreen extends ModScreen<ReactorTerminalContai
         };
         screen.addScreenElement(activityToggle);
 
-        // (Left) Auto-eject toggle:
-        Biselector<ReactorTerminalContainer> autoEjectToggle = new Biselector<>(screen, 8, 114, Component.translatable("screen.biggerreactorsrework.reactor_terminal.auto_eject_toggle.tooltip"),
-                () -> reactorState.doAutoEject ? 1 : 0, SelectorColors.CYAN);
-        autoEjectToggle.onMouseReleased = (mX, mY, btn) -> {
-            // Click logic.
-            screen.getMenu().executeRequest("setAutoEject", autoEjectToggle.getState() == 0 ? 1 : 0);
-            return true;
-        };
-        screen.addScreenElement(autoEjectToggle);
+        Biselector<ReactorTerminalContainer> balance = new Biselector<>(screen,8,114,
+            Component.translatable("thermal.biggerreactorsrework.balanced_outputs"),()->reactorState.balancedOutputs?1:0,SelectorColors.CYAN);
+        balance.onMouseReleased=(mX,mY,btn)->{screen.getMenu().executeRequest("balancedOutputs",!reactorState.balancedOutputs);return true;};
+        screen.addScreenElement(balance);
 
-        // (Left) Manual eject button:
-        InteractiveElement<ReactorTerminalContainer> manualEjectButton = new InteractiveElement<>(screen, 8, 130, 15, 15, 0, 0, Component.translatable("screen.biggerreactorsrework.reactor_terminal.manual_eject.tooltip"));
-        manualEjectButton.onMouseReleased = (mX, mY, btn) -> {
-            // Click logic. Extra check necessary since this is an "in-class" button.
-            if (manualEjectButton.isMouseOver(mX, mY)) {
-                // Mouse is hovering, do the thing.
-                //screen.getContainer().executeRequest("ejectWaste", true);
-                Minecraft.getInstance().player.sendSystemMessage(Component.literal("No effect. This button will be removed in the future."));
-                Minecraft.getInstance().player.sendSystemMessage(Component.literal("Use the access ports to eject waste!"));
-                // Play the selection sound.
-                manualEjectButton.playSound(SoundEvents.UI_BUTTON_CLICK);
-                return true;
-            } else {
-                // It ain't hovered, don't do the thing.
-                return false;
-            }
-        };
-        manualEjectButton.onRender = ((mS, mX, mY) -> {
-            // Custom rendering.
-            GuiArt.button(mS, manualEjectButton.x, manualEjectButton.y, manualEjectButton.width, manualEjectButton.height, manualEjectButton.isMouseOver(mX, mY), GuiIcon.EJECT, screen.getFrame());
-        });
-        // TODO: Remove with reactor manual eject.
-        // This element will be removed soon, in favor of having the eject button be in the access ports.
-        //screen.addElement(manualEjectButton);
     }
 
     /**
@@ -189,12 +157,12 @@ public class CommonReactorTerminalScreen extends ModScreen<ReactorTerminalContai
 
         // (Top) Case heat gauge:
         RenderedElement<ReactorTerminalContainer> caseHeatGauge = new RenderedElement<>(screen, 131, 25, 18, 64, 0, 152, Component.empty());
-        caseHeatGauge.onRender = (@Nonnull GuiGraphicsExtractor graphics, int mX, int mY) -> CommonReactorTerminalScreen.renderHeatGauge(graphics, caseHeatGauge, reactorState.caseHeatStored, Config.CONFIG.Reactor.GUI.HeatDisplayMax);
+        caseHeatGauge.onRender = (@Nonnull GuiGraphicsExtractor graphics, int mX, int mY) -> CommonReactorTerminalScreen.renderHeatGauge(graphics, caseHeatGauge, reactorState.heatCapturable, reactorState.heatScale);
         screen.addScreenElement(caseHeatGauge);
 
         // (Top) Fuel heat gauge:
         RenderedElement<ReactorTerminalContainer> fuelHeatGauge = new RenderedElement<>(screen, 153, 25, 18, 64, 0, 152, Component.empty());
-        fuelHeatGauge.onRender = (@Nonnull GuiGraphicsExtractor graphics, int mX, int mY) -> CommonReactorTerminalScreen.renderHeatGauge(graphics, fuelHeatGauge, reactorState.fuelHeatStored, Config.CONFIG.Reactor.GUI.HeatDisplayMax);
+        fuelHeatGauge.onRender = (@Nonnull GuiGraphicsExtractor graphics, int mX, int mY) -> CommonReactorTerminalScreen.renderHeatGauge(graphics, fuelHeatGauge, reactorState.heatGenerated, reactorState.heatScale);
         screen.addScreenElement(fuelHeatGauge);
     }
 
@@ -218,7 +186,7 @@ public class CommonReactorTerminalScreen extends ModScreen<ReactorTerminalContai
     public static void renderHeatGauge(@Nonnull GuiGraphicsExtractor graphics, @Nonnull RenderedElement<ReactorTerminalContainer> symbol, double heatStored, double heatCapacity) {
         GaugeBar.drawHeat(graphics, symbol.x, symbol.y, heatStored, heatCapacity);
         // Update tooltip.
-        symbol.tooltip = Component.literal(String.format("%.1f/%.1f K", heatStored, heatCapacity));
+        symbol.tooltip = Component.literal(String.format("%.1f/%.1f kJ/t", heatStored, heatCapacity));
     }
 
     /**
@@ -253,19 +221,18 @@ public class CommonReactorTerminalScreen extends ModScreen<ReactorTerminalContai
      *
      * @param poseStack       The current pose stack.
      * @param reactorActivity The reactor status to draw.
-     * @param doAutoEject     The auto-eject status to draw.
      * @param heatStored      The heat value to draw.
      * @param fuelUsageRate   The fuel usage rate to draw.
      * @param reactivityRate  The reactivity rate to draw.
      * @param statusRight     Where the status lines next to the toggles must end, relative to the screen.
      * @implNote Output rate is not rendered by this function, since it changes depending on reactor type. Do that yourself.
      */
-    public static void renderStatusText(@Nonnull GuiGraphicsExtractor graphics, @Nonnull ModScreen<ReactorTerminalContainer> screen, ReactorActivity reactorActivity, boolean doAutoEject, double heatStored, double fuelUsageRate, double reactivityRate, int statusRight) {
+    public static void renderStatusText(@Nonnull GuiGraphicsExtractor graphics, @Nonnull ModScreen<ReactorTerminalContainer> screen, ReactorActivity reactorActivity, double heatStored, double fuelUsageRate, double reactivityRate, int statusRight) {
         // Render text for reactor temperature (no fancy suffix for Celsius):
-        renderReadout(graphics, screen, String.format("%.0f K", heatStored), 23);
+        renderReadout(graphics, screen, RenderHelper.formatValue(heatStored,1,"kJ/t",true), 23);
 
         // Render text for fuel consumption rate:
-        renderReadout(graphics, screen, RenderHelper.formatValue(fuelUsageRate, 3, "mB/t", true), 61);
+        renderReadout(graphics, screen, String.format(java.util.Locale.ROOT,"%.4f mB/t",fuelUsageRate), 61);
 
         // Render text for reactivity rate (no fancy suffix for percentages):
         renderReadout(graphics, screen, String.format("%.1f%%", (reactivityRate * 100.0)), 80);
@@ -280,18 +247,8 @@ public class CommonReactorTerminalScreen extends ModScreen<ReactorTerminalContai
             GuiArt.scrollingText(graphics, screen.getFont(), Component.translatable("screen.biggerreactorsrework.reactor_terminal.activity_toggle.offline").getString(), screen.getLeftPos() + 42, screen.getTopPos() + 102, statusRight - 42, GuiTheme.textColor());
         }
 
-        // Render text for auto-eject status:
-        if (doAutoEject) {
-            // Text for enabled auto-ejection:
-            GuiArt.scrollingText(graphics, screen.getFont(), Component.translatable("screen.biggerreactorsrework.reactor_terminal.auto_eject_toggle.enabled").getString(), screen.getLeftPos() + 42, screen.getTopPos() + 118, statusRight - 42, GuiTheme.textColor());
-        } else {
-            // Text for disabled auto-ejection:
-            GuiArt.scrollingText(graphics, screen.getFont(), Component.translatable("screen.biggerreactorsrework.reactor_terminal.auto_eject_toggle.disabled").getString(), screen.getLeftPos() + 42, screen.getTopPos() + 118, statusRight - 42, GuiTheme.textColor());
-        }
+        GuiArt.scrollingText(graphics,screen.getFont(),Component.translatable("thermal.biggerreactorsrework.balanced_outputs").getString(),screen.getLeftPos()+42,screen.getTopPos()+118,statusRight-42,GuiTheme.textColor());
 
-        // Render text for manual eject button:
-        // TODO: Remove with reactor manual eject.
-        //screen.getFont().text(mStack, Component.translatable("screen.biggerreactorsrework.reactor_terminal.manual_eject").getString(), screen.getLeftPos() + 26, screen.getTopPos() + 134, GuiTheme.textColor());
     }
 
     @Override

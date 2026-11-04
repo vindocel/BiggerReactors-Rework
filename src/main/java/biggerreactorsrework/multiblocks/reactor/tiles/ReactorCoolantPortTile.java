@@ -87,7 +87,7 @@ public class ReactorCoolantPortTile extends ReactorBaseTile implements IFluidTan
         if (transitionTank == null) {
             return Fluids.EMPTY;
         }
-        return transitionTank.fluidTypeInTank(tank);
+        return transitionTank.maintenanceFluid(tank);
     }
     
     @Nullable
@@ -96,7 +96,7 @@ public class ReactorCoolantPortTile extends ReactorBaseTile implements IFluidTan
         if (transitionTank == null) {
             return DataComponentPatch.EMPTY;
         }
-        return transitionTank.fluidComponentsInTank(tank);
+        return transitionTank.maintenanceComponents(tank);
     }
     
     @Override
@@ -118,7 +118,7 @@ public class ReactorCoolantPortTile extends ReactorBaseTile implements IFluidTan
     
     @Override
     public long fill(Fluid fluid, DataComponentPatch components, long amount, boolean simulate) {
-        if (transitionTank == null || direction != INLET) {
+        if (transitionTank == null || direction != INLET || isRecoveringInput()) {
             return 0;
         }
         return transitionTank.fill(fluid, components, amount, simulate);
@@ -126,24 +126,45 @@ public class ReactorCoolantPortTile extends ReactorBaseTile implements IFluidTan
     
     @Override
     public long drain(Fluid fluid, DataComponentPatch components, long amount, boolean simulate) {
-        if (transitionTank == null || direction == INLET) {
+        if (transitionTank == null || !canDrain()) {
             return 0;
         }
-        return transitionTank.drain(fluid, components, amount, simulate);
+        return transitionTank.maintenanceDrain(outputTank(),fluid, components, amount, simulate);
     }
     
+    // Modified 2026-11-02: controller drains only the sum actually accepted by balanced destinations.
+    public long offerFluid(long maximum) {
+        neighborChanged();
+        if(!connected || !canDrain() || handler==null || transitionTank==null)return 0;
+        long amount=Math.min(maximum,transitionTank.fluidAmountInTank(outputTank()));
+        return Math.max(0,Math.min(amount,handler.fill(transitionTank.maintenanceFluid(outputTank()),transitionTank.maintenanceComponents(outputTank()),amount,false)));
+    }
+
+    private boolean maintenanceCold;
+
+    public boolean isRecoveringInput() {
+        return direction == INLET && maintenanceCold;
+    }
+
+    private boolean canDrain() {
+        return direction != INLET || isRecoveringInput();
+    }
+
+    private int outputTank() {
+        return isRecoveringInput() ? 0 : 1;
+    }
     public long pushFluid() {
         neighborChanged();
-        if (!connected || direction == INLET) {
+        if (!connected || !canDrain() || transitionTank == null) {
             return 0;
         }
         if (handler != null && transitionTank != null) {
-            Fluid fluid = transitionTank.vaporType();
-            var components = transitionTank.fluidComponentsInTank(1);
-            long amount = transitionTank.vaporAmount();
-            amount = transitionTank.drain(fluid, components, amount, true);
+            Fluid fluid = transitionTank.maintenanceFluid(outputTank());
+            var components = transitionTank.maintenanceComponents(outputTank());
+            long amount = transitionTank.fluidAmountInTank(outputTank());
+            amount = transitionTank.maintenanceDrain(outputTank(),fluid, components, amount, true);
             amount = handler.fill(fluid, components, amount, false);
-            amount = transitionTank.drain(fluid, components, amount, false);
+            amount = transitionTank.maintenanceDrain(outputTank(),fluid, components, amount, false);
             return amount;
         } else {
             handler = null;
@@ -176,12 +197,14 @@ public class ReactorCoolantPortTile extends ReactorBaseTile implements IFluidTan
     }
     
     public void setDirection(ReactorAccessPort.PortDirection direction) {
+        if (this.direction != direction) maintenanceCold = false;
         this.direction = direction;
         this.setChanged();
     }
     
     @Override
     protected void readNBT(CompoundTag compound) {
+        maintenanceCold=compound.getBooleanOr("recoverInput", false);
         if (compound.contains("direction")) {
             direction = biggerreactorsrework.core.util.SavedValues.enumValue(ReactorAccessPort.PortDirection.class, compound.getStringOr("direction", ""), ReactorAccessPort.PortDirection.INLET);
         }
@@ -192,11 +215,19 @@ public class ReactorCoolantPortTile extends ReactorBaseTile implements IFluidTan
     protected CompoundTag writeNBT() {
         CompoundTag NBT = new CompoundTag();
         NBT.putString("direction", String.valueOf(direction));
+        NBT.putBoolean("recoverInput", isRecoveringInput());
         return NBT;
     }
     
     @Override
     public void runRequest(String requestName, Object requestData) {
+        if (requestName.equals("recoverInput")) {
+            if (direction == INLET && requestData instanceof Boolean value) {
+                maintenanceCold = value;
+                setChanged();
+            }
+            return;
+        }
         // Change IO direction.
         if (requestName.equals("setDirection")) {
             // Modified 2026-10-30: reject invalid command types and domains before mutation.
@@ -229,6 +260,7 @@ public class ReactorCoolantPortTile extends ReactorBaseTile implements IFluidTan
     
     @Override
     public void updateState() {
+        reactorCoolantPortState.maintenanceCold=isRecoveringInput();
         reactorCoolantPortState.direction = (this.direction == INLET);
     }
     

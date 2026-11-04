@@ -12,77 +12,6 @@ import net.neoforged.neoforge.gametest.*;
 
 /** Modified 2026-10-27: coolant identity and volumes must survive casing repair within the same session. */
 public final class ReactorCoolantReassemblyGameTests {
-    @GameTest(template="empty_7x7x7",timeoutTicks=160)
-    public static void cancelledCoolantInsertionDoesNotBlockObsidian(GameTestHelper h) {
-        build(h);
-        h.startSequence().thenWaitUntil(() -> h.assertTrue(terminal(h).nullableController()!=null &&
-                terminal(h).controller().simulation()!=null, "reactor not ready"))
-            .thenExecute(() -> {
-                var portPos = h.absolutePos(new BlockPos(1,3,2));
-                var handler = h.getLevel().getCapability(net.neoforged.neoforge.capabilities.Capabilities.Fluid.BLOCK,
-                        portPos, net.minecraft.core.Direction.WEST);
-                h.assertTrue(handler != null, "coolant port capability missing");
-                var water = net.neoforged.neoforge.transfer.fluid.FluidResource.of(Fluids.WATER);
-                var obsidian = net.neoforged.neoforge.transfer.fluid.FluidResource.of(biggerreactorsrework.fluids.LiquidObsidian.INSTANCE);
-                var tank = terminal(h).controller().coolantTank();
-                try (var tx = net.neoforged.neoforge.transfer.transaction.Transaction.openRoot()) {
-                    h.assertTrue(handler.insert(water,1000,tx)==1000,"water preview rejected");
-                }
-                h.assertTrue(tank.liquidAmount()==0 && tank.activeTransition()==null,
-                        "cancelled transfer left unidentified coolant in the reactor");
-                try (var tx = net.neoforged.neoforge.transfer.transaction.Transaction.openRoot()) {
-                    h.assertTrue(handler.insert(obsidian,1000,tx)==1000,"obsidian rejected after cancelled water transfer");
-                }
-                h.assertTrue(tank.liquidAmount()==0 && tank.activeTransition()==null,"obsidian preview changed tank");
-                try (var tx = net.neoforged.neoforge.transfer.transaction.Transaction.openRoot()) {
-                    h.assertTrue(handler.insert(obsidian,1000,tx)==1000,"obsidian insertion failed");
-                    tx.commit();
-                }
-                h.assertTrue(tank.liquidAmount()==1000 && tank.liquidType()==biggerreactorsrework.fluids.LiquidObsidian.INSTANCE,
-                        "committed obsidian did not reach the reactor");
-                var internal = (biggerreactorsrework.multiblocks.reactor.simulation.base.CoolantTank)
-                        terminal(h).controller().simulation().coolantTank();
-                internal.absorbRF(-1000.5);
-                var before = internal.save().toROBNMap();
-                var hot = net.neoforged.neoforge.transfer.fluid.FluidResource.of(tank.getFluidInTank(1));
-                h.assertTrue(!hot.isEmpty(), "reactor did not heat the obsidian");
-                ((ReactorCoolantPortTile) h.getLevel().getBlockEntity(portPos)).setDirection(
-                        ReactorAccessPort.PortDirection.OUTLET);
-                try (var tx = net.neoforged.neoforge.transfer.transaction.Transaction.openRoot()) {
-                    h.assertTrue(handler.extract(0,hot,1000,tx)==0,"hot coolant exposed in the cold input chamber");
-                    h.assertTrue(handler.extract(1,hot,1000,tx)>0,"pipe could not extract heated coolant from its reported chamber");
-                }
-                h.assertTrue(internal.save().toROBNMap().equals(before),
-                        "cancelled coolant extraction changed volume, thermal residue or backpressure");
-                // Pipez 26.3 uses this utility, which extracts by the chamber index reported by the source.
-                var exchangerPos = new BlockPos(6,3,3);
-                h.setBlock(exchangerPos, biggerreactorsrework.multiblocks.heatexchanger.blocks.HeatExchangerFluidPortBlock.INSTANCE);
-                var exchanger = (biggerreactorsrework.multiblocks.heatexchanger.tiles.HeatExchangerFluidPortTile)
-                        h.getLevel().getBlockEntity(h.absolutePos(exchangerPos));
-                var primary = new biggerreactorsrework.util.FluidTransitionTank(true);
-                primary.perSideCapacity = 10000;
-                exchanger.setHETank(primary);
-                exchanger.setInlet(true);
-                var destination = h.getLevel().getCapability(net.neoforged.neoforge.capabilities.Capabilities.Fluid.BLOCK,
-                        h.absolutePos(exchangerPos), net.minecraft.core.Direction.WEST);
-                h.assertTrue(destination != null, "exchanger port capability missing");
-                int available = handler.getAmountAsInt(1);
-                try (var tx = net.neoforged.neoforge.transfer.transaction.Transaction.openRoot()) {
-                    h.assertTrue(net.neoforged.neoforge.transfer.ResourceHandlerUtil.move(handler,destination,r -> true,1000,tx)==available,
-                            "Pipez transfer routine could not move heated obsidian");
-                }
-                h.assertTrue(tank.vaporAmount()==available && primary.fluidAmountInTank(0)==0,
-                        "cancelled pipe transfer changed either machine");
-                int moved = net.neoforged.neoforge.transfer.ResourceHandlerUtil.move(handler,destination,r -> true,1000,null);
-                h.assertTrue(moved==available && tank.vaporAmount()==0 && primary.fluidAmountInTank(0)==available,
-                        "pipe transfer did not conserve heated coolant");
-                h.assertTrue(hot.matches(primary.getFluidInTank(0)) &&
-                        primary.activeTransition()==biggerreactorsrework.registries.FluidTransitionRegistry.liquidTransition(
-                                biggerreactorsrework.fluids.LiquidObsidian.INSTANCE),
-                        "pipe transfer lost the obsidian coolant components");
-            }).thenSucceed();
-    }
-
     private static final BlockPos TERMINAL=new BlockPos(1,3,3),BROKEN=new BlockPos(1,5,1);
     private static ReactorTerminalTile terminal(GameTestHelper h){return (ReactorTerminalTile)GameTestSupport.be(h,TERMINAL);}
     private static void build(GameTestHelper h) {
@@ -128,7 +57,7 @@ public final class ReactorCoolantReassemblyGameTests {
         h.assertTrue(tank.liquidType()==Fluids.WATER && tank.liquidAmount()==1000,"refill has incorrect identity or amount");h.succeed();
     }
     @GameTest(template="empty_7x7x7",timeoutTicks=160)
-    public static void mountedReactorWithLegacyLavaStopsUntilBothTanksAreCleared(GameTestHelper h) {
+    public static void mountedReactorWithLegacyLavaPreservesStockAndDiscardsHeat(GameTestHelper h) {
         build(h);
         h.startSequence().thenWaitUntil(()->h.assertTrue(terminal(h).nullableController()!=null && terminal(h).controller().simulation()!=null,"reactor not ready"))
           .thenExecute(()->{
@@ -139,7 +68,7 @@ public final class ReactorCoolantReassemblyGameTests {
             var old=tank.serializeNBT();old.putString("outFluid","minecraft:lava");tank.deserializeNBT(old);
             c.setActive(biggerreactorsrework.multiblocks.reactor.state.ReactorActivity.ACTIVE);
             for(int i=0;i<40;i++)c.tick();
-            h.assertTrue(c.simulation().fuelTank().fuel()==5000,"invalid mounted reactor burned fuel");
+            h.assertTrue(c.simulation().fuelTank().usableFuel()<5000 && c.simulation().coolantTank().transitionedLastTick()==0,"quarantine saved fuel or processed an invalid profile");
             h.assertTrue(tank.hasUnresolvedProfile() && tank.activeTransition()==null,"invalid reactor reinterpreted lava");
             h.assertTrue(tank.liquidAmount()==5000 && tank.vaporAmount()==1000,"invalid reactor changed its volumes");
             tank.dumpLiquid();

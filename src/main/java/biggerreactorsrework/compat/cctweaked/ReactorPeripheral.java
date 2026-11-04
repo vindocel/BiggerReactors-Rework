@@ -11,6 +11,11 @@ public final class ReactorPeripheral extends ComputerPeripheral {
         super(tile, "biggerreactorsrework_reactor");
         access = ReactorAccess.create(tile::nullableController);
     }
+    @LuaFunction(mainThread=true)
+    public Object[] thermal(IArguments args) throws LuaException {
+        try { checkAvailable();return result(access.thermal()); }
+        catch(IllegalArgumentException | IllegalStateException error) { throw new LuaException(error.getMessage()); }
+    }
     @LuaFunction(mainThread = true)
     public Object[] connected(IArguments args) throws LuaException {
         try {

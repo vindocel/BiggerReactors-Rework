@@ -5,7 +5,7 @@ import biggerreactorsrework.core.registry.RegisterFluid;
 
 import javax.annotation.Nonnull;
 
-@RegisterFluid(name = "liquid_obsidian", registerBucket = true)
+@RegisterFluid(name = "liquid_obsidian", registerBucket = true, waterLikeMovement = true)
 public class LiquidObsidian extends ModFluid {
     
     @RegisterFluid.Instance

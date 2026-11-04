@@ -42,6 +42,10 @@ public class TurbineCoilRegistry {
             this.bonus = bonus;
             this.extractionRate = extractionRate;
         }
+
+        // Added 2026-11-03: the turbine's rounded generation rule derived from the material data.
+        public double fePerMB() { return Math.round(efficiency * 32) / 4.0; }
+        public long steamPerTick() { return Math.round(extractionRate * 5000); }
     }
     
     private static final HashMap<Block, CoilData> registry = new HashMap<>();

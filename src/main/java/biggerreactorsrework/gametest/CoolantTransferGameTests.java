@@ -11,6 +11,7 @@ import biggerreactorsrework.util.FluidTransitionTank;
 import biggerreactorsrework.util.GuideStructures;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.component.DataComponentPatch;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.resources.Identifier;
@@ -62,7 +63,7 @@ public final class CoolantTransferGameTests {
             tx.commit();
         }
         var internal = (CoolantTank) terminal(h).controller().simulation().coolantTank();
-        internal.absorbRF(-1000.5);
+        internal.absorbRF(-100.05);
         ((ReactorCoolantPortTile) GameTestSupport.be(h, OUTLET)).setDirection(ReactorAccessPort.PortDirection.OUTLET);
         var hot = terminal(h).controller().coolantTank().getFluidInTank(1).copy();
         h.assertTrue(!hot.isEmpty(), "reactor did not heat the obsidian");
@@ -91,6 +92,80 @@ public final class CoolantTransferGameTests {
     public static void pipezNearestDistributionMovesHeatedObsidian(GameTestHelper h) { pipeNetwork(h,"NEAREST"); }
     @GameTest(template="empty_64x48x40",timeoutTicks=600)
     public static void pipezRoundRobinDistributionMovesHeatedObsidian(GameTestHelper h) { pipeNetwork(h,"ROUND_ROBIN"); }
+
+    @GameTest(template="empty_64x48x40", timeoutTicks=160)
+    public static void pipezReturnsLiquidObsidianToReactor(GameTestHelper h) {
+        if (!ModList.get().isLoaded("pipez")) { h.succeed(); return; }
+        build(h);
+        var exchanger = placeExchanger(h, new BlockPos(7, 2, 1));
+        var pipePos = new BlockPos(6, 3, 2);
+        h.startSequence().thenWaitUntil(() -> {
+            h.assertTrue(exchanger.getBlockState().getValue(ASSEMBLED), "exchanger not assembled");
+            h.assertTrue(terminal(h).nullableController() != null && terminal(h).controller().coolantTank() != null, "reactor not assembled");
+        }).thenExecute(() -> {
+            var reactorPort = (ReactorCoolantPortTile) GameTestSupport.be(h, OUTLET);
+            reactorPort.setDirection(ReactorAccessPort.PortDirection.INLET);
+            exchanger.controller().setInletPort(exchanger, false);
+            var primary = exchanger.controller().condenserTank;
+            var obsidian = FluidTransitionRegistry.liquidTransition(LiquidObsidian.INSTANCE);
+            h.assertTrue(primary.fill(biggerreactorsrework.fluids.HeatedCoolant.INSTANCE,
+                    biggerreactorsrework.registries.CoolantComponents.heated(obsidian), 1000, false) == 1000, "hot supply refused");
+            exchanger.controller().evaporatorTank.fill(net.minecraft.world.level.material.Fluids.WATER,
+                    net.minecraft.core.component.DataComponentPatch.EMPTY, 2000, false);
+            exchanger.controller().tick();
+            h.assertTrue(primary.fluidAmountInTank(1) == 1000, "cold output missing");
+            h.setBlock(pipePos, BuiltInRegistries.BLOCK.getValue(Identifier.fromNamespaceAndPath("pipez", "fluid_pipe")));
+            try {
+                var pipe = Pipez.configure(h.getLevel(), h.absolutePos(pipePos), "NEAREST", Direction.EAST);
+                for (int i = 0; i < 20; i++) Pipez.tick(pipe);
+            } catch (ReflectiveOperationException e) { throw new AssertionError(e); }
+            var returned = terminal(h).controller().coolantTank();
+            h.assertTrue(returned.liquidAmount() == 1000 && returned.liquidType() == LiquidObsidian.INSTANCE
+                    && primary.fluidAmountInTank(1) == 0, "Pipez did not return the exact cold volume to the reactor");
+        }).thenSucceed();
+    }
+
+    @GameTest(template="empty_7x7x7")
+    public static void cancelledMaintenanceDrainRestoresQuarantinedStock(GameTestHelper h) {
+        var pos = new BlockPos(2, 2, 2);
+        var tank = exchanger(h, pos, 0);
+        var port = (HeatExchangerFluidPortTile) GameTestSupport.be(h, pos);
+        port.setInlet(false);
+        port.runRequest("recoverInput", true);
+        h.assertFalse(port.isRecoveringInput(), "product outlet accepted input recovery");
+        port.setInlet(true);
+        port.setCondenser(false);
+        port.runRequest("recoverInput", true);
+        h.assertTrue(port.isRecoveringInput(), "water inlet refused input recovery");
+        var waterTank = new FluidTransitionTank(false);
+        waterTank.perSideCapacity = 1000;
+        var water = net.minecraft.world.level.material.Fluids.WATER;
+        waterTank.fill(water, DataComponentPatch.EMPTY, 500, false);
+        port.setHETank(waterTank);
+        h.assertTrue(port.drain(water, DataComponentPatch.EMPTY, 500, false) == 500, "water inlet did not recover its water");
+        h.assertTrue(port.fill(water, DataComponentPatch.EMPTY, 500, false) == 0, "water inlet accepted filling during recovery");
+        port.setHETank(tank);
+        port.setCondenser(true);
+        port.runRequest("recoverInput", true);
+        var saved = new net.minecraft.nbt.CompoundTag();
+        saved.putString("inFluid", "biggerreactorsrework:steam");
+        saved.putLong("inAmount", 1000);
+        saved.putString("profile", "unknown-test-signature");
+        tank.deserializeNBT(saved);
+        var handler = handler(h, pos, Direction.WEST);
+        var steam = FluidResource.of(biggerreactorsrework.fluids.Steam.INSTANCE);
+        try (var tx = Transaction.openRoot()) {
+            h.assertTrue(handler.extract(steam, 1000, tx) == 1000, "maintenance could not recover zero-capacity stock");
+        }
+        h.assertTrue(tank.hasUnresolvedProfile() && tank.serializeNBT().equals(saved), "rollback changed quarantined stock or its signature");
+        port.setInlet(false);
+        try (var tx = Transaction.openRoot()) {
+            h.assertTrue(handler.extract(steam, 1000, tx) == 0, "product outlet drained the input tank");
+        }
+        port.setInlet(true);
+        h.assertFalse(port.isRecoveringInput(), "direction change left recovery enabled");
+        h.succeed();
+    }
 
     private static HeatExchangerFluidPortTile placeExchanger(GameTestHelper h, BlockPos origin) {
         GuideStructures.exchanger().parts().forEach((pos,block)->h.setBlock(origin.offset(pos),block));
@@ -122,7 +197,7 @@ public final class CoolantTransferGameTests {
                 // A single small batch fits one connection's share: keep producing so distribution can alternate.
                 if(state.rounds<4 && tank.vaporAmount()==0) {
                     state.rounds++;
-                    ((CoolantTank) terminal(h).controller().simulation().coolantTank()).absorbRF(-1000.5);
+                    ((CoolantTank) terminal(h).controller().simulation().coolantTank()).absorbRF(-100.05);
                     state.total += tank.vaporAmount();
                 }
                 h.assertTrue(state.rounds==4 && tank.vaporAmount()==0,"heated coolant still in the reactor: "+tank.vaporAmount()+", round "+state.rounds);
@@ -143,17 +218,20 @@ public final class CoolantTransferGameTests {
     /** Separate class: the base test environment has no Pipez classes. */
     private static final class Pipez {
         static net.minecraft.world.level.block.entity.BlockEntity configure(net.minecraft.world.level.Level level, BlockPos pos, String distribution) throws ReflectiveOperationException {
+            return configure(level, pos, distribution, Direction.WEST);
+        }
+        static net.minecraft.world.level.block.entity.BlockEntity configure(net.minecraft.world.level.Level level, BlockPos pos, String distribution, Direction extraction) throws ReflectiveOperationException {
             var type = Class.forName("de.maxhenkel.pipez.blocks.tileentity.types.FluidPipeType").getField("INSTANCE").get(null);
             var pipeType = Class.forName("de.maxhenkel.pipez.blocks.tileentity.types.PipeType");
             var modes = Class.forName("de.maxhenkel.pipez.blocks.tileentity.UpgradeTileEntity$Distribution");
             var block = level.getBlockState(pos).getBlock();
             // The block creates its tile only once a side has data, as a player's wrench does.
-            block.getClass().getMethod("setExtracting",net.minecraft.world.level.Level.class,BlockPos.class,Direction.class,boolean.class).invoke(block,level,pos,Direction.WEST,true);
+            block.getClass().getMethod("setExtracting",net.minecraft.world.level.Level.class,BlockPos.class,Direction.class,boolean.class).invoke(block,level,pos,extraction,true);
             var pipe = level.getBlockEntity(pos);
             var upgrade = new ItemStack(BuiltInRegistries.ITEM.getValue(Identifier.fromNamespaceAndPath("pipez","ultimate_upgrade")));
-            pipe.getClass().getMethod("setUpgradeItem",Direction.class,ItemStack.class).invoke(pipe,Direction.WEST,upgrade);
+            pipe.getClass().getMethod("setUpgradeItem",Direction.class,ItemStack.class).invoke(pipe,extraction,upgrade);
             pipe.getClass().getMethod("setDistribution",Direction.class,pipeType,modes)
-                    .invoke(pipe,Direction.WEST,type,modes.getMethod("valueOf",String.class).invoke(null,distribution));
+                    .invoke(pipe,extraction,type,modes.getMethod("valueOf",String.class).invoke(null,distribution));
             Class.forName("de.maxhenkel.pipez.blocks.tileentity.PipeTileEntity").getMethod("markPipesDirty",net.minecraft.world.level.Level.class,BlockPos.class)
                     .invoke(null,level,pos);
             return pipe;

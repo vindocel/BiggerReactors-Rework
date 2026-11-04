@@ -556,9 +556,8 @@ public final class PlantSearch {
         long primary = spec.reactorTankCapacity();
         long water = 0;
         if (spec.exchanger() != null) {
-            long channels = spec.exchanger().channelVolume() / 2;
-            primary += channels / 2;
-            water = channels * 9 / 10;
+            primary += spec.exchanger().channelVolume() / 4;
+            water = spec.exchanger().waterVolume() * 9 / 20;
         }
         return spec.withCharges(primary, water);
     }
@@ -569,13 +568,14 @@ public final class PlantSearch {
         Candidate best = chosen;
         long reactor = spec.reactorTankCapacity();
         long channels = spec.exchanger() == null ? 0 : spec.exchanger().channelVolume() / 2;
+        long waterChannels = spec.exchanger() == null ? 0 : spec.exchanger().waterVolume() / 2;
         var options = new ArrayList<long[]>();
         if (spec.exchanger() == null) {
             options.add(new long[]{reactor * 3 / 4, 0});
         } else {
             for (long hot : new long[]{channels / 4, channels * 3 / 4})
                 options.add(new long[]{reactor + hot, spec.waterCharge()});
-            options.add(new long[]{spec.primaryCharge(), channels * 6 / 10});
+            options.add(new long[]{spec.primaryCharge(), waterChannels * 6 / 10});
         }
         for (var option : options) {
             if (!budgetLeft()) break;

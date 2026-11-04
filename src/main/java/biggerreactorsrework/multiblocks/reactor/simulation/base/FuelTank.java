@@ -22,24 +22,20 @@ public class FuelTank implements IReactorSimulation.IFuelTank, ISerializable {
         this.capacity = capacity;
     }
     
+    // Modified 2026-11-02: only unconsumed fuel can pay for heat, including the final fractional unit.
+    public double usableFuel() { return Math.max(0, fuel - partialUsed); }
     public void burn(double amount) {
-        if (Double.isInfinite(amount) || Double.isNaN(amount) || amount == 0) {
-            burnedLastTick = 0;
-            return;
-        }
-        
-        double toProcess = partialUsed + amount;
-        toProcess = Math.min(toProcess, (double) fuel);
-        
-        burnedLastTick = toProcess - partialUsed;
-        
-        partialUsed = toProcess;
-        if (toProcess >= 1) {
-            long toBurn = (long) toProcess;
-            fuel -= toBurn;
-            waste += toBurn;
-            partialUsed -= toBurn;
-        }
+        burnedLastTick = 0;
+        if (!Double.isFinite(amount) || amount <= 0 || fuel <= 0) return;
+        double available = usableFuel();
+        double consumed = Math.min(amount, available);
+        if (consumed <= 0) return;
+        double toProcess = partialUsed + consumed;
+        long whole = Math.min(fuel, (long) toProcess);
+        fuel -= whole;
+        waste = waste > Long.MAX_VALUE - whole ? Long.MAX_VALUE : waste + whole;
+        partialUsed = fuel == 0 ? 0 : Math.max(0, toProcess - whole);
+        burnedLastTick = consumed;
     }
     
     @Override
@@ -97,7 +93,7 @@ public class FuelTank implements IReactorSimulation.IFuelTank, ISerializable {
     
     @Override
     public long extractFuel(long amount, boolean simulated) {
-        amount = Math.max(0, Math.min(fuel, amount));
+        amount = Math.max(0, Math.min(fuel - (partialUsed > 0 ? 1 : 0), amount));
         if (!simulated) {
             fuel -= amount;
         }
@@ -139,6 +135,6 @@ public class FuelTank implements IReactorSimulation.IFuelTank, ISerializable {
         fuel = Math.max(0, compound.getLong("fuel"));
         waste = Math.max(0, compound.getLong("waste"));
         partialUsed = biggerreactorsrework.core.util.SavedValues.nonNegative(compound.getDouble("partialUsed"), 0);
-        if (partialUsed >= 1) partialUsed = 0;
+        if (partialUsed >= 1 || fuel == 0) partialUsed = 0;
     }
 }

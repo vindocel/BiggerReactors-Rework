@@ -33,6 +33,7 @@ public class BiggerReactors {
         biggerreactorsrework.worldgen.UraniumGeneration.register(modBus);
         biggerreactorsrework.advancement.ReworkAdvancements.register(modBus);
         biggerreactorsrework.registries.CoolantComponents.register(modBus);
+        biggerreactorsrework.fluids.HeatedCoolantBucket.register(modBus);
         version = container.getModInfo().getVersion().toString();
         new Registry(modid, BiggerReactors.class.getPackageName(), modBus, new ReferenceArrayList<>(), new ReferenceArrayList<>());
         biggerreactorsrework.machine.recipe.ReprocessingRecipes.register(modBus);

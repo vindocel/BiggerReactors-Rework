@@ -1,8 +1,9 @@
 package biggerreactorsrework.gametest;
 
 import biggerreactorsrework.BiggerReactors;
-import biggerreactorsrework.machine.blocks.CyaniteReprocessor;
-import biggerreactorsrework.machine.tiles.CyaniteReprocessorTile;
+import biggerreactorsrework.machine.blocks.IndustrialProcessor;
+import biggerreactorsrework.machine.side.Transmission;
+import biggerreactorsrework.machine.tiles.IndustrialProcessorTile;
 import biggerreactorsrework.items.ingots.*;
 import biggerreactorsrework.fluids.*;
 import biggerreactorsrework.registries.*;
@@ -18,11 +19,15 @@ import net.neoforged.neoforge.gametest.*;
 
 /** Modified 2026-10-27: real Industrial Processor, exact input accounting and legacy coolant rejection. */
 public final class IndustrialProcessorGameTests {
-    private static CyaniteReprocessorTile machine(GameTestHelper h) {
-        h.setBlock(2,2,2,CyaniteReprocessor.INSTANCE);
-        var t=(CyaniteReprocessorTile)GameTestSupport.be(h,new BlockPos(2,2,2));t.tick();
+    private static IndustrialProcessorTile machine(GameTestHelper h) {
+        return machine(h, new FluidStack(Fluids.WATER, 1000));
+    }
+    private static IndustrialProcessorTile machine(GameTestHelper h, FluidStack input) {
+        h.setBlock(2,2,2,IndustrialProcessor.INSTANCE);
+        var t=(IndustrialProcessorTile)GameTestSupport.be(h,new BlockPos(2,2,2));t.tick();
         for(int i=0;i<10;i++)t.energyFor(null).receiveEnergy(500,false);
-        t.fluidFor(null).fill(new FluidStack(Fluids.WATER,1000),FluidAction.EXECUTE);return t;
+        h.assertTrue(t.fluidFor(null).fill(input, FluidAction.EXECUTE) == input.getAmount(), "processor refused input fluid");
+        return t;
     }
     @GameTest(template="empty_7x7x7")
     public static void obsidianUsesExactlyOneBlockOneHundredWaterAndTwoHundredFE(GameTestHelper h) {
@@ -36,6 +41,42 @@ public final class IndustrialProcessorGameTests {
         h.assertTrue(t.fluidFor(null).fill(new FluidStack(LiquidObsidian.INSTANCE,100),FluidAction.EXECUTE)==0,"product can be injected from outside");
         var preview=t.fluidFor(null).drain(100,FluidAction.SIMULATE);
         h.assertTrue(preview.getAmount()==100 && t.fluidFor(null).getFluidInTank(1).getAmount()==100,"drain simulation mutated output");
+        h.succeed();
+    }
+    @GameTest(template="empty_7x7x7")
+    public static void configuredFluidOutputPushesToAdjacentInput(GameTestHelper h) {
+        var source = machine(h);
+        var destinationPos = new BlockPos(3, 2, 2);
+        h.setBlock(destinationPos, IndustrialProcessor.INSTANCE);
+        var destination = (IndustrialProcessorTile) GameTestSupport.be(h, destinationPos);
+        int fluidBatch = Transmission.FLUID.ordinal() * 2;
+        source.runRequest("sideClearAll", null);
+        source.runRequest("sideBatch", fluidBatch);
+        source.runRequest("sideBatch", fluidBatch);
+        destination.runRequest("sideClearAll", null);
+
+        source.itemHandlerFor(null).insertItem(0, new ItemStack(Items.OBSIDIAN), false);
+        for (int i = 0; i < 200; i++) source.tick();
+        h.assertTrue(source.fluidFor(null).getFluidInTank(1).getAmount() == 100, "closed destination lost fluid");
+
+        destination.runRequest("sideBatch", fluidBatch);
+        for (int i = 0; i < 10; i++) source.tick();
+        var received = destination.fluidFor(null).getFluidInTank(0);
+        h.assertTrue(received.getFluid() == LiquidObsidian.INSTANCE && received.getAmount() == 100, "adjacent input did not receive the product automatically");
+        h.assertTrue(source.fluidFor(null).getFluidInTank(1).isEmpty(), "accepted product remained in the output");
+        h.succeed();
+    }
+
+    @GameTest(template="empty_7x7x7")
+    // Added 2026-11-03: verify the full Frozen Obsidian process on the registered machine.
+    public static void processorMakesFrozenObsidian(GameTestHelper h) {
+        var t = machine(h, new FluidStack(LiquidObsidian.INSTANCE, 250));
+        t.itemHandlerFor(null).insertItem(0, new ItemStack(Items.BLUE_ICE), false);
+        for (int i = 0; i < 200; i++) t.tick();
+        var product = t.fluidFor(null).getFluidInTank(1);
+        h.assertTrue(product.getFluid() == FrozenObsidian.INSTANCE && product.getAmount() == 100, "wrong Frozen Obsidian output");
+        h.assertTrue(t.fluidFor(null).getFluidInTank(0).getAmount() == 50, "wrong Liquid Obsidian consumption");
+        h.assertTrue(t.itemHandlerFor(null).getStackInSlot(0).isEmpty(), "Blue Ice was not consumed");
         h.succeed();
     }
     @GameTest(template="empty_7x7x7")

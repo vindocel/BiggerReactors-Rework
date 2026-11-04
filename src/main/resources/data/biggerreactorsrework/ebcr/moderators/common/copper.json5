@@ -1,4 +1,6 @@
+// Modified 2026-11-02: static thermal class.
 {
+    passiveClass: "INTERMEDIATE",
     type: "tag",
     location: "c:storage_blocks/copper",
     absorption: 0.5,
