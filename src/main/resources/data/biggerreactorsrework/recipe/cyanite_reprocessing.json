@@ -1,5 +1,5 @@
 {
-  "type": "biggerreactorsrework:cyanite_reprocessing",
+  "type": "biggerreactorsrework:industrial_processing",
   "ingredient": "biggerreactorsrework:cyanite_ingot",
   "input_count": 2,
   "result": {

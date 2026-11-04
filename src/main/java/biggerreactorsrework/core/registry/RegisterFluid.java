@@ -16,6 +16,18 @@ public @interface RegisterFluid {
     
     int color() default 0xFFFFFFFF;
     
+    /** Added 2026-11-03: light emitted by the fluid where it is drawn. */
+    int light() default 0;
+
+    /** Use water movement and swimming for entities in the placed fluid. */
+    boolean waterLikeMovement() default false;
+
+    /** Added 2026-11-03: entities inside the placed fluid freeze as in powder snow. */
+    boolean freezes() default false;
+
+    /** Added 2026-11-03: entities inside the placed fluid burn as in lava. */
+    boolean burns() default false;
+
     @Retention(RetentionPolicy.RUNTIME)
     @interface Instance {
     }

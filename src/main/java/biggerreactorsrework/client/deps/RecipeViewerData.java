@@ -17,6 +17,7 @@ import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
+import net.minecraft.util.ARGB;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.AirBlock;
@@ -201,37 +202,28 @@ public final class RecipeViewerData {
                 }
             });
             return List.of(
-                    stat("moderation", properties.moderation(), all, ReactorModeratorRegistry.IModeratorProperties::moderation, false),
-                    stat("absorption", properties.absorption(), all, ReactorModeratorRegistry.IModeratorProperties::absorption, true),
-                    stat("efficiency", properties.heatEfficiency(), all, ReactorModeratorRegistry.IModeratorProperties::heatEfficiency, false),
-                    stat("conductivity", properties.heatConductivity(), all, ReactorModeratorRegistry.IModeratorProperties::heatConductivity, false));
+                stat("passive_cooling",passiveCooling(properties)*100,all,p->passiveCooling(p)*100,false),
+                stat("passive_rate",passiveFuelRF(properties),all,RecipeViewerData::passiveFuelRF,false));
         }
 
         public static List<Stat> coil(TurbineCoilRegistry.CoilData data) {
             List<TurbineCoilRegistry.CoilData> all = new ArrayList<>(TurbineCoilRegistry.Client.getImmutableRegistry().values());
             return List.of(
-                    stat("coil_efficiency", data.efficiency, all, coil -> coil.efficiency, false),
-                    stat("bonus", data.bonus, all, coil -> coil.bonus, false),
-                    stat("extraction", data.extractionRate, all, coil -> coil.extractionRate, false));
+                    stat("fe_per_mb", data.fePerMB(), all, TurbineCoilRegistry.CoilData::fePerMB, false),
+                    stat("steam_capacity", data.steamPerTick(), all, coil -> (double) coil.steamPerTick(), false));
         }
 
         public static List<Stat> coolant(FluidTransitionRegistry.FluidTransition profile) {
             List<FluidTransitionRegistry.FluidTransition> all = biggerreactorsrework.registries.CoolantSync.profiles();
-            return List.of(
-                    stat("coolant_heat", profile.latentHeat, all, t -> t.latentHeat, false),
-                    stat("coolant_temperature", profile.boilingPoint, all, t -> t.boilingPoint, true),
-                    stat("coolant_conductivity", profile.liquidRFMKT, all, t -> t.liquidRFMKT, false),
-                    stat("coolant_recovery", profile.recovery, all, t -> t.recovery, false));
+            double cost=Config.CONFIG.Reactor.Thermal.KJPerCoolant;
+            return List.of(stat("thermal_cost",cost,all,t->cost,true),
+                stat("thermal_steam",profile.steamPerBatch,all,t->t.steamPerBatch,false),
+                stat("thermal_budget",Config.CONFIG.Reactor.Thermal.SteamBudgetKJ,all,t->Config.CONFIG.Reactor.Thermal.SteamBudgetKJ,true));
         }
 
         /** The evaporator heats the cold fluid; the condenser takes the heat out of the hot one. */
         public static List<Stat> exchange(FluidTransitionRegistry.FluidTransition profile, boolean evaporation) {
-            List<FluidTransitionRegistry.FluidTransition> all = biggerreactorsrework.registries.CoolantSync.profiles();
-            return List.of(
-                    stat("coolant_temperature", profile.boilingPoint, all, t -> t.boilingPoint, true),
-                    stat("coolant_heat", profile.latentHeat, all, t -> t.latentHeat, false),
-                    evaporation ? stat("coolant_conductivity", profile.liquidRFMKT, all, t -> t.liquidRFMKT, false)
-                            : stat("coolant_hot_conductivity", profile.gasRFMKT, all, t -> t.gasRFMKT, false));
+            return coolant(profile);
         }
 
         private static <T> Stat stat(String name, double value, List<T> all, ToDoubleFunction<T> property, boolean tradeOff) {
@@ -285,9 +277,15 @@ public final class RecipeViewerData {
                     fill = Math.max(1, fill);
                 }
                 g.fill(BAR_X, barY, BAR_X + fill, barY + BAR_HEIGHT, color(stat));
-                g.fill(BAR_X, barY, BAR_X + fill, barY + 1, net.minecraft.util.ARGB.srgbLerp(0.35f, color(stat), GuiArt.WHITE));
+                g.fill(BAR_X, barY, BAR_X + fill, barY + 1, ARGB.srgbLerp(0.35f, color(stat), GuiArt.WHITE));
                 String value = display(stat);
-                g.text(font, value, width - font.width(value), y, text, false);
+                // Modified 2026-11-03: keep the readout inside its column, even when the value scrolls.
+                int valueLeft = BAR_X + BAR_WIDTH + 3;
+                int valueWidth = width - valueLeft;
+                if (valueWidth > 0) {
+                    int x = Math.max(valueLeft, width - font.width(value));
+                    GuiArt.scrollingText(g, font, value, x, y, width - x, text);
+                }
             }
         }
 
@@ -327,13 +325,13 @@ public final class RecipeViewerData {
                     lines.add(Component.translatable(KEY + "average").withStyle(ChatFormatting.YELLOW));
                 }
             }
-            if (net.minecraft.locale.Language.getInstance().has(key + ".pro")) {
+            if (I18n.exists(key + ".pro")) {
                 lines.add(Component.translatable(key + ".pro").withStyle(ChatFormatting.GREEN));
             }
-            if (net.minecraft.locale.Language.getInstance().has(key + ".con")) {
+            if (I18n.exists(key + ".con")) {
                 lines.add(Component.translatable(key + ".con").withStyle(ChatFormatting.RED));
             }
-            if (net.minecraft.locale.Language.getInstance().has(key + ".note")) {
+            if (I18n.exists(key + ".note")) {
                 lines.add(Component.translatable(key + ".note").withStyle(ChatFormatting.GOLD));
             }
             return lines;
@@ -351,7 +349,7 @@ public final class RecipeViewerData {
                 return TRADE_OFF;
             }
             double rank = stat.rank();
-            return rank < 0.5 ? net.minecraft.util.ARGB.srgbLerp((float) (rank * 2), LOW, MIDDLE) : net.minecraft.util.ARGB.srgbLerp((float) (rank * 2 - 1), MIDDLE, HIGH);
+            return rank < 0.5 ? ARGB.srgbLerp((float) (rank * 2), LOW, MIDDLE) : ARGB.srgbLerp((float) (rank * 2 - 1), MIDDLE, HIGH);
         }
 
         private static String display(Stat stat) {
@@ -370,7 +368,7 @@ public final class RecipeViewerData {
     }
 
     /**
-     * The Cyanite Reprocessor's processing area, laid out like its screen: battery, input, progress arrow, output and
+     * The Industrial Processor's processing area, laid out like its screen: battery, input, progress arrow, output and
      * water tank. One recipe: 2 cyanite ingots, water and energy make 1 blutonium ingot.
      */
     public static final class Cyanite {
@@ -394,15 +392,15 @@ public final class RecipeViewerData {
         public static final int PRODUCT_X = WIDTH - GaugeBar.WIDTH;
 
         public static int ticks() {
-            return Config.CONFIG.CyaniteReprocessor.TotalWorkTime;
+            return Config.CONFIG.IndustrialProcessor.TotalWorkTime;
         }
 
         public static long energy() {
-            return (long) Config.CONFIG.CyaniteReprocessor.EnergyConsumptionPerTick * ticks();
+            return (long) Config.CONFIG.IndustrialProcessor.EnergyConsumptionPerTick * ticks();
         }
 
         public static long water() {
-            return (long) Config.CONFIG.CyaniteReprocessor.WaterConsumptionPerTick * ticks();
+            return (long) Config.CONFIG.IndustrialProcessor.WaterConsumptionPerTick * ticks();
         }
 
         public static void draw(GuiGraphicsExtractor g) { draw(g, null); }
@@ -412,10 +410,10 @@ public final class RecipeViewerData {
             long water = recipe == null ? water() : recipe.totalFluid();
             int ticks = recipe == null ? ticks() : recipe.duration();
             EnergyBar.draw(g, ENERGY_X, 0, GaugeBar.WIDTH, HEIGHT,
-                    EnergyBar.fraction(energy, Config.CONFIG.CyaniteReprocessor.EnergyTankCapacity));
+                    EnergyBar.fraction(energy, Config.CONFIG.IndustrialProcessor.EnergyTankCapacity));
             // Modified 2026-10-27: viewer ingredient renderers draw the complete decorated gauge once.
             GaugeBar.drawFluid(g, WATER_X, 0, 0, 1, Fluids.EMPTY);
-            GaugeBar.drawFluid(g, PRODUCT_X, 0, 0, Config.CONFIG.CyaniteReprocessor.WaterTankCapacity, Fluids.EMPTY);
+            GaugeBar.drawFluid(g, PRODUCT_X, 0, 0, Config.CONFIG.IndustrialProcessor.WaterTankCapacity, Fluids.EMPTY);
             GuiArt.slot(g, INPUT_X, SLOT_Y, 18);
             GuiArt.slot(g, OUTPUT_X, SLOT_Y, 18);
             long cycle = Math.max(1, ticks) * 50L;
@@ -426,24 +424,33 @@ public final class RecipeViewerData {
 
         public static List<Component> energyTooltip(biggerreactorsrework.machine.recipe.ReprocessingRecipe recipe) {
             long energy = recipe == null ? energy() : (long)recipe.energy()*recipe.duration();
-            return List.of(Component.translatable("recipe_viewer.biggerreactorsrework.cyanite_reprocessing.energy",
+            return List.of(Component.translatable("recipe_viewer.biggerreactorsrework.industrial_processing.energy",
                     RenderHelper.formatValue(energy, "FE")));
         }
 
         public static List<Component> waterTooltip() { return waterTooltip(null); }
 
         public static List<Component> waterTooltip(biggerreactorsrework.machine.recipe.ReprocessingRecipe recipe) {
-            long water = recipe == null ? water() : recipe.totalFluid();
-            return List.of(Component.translatable("recipe_viewer.biggerreactorsrework.cyanite_reprocessing.water",
-                    RenderHelper.formatValue(water / 1000.0, "B", true)));
+            long amount = recipe == null ? water() : recipe.totalFluid();
+            var fluid = recipe == null ? Fluids.WATER : recipe.fluid();
+            return List.of(Component.translatable("recipe_viewer.biggerreactorsrework.industrial_processing.fluid",
+                    fluid.getFluidType().getDescription(), RenderHelper.formatValue(amount / 1000.0, "B", true)));
         }
 
         public static List<Component> timeTooltip() { return timeTooltip(null); }
 
         public static List<Component> timeTooltip(biggerreactorsrework.machine.recipe.ReprocessingRecipe recipe) {
             int ticks = recipe == null ? ticks() : recipe.duration();
-            return List.of(Component.translatable("recipe_viewer.biggerreactorsrework.cyanite_reprocessing.time",
+            return List.of(Component.translatable("recipe_viewer.biggerreactorsrework.industrial_processing.time",
                     String.format(java.util.Locale.ROOT, "%.1f", ticks / 20.0)));
         }
+    }
+
+    // Added 2026-11-03: each moderator's own cooling share and the RF one fuel mB gives through it at full structure.
+    public static double passiveCooling(ReactorModeratorRegistry.IModeratorProperties p) {
+        return biggerreactorsrework.thermal.ThermalModel.passiveCooling(p.passiveClass(), p.heatConductivity());
+    }
+    public static double passiveFuelRF(ReactorModeratorRegistry.IModeratorProperties p) {
+        return Math.round(biggerreactorsrework.thermal.ThermalModel.passiveYield(p.passiveClass(), p.heatConductivity()) * Config.CONFIG.Reactor.Thermal.KJPerFuel * biggerreactorsrework.thermal.ThermalModel.PASSIVE_RF_PER_KJ);
     }
 }

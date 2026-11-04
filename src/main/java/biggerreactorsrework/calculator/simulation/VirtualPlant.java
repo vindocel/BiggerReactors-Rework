@@ -2,8 +2,6 @@ package biggerreactorsrework.calculator.simulation;
 
 import biggerreactorsrework.Config;
 import biggerreactorsrework.core.fluids.IFluidTankHandler;
-import biggerreactorsrework.core.util.HeatBody;
-import biggerreactorsrework.multiblocks.heatexchanger.HeatExchangerBackpressure;
 import biggerreactorsrework.multiblocks.reactor.simulation.IReactorSimulation;
 import biggerreactorsrework.multiblocks.reactor.simulation.SimulationConfiguration;
 import biggerreactorsrework.multiblocks.reactor.simulation.SimulationDescription;
@@ -149,44 +147,30 @@ public final class VirtualPlant {
     public long exchangerConversion() { return exchanger == null ? 0 : exchanger.primary.transitionedLastTick(); }
     public long turbineFlow() { return turbine == null ? 0 : turbine.flowLastTick(); }
     public double rpm() { return turbine == null ? 0 : turbine.RPM(); }
+    public biggerreactorsrework.thermal.ThermalSnapshot thermal() { return reactor.thermal(); }
     public double fuelTemperature() { return reactor.fuelHeat(); }
     public double reactorOutputLimit() { return reactor.outputLimit(); }
-    public double exchangerOutputLimit() { return exchanger == null ? 1 : exchanger.pressure.limit(); }
+    public double exchangerOutputLimit() { return 1; }
 
-    /** Thermal step of the heat exchanger controller over the geometry of its assembled channels. */
+    /** Modified 2026-11-02: share the controller's atomic thermal step without legacy heat reservoirs. */
     static final class Exchanger {
         final FluidTransitionTank primary = new FluidTransitionTank(true);
         final FluidTransitionTank secondary = new FluidTransitionTank(false);
-        final HeatExchangerBackpressure pressure = new HeatExchangerBackpressure(primary, secondary);
-        final HeatBody ambient = new HeatBody(), air = new HeatBody(), hot = new HeatBody(), cold = new HeatBody();
+        final biggerreactorsrework.thermal.ThermalExchanger thermal=new biggerreactorsrework.thermal.ThermalExchanger();
         private final biggerreactorsrework.calculator.design.ExchangerDesign.Geometry g;
 
         Exchanger(biggerreactorsrework.calculator.design.ExchangerDesign.Geometry g) {
             this.g = g;
             var cfg = Config.CONFIG.HeatExchanger;
-            ambient.setTemperature(AMBIENT);
-            air.setTemperature(AMBIENT);
-            hot.setTemperature(AMBIENT);
-            cold.setTemperature(AMBIENT);
-            hot.setRfPerKelvin(g.condenser() * cfg.ChannelFEPerKelvinUnitVolume);
-            cold.setRfPerKelvin(g.evaporator() * cfg.ChannelFEPerKelvinUnitVolume);
             primary.perSideCapacity = g.condenser() * cfg.ChannelTankVolumePerBlock;
-            secondary.perSideCapacity = g.evaporator() * cfg.ChannelTankVolumePerBlock;
-            air.setRfPerKelvin(g.airRFK());
-            ambient.setInfinite(true);
+            secondary.perSideCapacity = g.evaporator() * cfg.evaporatorTankVolumePerBlock();
         }
 
         void tick() {
-            var cfg = Config.CONFIG.HeatExchanger;
-            pressure.tick();
-            primary.sampleFlows();
-            secondary.sampleFlows();
-            primary.transferWith(hot, g.condenser() * cfg.ChannelInternalSurfaceArea);
-            hot.transferWith(air, g.condenserAirRFKT());
-            hot.transferWith(cold, g.channelRFKT());
-            cold.transferWith(air, g.evaporatorAirRFKT());
-            secondary.transferWith(cold, g.evaporator() * cfg.ChannelInternalSurfaceArea);
-            air.transferWith(ambient, g.ambientRFKT());
+            primary.sampleFlows();secondary.sampleFlows();
+            var cfg=Config.CONFIG.Reactor;
+            var preset=cfg.Thermal.snapshot(cfg.PerFuelRodCapacity,cfg.CoolantTankAmountPerFuelRod);
+            thermal.tick(primary,secondary,g.thermalLinks()*preset.exchangerRate(),preset);
         }
     }
 }

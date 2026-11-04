@@ -6,13 +6,13 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
 class ManifoldFluidGeometryTest {
-    @Test void coolantReachesTheOuterGrilleWithoutCoincidentFaces() {
+    @Test void coolantSitsWithinAPixelBehindTheGrilleWithoutDepthFighting() {
         var box=ManifoldFluidGeometry.box(0,1);
         assertTrue(box.valid());
-        assertTrue(box.x0()>0 && box.x0()<.002);
-        assertTrue(box.z0()>0 && box.z0()<.002);
-        assertTrue(box.x1()<1 && box.x1()>.998);
-        assertTrue(box.z1()<1 && box.z1()>.998);
+        assertTrue(box.x0()>.01 && box.x0()<1/16f);
+        assertTrue(box.z0()>.01 && box.z0()<1/16f);
+        assertTrue(box.x1()<.99 && box.x1()>1-1/16f);
+        assertTrue(box.z1()<.99 && box.z1()>1-1/16f);
         assertEquals(box.x0(),1-box.x1(),.000001);
         assertEquals(0,box.y0()); assertEquals(1,box.y1());
     }

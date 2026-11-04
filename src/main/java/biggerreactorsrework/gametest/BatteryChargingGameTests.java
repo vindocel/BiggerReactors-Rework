@@ -80,6 +80,25 @@ public final class BatteryChargingGameTests {
             h.assertTrue(c.chargeItem(new ItemStack(Items.STONE))==0,"non-FE item accepted energy");
             c.items.setStackInSlot(BatteryItemHandler.CHARGE_SLOT,ItemStack.EMPTY);
             c.items.setStackInSlot(BatteryItemHandler.DISCHARGE_SLOT,ItemStack.EMPTY);
+
+            var cell = new ItemStack(BatteryCell.INSTANCE);
+            var cellData = new net.minecraft.nbt.CompoundTag();
+            cellData.putLong(biggerreactorsrework.multiblocks.battery.tiles.BatteryCellTile.ENERGY_KEY, 1500);
+            cellData.putString("testMarker", "keep");
+            cell.set(DataComponents.CUSTOM_DATA, CustomData.of(cellData));
+            var minus = menu.getSlot(BatteryItemHandler.DISCHARGE_SLOT);
+            h.assertTrue(minus.mayPlace(cell) && !menu.getSlot(BatteryItemHandler.CHARGE_SLOT).mayPlace(cell), "charged cell did not route exclusively to minus");
+            minus.set(cell);
+            set(c, "inputThisTick", 0);
+            c.tick();
+            h.assertTrue(c.stored() == 1000 && BatteryCell.storedEnergy(minus.getItem()) == 500, "cell discharge exceeded the shared input limit");
+            h.assertTrue(c.statistics().stream().anyMatch(row -> row.get("key").equals("battery_input") && row.get("value").equals("1000 FE/t")),
+                    "statistics did not include the input from the cell");
+            c.tick();
+            h.assertTrue(c.stored() == 1500 && BatteryCell.storedEnergy(minus.getItem()) == 0 && minus.getItem().is(BatteryCell.INSTANCE.asItem()),
+                    "cell did not finish discharging or was consumed");
+            h.assertTrue(minus.getItem().get(DataComponents.CUSTOM_DATA).copyTag().getStringOr("testMarker", "").equals("keep"),
+                    "cell discharge erased unrelated data");
           }).thenSucceed();
     }
 }

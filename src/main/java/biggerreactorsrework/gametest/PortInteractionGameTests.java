@@ -129,9 +129,8 @@ public final class PortInteractionGameTests {
         h.startSequence().thenWaitUntil(()->h.assertTrue(h.getLevel().getBlockState(pos).getValue(IAssemblyStateBlock.ASSEMBLED),"turbine not assembled"))
                 .thenExecute(()->{
                     var tile=(biggerreactorsrework.multiblocks.turbine.tiles.TurbineFluidPortTile)h.getLevel().getBlockEntity(pos);var p=player(h,false);
-                    p.setItemInHand(InteractionHand.MAIN_HAND,new ItemStack(Steam.INSTANCE.getBucket()));
-                    click(h,p,pos,Direction.NORTH,InteractionHand.MAIN_HAND);
-                    h.assertTrue(tile.fluidAmountInTank(0)==1000&&p.getMainHandItem().is(Items.BUCKET),"steam bucket did not fill turbine");
+                    // Modified 2026-11-03: steam enters through the fluid port, since it has no bucket.
+                    h.assertTrue(tile.fill(Steam.INSTANCE,net.minecraft.core.component.DataComponentPatch.EMPTY,1000,false)==1000,"steam did not fill turbine");
                     var tank=(biggerreactorsrework.util.FluidTransitionTank)tile.controller().simulation().fluidTank();
                     tank.absorbRF(1e9);
                     h.assertTrue(tile.fluidAmountInTank(1)==1000,"steam was not condensed for extraction");
@@ -153,9 +152,8 @@ public final class PortInteractionGameTests {
                         var pos=h.absolutePos(relative);var tile=(biggerreactorsrework.multiblocks.heatexchanger.tiles.HeatExchangerFluidPortTile)h.getLevel().getBlockEntity(pos);
                         tile.setInletOtherOutlet(true);
                         if(tile.isCondenser()){
-                            p.setItemInHand(InteractionHand.MAIN_HAND,new ItemStack(Steam.INSTANCE.getBucket()));
-                            click(h,p,pos,Direction.WEST,InteractionHand.MAIN_HAND);
-                            h.assertTrue(tile.fluidAmountInTank(0)==1000&&tile.fluidTypeInTank(0)==Steam.INSTANCE,"steam bucket did not fill primary circuit");
+                            h.assertTrue(tile.fill(Steam.INSTANCE,net.minecraft.core.component.DataComponentPatch.EMPTY,1000,false)==1000,"steam did not fill primary circuit");
+                            p.setItemInHand(InteractionHand.MAIN_HAND,new ItemStack(Items.BUCKET));
                         }else{
                             p.setItemInHand(InteractionHand.MAIN_HAND,new ItemStack(Items.WATER_BUCKET));
                             click(h,p,pos,Direction.WEST,InteractionHand.MAIN_HAND);
@@ -193,7 +191,7 @@ public final class PortInteractionGameTests {
     }
 
     @GameTest(template="empty_7x7x7",timeoutTicks=120)
-    public static void plainBucketsCannotDiscardHeatedCoolantIdentity(GameTestHelper h) {
+    public static void bucketsCollectHeatedCoolantWithItsIdentity(GameTestHelper h) {
         GuideStructures.exchanger().parts().forEach(h::setBlock);var first=h.absolutePos(new BlockPos(0,1,1));
         h.startSequence().thenWaitUntil(()->h.assertTrue(h.getLevel().getBlockState(first).getValue(IAssemblyStateBlock.ASSEMBLED),"exchanger not assembled"))
                 .thenExecute(()->{
@@ -208,7 +206,10 @@ public final class PortInteractionGameTests {
                         long before=hotTank.fluidAmountInTank(1);
                         h.assertTrue(before==1000&&!hotTank.fluidComponentsInTank(1).isEmpty(),"test did not prepare identified generic hot output");
                         click(h,p,hot.getBlockPos(),Direction.WEST,InteractionHand.MAIN_HAND);
-                        h.assertTrue(hotTank.fluidAmountInTank(1)==before&&p.getMainHandItem().is(Items.BUCKET),"plain bucket lost heated identity");
+                        var expected=biggerreactorsrework.registries.CoolantComponents.fingerprint(
+                                biggerreactorsrework.registries.FluidTransitionRegistry.liquidTransition(LiquidObsidian.INSTANCE));
+                        h.assertTrue(hotTank.fluidAmountInTank(1)==0 && expected.equals(
+                                biggerreactorsrework.fluids.HeatedCoolantBucket.origin(p.getMainHandItem())),"filled bucket lost heated identity");
                 }).thenSucceed();
     }
 }

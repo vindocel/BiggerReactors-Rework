@@ -552,9 +552,20 @@ public class Registry {
             
             Supplier<? extends ModFluid> stillSupplier = () -> fluids[0];
             Supplier<? extends ModFluid> flowingSupplier = () -> fluids[1];
-            final var fluidType = new FluidType(FluidType.Properties.create().descriptionId("fluid." + modid + "." + name)) {
+            final var fluidType = new FluidType(FluidType.Properties.create().descriptionId("fluid." + modid + "." + name)
+                    .lightLevel(annotation.light()).isWaterLike(annotation.waterLikeMovement())) {
                 @Override public net.minecraft.network.chat.Component getDescription(net.neoforged.neoforge.fluids.FluidStack stack) {
                     return name.equals("heated_coolant") ? biggerreactorsrework.registries.CoolantComponents.name(stack) : super.getDescription(stack);
+                }
+                // Added 2026-11-03: a filled bucket keeps the heated coolant's origin.
+                @Override public net.minecraft.world.item.ItemStack getBucket(net.neoforged.neoforge.fluids.FluidStack stack) {
+                    return name.equals("heated_coolant") ? biggerreactorsrework.fluids.HeatedCoolantBucket.filled(stack) : super.getBucket(stack);
+                }
+                // Added 2026-11-03: heated coolant glows like the coolant it came from.
+                @Override public int getLightLevel(net.neoforged.neoforge.fluids.FluidStack stack) {
+                    if (!name.equals("heated_coolant")) return super.getLightLevel(stack);
+                    var source = biggerreactorsrework.registries.CoolantComponents.sourceFluid(stack);
+                    return source == null ? 0 : source.getFluidType().getLightLevel();
                 }
             };
             FLUID_CLIENT_INFO.add(new FluidClientInfo(fluidType,
@@ -586,7 +597,23 @@ public class Registry {
             fluids[0] = stillInstance;
             fluids[1] = flowingInstance;
             // Modified 2026-11-01: placed fluids can be replaced by ordinary blocks, like vanilla liquids.
-            blockArray[0] = new LiquidBlock(stillInstance, Block.Properties.of().setId(net.minecraft.resources.ResourceKey.create(net.minecraft.core.registries.Registries.BLOCK, baseResourceLocation)).replaceable().noCollision().explosionResistance(100.0F).noLootTable());
+            blockArray[0] = new LiquidBlock(stillInstance, Block.Properties.of().setId(net.minecraft.resources.ResourceKey.create(net.minecraft.core.registries.Registries.BLOCK, baseResourceLocation)).replaceable().noCollision().explosionResistance(100.0F).noLootTable().overrideDescription("fluid." + modid + "." + name)) {
+                @Override public net.minecraft.world.item.ItemStack pickupBlock(@javax.annotation.Nullable net.minecraft.world.entity.LivingEntity player, net.minecraft.world.level.LevelAccessor level, net.minecraft.core.BlockPos pos, BlockState state) {
+                    String origin = name.equals("heated_coolant") && level instanceof net.minecraft.server.level.ServerLevel server
+                            ? biggerreactorsrework.fluids.PlacedCoolantOrigins.get(server.getChunkAt(pos), pos) : null;
+                    var bucket = super.pickupBlock(player, level, pos, state);
+                    return biggerreactorsrework.fluids.HeatedCoolantBucket.pickup(origin, bucket);
+                }
+                @Override protected void affectNeighborsAfterRemoval(BlockState state, net.minecraft.server.level.ServerLevel level, net.minecraft.core.BlockPos pos, boolean movedByPiston) {
+                    super.affectNeighborsAfterRemoval(state, level, pos, movedByPiston);
+                    if (name.equals("heated_coolant")) biggerreactorsrework.fluids.PlacedCoolantOrigins.put(level, pos, null);
+                }
+                @Override protected void entityInside(BlockState state, net.minecraft.world.level.Level level, net.minecraft.core.BlockPos pos, net.minecraft.world.entity.Entity entity, net.minecraft.world.entity.InsideBlockEffectApplier effects, boolean inside) {
+                    super.entityInside(state, level, pos, entity, effects, inside);
+                    if (annotation.freezes()) effects.apply(net.minecraft.world.entity.InsideBlockEffectType.FREEZE);
+                    if (annotation.burns()) effects.apply(net.minecraft.world.entity.InsideBlockEffectType.LAVA_IGNITE);
+                }
+            };
             
             for (Field declaredField : fluidClazz.getDeclaredFields()) {
                 if (declaredField.isAnnotationPresent(RegisterFluid.Instance.class)) {
@@ -628,8 +655,11 @@ public class Registry {
             
             if (annotation.registerBucket()) {
                 itemRegistrationQueue.enqueue(() -> {
-                    BucketItem bucket = new BucketItem(fluids[0], new Item.Properties().setId(net.minecraft.resources.ResourceKey.create(net.minecraft.core.registries.Registries.ITEM, Identifier.parse(baseRegistryName + "_bucket"))).craftRemainder(Items.BUCKET).stacksTo(1));
-                    creativeTabItems.add(bucket);
+                    var bucketProperties = new Item.Properties().setId(net.minecraft.resources.ResourceKey.create(net.minecraft.core.registries.Registries.ITEM, Identifier.parse(baseRegistryName + "_bucket"))).craftRemainder(Items.BUCKET).stacksTo(1);
+                    BucketItem bucket = name.equals("heated_coolant")
+                            ? new biggerreactorsrework.fluids.HeatedCoolantBucket.BucketWithOrigin(fluids[0], bucketProperties)
+                            : new BucketItem(fluids[0], bucketProperties);
+                    if (annotation.creativeTab()) creativeTabItems.add(bucket);
                     bucketArray[0] = bucket;
                     itemRegistryEvent.register(Identifier.parse(baseRegistryName + "_bucket"), bucket);
                     if (LOGGER.isDebugEnabled()) {

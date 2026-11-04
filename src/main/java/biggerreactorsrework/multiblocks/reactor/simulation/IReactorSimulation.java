@@ -20,6 +20,7 @@ public interface IReactorSimulation extends ISerializable, IDebuggable {
      * call this even if inactive, as there can be some inactive decay
      */
     void tick(boolean active);
+    default biggerreactorsrework.thermal.ThermalSnapshot thermal() { return biggerreactorsrework.thermal.ThermalSnapshot.EMPTY; }
     default double burnFraction() { return 1; }
     default double outputLimit() { return 1; }
     default double retainedOutputFraction() { return 0; }
@@ -127,6 +128,7 @@ public interface IReactorSimulation extends ISerializable, IDebuggable {
         
         long extractWaste(long amount, boolean simulated);
         
+        default double usableFuel() { return fuel(); }
         double burnedLastTick();
         
         void restoreStored(long fuel, long waste);

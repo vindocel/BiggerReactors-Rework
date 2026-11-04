@@ -34,3 +34,9 @@ This rework is not affiliated with or endorsed by the original authors.
     ordering="NONE"
     side="BOTH"
 ${optional_dependencies}
+
+[[mixins]]
+config="biggerreactorsrework.client.mixins.json"
+
+[[mixins]]
+config="biggerreactorsrework.coolant-particles.mixins.json"

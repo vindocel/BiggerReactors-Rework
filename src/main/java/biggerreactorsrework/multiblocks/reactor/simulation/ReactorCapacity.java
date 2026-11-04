@@ -15,7 +15,7 @@ public final class ReactorCapacity {
             sim.coolantTank().setModeratorProperties(new ReactorModeratorRegistry.ModeratorProperties(.3,.7,1.35,profile.liquidRFMKT));
         }
         double burn=0,conversion=0,power=0;
-        final int warm=160000,sample=20000;
+        final int warm=20,sample=200;
         for(int tick=0;tick<warm+sample;tick++) {
             if((tick&511)==0 && Thread.currentThread().isInterrupted()) throw new java.util.concurrent.CancellationException();
             sim.fuelTank().extractWaste(Long.MAX_VALUE,false);

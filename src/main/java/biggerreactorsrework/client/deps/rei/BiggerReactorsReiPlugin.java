@@ -8,7 +8,7 @@ import biggerreactorsrework.client.deps.RecipeViewerData.Cyanite;
 import biggerreactorsrework.client.deps.RecipeViewerData.Stats;
 import biggerreactorsrework.client.deps.RecipeViewers;
 import biggerreactorsrework.core.client.gui.screens.ModScreen;
-import biggerreactorsrework.machine.blocks.CyaniteReprocessor;
+import biggerreactorsrework.machine.blocks.IndustrialProcessor;
 import biggerreactorsrework.machine.recipe.ReprocessingRecipe;
 import biggerreactorsrework.machine.recipe.ReprocessingRecipes;
 import biggerreactorsrework.multiblocks.heatexchanger.blocks.*;
@@ -45,7 +45,7 @@ import java.util.Optional;
 /** Modified 2026-11-01: native REI 26.1.2 categories using synchronized recipes, fluid models and machine artwork. */
 @REIPluginClient
 public final class BiggerReactorsReiPlugin implements REIClientPlugin {
-    private static final CategoryIdentifier<Page> PROCESSING = CategoryIdentifier.of(RecipeViewers.CYANITE_REPROCESSING);
+    private static final CategoryIdentifier<Page> PROCESSING = CategoryIdentifier.of(RecipeViewers.INDUSTRIAL_PROCESSING);
     private static final CategoryIdentifier<Page> MODERATORS = CategoryIdentifier.of(RecipeViewers.MODERATOR_BLOCK);
     private static final CategoryIdentifier<Page> COOLANTS = CategoryIdentifier.of(RecipeViewers.MODERATOR_FLUID);
     private static final CategoryIdentifier<Page> COILS = CategoryIdentifier.of(RecipeViewers.TURBINE_COIL);
@@ -54,12 +54,12 @@ public final class BiggerReactorsReiPlugin implements REIClientPlugin {
     @Override
     public void registerCategories(CategoryRegistry registry) {
         if (RecipeViewers.emi()) return;
-        registry.add(new Category(PROCESSING, "cyanite_reprocessing", CyaniteReprocessor.INSTANCE, Cyanite.WIDTH, Cyanite.HEIGHT));
+        registry.add(new Category(PROCESSING, "industrial_processing", IndustrialProcessor.INSTANCE, Cyanite.WIDTH, Cyanite.HEIGHT));
         registry.add(new Category(MODERATORS, "classic.reactor_moderator_block", ReactorTerminal.INSTANCE, Stats.WIDTH, 4 * Stats.ROW));
         registry.add(new Category(COOLANTS, "classic.reactor_moderator_fluid", ReactorTerminal.INSTANCE, Stats.WIDTH, 6 * Stats.ROW));
         registry.add(new Category(COILS, "classic.turbine_coil_block", TurbineTerminal.INSTANCE, Stats.WIDTH, 3 * Stats.ROW));
         registry.add(new Category(EXCHANGE, "heat_exchange", HeatExchangerTerminalBlock.INSTANCE, Stats.WIDTH, 6 * Stats.ROW));
-        registry.addWorkstations(PROCESSING, EntryStacks.of(CyaniteReprocessor.INSTANCE));
+        registry.addWorkstations(PROCESSING, EntryStacks.of(IndustrialProcessor.INSTANCE));
         registry.addWorkstations(MODERATORS, EntryStacks.of(ReactorTerminal.INSTANCE));
         registry.addWorkstations(COOLANTS, EntryStacks.of(ReactorTerminal.INSTANCE));
         registry.addWorkstations(COILS, EntryStacks.of(TurbineTerminal.INSTANCE));

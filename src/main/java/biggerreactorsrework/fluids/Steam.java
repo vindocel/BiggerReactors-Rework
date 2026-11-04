@@ -5,7 +5,8 @@ import biggerreactorsrework.core.registry.RegisterFluid;
 
 import javax.annotation.Nonnull;
 
-@RegisterFluid(name = "steam", registerBucket = true)
+// Modified 2026-11-03: steam is a gas; it moves only through closed tanks and pipes, never buckets.
+@RegisterFluid(name = "steam", color = 0xF0FFFFFF)
 public class Steam extends ModFluid {
     
     @RegisterFluid.Instance

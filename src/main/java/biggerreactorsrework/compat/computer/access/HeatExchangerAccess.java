@@ -37,6 +37,13 @@ public class HeatExchangerAccess {
         internalEnvironment = new InternalEnvironment(() -> controllerSupplier.get().airHeatBody);
     }
 
+    public java.util.Map<String,Object> thermal() {
+        var c=controllerSupplier.get();
+        return java.util.Map.of("modelVersion",biggerreactorsrework.thermal.ThermalModel.VERSION,"weightedLinks",c.thermalLinks,
+            "inputKJ",c.thermalExchange.inputKJ,"usefulKJ",c.thermalExchange.usefulKJ,"processLossKJ",c.thermalExchange.processLossKJ,
+            "hotLastTick",c.thermalExchange.hotLastTick,"steamLastTick",c.thermalExchange.steamLastTick,"balancedOutputs",c.balancedOutputs);
+    }
+
     public final String apiVersion() {
         return BiggerReactors.modVersion();
     }

@@ -20,23 +20,41 @@ public final class CoolantComponents {
             b -> b.persistent(Codec.STRING).networkSynchronized(ByteBufCodecs.STRING_UTF8));
     public static void register(IEventBus bus) { TYPES.register(bus); }
     public static String origin(DataComponentPatch components){var value=java.util.Optional.ofNullable(components.get(net.minecraft.core.component.DataComponentMap.EMPTY,ORIGIN.get()));return value==null || value.isEmpty()?"":value.get();}
+    @javax.annotation.Nullable
+    public static net.minecraft.world.level.material.Fluid sourceFluid(FluidStack stack) {
+        return sourceFluid(stack.get(ORIGIN.get()));
+    }
+    @javax.annotation.Nullable
+    public static net.minecraft.world.level.material.Fluid sourceFluid(@javax.annotation.Nullable String token) {
+        if(token==null || token.indexOf('@')<=0)return null;
+        var key=Identifier.tryParse(token.substring(0,token.indexOf('@')));
+        return key!=null && net.minecraft.core.registries.BuiltInRegistries.FLUID.containsKey(key)?net.minecraft.core.registries.BuiltInRegistries.FLUID.getValue(key):null;
+    }
     public static DataComponentPatch heated(FluidTransitionRegistry.FluidTransition transition) {
         return DataComponentPatch.builder().set(ORIGIN.get(), fingerprint(transition)).build();
     }
-    public static String fingerprint(FluidTransitionRegistry.FluidTransition t) {
-        return net.minecraft.core.registries.BuiltInRegistries.FLUID.getKey(t.liquids.getFirst()) + "@" +
+    // Modified 2026-11-02: version process signatures without changing turbine properties.
+    private static String legacyFingerprint(FluidTransitionRegistry.FluidTransition t) {
+        return net.minecraft.core.registries.BuiltInRegistries.FLUID.getKey(t.liquids.getFirst())+"@"+
                 Integer.toHexString(java.util.Objects.hash(t.latentHeat,t.boilingPoint,t.liquidRFMKT,t.gasRFMKT,t.recovery));
     }
-    /** Modified 2026-10-26: adopt the approved sodium temperature correction without discarding stored fluid.
-     * Latent heat, recovery, native fluid pair and volumes are unchanged; arbitrary profile edits stay quarantined.
-     */
+    public static String fingerprint(FluidTransitionRegistry.FluidTransition t) {
+        return legacyFingerprint(t)+":thermal"+biggerreactorsrework.thermal.ThermalModel.VERSION+":"+t.steamPerBatch;
+    }
     public static boolean matchesStoredProfile(String stored,FluidTransitionRegistry.FluidTransition t) {
         if(fingerprint(t).equals(stored))return true;
-        var registry=net.minecraft.core.registries.BuiltInRegistries.FLUID;
-        if(!registry.getKey(t.liquids.getFirst()).toString().equals("mekanism:sodium") ||
-           !registry.getKey(t.gases.getFirst()).toString().equals("mekanism:superheated_sodium") ||
-           t.latentHeat!=40 || t.boilingPoint!=1273.15 || t.liquidRFMKT!=4 || t.gasRFMKT!=4 || t.recovery!=.95)return false;
-        return stored.equals("mekanism:sodium@"+Integer.toHexString(java.util.Objects.hash(40d,473.15,4d,4d,.95)));
+        String cold=net.minecraft.core.registries.BuiltInRegistries.FLUID.getKey(t.liquids.getFirst()).toString();
+        String hot=net.minecraft.core.registries.BuiltInRegistries.FLUID.getKey(t.gases.getFirst()).toString();
+        String expected=switch(cold) {
+            case "minecraft:water" -> "biggerreactorsrework:steam@"+Integer.toHexString(java.util.Objects.hash(4d,373.15,.6,.025,.6));
+            case "biggerreactorsrework:liquid_obsidian" -> "biggerreactorsrework:heated_coolant@"+Integer.toHexString(java.util.Objects.hash(36d,773.15,2.2,1.8,.71765));
+            case "ad_astra:cryo_fuel" -> "biggerreactorsrework:heated_coolant@"+Integer.toHexString(java.util.Objects.hash(30d,773.15,2.2,1.8,.59));
+            case "mekanism:sodium" -> "mekanism:superheated_sodium@"+Integer.toHexString(java.util.Objects.hash(40d,1273.15,4d,4d,.95));
+            default -> "";
+        };
+        int separator=expected.indexOf('@');
+        if(separator>0 && hot.equals(expected.substring(0,separator)) && stored.equals(cold+expected.substring(separator)))return true;
+        return cold.equals("mekanism:sodium") && hot.equals("mekanism:superheated_sodium") && stored.equals(cold+"@"+Integer.toHexString(java.util.Objects.hash(40d,473.15,4d,4d,.95)));
     }
     public static FluidTransitionRegistry.FluidTransition resolve(DataComponentPatch patch) {
         var origin = java.util.Optional.ofNullable(patch.get(net.minecraft.core.component.DataComponentMap.EMPTY,ORIGIN.get()));
@@ -47,7 +65,7 @@ public final class CoolantComponents {
         var key=Identifier.tryParse(id.substring(0,split));
         if(key==null || !net.minecraft.core.registries.BuiltInRegistries.FLUID.containsKey(key)) return null;
         var t=FluidTransitionRegistry.liquidTransition(net.minecraft.core.registries.BuiltInRegistries.FLUID.getValue(key));
-        return t!=null && t.genericHot() && fingerprint(t).equals(id) ? t : null;
+        return t!=null && t.genericHot() && matchesStoredProfile(id,t) ? t : null;
     }
     public static Component name(FluidStack stack) {
         var t=resolve(stack.getComponentsPatch());

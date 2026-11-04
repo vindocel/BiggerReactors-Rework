@@ -130,6 +130,14 @@ public class TurbineFluidPortTile extends TurbineBaseTile implements IFluidTankH
         return transitionTank.drain(fluid, DataComponentPatch.EMPTY, amount, simulate);
     }
     
+    // Added 2026-11-02: controller drains only the sum actually accepted by balanced destinations.
+    public long offerFluid(long maximum) {
+        neighborChanged();
+        if (!connected || direction == INLET || handler == null || transitionTank == null) return 0;
+        long amount = Math.min(maximum, transitionTank.liquidAmount());
+        return Math.max(0, Math.min(amount, handler.fill(transitionTank.liquidType(), DataComponentPatch.EMPTY, amount, false)));
+    }
+
     public long pushFluid() {
         neighborChanged();
         if (!connected || direction == INLET) {

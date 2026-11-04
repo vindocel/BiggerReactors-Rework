@@ -22,24 +22,27 @@ public final class MaterialDataMaps {
     private static final Codec<Double> NONNEGATIVE=Codec.DOUBLE.validate(n->Double.isFinite(n)&&n>=0?DataResult.success(n):DataResult.error(()->"Expected a finite nonnegative number"));
     private static final Codec<Double> POSITIVE=NONNEGATIVE.validate(n->n>0?DataResult.success(n):DataResult.error(()->"Expected a positive number"));
     private static final Codec<Double> UNIT=NONNEGATIVE.validate(n->n<=1?DataResult.success(n):DataResult.error(()->"Expected a number in [0,1]"));
-    public record Moderator(double absorption,double efficiency,double moderation,double conductivity) {
+    public record Moderator(double absorption,double efficiency,double moderation,double conductivity, biggerreactorsrework.thermal.ThermalModel.PassiveClass passiveClass) {
+        public Moderator(double absorption,double efficiency,double moderation,double conductivity) { this(absorption,efficiency,moderation,conductivity,biggerreactorsrework.thermal.ThermalModel.PassiveClass.NONE); }
         public static final Codec<Moderator> CODEC=RecordCodecBuilder.create(i->i.group(
             UNIT.fieldOf("absorption").forGetter(Moderator::absorption),UNIT.fieldOf("efficiency").forGetter(Moderator::efficiency),
             NONNEGATIVE.validate(n->n>=1?DataResult.success(n):DataResult.error(()->"Moderation must be >= 1")).fieldOf("moderation").forGetter(Moderator::moderation),
-            NONNEGATIVE.fieldOf("conductivity").forGetter(Moderator::conductivity)).apply(i,Moderator::new));
-        ReactorModeratorRegistry.ModeratorProperties properties(){return new ReactorModeratorRegistry.ModeratorProperties(absorption,efficiency,moderation,conductivity);}
+            NONNEGATIVE.fieldOf("conductivity").forGetter(Moderator::conductivity),
+            Codec.STRING.comapFlatMap(name -> { try { return DataResult.success(biggerreactorsrework.thermal.ThermalModel.PassiveClass.valueOf(name.toUpperCase(java.util.Locale.ROOT))); } catch(IllegalArgumentException e) { return DataResult.error(()->"Unknown passive class"); } }, Enum::name).optionalFieldOf("passiveClass",biggerreactorsrework.thermal.ThermalModel.PassiveClass.NONE).forGetter(Moderator::passiveClass)).apply(i,Moderator::new));
+        ReactorModeratorRegistry.ModeratorProperties properties(){return new ReactorModeratorRegistry.ModeratorProperties(absorption,efficiency,moderation,conductivity,passiveClass);}
     }
     public record Coil(double efficiency,double extractionRate,double bonus) {
         public static final Codec<Coil> CODEC=RecordCodecBuilder.create(i->i.group(
             POSITIVE.fieldOf("efficiency").forGetter(Coil::efficiency),POSITIVE.fieldOf("extractionRate").forGetter(Coil::extractionRate),
             POSITIVE.validate(n->n<2?DataResult.success(n):DataResult.error(()->"Bonus must be < 2")).fieldOf("bonus").forGetter(Coil::bonus)).apply(i,Coil::new));
     }
-    public record Transition(ExtraCodecs.TagOrElementLocation gas,double latentHeat,double boilingPoint,double liquidThermalConductivity,double gasThermalConductivity,double turbineMultiplier,double recovery) {
+    public record Transition(ExtraCodecs.TagOrElementLocation gas,double latentHeat,double boilingPoint,double liquidThermalConductivity,double gasThermalConductivity,double turbineMultiplier,double recovery,int steamPerBatch) {
+        public Transition(ExtraCodecs.TagOrElementLocation gas,double latentHeat,double boilingPoint,double liquidThermalConductivity,double gasThermalConductivity,double turbineMultiplier,double recovery) { this(gas,latentHeat,boilingPoint,liquidThermalConductivity,gasThermalConductivity,turbineMultiplier,recovery,10); }
         public static final Codec<Transition> CODEC=RecordCodecBuilder.create(i->i.group(
             ExtraCodecs.TAG_OR_ELEMENT_ID.fieldOf("gas").forGetter(Transition::gas),POSITIVE.fieldOf("latentHeat").forGetter(Transition::latentHeat),
             POSITIVE.fieldOf("boilingPoint").forGetter(Transition::boilingPoint),NONNEGATIVE.fieldOf("liquidThermalConductivity").forGetter(Transition::liquidThermalConductivity),
             NONNEGATIVE.fieldOf("gasThermalConductivity").forGetter(Transition::gasThermalConductivity),NONNEGATIVE.fieldOf("turbineMultiplier").forGetter(Transition::turbineMultiplier),
-            POSITIVE.validate(n->n<=1?DataResult.success(n):DataResult.error(()->"Recovery must be in (0,1]")).optionalFieldOf("recovery",1d).forGetter(Transition::recovery)).apply(i,Transition::new));
+            POSITIVE.validate(n->n<=1?DataResult.success(n):DataResult.error(()->"Recovery must be in (0,1]")).optionalFieldOf("recovery",1d).forGetter(Transition::recovery),Codec.intRange(1,50).optionalFieldOf("steamPerBatch",10).forGetter(Transition::steamPerBatch)).apply(i,Transition::new));
     }
     private static Identifier id(String path){return Identifier.fromNamespaceAndPath(BiggerReactors.modid,path);}
     public static final DataMapType<Block,Moderator> MODERATOR=DataMapType.builder(id("reactor_moderator"),Registries.BLOCK,Moderator.CODEC).build();
@@ -72,7 +75,7 @@ public final class MaterialDataMaps {
             if(outputs.isEmpty()){BiggerReactors.LOGGER.error("Ignoring transition with missing gas: {}",d.gas);return;}
             outputs.sort(java.util.Comparator.comparing(BuiltInRegistries.FLUID::getKey));
             var transition=new FluidTransitionRegistry.FluidTransition(List.of(holder.value()),List.copyOf(outputs),d.latentHeat,d.boilingPoint,d.liquidThermalConductivity,d.gasThermalConductivity,d.turbineMultiplier);
-            transition.recovery=d.recovery;
+            transition.recovery=d.recovery;transition.steamPerBatch=d.steamPerBatch;
             var previous=liquids.put(holder.value(),transition);
             if(previous!=null)previous.gases.forEach(gas->{if(gases.get(gas)==previous)gases.remove(gas);});
             outputs.stream().filter(gas->gas!=biggerreactorsrework.fluids.HeatedCoolant.INSTANCE).forEach(gas->gases.put(gas,transition));

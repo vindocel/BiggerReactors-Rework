@@ -18,7 +18,7 @@ public class ReactorAccessPortState implements GuiSync.IGUIPacket {
     /**
      * Allows fuel or waste to be extracted. True for fuel extraction, false for waste extraction.
      */
-    public boolean fuelMode = false;
+    public boolean recoverFuel = false;
 
     /**
      * The tile whose information this belongs to.
@@ -34,7 +34,7 @@ public class ReactorAccessPortState implements GuiSync.IGUIPacket {
         // Modified 2026-10-30: resource ports share the terminal's appearance, not its menu origin.
         reactorAccessPortTile.readAppearance(data);
         direction = (Boolean) data.get("direction");
-        fuelMode = (Boolean) data.get("fuelMode");
+        recoverFuel = (Boolean) data.get("recoverFuel");
     }
 
     @Override
@@ -45,7 +45,7 @@ public class ReactorAccessPortState implements GuiSync.IGUIPacket {
         data.put("appearancePos", reactorAccessPortTile.writeAppearance());
 
         data.put("direction", direction);
-        data.put("fuelMode", fuelMode);
+        data.put("recoverFuel", recoverFuel);
 
         return data;
     }

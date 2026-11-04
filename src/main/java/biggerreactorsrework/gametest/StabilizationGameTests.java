@@ -8,8 +8,8 @@ import biggerreactorsrework.core.capability.NeighborCapability;
 import biggerreactorsrework.core.client.gui.GuiSync;
 import biggerreactorsrework.core.config.ConfigManager;
 import biggerreactorsrework.core.serialization.DataCompound;
-import biggerreactorsrework.machine.blocks.CyaniteReprocessor;
-import biggerreactorsrework.machine.tiles.CyaniteReprocessorTile;
+import biggerreactorsrework.machine.blocks.IndustrialProcessor;
+import biggerreactorsrework.machine.tiles.IndustrialProcessorTile;
 import biggerreactorsrework.machine.side.*;
 import biggerreactorsrework.multiblocks.reactor.blocks.*;
 import biggerreactorsrework.multiblocks.reactor.tiles.*;
@@ -40,6 +40,50 @@ public final class StabilizationGameTests {
     }
 
     @GameTest(template = "empty_7x7x7", timeoutTicks = 140)
+    public static void reactorAccessPortPushesOnlyItsSelectedOutput(GameTestHelper h) {
+        for (int x = 1; x <= 3; x++) for (int y = 1; y <= 3; y++) for (int z = 1; z <= 3; z++) {
+            if (x == 1 || x == 3 || y == 1 || y == 3 || z == 1 || z == 3) h.setBlock(x, y, z, ReactorCasing.INSTANCE);
+        }
+        h.setBlock(2, 2, 2, ReactorFuelRod.INSTANCE);
+        h.setBlock(2, 3, 2, ReactorControlRod.INSTANCE);
+        h.setBlock(1, 2, 2, ReactorTerminal.INSTANCE);
+        var portPos = new BlockPos(3, 2, 2);
+        h.setBlock(portPos, ReactorAccessPort.INSTANCE);
+        h.setBlock(portPos.east(), Blocks.CHEST);
+        h.startSequence().thenWaitUntil(() -> {
+            var port = (ReactorAccessPortTile) GameTestSupport.be(h, portPos);
+            h.assertTrue(port.nullableController() != null && port.controller().simulation() != null, "reactor not assembled");
+        }).thenExecute(() -> {
+            var port = (ReactorAccessPortTile) GameTestSupport.be(h, portPos);
+            var chest = (net.minecraft.world.level.block.entity.ChestBlockEntity) GameTestSupport.be(h, portPos.east());
+            var tank = port.controller().simulation().fuelTank();
+            long ingot = biggerreactorsrework.Config.CONFIG.Reactor.FuelMBPerIngot;
+            tank.restoreStored(2 * ingot, 2 * ingot);
+            port.controller().tick();
+            h.assertTrue(chest.isEmpty(), "inlet ejected stock");
+            var saved = port.saveWithFullMetadata(h.getLevel().registryAccess());
+            var legacy = saved.getCompoundOrEmpty("local");
+            legacy.putString("direction", "OUTLET");
+            legacy.putBoolean("fuelMode", true);
+            GameTestSupport.load(port, saved, h);
+            h.assertTrue(port.isInlet() && port.getState().recoverFuel, "legacy fuel outlet did not migrate to a recovering inlet");
+            h.assertTrue(port.insertItem(ReactorAccessPortTile.FUEL_INSERT_SLOT, new net.minecraft.world.item.ItemStack(biggerreactorsrework.items.ingots.UraniumIngot.INSTANCE), false).getCount() == 1,
+                    "recovering inlet accepted fuel");
+            port.controller().ejectWaste();
+            h.assertTrue(chest.isEmpty(), "waste command used the fuel outlet");
+            port.controller().tick();
+            h.assertTrue(chest.getItem(0).is(biggerreactorsrework.items.ingots.UraniumIngot.INSTANCE)
+                    && chest.getItem(0).getCount() == 2 && tank.fuel() == 0 && tank.waste() == 2 * ingot, "fuel outlet sent the wrong stock");
+            port.runRequest("setDirection", 1);
+            port.runRequest("recoverFuel", true);
+            h.assertFalse(port.getState().recoverFuel, "cyanite outlet accepted fuel recovery");
+            port.controller().tick();
+            h.assertTrue(chest.getItem(1).is(biggerreactorsrework.items.ingots.CyaniteIngot.INSTANCE)
+                    && chest.getItem(1).getCount() == 2 && tank.waste() == 0, "cyanite outlet did not send waste");
+        }).thenSucceed();
+    }
+
+    @GameTest(template = "empty_7x7x7", timeoutTicks = 140)
     public static void menuDispatchRejectsMalformedPortCommandsAndStaleOrigins(GameTestHelper h) {
         for (int x=1;x<=3;x++) for (int y=1;y<=3;y++) for (int z=1;z<=3;z++)
             if (x==1 || x==3 || y==1 || y==3 || z==1 || z==3) h.setBlock(x,y,z,ReactorCasing.INSTANCE);
@@ -60,7 +104,7 @@ public final class StabilizationGameTests {
                 player.containerMenu=new ReactorAccessPortContainer(73,pos,player);
                 for (Object invalid : new Object[]{"bad",1L,List.of(1),-1,2}) {
                     request(player,tile,"setDirection",invalid,73,pos);
-                    request(player,tile,"setFuelMode",invalid,73,pos);
+                    request(player,tile,"recoverFuel",invalid,73,pos);
                 }
                 request(player,tile,"setDirection",null,73,pos);
                 h.assertTrue(tile.isInlet(),"malformed command changed port direction");
@@ -85,8 +129,8 @@ public final class StabilizationGameTests {
 
     @GameTest(template = "empty_7x7x7")
     public static void idleProcessorChargingMarksChunkAndRoundTripsCurrentState(GameTestHelper h) {
-        var pos=new BlockPos(2,2,2);h.setBlock(pos,CyaniteReprocessor.INSTANCE);
-        var tile=(CyaniteReprocessorTile)GameTestSupport.be(h,pos);tile.tick();
+        var pos=new BlockPos(2,2,2);h.setBlock(pos,IndustrialProcessor.INSTANCE);
+        var tile=(IndustrialProcessorTile)GameTestSupport.be(h,pos);tile.tick();
         var chunk=h.getLevel().getChunkAt(h.absolutePos(pos));
         chunk.tryMarkSaved();
         var energy=tile.energyFor(null);
@@ -97,7 +141,7 @@ public final class StabilizationGameTests {
         energy.receiveEnergy(offered,false);tile.tick();
         h.assertTrue(chunk.isUnsaved(),"idle processor charge was not marked for disk saving");
         var saved=tile.saveWithFullMetadata(h.getLevel().registryAccess());
-        var restored=CyaniteReprocessorTile.SUPPLIER.create(tile.getBlockPos(),tile.getBlockState());
+        var restored=IndustrialProcessorTile.SUPPLIER.create(tile.getBlockPos(),tile.getBlockState());
         restored.setLevel(h.getLevel());GameTestSupport.load(restored,saved,h);
         h.assertTrue(restored.energyFor(null).getEnergyStored()==accepted,"current processor charge was lost");
         h.succeed();
@@ -106,9 +150,9 @@ public final class StabilizationGameTests {
     @GameTest(template = "empty_7x7x7")
     public static void cachedNeighborTracksSideChangesWithoutBlockReplacement(GameTestHelper h) {
         var ownerPos=new BlockPos(2,2,2);var neighborPos=ownerPos.east();
-        h.setBlock(ownerPos,CyaniteReprocessor.INSTANCE);h.setBlock(neighborPos,CyaniteReprocessor.INSTANCE);
-        var owner=(CyaniteReprocessorTile)GameTestSupport.be(h,ownerPos);
-        var neighbor=(CyaniteReprocessorTile)GameTestSupport.be(h,neighborPos);
+        h.setBlock(ownerPos,IndustrialProcessor.INSTANCE);h.setBlock(neighborPos,IndustrialProcessor.INSTANCE);
+        var owner=(IndustrialProcessorTile)GameTestSupport.be(h,ownerPos);
+        var neighbor=(IndustrialProcessorTile)GameTestSupport.be(h,neighborPos);
         var cache=NeighborCapability.fluids(owner);
         neighbor.runRequest("sideClearAll",null);
         h.assertTrue(cache.get(Direction.EAST)==null,"disabled neighbor exposed fluid capability");

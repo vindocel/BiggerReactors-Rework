@@ -151,7 +151,7 @@ public final class CalculatorGameTests {
             h.assertTrue(controller.condenserAirRFKT == g.condenserAirRFKT() && controller.evaporatorAirRFKT == g.evaporatorAirRFKT(), "folded air contacts differ");
             h.assertTrue(controller.airAmbientRFKT == g.ambientRFKT() && controller.airHeatBody.rfPerKelvin() == g.airRFK(), "folded heat loss geometry differs");
             h.assertTrue(controller.condenserTank.perSideCapacity == design.channelVolume()
-                    && controller.evaporatorTank.perSideCapacity == design.channelVolume(), "folded tank capacities differ");
+                    && controller.evaporatorTank.perSideCapacity == design.waterVolume(), "folded tank capacities differ");
         });
     }
 
@@ -170,7 +170,7 @@ public final class CalculatorGameTests {
         var coolant = FluidTransitionRegistry.liquidTransition(LiquidObsidian.INSTANCE);
         var water = FluidTransitionRegistry.liquidTransition(Fluids.WATER);
         long primary = reactor.manifoldBlocks() * biggerreactorsrework.Config.CONFIG.Reactor.CoolantTankAmountPerFuelRod;
-        long secondary = exchanger.channelVolume() / 2;
+        long secondary = exchanger.waterVolume() / 2;
         var spec = new PlantSpec(reactor, null, coolant, exchanger, water, turbine, TurbineCoilRegistry.getCoilData(Blocks.IRON_BLOCK), primary, secondary);
         h.startSequence().thenWaitUntil(() -> h.assertTrue(assembled(h, plant), "plant did not assemble")).thenExecute(() -> {
             configurePorts(h, plant);
@@ -322,8 +322,8 @@ public final class CalculatorGameTests {
             BiggerReactors.LOGGER.info("Searched plant in the level: {} FE/t {} mB/t; predicted {} FE/t {} mB/t", power, fuel, predicted, outcome.validation().fuel());
             h.assertTrue(power >= 5000, "assembled plant missed the target: " + power);
             // The prediction may be conservative (slow rise after the validation windows), never optimistic.
-            h.assertTrue(power >= .99 * predicted && power <= 1.03 * predicted, "assembled " + power + " differs from predicted " + predicted);
-            h.assertTrue(Math.abs(fuel - outcome.validation().fuel()) <= .02 * outcome.validation().fuel(), "fuel " + fuel + " differs from predicted " + outcome.validation().fuel());
+            h.assertTrue(power >= .99 * predicted && power <= 1.01 * predicted, "assembled " + power + " differs from predicted " + predicted);
+            h.assertTrue(Math.abs(fuel - outcome.validation().fuel()) <= .01 * outcome.validation().fuel(), "fuel " + fuel + " differs from predicted " + outcome.validation().fuel());
         }).thenSucceed();
     }
 
@@ -359,8 +359,12 @@ public final class CalculatorGameTests {
         if (target == 3000000) {
             var x = outcome.spec().exchanger();
             h.assertTrue(x.layers() > 1, "large target still uses a flat exchanger: " + row);
-            long volume = outcome.plant().machines().stream().mapToLong(p -> (long) p.machine().width() * p.machine().height() * p.machine().depth()).sum();
-            h.assertTrue(volume < 10L * 6 * 9 + 48L * 5 * 4 + 11L * 32 * 11, "compact search regressed from the long baseline: " + row);
+            // Modified 2026-11-03: a shape check replaces the size baseline tied to the previous turbine yield.
+            for(var p:outcome.plant().machines()) {
+                int lo=Math.min(p.machine().width(),Math.min(p.machine().height(),p.machine().depth()));
+                int hi=Math.max(p.machine().width(),Math.max(p.machine().height(),p.machine().depth()));
+                h.assertTrue(hi<=3*lo,"balanced compactness regressed to a long machine: "+row);
+            }
         }
         if (target == 15000000) {
             var t = outcome.spec().turbine();
@@ -369,7 +373,7 @@ public final class CalculatorGameTests {
             h.assertTrue(outcome.validation().primaryError() == 0 && outcome.validation().waterError() == 0, "high-target circuit lost fluid");
         }
         }
-        java.nio.file.Files.writeString(java.nio.file.Path.of("calculator-sodium.json"), new com.google.gson.GsonBuilder().setPrettyPrinting().create().toJson(rows));
+        StudyReports.write("thermal-calculator-sodium.json", new com.google.gson.GsonBuilder().setPrettyPrinting().create().toJson(rows));
         h.succeed();
     }
 }

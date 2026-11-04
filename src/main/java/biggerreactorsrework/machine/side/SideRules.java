@@ -20,10 +20,10 @@ public interface SideRules {
     List<SideRoute> ENERGY = List.of(SideRoute.NONE, SideRoute.ENERGY_INPUT);
 
     /**
-     * Cyanite Reprocessor: FRONT locked; the other faces take cyanite in, give blutonium out, take water in and take
+     * Industrial Processor: FRONT locked; the other faces take cyanite in, give blutonium out, take water in and take
      * energy in. Every configurable face starts accepting energy.
      */
-    SideRules CYANITE_REPROCESSOR = new SideRules() {
+    SideRules INDUSTRIAL_PROCESSOR = new SideRules() {
         @Override
         public List<SideRoute> allowed(RelativeFace face, Transmission transmission) {
             if (face == RelativeFace.FRONT) {

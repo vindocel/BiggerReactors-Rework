@@ -2,7 +2,7 @@ package biggerreactorsrework.multiblocks;
 
 import biggerreactorsrework.core.multiblock.IAssemblyStateBlock;
 import biggerreactorsrework.fluids.Steam;
-import biggerreactorsrework.machine.blocks.CyaniteReprocessor;
+import biggerreactorsrework.machine.blocks.IndustrialProcessor;
 import biggerreactorsrework.multiblocks.battery.blocks.BatteryTerminal;
 import biggerreactorsrework.multiblocks.battery.state.BatteryActivity;
 import biggerreactorsrework.multiblocks.heatexchanger.blocks.HeatExchangerCondenserChannelBlock;
@@ -23,15 +23,18 @@ public final class MachineLighting {
     public static final int FUEL = 7;
     public static final int HOT_FLUID = 6;
     public static final int PROCESSOR = 6;
+    /** Added 2026-11-03: glowing coolants outshine the fuel, cold or hot. */
+    public static final int GLOWING_COOLANT = 10;
 
     private MachineLighting() { }
 
     public static int emission(BlockState state) {
         var block = state.getBlock();
         if (block instanceof ReactorFuelRod) return state.getValue(ReactorFuelRod.FUEL_HEIGHT_PROPERTY) > 0 ? FUEL : 0;
-        if (block instanceof CyaniteReprocessor) return state.getValue(CyaniteReprocessor.ENABLED) ? PROCESSOR : 0;
+        if (block instanceof IndustrialProcessor) return state.getValue(IndustrialProcessor.ENABLED) ? PROCESSOR : 0;
         if (block instanceof HeatExchangerCondenserChannelBlock) return state.getValue(BlockStateProperties.LIT) ? HOT_FLUID : 0;
         if (!state.hasProperty(IAssemblyStateBlock.ASSEMBLED) || !state.getValue(IAssemblyStateBlock.ASSEMBLED)) return 0;
+        if (block instanceof biggerreactorsrework.multiblocks.reactor.blocks.ReactorManifold) return state.getValue(BlockStateProperties.LIT) ? GLOWING_COOLANT : 0;
         if (block instanceof ReactorTerminal) return state.getValue(ReactorActivity.REACTOR_ACTIVITY_ENUM_PROPERTY) == ReactorActivity.ACTIVE ? TERMINAL : 0;
         if (block instanceof TurbineTerminal) return state.getValue(TurbineActivity.TURBINE_STATE_ENUM_PROPERTY) == TurbineActivity.ACTIVE ? TERMINAL : 0;
         if (block instanceof BatteryTerminal) return state.getValue(BatteryActivity.BATTERY_STATE_ENUM_PROPERTY) == BatteryActivity.ACTIVE ? TERMINAL : 0;

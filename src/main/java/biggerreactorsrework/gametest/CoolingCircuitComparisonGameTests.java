@@ -45,18 +45,14 @@ public final class CoolingCircuitComparisonGameTests {
         final HeatExchangerCapacity.Geometry g;
         Exchanger(HeatExchangerCapacity.Geometry g) {
             this.g=g;var cfg=Config.CONFIG.HeatExchanger;
-            primary.perSideCapacity=g.condenser()*cfg.ChannelTankVolumePerBlock;water.perSideCapacity=g.evaporator()*cfg.ChannelTankVolumePerBlock;
+            primary.perSideCapacity=g.condenser()*cfg.ChannelTankVolumePerBlock;water.perSideCapacity=g.evaporator()*cfg.evaporatorTankVolumePerBlock();
             hot.setRfPerKelvin(g.condenser()*cfg.ChannelFEPerKelvinUnitVolume);cold.setRfPerKelvin(g.evaporator()*cfg.ChannelFEPerKelvinUnitVolume);air.setRfPerKelvin(g.airCapacity());ambient.setInfinite(true);
             for(var body:new HeatBody[]{hot,cold,air,ambient})body.setTemperature(g.ambientTemperature());
         }
+        final biggerreactorsrework.thermal.ThermalExchanger model=new biggerreactorsrework.thermal.ThermalExchanger();
         void tick() {
-            var cfg=Config.CONFIG.HeatExchanger;
-            pressure.tick();
             water.fill(Fluids.WATER,DataComponentPatch.EMPTY,water.perSideCapacity,false);
-            primary.transferWith(hot,g.condenser()*cfg.ChannelInternalSurfaceArea);
-            hot.transferWith(air,g.condenserAir());hot.transferWith(cold,g.contact());
-            cold.transferWith(air,g.evaporatorAir());water.transferWith(cold,g.evaporator()*cfg.ChannelInternalSurfaceArea);
-            air.transferWith(ambient,g.ambientArea());
+            model.tick(primary,water,g.thermalLinks()*biggerreactorsrework.thermal.ThermalModel.Preset.DEFAULT.exchangerRate(),biggerreactorsrework.thermal.ThermalModel.Preset.DEFAULT);
             water.drain(Integer.MAX_VALUE,FluidAction.EXECUTE);
         }
     }
@@ -100,7 +96,7 @@ public final class CoolingCircuitComparisonGameTests {
         }
         var row=new LinkedHashMap<String,Object>();double ticks=2d*WINDOW;
         row.put("case",name);row.put("steam_mB_t",steam/ticks);row.put("fuel_mB_t",burn/ticks);row.put("steam_per_mB_fuel",steam/burn);
-        row.put("reactor_conversion_mB_t",conversion/ticks);row.put("fuel_temperature_K",fuelTemperature/ticks);row.put("automatic_burn_fraction",fraction/ticks);
+        row.put("reactor_conversion_mB_t",conversion/ticks);row.put("fuel_temperature_K",fuelTemperature/ticks);row.put("usable_fuel_fill_fraction",fraction/ticks);
         row.put("first_window_steam_mB_t",early/WINDOW);row.put("last_window_steam_mB_t",late/WINDOW);
         double drift=Math.abs(late-early)/Math.max(1,late);row.put("relative_window_drift",drift);
         h.assertTrue(drift<.005,"comparison has not reached stable operation: "+name);
@@ -129,7 +125,7 @@ public final class CoolingCircuitComparisonGameTests {
         rows.add(measure(h,"water_direct",null,reactor(3),FluidTransitionRegistry.liquidTransition(Fluids.WATER)));
         for(var fluid:List.of(biggerreactorsrework.fluids.LiquidObsidian.INSTANCE,registry.getValue(cryoKey),registry.getValue(sodiumKey)))
             rows.add(measure(h,registry.getKey(fluid).toString(),g,reactor(3),FluidTransitionRegistry.liquidTransition(fluid)));
-        java.nio.file.Files.writeString(java.nio.file.Path.of("coolant-progression.json"),new com.google.gson.GsonBuilder().setPrettyPrinting().create().toJson(rows));
+        StudyReports.write("coolant-progression.json",new com.google.gson.GsonBuilder().setPrettyPrinting().create().toJson(rows));
         BiggerReactors.LOGGER.info("Same-setup coolant progression: {}",rows);
         double water=((Number)rows.getFirst().get("steam_mB_t")).doubleValue();
         var sodium=rows.getLast();
@@ -150,20 +146,19 @@ public final class CoolingCircuitComparisonGameTests {
     public static void compareSavedReactorWaterAndClosedObsidianLoop(GameTestHelper h)throws Exception {
         var cfg=Config.CONFIG.HeatExchanger;var cases=new ArrayList<Map<String,Object>>();
         cases.add(measure(h,"water_direct",null));
-        cases.add(measure(h,"obsidian_saved_5x5x5_gap",new HeatExchangerCapacity.Geometry(5,5,0,22*cfg.AirFEPerKelvinMetreSquared,22*cfg.AirFEPerKelvinMetreSquared,150*cfg.AmbientFEPerKelvinMetreSquared,115*cfg.AirFEPerKelvinUnitVolume,293.15)));
-        cases.add(measure(h,"obsidian_adjacent_7x4x4",straight(5)));
+        cases.add(measure(h,"obsidian_saved_5x5x5_gap",new HeatExchangerCapacity.Geometry(5,5,0,22*cfg.AirFEPerKelvinMetreSquared,22*cfg.AirFEPerKelvinMetreSquared,150*cfg.AmbientFEPerKelvinMetreSquared,115*cfg.AirFEPerKelvinUnitVolume,293.15,2.5)));
+        cases.add(measure(h,"obsidian_adjacent_3x4x4",straight(1)));
         cases.add(measure(h,"obsidian_adjacent_41x4x4",straight(39)));
         double baseline=((Number)cases.getFirst().get("steam_mB_t")).doubleValue(),fuelEfficiency=((Number)cases.getFirst().get("steam_per_mB_fuel")).doubleValue();
         for(var row:cases){row.put("steam_vs_water",((Number)row.get("steam_mB_t")).doubleValue()/baseline);row.put("steam_per_fuel_vs_water",((Number)row.get("steam_per_mB_fuel")).doubleValue()/fuelEfficiency);}
-        for(int i:new int[]{2,3}) {
-            h.assertTrue(i<cases.size()-1 || ((Number)cases.get(i).get("steam_vs_water")).doubleValue()>1,"adjacent obsidian circuit does not outperform direct water with the same rod settings");
-            h.assertTrue(((Number)cases.get(i).get("steam_per_fuel_vs_water")).doubleValue()>1,"adjacent obsidian circuit uses more fuel per steam than direct water");
-        }
+        h.assertTrue(((Number)cases.get(3).get("steam_per_fuel_vs_water")).doubleValue()>1,"Sufficiently sized obsidian exchanger did not outperform direct water");
+        for(int i=1;i<cases.size();i++)h.assertTrue(Math.abs(((Number)cases.get(i).get("fuel_mB_t")).doubleValue()/((Number)cases.getFirst().get("fuel_mB_t")).doubleValue()-1)<.001,"Exchanger bottleneck incorrectly saved reactor fuel");
+        h.assertTrue(((Number)cases.get(2).get("steam_mB_t")).doubleValue()<baseline,"Undersized exchanger evaded its geometric throughput limit");
         var report=new LinkedHashMap<String,Object>();report.put("source_world","run/saves/New World");report.put("source_reactor_min",List.of(-36,72,107));
         report.put("external_dimensions",List.of(6,6,6));report.put("fuel_rod_blocks",32);report.put("manifolds",28);report.put("contact_faces",80);
         report.put("rod_insertions","42% on seven rods; 45% at local x=2,z=0");report.put("warmup_ticks",WARM);report.put("sample_ticks",2*WINDOW);
         report.put("conditions","Full fuel; water supplied externally; steam removed freely; closed finite primary charge 280000 mB; no pipe rate limits; no turbine; native production simulations and registry profiles");report.put("cases",cases);
-        java.nio.file.Files.writeString(java.nio.file.Path.of("cooling-circuit-comparison.json"),new com.google.gson.GsonBuilder().setPrettyPrinting().create().toJson(report));
+        StudyReports.write("cooling-circuit-comparison.json",new com.google.gson.GsonBuilder().setPrettyPrinting().create().toJson(report));
         BiggerReactors.LOGGER.info("Cooling circuit A/B comparison: {}",cases);
         h.succeed();
     }

@@ -11,6 +11,9 @@ public final class ReactorComponent extends PortComponent {
         super(tile, "biggerreactorsrework_reactor");
         access = ReactorAccess.create(tile::nullableController);
     }
+    @Callback(doc = "function():table -- Thermal model snapshot: kJ/t heat and RF/t electricity.")
+    public Object[] thermal(Context context, Arguments args) { checkAvailable(); return result(access.thermal()); }
+
     @Callback(doc = "function():boolean -- Whether the port belongs to an assembled machine.")
     public Object[] connected(Context context, Arguments args) {
         checkThread(); return result(available() && access.connected());

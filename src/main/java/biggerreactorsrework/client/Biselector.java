@@ -10,6 +10,7 @@ import biggerreactorsrework.core.client.gui.elements.InteractiveElement;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.function.IntSupplier;
+import java.util.function.Supplier;
 
 public class Biselector<T extends AbstractContainerMenu> extends InteractiveElement<T> {
 
@@ -21,7 +22,8 @@ public class Biselector<T extends AbstractContainerMenu> extends InteractiveElem
     /**
      * The color of the block beside the knob when the switch is on (state 1).
      */
-    private final SelectorColors onColor;
+    private final Supplier<SelectorColors> onColor;
+    private final Supplier<SelectorColors> offColor;
 
     /**
      * Default constructor.
@@ -34,9 +36,21 @@ public class Biselector<T extends AbstractContainerMenu> extends InteractiveElem
      * @param onColor      The color shown when the switch is on (state 1).
      */
     public Biselector(@Nonnull ModScreen<T> parent, int x, int y, @Nullable Component tooltip, IntSupplier initialState, SelectorColors onColor) {
+        this(parent, x, y, tooltip, initialState, null, onColor);
+    }
+
+    /** A switch with a status color in both positions. */
+    public Biselector(@Nonnull ModScreen<T> parent, int x, int y, @Nullable Component tooltip,
+                      IntSupplier initialState, @Nullable SelectorColors offColor, SelectorColors onColor) {
+        this(parent, x, y, tooltip, initialState, () -> offColor, () -> onColor);
+    }
+
+    public Biselector(@Nonnull ModScreen<T> parent, int x, int y, @Nullable Component tooltip,
+                      IntSupplier initialState, Supplier<SelectorColors> offColor, Supplier<SelectorColors> onColor) {
         super(parent, x, y, GuiArt.SWITCH_WIDTH, GuiArt.TOGGLE_HEIGHT, 0, 0, tooltip);
         this.state = initialState;
         this.onColor = onColor;
+        this.offColor = offColor;
     }
 
     /**
@@ -59,7 +73,7 @@ public class Biselector<T extends AbstractContainerMenu> extends InteractiveElem
     public void render(@Nonnull GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
         // Check conditions.
         if (this.renderEnable) {
-            GuiArt.toggleSwitch(graphics, this.x, this.y, this.state.getAsInt() != 0, this.actionEnable && this.isMouseOver(mouseX, mouseY), !this.actionEnable, this.onColor, this.parent.getFrame());
+            GuiArt.toggleSwitch(graphics, this.x, this.y, this.state.getAsInt() != 0, this.actionEnable && this.isMouseOver(mouseX, mouseY), !this.actionEnable, this.offColor.get(), this.onColor.get(), this.parent.getFrame());
             // Trigger user-defined render logic.
             if (this.onRender != null) {
                 this.onRender.trigger(graphics, mouseX, mouseY);

@@ -1,5 +1,6 @@
 package biggerreactorsrework.multiblocks.battery;
 
+import biggerreactorsrework.multiblocks.battery.blocks.BatteryCell;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import biggerreactorsrework.core.transfer.EnergyStore;
@@ -31,6 +32,9 @@ public class BatteryItemHandler extends SlotStorage {
     
     @Override
     public boolean isItemValid(int slot, @Nonnull ItemStack stack) {
+        if (stack.is(BatteryCell.INSTANCE.asItem())) {
+            return slot == DISCHARGE_SLOT && BatteryCell.storedEnergy(stack) > 0;
+        }
         EnergyStore storage = energy(stack);
         if (storage == null) {
             return false;

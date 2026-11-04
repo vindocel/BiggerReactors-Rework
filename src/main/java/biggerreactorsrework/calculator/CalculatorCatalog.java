@@ -32,7 +32,7 @@ public record CalculatorCatalog(List<String> fuels, List<String> moderators, Lis
                                 Map<String, TurbineCoilRegistry.CoilData> coilProperties,
                                 @Nullable FluidTransitionRegistry.FluidTransition water) {
     /** Bumped whenever the search or the virtual plant changes in a way that changes results. */
-    public static final int ENGINE_VERSION = 3;
+    public static final int ENGINE_VERSION = 5;
 
     public record Coolant(String id, Route route) { }
 
@@ -95,11 +95,11 @@ public record CalculatorCatalog(List<String> fuels, List<String> moderators, Lis
                                       Map<String, TurbineCoilRegistry.CoilData> coils, @Nullable FluidTransitionRegistry.FluidTransition water) {
         var text = new StringBuilder("engine=").append(ENGINE_VERSION).append('\n');
         moderators.forEach((id, p) -> text.append("m ").append(id).append(' ').append(p.absorption).append(' ').append(p.heatEfficiency)
-                .append(' ').append(p.moderation).append(' ').append(p.heatConductivity).append('\n'));
+                .append(' ').append(p.moderation).append(' ').append(p.heatConductivity).append(' ').append(p.passiveClass).append('\n'));
         coolants.forEach((id, t) -> text.append("c ").append(id).append(' ').append(CoolantComponents.fingerprint(t)).append(' ').append(t.recovery).append('\n'));
         if (water != null) text.append("w ").append(CoolantComponents.fingerprint(water)).append(' ').append(water.recovery).append('\n');
         coils.forEach((id, c) -> text.append("k ").append(id).append(' ').append(c.efficiency).append(' ').append(c.bonus).append(' ').append(c.extractionRate).append('\n'));
-        for (Object section : new Object[]{Config.CONFIG.Reactor, Config.CONFIG.Reactor.ModeSpecific, Config.CONFIG.Turbine, Config.CONFIG.HeatExchanger})
+        for (Object section : new Object[]{Config.CONFIG.Reactor, Config.CONFIG.Reactor.ModeSpecific, Config.CONFIG.Reactor.Thermal, Config.CONFIG.Turbine, Config.CONFIG.HeatExchanger})
             for (var field : section.getClass().getDeclaredFields()) {
                 if (Modifier.isStatic(field.getModifiers()) || !(field.getType().isPrimitive())) continue;
                 try {

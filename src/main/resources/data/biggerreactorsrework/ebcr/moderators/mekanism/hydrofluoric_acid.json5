@@ -1,4 +1,6 @@
+// Modified 2026-11-02: static thermal class.
 {
+    passiveClass: "NONE",
     type: "registry",
     location: "mekanism:hydrofluoric_acid",
     absorption: 0.6,

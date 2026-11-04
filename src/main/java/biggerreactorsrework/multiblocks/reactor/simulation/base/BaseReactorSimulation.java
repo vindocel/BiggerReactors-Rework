@@ -1,399 +1,148 @@
 package biggerreactorsrework.multiblocks.reactor.simulation.base;
 
-import biggerreactorsrework.multiblocks.reactor.simulation.SimulationConfiguration;
-import biggerreactorsrework.multiblocks.reactor.simulation.IReactorSimulation;
-import biggerreactorsrework.multiblocks.reactor.simulation.SimulationDescription;
+import biggerreactorsrework.multiblocks.reactor.simulation.*;
 import biggerreactorsrework.registries.ReactorModeratorRegistry;
 import biggerreactorsrework.core.debug.DebugInfo;
 import biggerreactorsrework.core.serialization.DataCompound;
-import biggerreactorsrework.core.util.HeatBody;
-import org.jetbrains.annotations.NotNull;
-import org.joml.Vector2ic;
-import org.joml.Vector3ic;
+import biggerreactorsrework.thermal.*;
+import java.util.*;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+// Modified 2026-11-02: fuel-paid thermal simulation; no radiation multipliers or stored waste heat.
+public class BaseReactorSimulation implements IReactorSimulation {
+    private final SimulationConfiguration configuration;
+    private final ThermalModel.Preset preset;
+    private final ThermalModel.Geometry geometry;
+    private final Rod[][] rods;
+    private final List<Column> columns = new ArrayList<>();
+    private final FuelTank fuelTank;
+    private final Battery battery;
+    private final CoolantTank coolantTank;
+    private final double efficiency;
+    private double electricalFraction;
+    private ThermalSnapshot snapshot = ThermalSnapshot.EMPTY;
+    private static final int[][] DIRECTIONS={{1,0},{-1,0},{0,1},{0,-1}};
 
-public abstract class BaseReactorSimulation implements IReactorSimulation {
-    
-    protected final int x, y, z;
-    protected final ReactorModeratorRegistry.IModeratorProperties defaultModeratorProperties;
-    protected final ReactorModeratorRegistry.IModeratorProperties[][][] moderatorProperties;
-    protected final SimUtil.ControlRod[][] controlRodsXZ;
-    protected final SimUtil.ControlRod[] controlRods;
-    
-    protected final double fuelToCasingRFKT;
-    protected final double fuelToManifoldSurfaceArea;
-    protected final double stackToCoolantSystemRFKT;
-    protected final double casingToAmbientRFKT;
-    
-    protected final HeatBody fuelHeat = new HeatBody();
-    protected final HeatBody stackHeat = new HeatBody();
-    protected final HeatBody ambientHeat = new HeatBody();
-    
-    @Nullable
-    protected final Battery battery;
-    @Nullable
-    protected final CoolantTank coolantTank;
-    protected final HeatBody output;
-    
-    protected final FuelTank fuelTank;
-    
-    protected double fuelFertility = 1;
-    
-    protected final SimulationConfiguration configuration;
-    
-    private boolean wasActiveLastTick = false;
-    
-    protected BaseReactorSimulation(SimulationDescription simulationDescription, SimulationConfiguration configuration) {
-        this.configuration = configuration;
-        x = simulationDescription.x();
-        y = simulationDescription.y();
-        z = simulationDescription.z();
-        defaultModeratorProperties = simulationDescription.defaultModeratorProperties();
-        
-        // yes this gets trashed immediately, oh well
-        moderatorProperties = new ReactorModeratorRegistry.IModeratorProperties[x][y][z];
-        controlRodsXZ = new SimUtil.ControlRod[x][z];
-        controlRods = new SimUtil.ControlRod[simulationDescription.controlRodCount()];
-        
-        {
-            int currentControlRodIndex = 0;
-            for (int i = 0; i < x; i++) {
-                for (int j = 0; j < z; j++) {
-                    if (simulationDescription.isControlRodAt(i, j)) {
-                        var rod = new SimUtil.ControlRod(i, j);
-                        controlRodsXZ[i][j] = rod;
-                        controlRods[currentControlRodIndex++] = rod;
-                    }
-                }
-            }
+    private static final class Rod implements ControlRod {
+        private double insertion;
+        public double insertion() { return insertion; }
+        public void setInsertion(double value) {
+            if(!Double.isFinite(value) || value<0 || value>100) throw new IllegalArgumentException("Insertion must be in [0,100]");
+            insertion=value;
         }
-        
-        final ReactorModeratorRegistry.IModeratorProperties manifoldSignalingProperties;
-        if (configuration.passivelyCooled()) {
-            output = battery = new Battery((((long) (x + 2) * (y + 2) * (z + 2)) - ((long) x * y * z)) * configuration.passiveBatteryPerExternalBlock(), configuration);
-            coolantTank = null;
-            manifoldSignalingProperties = new ReactorModeratorRegistry.ModeratorProperties(defaultModeratorProperties);
+    }
+    private record Column(Rod rod, int blocks, double covered, int isolated, double passive, double output) { }
+
+    public BaseReactorSimulation(SimulationDescription d, SimulationConfiguration configuration) {
+        d.ensureValid(); this.configuration=configuration; preset=configuration.thermal(); geometry=d.thermalGeometry();
+        rods=new Rod[d.x()][d.z()];
+        double totalPassiveWeight=0; long productiveCells=0;
+        if(configuration.passivelyCooled()) for(int x=0;x<d.x();x++) for(int y=0;y<d.y();y++) for(int z=0;z<d.z();z++) {
+            var p=d.moderatorPropertiesAt(x,y,z);
+            if(!d.isControlRodAt(x,z) && p!=null && p.passiveClass()!=ThermalModel.PassiveClass.NONE) productiveCells++;
+        }
+        for(var column:geometry.columns()) {
+            Rod rod=new Rod(); rods[column.x()][column.z()]=rod;
+            double passive=0,output=0;
+            int passiveIsolated=0;
+            for(int y=0;y<d.y();y++) {
+                int possible=0; double weight=0;
+                for(int[] direction:DIRECTIONS) {
+                    int nx=column.x()+direction[0],nz=column.z()+direction[1];
+                    if(nx>=0 && nx<d.x() && nz>=0 && nz<d.z()) possible++;
+                }
+                // Modified 2026-11-03: a rod with no interior neighbour (a 3×3×3 reactor) cools as if surrounded by air.
+                if(possible==0) { if(configuration.passivelyCooled()) { passive+=ThermalModel.AIR_COOLING; output+=ThermalModel.AIR_COOLING; } else passiveIsolated++; continue; }
+                for(int[] direction:DIRECTIONS) {
+                    int nx=column.x()+direction[0],nz=column.z()+direction[1];
+                    if(nx<0 || nx>=d.x() || nz<0 || nz>=d.z() || d.isControlRodAt(nx,nz)) continue;
+                    ReactorModeratorRegistry.IModeratorProperties p=d.moderatorPropertiesAt(nx,y,nz);
+                    double cooling=p==null || d.isManifoldAt(nx,y,nz) ? 0 : ThermalModel.passiveCooling(p.passiveClass(),p.heatConductivity());
+                    double contribution=cooling/possible;
+                    passive+=contribution; weight+=contribution;
+                    if(cooling>0) output+=ThermalModel.passiveYield(p.passiveClass(),p.heatConductivity())/possible;
+                }
+                if(weight==0) passiveIsolated++;
+            }
+            double covered=configuration.passivelyCooled()?passive:column.coveredRods();
+            totalPassiveWeight+=covered;
+            columns.add(new Column(rod,column.rods(),covered,configuration.passivelyCooled()?passiveIsolated:column.isolatedRods(),passive,output));
+        }
+        efficiency=configuration.passivelyCooled()? geometry.rods()==0?0:Math.min(totalPassiveWeight/geometry.rods(),
+                (double)(geometry.rods()+productiveCells)/geometry.volume()):geometry.efficiency();
+        fuelTank=new FuelTank(Math.multiplyExact(preset.fuelPerRod(),geometry.rods()));
+        if(configuration.passivelyCooled()) {
+            long shell=(long)(d.x()+2)*(d.y()+2)*(d.z()+2)-geometry.volume();
+            battery=new Battery(Math.multiplyExact(shell,configuration.passiveBatteryPerExternalBlock()),configuration); coolantTank=null;
         } else {
-            long perSideCapacity = simulationDescription.manifoldCount() * configuration.coolantTankCapacityPerFuelRod();
-            output = coolantTank = new CoolantTank(perSideCapacity, simulationDescription.defaultModeratorProperties(), configuration);
-            battery = null;
-            manifoldSignalingProperties = coolantTank;
-        }
-        
-        for (int i = 0; i < x; i++) {
-            for (int j = 0; j < y; j++) {
-                for (int k = 0; k < z; k++) {
-                    var newProperties = simulationDescription.moderatorPropertiesAt(i, j, k);
-                    if (!configuration.passivelyCooled()) newProperties=simulationDescription.defaultModeratorProperties();
-                    if (simulationDescription.isManifoldAt(i, j, k)) {
-                        newProperties = manifoldSignalingProperties;
-                    }
-                    if (newProperties == null) {
-                        newProperties = simulationDescription.defaultModeratorProperties();
-                    }
-                    if (controlRodsXZ[i][k] != null) {
-                        newProperties = null;
-                    }
-                    moderatorProperties[i][j][k] = newProperties;
-                }
-            }
-        }
-    
-        fuelTank = new FuelTank(configuration.fuelRodFuelCapacity() * controlRods.length * y);
-        
-        double fuelToCasingRFKT = 0;
-        int fuelToManifoldSurfaceArea = 0;
-        for (SimUtil.ControlRod controlRod : controlRods) {
-            for (int i = 0; i < y; i++) {
-                for (Vector2ic direction : SimUtil.cardinalDirections) {
-                    if (controlRod.x + direction.x() < 0 || controlRod.x + direction.x() >= x || controlRod.z + direction.y() < 0 || controlRod.z + direction.y() >= z) {
-                        fuelToCasingRFKT += configuration.casingHeatTransferRFMKT();
-                        continue;
-                    }
-                    ReactorModeratorRegistry.IModeratorProperties properties = moderatorProperties[controlRod.x + direction.x()][i][controlRod.z + direction.y()];
-                    if (properties != null) {
-                        if (properties == manifoldSignalingProperties) {
-                            // manifold, dynamic heat transfer rate
-                            fuelToManifoldSurfaceArea++;
-                        } else {
-                            // normal block
-                            fuelToCasingRFKT += properties.heatConductivity();
-                        }
-                    }
-                }
-            }
-        }
-        fuelToCasingRFKT *= configuration.fuelToStackRFKTMultiplier();
-        
-        double stackToCoolantSystemRFKT = 2 * (x * y + x * z + z * y);
-        
-        
-        for (int i = 0; i < x; i++) {
-            for (int j = 0; j < y; j++) {
-                for (int k = 0; k < z; k++) {
-                    ReactorModeratorRegistry.IModeratorProperties properties = moderatorProperties[i][j][k];
-                    if (properties == manifoldSignalingProperties) {
-                        // its a manifold here, need to consider its surface area
-                        for (Vector3ic axisDirection : SimUtil.axisDirections) {
-                            int neighborX = i + axisDirection.x();
-                            int neighborY = j + axisDirection.y();
-                            int neighborZ = k + axisDirection.z();
-                            if (neighborX < 0 || neighborX >= this.x ||
-                                    neighborY < 0 || neighborY >= this.y ||
-                                    neighborZ < 0 || neighborZ >= this.z) {
-                                // OOB, so its a casing we are against here, this counts against us
-                                stackToCoolantSystemRFKT--;
-                                continue;
-                            }
-                            ReactorModeratorRegistry.IModeratorProperties neighborProperties = moderatorProperties[neighborX][neighborY][neighborZ];
-                            // should a fuel rod add to surface area? it does right now.
-                            if (neighborProperties != manifoldSignalingProperties) {
-                                stackToCoolantSystemRFKT++;
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        stackToCoolantSystemRFKT *= configuration.stackToCoolantRFMKT();
-        if (!configuration.passivelyCooled()) stackToCoolantSystemRFKT=fuelToManifoldSurfaceArea*configuration.stackToCoolantRFMKT();
-        
-        if (configuration.passivelyCooled()) {
-            stackToCoolantSystemRFKT *= configuration.passiveCoolingTransferEfficiency();
-        }
-        
-        this.casingToAmbientRFKT = 2 * ((x + 2) * (y + 2) + (x + 2) * (z + 2) + (z + 2) * (y + 2)) * configuration.stackToAmbientRFMKT();
-        this.fuelToCasingRFKT = fuelToCasingRFKT;
-        this.fuelToManifoldSurfaceArea = fuelToManifoldSurfaceArea;
-        this.stackToCoolantSystemRFKT = stackToCoolantSystemRFKT;
-        
-        fuelHeat.setRfPerKelvin(controlRods.length * y * configuration.rodRFM3K());
-        stackHeat.setRfPerKelvin(x * y * z * configuration.stackRFM3K());
-        
-        ambientHeat.setInfinite(true);
-        ambientHeat.setTemperature(configuration.ambientTemperature());
-        stackHeat.setTemperature(configuration.ambientTemperature());
-        fuelHeat.setTemperature(configuration.ambientTemperature());
-        if (battery != null) {
-            battery.setTemperature(configuration.ambientTemperature());
-        }
-    }
-    
-    @Override
-    public final void tick(boolean active) {
-        // Modified 2026-10-26: observe before production, after the previous transfer cycle.
-        if(coolantTank!=null)coolantTank.updateOutputPressure();
-        double oldFuelHeat=fuelHeat.temperature(), oldStackHeat=stackHeat.temperature(), oldFertility=fuelFertility;
-        double toBurn = 0;
-        if (wasActiveLastTick || (!isAsync() && active)) {
-            toBurn = radiate();
-            toBurn=limitRadiation(toBurn,oldFuelHeat,oldStackHeat,oldFertility);
-        } else {
-            fuelTank.burn(0);
-        }
-        
-        {
-            // decay fertility, RadiationHelper.tick in old BR, this is copied, mostly
-            double denominator = configuration.fuelFertilityDecayDenominator();
-            if (!active) {
-                // Much slower decay when off
-                denominator *= configuration.fuelFertilityDecayDenominatorInactiveMultiplier();
-            }
-            
-            // Fertility decay, at least 0.1 rad/t, otherwise halve it every 10 ticks
-            fuelFertility = Math.max(0f, fuelFertility - Math.max(configuration.fuelFertilityMinimumDecay(), fuelFertility / denominator));
-        }
-        
-        fuelHeat.transferWith(stackHeat, fuelToCasingRFKT + (coolantTank==null ? fuelToManifoldSurfaceArea*defaultModeratorProperties.heatConductivity() : 0));
-        output.transferWith(coolantTank==null?stackHeat:fuelHeat, stackToCoolantSystemRFKT);
-        stackHeat.transferWith(ambientHeat, casingToAmbientRFKT);
-        
-        wasActiveLastTick = false;
-        fuelTank.burn(toBurn);
-        if (active && isAsync() && fuelTank.fuel() > 0) {
-            startNextRadiate();
-            wasActiveLastTick = true;
+            battery=null; coolantTank=new CoolantTank(Math.multiplyExact(geometry.usefulManifolds(),preset.coolantPerManifold()),d.defaultModeratorProperties(),configuration);
         }
     }
 
-    // Modified 2026-10-26: pending asynchronous radiation uses the same safety gate when settling.
-    private double limitRadiation(double toBurn,double oldFuelHeat,double oldStackHeat,double oldFertility) {
-            if(coolantTank!=null) {
-                double proposed=Math.max(0,(fuelHeat.temperature()-oldFuelHeat)*fuelHeat.rfPerKelvin())+
-                        Math.max(0,(stackHeat.temperature()-oldStackHeat)*stackHeat.rfPerKelvin());
-                var transition=coolantTank.transition();
-                double available=Math.min(coolantTank.liquidAmount(),coolantTank.perSideCapacity()-coolantTank.vaporAmount());
-                double headroom=Math.max(0,(biggerreactorsrework.Config.CONFIG.Reactor.MaxFuelTemperature-oldFuelHeat)*fuelHeat.rfPerKelvin());
-                double ceiling=biggerreactorsrework.Config.CONFIG.Reactor.MaxFuelTemperature;
-                double allowed=0;
-                if(transition!=null && available>0 && coolantTank.perSideCapacity()>0) {
-                    double k=stackToCoolantSystemRFKT*transition.liquidRFMKT()*Math.max(.01,(double)coolantTank.liquidAmount()/coolantTank.perSideCapacity());
-                    double decay=Math.exp(-Math.min(20,k/fuelHeat.rfPerKelvin()));
-                    double retainedHeat=1-coolantTank.outputPressure.limit()*(1-decay);
-                    double maxFromContact=fuelHeat.rfPerKelvin()*((ceiling-transition.boilingPoint())/retainedHeat-(oldFuelHeat-transition.boilingPoint()));
-                    allowed=Math.max(0,Math.min(headroom+available*transition.latentHeat()/coolantTank.recovery(),maxFromContact));
-                }
-                double fraction=transition==null || available<=0 || fuelToManifoldSurfaceArea<=0 ? 0 : Math.min(1,allowed/Math.max(1,proposed));
-                fraction=Math.min(fraction,coolantTank.outputPressure.limit());
-                fraction=Math.min(fraction,burnFraction+.05);
-                burnFraction=fraction;
-                fuelHeat.setTemperature(oldFuelHeat+(fuelHeat.temperature()-oldFuelHeat)*fraction);
-                stackHeat.setTemperature(oldStackHeat+(stackHeat.temperature()-oldStackHeat)*fraction);
-                fuelFertility=oldFertility+(fuelFertility-oldFertility)*fraction;
-                toBurn*=fraction;
-            }
-        return toBurn;
-    }
-
-    private double burnFraction=1;
-    @Override public double burnFraction() { return burnFraction; }
-    @Override public double outputLimit() { return coolantTank==null?1:coolantTank.outputPressure.limit(); }
-    @Override public double retainedOutputFraction() { return coolantTank==null?0:coolantTank.outputPressure.retainedFraction(); }
-    @Override public int manifoldContacts() { return (int)fuelToManifoldSurfaceArea; }
-    
-    @Override
-    public final void settle() {
-        if (wasActiveLastTick) {
-            wasActiveLastTick = false;
-            double oldFuelHeat=fuelHeat.temperature(),oldStackHeat=stackHeat.temperature(),oldFertility=fuelFertility;
-            double toBurn=radiate();
-            fuelTank.burn(limitRadiation(toBurn,oldFuelHeat,oldStackHeat,oldFertility));
+    @Override public void tick(boolean active) {
+        double usable=fuelTank.usableFuel(),open=0,coveredOpen=0,isolatedOpen=0,rfOpen=0;
+        for(var c:columns) {
+            double opening=1-c.rod.insertion/100;
+            open+=c.blocks*opening; coveredOpen+=c.covered*opening; isolatedOpen+=c.isolated*opening;
+            rfOpen+=c.output*opening*ThermalModel.PASSIVE_RF_PER_KJ;
         }
-    }
-
-    protected abstract double radiate();
-    
-    protected void startNextRadiate() {
-    
-    }
-    
-    @Override
-    @Nullable
-    public IBattery battery() {
-        return battery;
-    }
-    
-    @Override
-    @Nullable
-    public ICoolantTank coolantTank() {
-        return coolantTank;
-    }
-    
-    @Override
-    public IFuelTank fuelTank() {
-        return fuelTank;
-    }
-    
-    @Nullable
-    @Override
-    public ControlRod controlRodAt(int x, int z) {
-        if (x < 0 || x >= this.x || z < 0 || z >= this.z) {
-            return null;
+        double requested=active?preset.requestedBurn(usable,geometry.rods(),open):0;
+        fuelTank.burn(requested);
+        double generated=fuelTank.burnedLastTick()*preset.heatPerFuel();
+        double local=open==0?0:generated*(coveredOpen/open);
+        var heat=ThermalModel.heat(generated,local,open==0?0:generated*(isolatedOpen/open),efficiency);
+        ThermalModel.Conversion conversion;
+        double potentialRF=0,discardedRF=0;long acceptedRF=0;
+        if(coolantTank!=null) conversion=coolantTank.convertHeat(heat.capturable(),preset);
+        else {
+            conversion=new ThermalModel.Conversion(0,heat.capturable(),heat.capturable(),0,0,0,0);
+            double exact=open==0?0:generated*rfOpen/open;
+            if(local>0) exact*=heat.capturable()/local;
+            double withFraction=exact+electricalFraction;
+            long whole=ThermalModel.wholeUnits(withFraction);
+            potentialRF=whole; acceptedRF=battery.generate(whole);discardedRF=whole-acceptedRF;
+            electricalFraction=acceptedRF==whole?withFraction-whole:0;
+            if(electricalFraction<0 || electricalFraction>=1 || !Double.isFinite(electricalFraction))electricalFraction=0;
         }
-        return controlRodsXZ[x][z];
+        snapshot=new ThermalSnapshot(generated,heat.capturable(),heat.isolated(),heat.structural(),conversion.processed(),
+                conversion.useful(),conversion.processLoss(),conversion.missingCoolant(),conversion.blockedOutput(),conversion.rounding(),
+                efficiency,geometry.contactEfficiency(),geometry.occupancy(),geometry.rods(),geometry.usefulManifolds(),
+                usable,preset.burnPerRod(geometry.rods()),requested,potentialRF,acceptedRF,discardedRF);
     }
-    
-    @Override
-    public void setAllControlRodInsertions(double insertion) {
-        for (int i = 0; i < controlRods.length; i++) {
-            controlRods[i].setInsertion(insertion);
-        }
+    @Override public ThermalSnapshot thermal() { return snapshot; }
+    @Override public double burnFraction() { return geometry.rods()==0?0:preset.fill(fuelTank.usableFuel(),geometry.rods()); }
+    @Override public int manifoldContacts() { return geometry.contacts(); }
+    @Override public IBattery battery() { return battery; }
+    @Override public ICoolantTank coolantTank() { return coolantTank; }
+    @Override public IFuelTank fuelTank() { return fuelTank; }
+    @Override public ControlRod controlRodAt(int x,int z) { return x<0 || x>=rods.length || z<0 || z>=rods[0].length?null:rods[x][z]; }
+    @Override public void setAllControlRodInsertions(double value) { for(var c:columns)c.rod.setInsertion(value); }
+    /** Deprecated temperature/fertility readings are neutral; productive quantities are in thermal(). */
+    @Override public double fertility() { return 1; }
+    @Override public double fuelHeat() { return configuration.ambientTemperature(); }
+    @Override public double stackHeat() { return configuration.ambientTemperature(); }
+    @Override public double ambientTemperature() { return configuration.ambientTemperature(); }
+    @Override public DataCompound save() {
+        var n=new DataCompound(); n.put("thermalModelVersion",ThermalModel.VERSION);n.put("fuelTank",fuelTank.save());
+        if(battery!=null)n.put("battery",battery.save()); if(coolantTank!=null)n.put("coolantTank",coolantTank.save());
+        n.put("electricalFraction",electricalFraction);
+        n.put("insertions",columns.stream().map(c->c.rod.insertion).toList()); return n;
     }
-    
-    @Override
-    public double fertility() {
-        if (fuelFertility <= 1f) {
-            return 1f;
-        } else {
-            return Math.log10(fuelFertility) + 1;
+    @Override public void load(DataCompound n) {
+        fuelTank.load(n.getCompound("fuelTank"));
+        if(battery!=null)battery.load(n.getCompound("battery"));
+        if(coolantTank!=null)coolantTank.load(n.getCompound("coolantTank"));
+        electricalFraction=n.getInt("thermalModelVersion")==ThermalModel.VERSION?n.getDouble("electricalFraction"):0;
+        if(!Double.isFinite(electricalFraction) || electricalFraction<0 || electricalFraction>=1)electricalFraction=0;
+        if(!n.getList("insertions").isEmpty()) {
+            var values=n.getList("insertions");
+            if(values.size()==columns.size())for(int i=0;i<values.size();i++)if(values.get(i) instanceof Number v && Double.isFinite(v.doubleValue()))
+                columns.get(i).rod.setInsertion(Math.max(0,Math.min(100,v.doubleValue())));
         }
+        snapshot=ThermalSnapshot.EMPTY;
     }
-    
-    @Override
-    public double fuelHeat() {
-        return fuelHeat.temperature();
-    }
-    
-    @Override
-    public double stackHeat() {
-        return stackHeat.temperature();
-    }
-    
-    @Override
-    public double ambientTemperature() {
-        return ambientHeat.temperature();
-    }
-    
-    @NotNull
-    @Override
-    public DataCompound save() {
-        settle();
-        var compound = new DataCompound();
-        compound.put("fuelTank", fuelTank.save());
-        if (coolantTank != null) {
-            compound.put("coolantTank", coolantTank.save());
-        }
-        if (battery != null) {
-            compound.put("battery", battery.save());
-        }
-        compound.put("fuelFertility", fuelFertility);
-        compound.put("fuelHeat", fuelHeat.temperature());
-        compound.put("reactorHeat", stackHeat.temperature());
-        return compound;
-    }
-    
-    @Override
-    public void load(@Nonnull DataCompound compound) {
-        fuelTank.load(compound.getCompound("fuelTank"));
-        if (coolantTank != null) {
-            coolantTank.load(compound.getCompound("coolantTank"));
-        }
-        if (battery != null) {
-            battery.load(compound.getCompound("battery"));
-        }
-        // Modified 2026-10-30: invalid temperatures cannot poison subsequent simulation ticks.
-        fuelFertility = biggerreactorsrework.core.util.SavedValues.nonNegative(compound.getDouble("fuelFertility"), 1);
-        fuelHeat.setTemperature(biggerreactorsrework.core.util.SavedValues.nonNegative(compound.getDouble("fuelHeat"), ambientHeat.temperature()));
-        stackHeat.setTemperature(biggerreactorsrework.core.util.SavedValues.nonNegative(compound.getDouble("reactorHeat"), ambientHeat.temperature()));
-    }
-    
-    @Override
-    public DebugInfo getDebugInfo() {
-        final var simInfo = new DebugInfo("Simulation");
-        simInfo.add("SimClass: " + getClass().getSimpleName());
-        simInfo.add("FuelUsage: " + fuelTank().burnedLastTick());
-        simInfo.add("ReactantCapacity: " + fuelTank().capacity());
-        simInfo.add("TotalReactant: " + fuelTank().totalStored());
-        simInfo.add("PercentFull: " + (float) fuelTank().totalStored() * 100 / fuelTank().capacity());
-        simInfo.add("Fuel: " + fuelTank().fuel());
-        simInfo.add("Waste: " + fuelTank().waste());
-        simInfo.add("Fertility: " + fertility());
-        simInfo.add("FuelHeat: " + fuelHeat());
-        simInfo.add("ReactorHeat: " + stackHeat());
-        if (battery != null) {
-            final var batteryInfo = new DebugInfo("Battery");
-            batteryInfo.add("StoredPower: " + battery.stored());
-            batteryInfo.add("PowerProduction: " + battery.generatedLastTick());
-            simInfo.add(batteryInfo);
-        }
-        if (coolantTank != null) {
-            final var coolantTankInfo = new DebugInfo("CoolantTank");
-            coolantTankInfo.add("MBProduction: " + coolantTank.transitionedLastTick());
-            coolantTankInfo.add("CoolantTankSize: " + coolantTank.perSideCapacity());
-            coolantTankInfo.add("Liquid: " + coolantTank.liquidAmount());
-            coolantTankInfo.add("Vapor: " + coolantTank.vaporAmount());
-            simInfo.add(coolantTankInfo);
-        }
-        final var buildInfo = new DebugInfo("Build info");
-        buildInfo.add("Size: (" + x + ", " + y + ", " + z + ")");
-        buildInfo.add("Control rod count: " + controlRods.length);
-        buildInfo.add("fuelToCasingRFKT: " + fuelToCasingRFKT);
-        buildInfo.add("fuelToManifoldSurfaceArea: " + fuelToManifoldSurfaceArea);
-        buildInfo.add("stackToCoolantSystemRFKT: " + stackToCoolantSystemRFKT);
-        buildInfo.add("casingToAmbientRFKT: " + casingToAmbientRFKT);
-        simInfo.add(buildInfo);
-        return simInfo;
+    @Override public DebugInfo getDebugInfo() {
+        var info=new DebugInfo("Thermal simulation v"+ThermalModel.VERSION);
+        info.add("Fuel: "+fuelTank.usableFuel());info.add("Burn: "+fuelTank.burnedLastTick());
+        info.add("Generated kJ/t: "+snapshot.generated());info.add("Structural efficiency: "+efficiency);return info;
     }
 }

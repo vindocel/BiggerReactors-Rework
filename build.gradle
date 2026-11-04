@@ -74,7 +74,12 @@ neoForge {
 
         clientVerification {
             client()
-            gameDirectory = project.file('run/mc-26.1.2/client-verification')
+            def machineDrops = providers.gradleProperty('machineDropRenderTest').orElse('false').get().toBoolean()
+            gameDirectory = project.file(machineDrops ? 'run/mc-26.1.2/exchanger-crash-probe' : 'run/mc-26.1.2/client-verification')
+            if (machineDrops) {
+                systemProperty 'rework.testMachineDrops', 'true'
+                jvmArguments.add '-Xmx5G'
+            }
         }
 
         serverVerification {

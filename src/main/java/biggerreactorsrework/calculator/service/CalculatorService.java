@@ -206,7 +206,7 @@ public final class CalculatorService {
             if (outcome.alternate() != null) values.put(CalculationResult.POWER_ALT, outcome.alternate().power());
             values.put(CalculationResult.FUEL, r.fuel());
             values.put(CalculationResult.EFFICIENCY, r.efficiency());
-            values.put(CalculationResult.FUEL_TEMPERATURE, r.fuelTemperature());
+            r.thermal().values().forEach((key,value)->{if(value instanceof Number n)values.put("thermal_"+key,n.doubleValue());});
             values.put(CalculationResult.DRIFT, r.drift());
             values.put(CalculationResult.TICKS, (double) r.ticks());
             values.put(CalculationResult.WINDOW, (double) r.window());

@@ -56,9 +56,9 @@ public class HeatExchangerFluidPortTile extends HeatExchangerBaseTile implements
     
     
     
-    private IFluidTankHandler HETank;
+    private biggerreactorsrework.util.FluidTransitionTank HETank;
     
-    public void setHETank(IFluidTankHandler HETank) {
+    public void setHETank(biggerreactorsrework.util.FluidTransitionTank HETank) {
         this.HETank = HETank;
     }
     
@@ -67,6 +67,7 @@ public class HeatExchangerFluidPortTile extends HeatExchangerBaseTile implements
     
     public void setInlet(boolean inlet) {
         assert level != null;
+        if (this.inlet != inlet) maintenanceCold = false;
         this.inlet = inlet;
         level.setBlock(this.getBlockPos(), this.getBlockState().setValue(PORT_DIRECTION, inlet), 3);
         setChanged();
@@ -124,7 +125,7 @@ public class HeatExchangerFluidPortTile extends HeatExchangerBaseTile implements
         if (HETank == null) {
             return Fluids.EMPTY;
         }
-        return HETank.fluidTypeInTank(tank);
+        return HETank.maintenanceFluid(tank);
     }
     
     @Nullable
@@ -133,7 +134,7 @@ public class HeatExchangerFluidPortTile extends HeatExchangerBaseTile implements
         if (HETank == null) {
             return DataComponentPatch.EMPTY;
         }
-        return HETank.fluidComponentsInTank(tank);
+        return HETank.maintenanceComponents(tank);
     }
     
     @Override
@@ -155,7 +156,7 @@ public class HeatExchangerFluidPortTile extends HeatExchangerBaseTile implements
     
     @Override
     public long fill(Fluid fluid, DataComponentPatch components, long amount, boolean simulate) {
-        if (HETank == null || !inlet) {
+        if (HETank == null || !inlet || isRecoveringInput()) {
             return 0;
         }
         return HETank.fill(fluid, components, amount, simulate);
@@ -163,25 +164,46 @@ public class HeatExchangerFluidPortTile extends HeatExchangerBaseTile implements
     
     @Override
     public long drain(Fluid fluid, DataComponentPatch components, long amount, boolean simulate) {
-        if (HETank == null || inlet) {
+        if (HETank == null || !canDrain()) {
             return 0;
         }
-        return HETank.drain(fluid, components, amount, simulate);
+        return HETank.maintenanceDrain(outputTank(),fluid, components, amount, simulate);
     }
     
     
+    // Modified 2026-11-02: controller drains only the sum actually accepted by balanced destinations.
+    public long offerFluid(long maximum) {
+        neighborChanged();
+        if(!connected || !canDrain() || handler==null || HETank==null)return 0;
+        long amount=Math.min(maximum,HETank.fluidAmountInTank(outputTank()));
+        return Math.max(0,Math.min(amount,handler.fill(HETank.maintenanceFluid(outputTank()),HETank.maintenanceComponents(outputTank()),amount,false)));
+    }
+
+    private boolean maintenanceCold;
+
+    public boolean isRecoveringInput() {
+        return inlet && maintenanceCold;
+    }
+
+    private boolean canDrain() {
+        return !inlet || isRecoveringInput();
+    }
+
+    private int outputTank() {
+        return isRecoveringInput() ? 0 : 1;
+    }
     public long pushFluid() {
         neighborChanged();
-        if (!connected || inlet) {
+        if (!connected || !canDrain() || HETank == null) {
             return 0;
         }
         if (handler != null) {
-            Fluid fluid = HETank.fluidTypeInTank(1);
-            var components = HETank.fluidComponentsInTank(1);
-            long amount = HETank.fluidAmountInTank(1);
-            amount = HETank.drain(fluid, components, amount, true);
+            Fluid fluid = HETank.maintenanceFluid(outputTank());
+            var components = HETank.maintenanceComponents(outputTank());
+            long amount = HETank.fluidAmountInTank(outputTank());
+            amount = HETank.maintenanceDrain(outputTank(),fluid, components, amount, true);
             amount = handler.fill(fluid, components, amount, false);
-            amount = HETank.drain(fluid, components, amount, false);
+            amount = HETank.maintenanceDrain(outputTank(),fluid, components, amount, false);
             return amount;
         } else {
             handler = null;
@@ -213,6 +235,7 @@ public class HeatExchangerFluidPortTile extends HeatExchangerBaseTile implements
     
     @Override
     protected void readNBT(CompoundTag compound) {
+        maintenanceCold=compound.getBooleanOr("recoverInput", false);
         super.readNBT(compound);
         inlet = compound.getBooleanOr("inlet", false);
     }
@@ -222,6 +245,7 @@ public class HeatExchangerFluidPortTile extends HeatExchangerBaseTile implements
     protected CompoundTag writeNBT() {
         CompoundTag nbt = super.writeNBT();
         nbt.putBoolean("inlet", inlet);
+        nbt.putBoolean("recoverInput", isRecoveringInput());
         return nbt;
     }
     
@@ -254,6 +278,7 @@ public class HeatExchangerFluidPortTile extends HeatExchangerBaseTile implements
     @Override
     public void updateState() {
         state.direction = isInlet();
+        state.maintenanceCold=isRecoveringInput();
         state.condenser = isCondenser();
     }
     
@@ -270,6 +295,13 @@ public class HeatExchangerFluidPortTile extends HeatExchangerBaseTile implements
 
     @Override
     public void runRequest(String requestName, Object requestData) {
+        if (requestName.equals("recoverInput")) {
+            if (inlet && requestData instanceof Boolean value) {
+                maintenanceCold = value;
+                setChanged();
+            }
+            return;
+        }
         if (requestName.equals("setDirection")) {
             // Modified 2026-10-30: reject invalid command types and domains before mutation.
             if (!(requestData instanceof Integer value) || value < 0 || value > 1) return;

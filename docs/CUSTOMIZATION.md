@@ -81,48 +81,53 @@ Ranges use interval notation: `[1,)` means 1 or more, `(0,)` means above 0.
 |---|---|---|
 | `Worldgen.GenerateUranium` | `true` | `false` stops uranium ore in **newly generated** terrain. Existing ore stays, and the ore and items stay registered |
 
-### 3.2 Reactor
+### 3.2 Reactor — thermal model 1
 
-| Key | Default | Range | Effect |
-|---|---|---|---|
-| `Reactor.MaxLength` / `MaxWidth` | `128` | `[3,)` | Largest size in blocks |
-| `Reactor.MaxHeight` | `192` | `[3,)` | Largest height in blocks |
-| `Reactor.FuelUsageMultiplier` | `1` | `(0,)` | Fuel consumption. Higher burns fuel faster |
-| `Reactor.OutputMultiplier` | `1` | `(0,)` | Reactor output |
-| `Reactor.MaxFuelTemperature` | `3273.15` | `(1273.15,)` | Fuel temperature ceiling, in kelvin, for automatic liquid-cooling control |
-| `Reactor.CustomFuelEntries` | empty | see [6](#6-reactor-fuels) | Fuel yield per item or tag |
+The server uses one fuel-paid thermal model. There is no old/new burn selector. All settings below require restart and are synchronized to clients. Old stored fuel and cold/hot quantities are preserved, including stock above a reduced capacity; new insertions are refused until room exists.
 
-**Advanced:**
+| Key | Default | Effect |
+| --- | ---: | --- |
+| `Reactor.MaxLength` / `MaxWidth` / `MaxHeight` | `128` / `128` / `192` | External structure limits |
+| `Reactor.PerFuelRodCapacity` | `4000` | mB capacity per valid Fuel Rod block |
+| `Reactor.CoolantTankAmountPerFuelRod` | `10000` | mB per **useful manifold**, per cold/hot side; legacy key name retained |
+| `Reactor.PassiveBatteryPerExternalBlock` | `100000` | Passive buffer FE per external block |
+| `Reactor.FuelMBPerIngot` | `1000` | Uranium/blutonium ingot yield; blocks supply nine ingots |
+| `Reactor.CustomFuelEntries` | empty | Item/tag yields; see [6](#6-reactor-fuels) |
+| `Reactor.Thermal.BaseBurn` | `0.04` | Base mB per full rod per tick |
+| `Reactor.Thermal.SizeBurn` | `0.04` | Bounded additional size-dependent rate |
+| `Reactor.Thermal.SizeConstant` | `100` | Rod-block scale of the smooth size curve |
+| `Reactor.Thermal.KJPerFuel` | `12500` | kJ per mB actually consumed |
+| `Reactor.Thermal.KJPerCoolant` | `1` | kJ per mB converted from cold to hot |
+| `Reactor.Thermal.SteamBudgetKJ` | `0.2` | Useful kJ per steam mB; separate from turbine `latentHeat` |
+| `Reactor.Thermal.HotMBPerLink` | `2000` | Hot mB/t per direct channel link |
 
-| Key | Default | Range |
-|---|---|---|
-| `Reactor.PassiveOutputMultiplier` | `0.5` | `(0,)` |
-| `Reactor.ActiveOutputMultiplier` | `1` | `(0,)` |
-| `Reactor.FuelMBPerIngot` | `1000` | `(0,)` |
-| `Reactor.PerFuelRodCapacity` | `4000` | `[1,)` |
-| `Reactor.CoolantTankAmountPerFuelRod` | `10000` | `(0,)` |
-| `Reactor.PassiveBatteryPerExternalBlock` | `100000` | `(0,)` |
-| `Reactor.PassiveCoolingTransferEfficiency` | `0.2` | `(0,)` |
-| `Reactor.SimulationRays` | `64` (powers of two recommended) | `[16,)` |
-| `Reactor.IrradiationDistance` | `4` | `(0,)` |
-| `Reactor.ModeSpecific.ControlRodBatchSize` | `32` | `(0,)` |
-| `Reactor.useFullPassSimulation` | `false` | true / false |
-| `Reactor.allowOffThreadSimulation`, `allowMultiThreadSimulation` | `true` | true / false |
+Heat is measured in kJ: with water, one kJ makes one steam mB.
 
-`FuelMBPerIngot` is the yield of a uranium or blutonium ingot; their blocks give nine times that value.
+For N valid rod blocks, the full-rod burn is `BaseBurn + SizeBurn*N/(N+SizeConstant)`. Multiply by usable fuel filling (maximum 100%) and the opening of each column. Waste is not fuel; consumed fractions are deducted. The model uses 1e-9 mB requested-burn precision and consumes the last smaller residue without rounding stock upward. Rods without cooling still burn. No catch-up generation occurs for unloaded chunks.
 
-The remaining advanced reactor keys are constants of the simulation's physics. Change them only if you intend to rebalance it and can test the result:
+Thermal costs must be finite and positive, `SizeBurn` must be nonnegative, and `SteamBudgetKJ` must not exceed `KJPerCoolant`. The server rejects an invalid preset rather than producing unpaid heat.
 
-| Keys | Default |
-|---|---|
-| `FuelFertilityMinimumDecay`, `FuelFertilityDecayDenominator`, `FuelFertilityDecayDenominatorInactiveMultiplier` | `0.1`, `20`, `200` |
-| `CasingHeatTransferRFMKT`, `FuelToStackRFKTMultiplier`, `StackToCoolantRFMKT`, `StackToAmbientRFMKT` | `0.6`, `1`, `0.6`, `0.001` |
-| `CaseFEPerUnitVolumeKelvin`, `RodFEPerUnitVolumeKelvin` | `10`, `10` |
-| `FuelReactivity`, `FissionEventsPerFuelUnit`, `FEPerRadiationUnit`, `FuelPerRadiationUnit` | `1.05`, `0.1`, `10`, `0.0007` |
-| `FuelHardnessDivisor`, `FuelAbsorptionCoefficient`, `FuelModerationFactor`, `fuelRadScalingMultiplier` | `1`, `0.5`, `1.5`, `1` |
-| `RadIntensityScalingMultiplier`, `RadIntensityScalingRateExponentMultiplier`, `RadIntensityScalingShiftMultiplier` | `0.95`, `1.2`, `1` |
-| `RadPenaltyShiftMultiplier`, `RadPenaltyRateMultiplier` | `15`, `2.5` |
-| `FuelAbsorptionScalingMultiplier`, `FuelAbsorptionScalingShiftMultiplier`, `FuelAbsorptionScalingRateExponentMultiplier` | `0.95`, `1`, `2.2` |
+Heat is created only after fuel is debited. Coolant, temperature and fertility never multiply nuclear energy. Starvation, full hot outputs and full batteries do **not** save fuel. Lost heat is discarded immediately. An existing hot-fluid stock remains productive after shutdown.
+
+Liquid geometry is cached on assembly. For each rod, coverage is adjacent lateral manifolds / lateral positions inside the actual interior. Internal air, rods and obstacles remain in the denominator. Useful occupancy is `(rod blocks + directly adjacent unique manifolds)/interior volume`. Structural efficiency is the smaller of average coverage and occupancy; capturable heat is the smaller of the local covered heat and generated heat times structural efficiency. Penalties are not multiplied together. A complete checkerboard has no structural loss at walls/corners. Removing the lower middle manifold from a 3×3 checkerboard leaves 75% at every power, including selective rod shutdown.
+
+Passive materials have explicit static `passiveClass` values: `NONE`, `BASIC`, `INTERMEDIATE`, `ADVANCED`, `SUPERIOR`. Any class other than `NONE` marks a material as productive; its cooling share is its own `conductivity ÷ 5`, capped at 100%, and every kJ removed gives 8.9 RF. One fuel mB therefore gives `12,500 × cooling × 8.9` RF at full structure (diamond or Ludicrite, conductivity 3: 60% and 66,750 RF, about 42% below water through a Ludicrite-coil turbine at 9.25 FE/mB). Above conductivity 3 each extra point adds 10% RF per kJ, capped at +20% from conductivity 5 (Unobtanium: 133,500 RF, about 15% above that water setup). Air is `BASIC` with conductivity 0.25 (5%) and only matters in solid reactors; a rod with no interior lateral neighbour, as in a 3×3×3 reactor, cools 5% as if surrounded by air. Mixtures share one paid heat budget; installed mods do not reclassify materials.
+
+Legacy reactor radiation, fertility, temperature, output/fuel multipliers and simulation scheduling keys remain readable for configuration compatibility but do not control model 1. This includes `FuelUsageMultiplier`, `OutputMultiplier`, `PassiveOutputMultiplier`, `ActiveOutputMultiplier`, `MaxFuelTemperature`, `PassiveCoolingTransferEfficiency`, `SimulationRays`, `IrradiationDistance`, `ModeSpecific`, `useFullPassSimulation`, off-thread flags and the older physics constants. Use the versioned thermal settings and explicit material classes instead. Deprecated computer temperature methods return ambient kelvin, fertility returns 1. The new `thermal()` computer snapshot separates kJ/t heat, RF/t potential/accepted/discarded power, usable fuel, burn and geometry. The wire protocol is 6.
+
+Fluid outlets automatically push to adjacent handlers that accept insertion. The Industrial Processor also pushes through faces configured for fluid output or fluid input/output. An outlet keeps its fluid when the adjacent block cannot accept it.
+
+Reactor item outlets automatically push cyanite into adjacent inventories. Enable **Recover fuel** on a fuel inlet to pause fueling through that port and return stored fuel to a connected inventory. Existing fuel outlets migrate to inlets with recovery enabled. Industrial Processor item output faces automatically push the finished product.
+
+Reactors, exchangers and turbines have persistent **Balanced outputs**, off by default: equal shares across accepting outlets, refusal redistribution and rotating integer remainders. Exchanger circuits are balanced separately; turbines balance their returned water. The reactor's cold coolant inlet and both exchanger inlets can recover stored input, including overfill with zero productive capacity. Recovery pauses filling through that port and is cleared when the port changes direction. Normal outlets recover recognized-fluid quarantine stock from the output tank. Unknown/uninstalled fluid IDs stay preserved until their fluid becomes available. Generic heated coolant needs a component-compatible container.
+
+### 3.2.1 Fixed coolant processing
+
+`steamPerBatch` is the number of secondary water mB consumed and steam mB produced per ten hot primary mB. Bundled values are water 10, Liquid Obsidian 20, sodium 30, Cryo Fuel 17 and Frozen Obsidian 40. Primary hot/cold is 1:1 and secondary water/steam is 1:1. The exchanger executes whole atomic batches only when both inputs and both output spaces exist. Bounded sub-batch throughput credit never stores heat and resets on blockage.
+
+Channel links use the first opposite-circuit channel straight from a face across air only. Direct contact, one, two and three air blocks have weights 1, 0.5, 0.25 and 0.1. Longer gaps, obstacles, same-circuit channels, curves and diagonals add no link. Scan once from primary channels to avoid duplicates. Geometry changes speed, never recipe yield. Multiple nonbranching paths and at least two ports per circuit are supported; configure inputs and outputs independently.
+
+Model migration is idempotent. Known bundled legacy profile signatures map to the new server recipe, preserving volumes rather than historical yield. Unknown signatures remain quarantined and recoverable. Old temperature and thermal remainder values never create a second source of steam/FE. Existing worlds may need larger circulation, different rods or larger exchangers.
 
 ### 3.3 Turbine
 
@@ -138,10 +143,12 @@ The remaining advanced reactor keys are constants of the simulation's physics. C
 | `Turbine.FlowRatePerBlock` | `5000` |
 | `Turbine.TankVolumePerBlock` | `10000` |
 | `Turbine.BatterySizePerCoilBlock` | `300000` |
-| `Turbine.FluidPerBladeLinerKilometre` | `20` |
+| `Turbine.BladeSteamPerKilometre` | `120` |
 | `Turbine.RotorAxialMassPerShaft`, `RotorAxialMassPerBlade` | `100`, `100` |
 | `Turbine.FrictionDragMultiplier`, `AerodynamicDragMultiplier`, `CoilDragMultiplier` | `0.0005`, `0.0005`, `10` |
 | `Turbine.EffectiveGridFrequency`, `EfficiencyPeaks` (`[1,)`) | `30`, `2` |
+
+Turbine output is **handled steam × the coils’ base FE per steam mB × speed efficiency**. Rated steam capacity is the smaller of blade capacity at 1,800 RPM and total coil capacity. Mixed coils use their average FE per mB. With engaged coils and reference steam, half the rated flow targets 900 RPM and the full rated flow targets 1,800 RPM. Extra steam can drive the rotor to 2,200 RPM, with declining efficiency and no extra handled volume above rated capacity. The intake limit is rated capacity scaled by 2,200/1,800, bounded by the structure. Other vapors scale with `latentHeat × turbineMultiplier / 10`. The grid frequency and efficiency-peak settings control the restored efficiency curve. The default peaks are 900 and 1,800 RPM.
 
 ### 3.4 Heat exchanger
 
@@ -154,7 +161,7 @@ The remaining advanced reactor keys are constants of the simulation's physics. C
 
 | Key | Default |
 |---|---|
-| `HeatExchanger.ChannelTankVolumePerBlock` | `10000` |
+| `HeatExchanger.ChannelTankVolumePerBlock` | `10000` (coolant channels; water/steam channels hold four times this) |
 | `HeatExchanger.ChannelToChannelHeatConductivityMultiplier` | `0.5` |
 | `HeatExchanger.ChannelFEPerKelvinUnitVolume`, `ChannelFEPerKelvinMetreSquared`, `ChannelInternalSurfaceArea` | `1000`, `50`, `80` |
 | `HeatExchanger.AirFEPerKelvinUnitVolume`, `AirFEPerKelvinMetreSquared`, `AmbientFEPerKelvinMetreSquared` | `10`, `0.5`, `0.2` |
@@ -171,16 +178,16 @@ Lowering `CellCapacity` never deletes stored energy. A battery above its new lim
 
 ### 3.6 Industrial Processor
 
-These keys keep the `CyaniteReprocessor` name for compatibility with existing files.
+These keys configure the Industrial Processor.
 
 | Key | Default | Range | Effect |
 |---|---|---|---|
-| `CyaniteReprocessor.TransferRate` | `500` | `(0,)` | Largest fluid and energy transfer rate |
-| `CyaniteReprocessor.EnergyTankCapacity` | `5000` | `(0,)` | Energy capacity |
-| `CyaniteReprocessor.WaterTankCapacity` | `5000` | `(0,)` | Input fluid capacity |
-| `CyaniteReprocessor.EnergyConsumptionPerTick` | `1` | `(0,)` | FE/t for recipes that do not set their own |
-| `CyaniteReprocessor.WaterConsumptionPerTick` | `1` | `(0,)` | Fluid per tick for recipes that do not set their own |
-| `CyaniteReprocessor.TotalWorkTime` | `200` | `(0,)` | Ticks per job for recipes that do not set their own |
+| `IndustrialProcessor.TransferRate` | `500` | `(0,)` | Largest fluid and energy transfer rate |
+| `IndustrialProcessor.EnergyTankCapacity` | `5000` | `(0,)` | Energy capacity |
+| `IndustrialProcessor.WaterTankCapacity` | `5000` | `(0,)` | Input fluid capacity |
+| `IndustrialProcessor.EnergyConsumptionPerTick` | `1` | `(0,)` | FE/t for recipes that do not set their own |
+| `IndustrialProcessor.WaterConsumptionPerTick` | `1` | `(0,)` | Fluid per tick for recipes that do not set their own |
+| `IndustrialProcessor.TotalWorkTime` | `200` | `(0,)` | Ticks per job for recipes that do not set their own |
 
 ## 4. Client options
 
@@ -270,9 +277,9 @@ Blocks inside the reactor interior that change its behavior in solid (direct FE)
 
 | Field | Range | Meaning |
 |---|---|---|
-| `absorption` | `0` to `1` | How much radiation the block absorbs |
-| `efficiency` | `0` to `1` | How well absorbed radiation becomes heat |
-| `moderation` | `1` or more | How much the block slows radiation |
+| `absorption` | `0` to `1` | Legacy property retained for compatibility; not used for nuclear heat |
+| `efficiency` | `0` to `1` | Legacy property retained for compatibility |
+| `moderation` | `1` or more | Legacy property retained for compatibility |
 | `conductivity` | `0` or more | How well the block conducts heat |
 
 | Default example | Absorption | Efficiency | Moderation | Conductivity |
@@ -299,9 +306,11 @@ Changing a diamond value does not change Blue Ice: they are separate entries. Th
 
 | Field | Range | Meaning |
 |---|---|---|
-| `efficiency` | Above `0` | Energy conversion efficiency of the coil |
-| `extractionRate` | Above `0` | How much energy the coil extracts from the rotor |
-| `bonus` | Above `0`, below `2` | Bonus multiplier of the coil |
+| `efficiency` | Above `0` | FE per steam mB = `efficiency × 8`, rounded to the nearest 0.25 |
+| `extractionRate` | Above `0` | Steam mB/t each block handles = `extractionRate × 5000`, rounded |
+| `bonus` | Above `0`, below `2` | Retained for compatibility; no longer affects generation |
+
+Bundled examples: iron 2.75 FE/mB and 500 mB/t, gold 5.25 and 875, ludicrite 9.25 and 1,750.
 
 ## 9. Coolants and fluid transitions
 
@@ -341,22 +350,22 @@ A transition pairs a cold fluid with the fluid it becomes when heated.
 | Cryo Fuel → heated coolant (when installed) | `30` | `773.15` | `2.2` / `1.8` | `0` | `0.59` |
 | Sodium → superheated sodium (when installed) | `40` | `1273.15` | `4` / `4` | `0` | `0.95` |
 
-`biggerreactorsrework:heated_coolant` is a generic hot fluid that remembers its origin through fluid components. Plain buckets cannot keep those components, so they refuse to collect it from a port; pipes and containers that preserve components work normally. A tank holding a fluid whose profile changed stops as invalid until it is emptied manually.
+`biggerreactorsrework:heated_coolant` is a generic hot fluid that remembers its origin through fluid components. Collecting it with an empty bucket gives a Heated Coolant Bucket that stores the origin. Placing and collecting the source preserves its origin in the world. Component-aware pipes and tanks also preserve it. A tank holding a fluid whose profile changed stops as invalid until it is emptied manually.
 
 ## 10. Industrial Processor recipes
 
-Type: `biggerreactorsrework:cyanite_reprocessing`. Files go in `data/<namespace>/recipe/`.
+Type: `biggerreactorsrework:industrial_processing`. Files go in `data/<namespace>/recipe/`.
 
 | Field | Required | Meaning | When omitted |
 |---|---|---|---|
-| `ingredient` | Yes | Item input: `"minecraft:obsidian"`, `"#c:ingots/uranium"` or a list | Recipe rejected |
+| `ingredient` | Yes | Item input | Recipe rejected |
 | `input_count` | No | Items per job, `1` to `64` | `1` |
-| `result` | One of the two | Item output, `{ "id": ..., "count": ... }` | |
+| `result` | One of the two | Item output | |
 | `fluid_result` | One of the two | Fluid output, `{ "id": ..., "amount": ... }` | |
 | `fluid` | No | Input fluid | `minecraft:water` |
-| `ticks` | No | Ticks per job | `CyaniteReprocessor.TotalWorkTime` |
-| `energy_per_tick` | No | FE/t | `CyaniteReprocessor.EnergyConsumptionPerTick` |
-| `fluid_per_tick` | No | Fluid per tick | `CyaniteReprocessor.WaterConsumptionPerTick` |
+| `ticks` | No | Ticks per job | `IndustrialProcessor.TotalWorkTime` |
+| `energy_per_tick` | No | FE/t | `IndustrialProcessor.EnergyConsumptionPerTick` |
+| `fluid_per_tick` | No | Fluid per tick | `IndustrialProcessor.WaterConsumptionPerTick` |
 | `fluid_per_operation` | No | Fluid per whole job, used instead of the per-tick cost | Per-tick cost |
 
 The default cyanite recipe is `biggerreactorsrework:cyanite_reprocessing`, and Liquid Obsidian is `biggerreactorsrework:liquid_obsidian_processing`. To replace one, use the same path in the `biggerreactorsrework` namespace.
@@ -365,7 +374,7 @@ The default cyanite recipe is `biggerreactorsrework:cyanite_reprocessing`, and L
 
 ```json
 {
-  "type": "biggerreactorsrework:cyanite_reprocessing",
+  "type": "biggerreactorsrework:industrial_processing",
   "ingredient": "minecraft:netherrack",
   "input_count": 4,
   "fluid": "minecraft:water",
@@ -438,7 +447,7 @@ These are fixed in the code:
 - Rotor contact damage: 1 to 10 hearts per second depending on RPM, for players in the blades' swept area.
 - Automatic reactor and heat-exchanger slowdown when output stays full.
 - Fluids as reactor moderators.
-- The heated-coolant identity rule, and its refusal in plain buckets.
+- Heated-coolant identity in filled buckets, placed sources and compatible tanks.
 - Block and item IDs, the guide's chapters, and the machines' screens.
 - Reward-free advancements: their rewards and triggers are not options, though a datapack can replace an advancement file like any other.
 - Separate fuel physics. Custom fuels change the yield only.
@@ -472,8 +481,26 @@ Changes do not rewrite existing worlds. Reassemble a machine (break and replace 
 | All custom fuels stopped working | One invalid definition made the text invalid | `Ignoring invalid Reactor.CustomFuelEntries` in the log |
 | A moderator has no effect | The reactor is in liquid mode, or the block is a fluid | [Section 7](#7-solid-moderators) |
 | A coolant stops the reactor | Its profile changed while stored | Empty both tanks with the port's manual clear |
-| A plain bucket will not collect heated coolant | Intended: it would lose the coolant's identity | Use pipes or a container that preserves fluid components |
+| A Heated Coolant Bucket cannot be placed | It has no coolant origin | Fill it from an outlet with identified heated coolant |
 | A bucket does nothing at a port | Port not assembled, wrong direction, wrong fluid, or under 1,000 mB of room | The port's screen |
 | Ore still appears | The chunk was generated before the change | Explore new terrain |
 | A script value was refused on `/reload` | Options require a restart | Restart the world or server |
 | Missing IDs at load | An optional mod's ID without that mod | Remove the entry, or use a load condition |
+
+### Thermal material overrides
+
+Add `"passiveClass": "SUPERIOR"` (or another explicit class) to a moderator JSON5 or native `reactor_moderator` data-map value. A missing class defaults to `NONE`; the model never guesses from the legacy properties. Existing four-number material overrides therefore remain parseable, but must declare a class to provide productive passive cooling.
+
+Transition JSON5 and native `fluid_transition` data-map entries accept `"steamPerBatch": 17`, for example, separately from turbine fields. The default is 10; accepted integer values are 1–50. A recipe whose useful steam budget exceeds its primary heat budget is refused. With changed thermal costs, keep `steamPerBatch * SteamBudgetKJ <= 10 * KJPerCoolant` (steam as a primary input uses its own steam budget).
+
+Optional scripting overloads:
+
+```js
+BiggerReactorsEvents.materials(event => {
+  event.moderator('minecraft:diamond_block', 0.55, 0.85, 1.5, 3, 'SUPERIOR')
+  event.thermalTransition('mod:cold', 'biggerreactorsrework:heated_coolant',
+    30, 773.15, 2.2, 1.8, 0, 0.59, 17)
+})
+```
+
+Both APIs keep server authority. The older `moderator` and `transition` calls remain available with defaults `NONE` and 10 respectively. Existing calculator snapshots are preserved with a previous-rules notice; new calculations use engine 4 and the same fuel/geometry/recipe functions as real controllers.

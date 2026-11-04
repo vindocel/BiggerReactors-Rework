@@ -15,6 +15,9 @@ import biggerreactorsrework.core.multiblock.rectangular.IRectangularMultiblock;
 import biggerreactorsrework.core.multiblock.touching.ITouchingMultiblock;
 import biggerreactorsrework.multiblocks.battery.blocks.BatteryBaseBlock;
 import biggerreactorsrework.multiblocks.battery.blocks.BatteryCell;
+import biggerreactorsrework.core.util.Statistics;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.world.item.component.CustomData;
 import biggerreactorsrework.multiblocks.battery.blocks.BatteryEnergyPort.PortDirection;
 import biggerreactorsrework.multiblocks.battery.state.BatteryActivity;
 import biggerreactorsrework.multiblocks.battery.state.BatteryState;
@@ -41,6 +44,7 @@ import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -364,14 +368,42 @@ public class BatteryMultiblockController extends MultiblockController<BatteryBas
      * Item energy is counted in ints, so each move is capped.
      */
     private void chargeItems() {
-        EnergyStore source = BatteryItemHandler.energy(items.getStackInSlot(BatteryItemHandler.DISCHARGE_SLOT));
-        if (source != null && source.canExtract()) {
-            int room = (int) Math.min(Integer.MAX_VALUE, insert(Long.MAX_VALUE, true));
-            if (room > 0) {
-                insert(source.extractEnergy(room, false), false);
+        ItemStack discharge = items.getStackInSlot(BatteryItemHandler.DISCHARGE_SLOT);
+        if (discharge.is(BatteryCell.INSTANCE.asItem())) {
+            long energy = BatteryCell.storedEnergy(discharge);
+            long moved = insert(energy, false);
+            if (moved > 0) {
+                var updated = discharge.copy();
+                var data = updated.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag();
+                if (moved == energy) data.remove(BatteryCellTile.ENERGY_KEY);
+                else data.putLong(BatteryCellTile.ENERGY_KEY, energy - moved);
+                if (data.isEmpty()) updated.remove(DataComponents.CUSTOM_DATA);
+                else updated.set(DataComponents.CUSTOM_DATA, CustomData.of(data));
+                items.setStackInSlot(BatteryItemHandler.DISCHARGE_SLOT, updated);
+            }
+        } else {
+            EnergyStore source = BatteryItemHandler.energy(discharge);
+            if (source != null && source.canExtract()) {
+                int room = (int) Math.min(Integer.MAX_VALUE, insert(Long.MAX_VALUE, true));
+                if (room > 0) {
+                    insert(source.extractEnergy(room, false), false);
+                }
             }
         }
         chargeItem(items.getStackInSlot(BatteryItemHandler.CHARGE_SLOT));
+    }
+
+    public List<Map<String, Object>> statistics() {
+        double charge = capacity > 0 ? Math.min(100, 100.0 * stored / capacity) : 0;
+        return List.of(
+                Statistics.row("battery_charge", String.format(java.util.Locale.ROOT, "%.1f%%", charge)),
+                Statistics.row("battery_cells", cells.size()),
+                Statistics.row("battery_stored", stored + " FE"),
+                Statistics.row("battery_capacity", capacity + " FE"),
+                Statistics.row("battery_input", lastInput + " FE/t"),
+                Statistics.row("battery_output", lastOutput + " FE/t"),
+                Statistics.row("battery_max_input", transferLimit + " FE/t"),
+                Statistics.row("battery_max_output", transferLimit + " FE/t"));
     }
 
     /** Modified 2026-10-27: item slots and open-menu equipment share the battery's output budget. */

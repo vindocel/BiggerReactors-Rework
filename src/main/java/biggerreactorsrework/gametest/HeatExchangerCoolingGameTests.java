@@ -75,7 +75,7 @@ public final class HeatExchangerCoolingGameTests {
     private static double channelArea(){return Math.pow((12-.04)/16,2);}
     private static double overlap(biggerreactorsrework.core.util.FluidPath.Box a,biggerreactorsrework.core.util.FluidPath.Box b){return Math.max(0,Math.min(a.x1(),b.x1())-Math.max(a.x0(),b.x0()))*Math.max(0,Math.min(a.y1(),b.y1())-Math.max(a.y0(),b.y0()))*Math.max(0,Math.min(a.z1(),b.z1())-Math.max(a.z0(),b.z0()));}
     @GameTest(template="empty_7x7x7",timeoutTicks=150)
-    public static void savedHeatSurvivesReassembly(GameTestHelper h) {
+    public static void legacyHeatIsNeutralAfterReassembly(GameTestHelper h) {
         GuideStructures.exchanger().parts().forEach(h::setBlock);
         var pos=new BlockPos(1,1,0);
         h.startSequence().thenWaitUntil(()->h.assertTrue(h.getBlockState(pos).getValue(ASSEMBLED),"exchanger not assembled"))
@@ -83,9 +83,9 @@ public final class HeatExchangerCoolingGameTests {
                 var c=((HeatExchangerBaseTile)GameTestSupport.be(h,pos)).controller();
                 c.condenserHeatBody.setTemperature(900);c.evaporatorHeatBody.setTemperature(450);c.airHeatBody.setTemperature(500);
                 var saved=c.write();c.read(saved);c.onReassembled();
-                h.assertTrue(c.condenserHeatBody.temperature()==900,"reassembly discarded primary heat");
-                h.assertTrue(c.evaporatorHeatBody.temperature()==450,"reassembly discarded secondary heat");
-                h.assertTrue(c.airHeatBody.temperature()==500,"reassembly discarded internal heat");
+                h.assertTrue(c.condenserHeatBody.temperature()==293.15,"legacy primary heat remained productive");
+                h.assertTrue(c.evaporatorHeatBody.temperature()==293.15,"legacy secondary heat remained productive");
+                h.assertTrue(c.airHeatBody.temperature()==293.15,"legacy interior heat remained productive");
                 var channel=c.evaporatorChannels.iterator().next();
                 h.assertTrue(channel.coolantAnchor!=null,"channel has no aggregate render anchor");
                 h.assertTrue(channel.coolantPathLength==c.evaporatorChannels.size(),"render bar does not cover the whole circuit");
@@ -93,7 +93,11 @@ public final class HeatExchangerCoolingGameTests {
                 h.assertTrue(indices.size()==c.evaporatorChannels.size(),"two channels share the same position in the render bar");
                 var inlet=(biggerreactorsrework.multiblocks.heatexchanger.tiles.HeatExchangerFluidPortTile)GameTestSupport.be(h,new BlockPos(0,1,2));
                 var old=new java.util.HashMap<BlockPos,Integer>();for(var part:c.evaporatorChannels)old.put(part.getBlockPos(),part.coolantPathIndex);
-                c.setInletPort(inlet,!inlet.isInlet());
+                boolean wasInlet=inlet.isInlet();
+                c.setInletPort(inlet,!wasInlet);
+                h.assertTrue(inlet.isInlet()!=wasInlet,"selected port direction was not changed");
+                var counterpart=c.fluidPorts().stream().filter(p->p!=inlet && p.isCondenser()==inlet.isCondenser()).findFirst().orElseThrow();
+                c.setInletPort(counterpart,wasInlet);
                 for(var part:c.evaporatorChannels)h.assertTrue(part.coolantPathIndex==c.evaporatorChannels.size()-1-old.get(part.getBlockPos()),"changing inlet did not reverse the measuring bar");
                 h.assertFalse(channel.getBlockState().hasProperty(ASSEMBLED),"regression fixture must be a channel without ASSEMBLED");
                 for(var part:c.condenserChannels)h.assertTrue(part.renderTerminal()!=null,"condenser rendering cannot resolve assembled terminal");
@@ -113,32 +117,22 @@ public final class HeatExchangerCoolingGameTests {
 
     @GameTest(template="empty_7x7x7")
     public static void indirectExchangeStabilizesAndConservesPrimaryVolume(GameTestHelper h) {
-        var cfg=biggerreactorsrework.Config.CONFIG.HeatExchanger;
-        var geometry=new HeatExchangerCapacity.Geometry(39,39,0,79,79,79.6,4170,293.15);
         var primary=FluidTransitionRegistry.liquidTransition(biggerreactorsrework.fluids.LiquidObsidian.INSTANCE);
         var secondary=FluidTransitionRegistry.liquidTransition(Fluids.WATER);
+        var geometry=new HeatExchangerCapacity.Geometry(39,39,0,79,79,79.6,4170,293.15,3.9);
         var potential=HeatExchangerCapacity.measure(geometry,primary,secondary);
-        var hot=new FluidTransitionTank(true);var water=new FluidTransitionTank(false);
-        hot.perSideCapacity=water.perSideCapacity=39*cfg.ChannelTankVolumePerBlock;
-        HeatBody c=new HeatBody(),e=new HeatBody(),air=new HeatBody(),ambient=new HeatBody();
-        c.setRfPerKelvin(39*cfg.ChannelFEPerKelvinUnitVolume);e.setRfPerKelvin(39*cfg.ChannelFEPerKelvinUnitVolume);air.setRfPerKelvin(4170);ambient.setInfinite(true);
-        for(var b:new HeatBody[]{c,e,air,ambient})b.setTemperature(293.15);
-        int flow=(int)Math.min(3076,potential.converted()*.5);
-        long supplied=0,returned=0,early=0,late=0;
-        for(int tick=0;tick<60000;tick++) {
-            supplied+=hot.fill(biggerreactorsrework.fluids.HeatedCoolant.INSTANCE,biggerreactorsrework.registries.CoolantComponents.heated(FluidTransitionRegistry.liquidTransition(biggerreactorsrework.fluids.LiquidObsidian.INSTANCE)),flow,false);
-            water.fill(Fluids.WATER,DataComponentPatch.EMPTY,water.perSideCapacity,false);
-            hot.transferWith(c,39*cfg.ChannelInternalSurfaceArea);c.transferWith(air,geometry.condenserAir());c.transferWith(e,0);
-            e.transferWith(air,geometry.evaporatorAir());water.transferWith(e,39*cfg.ChannelInternalSurfaceArea);air.transferWith(ambient,geometry.ambientArea());
-            long amount=hot.drain(hot.fluidTypeInTank(1),hot.fluidComponentsInTank(1),Long.MAX_VALUE,false);returned+=amount;
+        var hot=new FluidTransitionTank(true);var water=new FluidTransitionTank(false);hot.perSideCapacity=water.perSideCapacity=100000;
+        var model=new biggerreactorsrework.thermal.ThermalExchanger();long supplied=0,returned=0;
+        for(int tick=0;tick<100;tick++) {
+            supplied+=hot.fill(primary.gases.getFirst(),biggerreactorsrework.registries.CoolantComponents.heated(primary),1000,false);
+            water.fill(Fluids.WATER,DataComponentPatch.EMPTY,100000,false);
+            model.tick(hot,water,3.9*biggerreactorsrework.thermal.ThermalModel.Preset.DEFAULT.exchangerRate(),biggerreactorsrework.thermal.ThermalModel.Preset.DEFAULT);
+            returned+=hot.drain(hot.fluidTypeInTank(1),hot.fluidComponentsInTank(1),Long.MAX_VALUE,false);
             water.drain(water.fluidTypeInTank(1),water.fluidComponentsInTank(1),Long.MAX_VALUE,false);
-            if(tick<2000)early+=amount;if(tick>=58000)late+=amount;
         }
-        h.assertTrue(supplied==returned+hot.fluidAmountInTank(0)+hot.fluidAmountInTank(1),"primary coolant was lost or duplicated");
-        h.assertTrue(c.temperature()>293.15 && e.temperature()>293.15,"channel temperatures did not warm up");
-        h.assertTrue(Math.abs(late/2000d-flow)<Math.max(2,flow*.01),"oversized exchanger did not stabilize at incoming flow");
-        h.assertTrue(potential.converted()>late/2000d,"full tank estimate must exceed partial supply throughput");
-        BiggerReactors.LOGGER.info("Indirect HX warmup: first 2000 ticks={} mB/t; final 2000={} mB/t; ideal={} mB/t; residual={} mB",early/2000d,late/2000d,potential.converted(),hot.fluidAmountInTank(0));
+        h.assertTrue(supplied==returned+hot.fluidAmountInTank(0)+hot.fluidAmountInTank(1),"Gap exchange lost primary volume");
+        h.assertTrue(potential.converted()==7800 && potential.burn()==15600,"Geometric gap changed recipe yield instead of rate");
+        h.assertTrue(returned==100000,"Partial supply did not process in bounded batches");
         h.succeed();
     }
 }

@@ -38,7 +38,7 @@ public record ExchangerDesign(int length, int rows, int layers) {
     public BlockPos steamOut() { return new BlockPos(width() - 1, coldOut().getY(), portDepth() + 1); }
 
     /** Heat paths counted from the blocks exactly as the controller counts them on assembly. */
-    public record Geometry(int condenser, int evaporator, int contact, int condenserAir, int evaporatorAir, int airVolume, int ambientArea) {
+    public record Geometry(int condenser, int evaporator, int contact, int condenserAir, int evaporatorAir, int airVolume, int ambientArea, double thermalLinks) {
         public double channelRFKT() { return contact * Config.CONFIG.HeatExchanger.ChannelFEPerKelvinMetreSquared; }
         public double condenserAirRFKT() { return condenserAir * Config.CONFIG.HeatExchanger.AirFEPerKelvinMetreSquared; }
         public double evaporatorAirRFKT() { return evaporatorAir * Config.CONFIG.HeatExchanger.AirFEPerKelvinMetreSquared; }
@@ -62,7 +62,12 @@ public record ExchangerDesign(int length, int rows, int layers) {
             }
         }
         int w = width(), h = height(), d = depth();
-        return new Geometry(condenser, evaporator, contact, condenserAir, evaporatorAir, w * h * d - condenser - evaporator, 2 * (w * h + w * d + h * d));
+        var links=biggerreactorsrework.thermal.ExchangerLinks.scan(parts.entrySet().stream().filter(e->e.getValue()==HeatExchangerCondenserChannelBlock.INSTANCE)
+                .map(e->new biggerreactorsrework.thermal.ExchangerLinks.Position(e.getKey().getX(),e.getKey().getY(),e.getKey().getZ())).toList(),(x,y,z)-> {
+                    if(x<=0 || x>=w-1 || y<=0 || y>=h-1 || z<=0 || z>=d-1)return 3;
+                    var block=parts.get(new BlockPos(x,y,z));return block==HeatExchangerCondenserChannelBlock.INSTANCE?1:block==HeatExchangerEvaporatorChannelBlock.INSTANCE?2:block==null?0:3;
+                });
+        return new Geometry(condenser, evaporator, contact, condenserAir, evaporatorAir, w * h * d - condenser - evaporator, 2 * (w * h + w * d + h * d),links.weighted());
     }
 
     private Map<BlockPos, Block> channels() {
@@ -101,6 +106,10 @@ public record ExchangerDesign(int length, int rows, int layers) {
     public long channelVolume() {
         long count = (long) layers * (rows * length + rows - 1) + (layers == 1 ? 0 : 4L * (layers - 1) + 2);
         return count * Config.CONFIG.HeatExchanger.ChannelTankVolumePerBlock;
+    }
+
+    public long waterVolume() {
+        return channelVolume() * Config.CONFIG.HeatExchanger.evaporatorTankVolumePerBlock() / Config.CONFIG.HeatExchanger.ChannelTankVolumePerBlock;
     }
 
     public MachineLayout layout() {

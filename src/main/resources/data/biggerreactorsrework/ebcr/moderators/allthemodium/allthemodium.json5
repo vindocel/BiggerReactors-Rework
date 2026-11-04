@@ -1,4 +1,6 @@
+// Modified 2026-11-02: static thermal class.
 {
+    passiveClass: "SUPERIOR",
     type: "tag",
     location: "c:storage_blocks/allthemodium",
     absorption: 0.66,

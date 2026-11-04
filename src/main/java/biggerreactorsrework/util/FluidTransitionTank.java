@@ -18,14 +18,17 @@ import java.util.List;
 
 @ParametersAreNonnullByDefault
 public class FluidTransitionTank extends HeatBody implements IFluidTankHandler, NbtSerializable {
+
+    // Modified 2026-11-03: an aborted maintenance drain must restore the quarantined tag as well as the amounts.
     private record TransferState(FluidTransitionRegistry.FluidTransition transition, Fluid inFluid, long inAmount, Fluid outFluid, long outAmount,
-                                 DataComponentPatch inComponents, DataComponentPatch outComponents, double incoming, double outgoing, double[] observer) {
+                                 DataComponentPatch inComponents, DataComponentPatch outComponents, double incoming, double outgoing,
+                                 double[] observer, CompoundTag unresolved) {
     }
 
     @Override
     public Object transferSnapshot() {
         return new TransferState(activeTransition, inFluid, inAmount, outFluid, outAmount, inComponents, outComponents, incoming, outgoing,
-                outputObserver == null ? null : outputObserver.history());
+                outputObserver == null ? null : outputObserver.history(), unresolved == null ? null : unresolved.copy());
     }
 
     @Override
@@ -33,6 +36,7 @@ public class FluidTransitionTank extends HeatBody implements IFluidTankHandler, 
         if (!(snapshot instanceof TransferState state)) return;
         activeTransition = state.transition; inFluid = state.inFluid; inAmount = state.inAmount; outFluid = state.outFluid; outAmount = state.outAmount;
         inComponents = state.inComponents; outComponents = state.outComponents; incoming = state.incoming; outgoing = state.outgoing;
+        unresolved = state.unresolved == null ? null : state.unresolved.copy();
         if (outputObserver != null && state.observer != null) outputObserver.restoreHistory(state.observer);
         transitionUpdate();
     }
@@ -144,6 +148,7 @@ public class FluidTransitionTank extends HeatBody implements IFluidTankHandler, 
     public long fill(@Nonnull Fluid fluid, DataComponentPatch components, long amount, boolean simulate) {
         var selected = condenser ? FluidTransitionRegistry.gasTransition(fluid, components) :
                 (components.isEmpty() ? FluidTransitionRegistry.liquidTransition(fluid) : null);
+        if(condenser && selected!=null && selected.genericHot())components=biggerreactorsrework.registries.CoolantComponents.heated(selected);
         return fillStack(fluid, components, amount, simulate, selected);
     }
     
@@ -200,6 +205,41 @@ public class FluidTransitionTank extends HeatBody implements IFluidTankHandler, 
         return 0;
     }
     
+    // Modified 2026-11-02: called only after the shared atomic exchanger has checked both circuits.
+    public void resetThermalCounters() { transitionedLastTick=0;maxTransitionedLastTick=0;rfTransferredLastTick=0;thermalRemainder=0; }
+    public void processThermalUnits(long units,double heatPerUnit) {
+        if(units<0 || units>inAmount || units>Math.max(0,perSideCapacity-outAmount) || unresolved!=null || activeTransition==null)
+            throw new IllegalArgumentException("Thermal conversion exceeds available stock");
+        inAmount-=units;outAmount+=units;transitionedLastTick=units;maxTransitionedLastTick=units;rfTransferredLastTick=(long)(units*heatPerUnit);thermalRemainder=0;
+    }
+
+    // Added 2026-11-02: recover preserved cold/hot stock without admitting its unknown profile into production.
+    public Fluid maintenanceFluid(int tank) {
+        if(unresolved==null)return fluidTypeInTank(tank);
+        var id=Identifier.tryParse(unresolved.getStringOr(tank==0?"inFluid":"outFluid", ""));
+        return id!=null && BuiltInRegistries.FLUID.containsKey(id)?BuiltInRegistries.FLUID.getValue(id):Fluids.EMPTY;
+    }
+    public DataComponentPatch maintenanceComponents(int tank) {
+        if(unresolved==null)return fluidComponentsInTank(tank);
+        String origin=unresolved.getStringOr("origin", "");
+        if(tank==1 && !condenser && maintenanceFluid(tank)==biggerreactorsrework.fluids.HeatedCoolant.INSTANCE)origin=unresolved.getStringOr("profile", "");
+        return !origin.isEmpty() && maintenanceFluid(tank)==biggerreactorsrework.fluids.HeatedCoolant.INSTANCE?
+            DataComponentPatch.builder().set(biggerreactorsrework.registries.CoolantComponents.ORIGIN.get(),origin).build():DataComponentPatch.EMPTY;
+    }
+    public long maintenanceDrain(int tank,Fluid fluid,DataComponentPatch components,long amount,boolean simulate) {
+        if(tank<0 || tank>1 || amount<=0 || fluid==Fluids.EMPTY || fluid!=maintenanceFluid(tank) || !components.equals(maintenanceComponents(tank)))return 0;
+        long drained=Math.min(amount,tank==0?inAmount:outAmount);
+        if(!simulate && drained>0) {
+            if(tank==0)inAmount-=drained;else outAmount-=drained;
+            if(unresolved!=null) {
+                unresolved.putLong(tank==0?"inAmount":"outAmount",tank==0?inAmount:outAmount);
+                if(inAmount==0 && outAmount==0)unresolved=null;
+            }
+            outgoing+=drained;clearSelectionIfEmpty();
+        }
+        return drained;
+    }
+
     public void dumpTank(int tank) {
         if (tank == IN_TANK) {
             inAmount = 0;
@@ -295,14 +335,15 @@ public class FluidTransitionTank extends HeatBody implements IFluidTankHandler, 
         if(unresolved!=null)return unresolved.copy();
         CompoundTag nbt = new CompoundTag();
         if (inFluid != null) {
+            nbt.putInt("thermalModelVersion",biggerreactorsrework.thermal.ThermalModel.VERSION);
             nbt.putString("inFluid", BuiltInRegistries.FLUID.getKey(inFluid).toString());
             nbt.putLong("inAmount", inAmount);
             nbt.putString("outFluid", BuiltInRegistries.FLUID.getKey(outFluid).toString());
             nbt.putLong("outAmount", outAmount);
-            nbt.putDouble("thermalRemainder",thermalRemainder);
+            nbt.putDouble("thermalRemainder",0);
             nbt.putString("profile",biggerreactorsrework.registries.CoolantComponents.fingerprint(activeTransition));
-            String origin=inComponents.get(net.minecraft.core.component.DataComponentMap.EMPTY,biggerreactorsrework.registries.CoolantComponents.ORIGIN.get());
-            if(origin!=null) nbt.putString("origin",origin);
+            var origin=java.util.Optional.ofNullable(inComponents.get(net.minecraft.core.component.DataComponentMap.EMPTY,biggerreactorsrework.registries.CoolantComponents.ORIGIN.get()));
+            if(origin!=null && origin.isPresent()) nbt.putString("origin",origin.get());
         }
         return nbt;
     }
@@ -370,12 +411,11 @@ public class FluidTransitionTank extends HeatBody implements IFluidTankHandler, 
             activeTransition = newTransition;
             inFluid = newInFluid;
             outFluid = newOutFluid;
-            inComponents=nbt.contains("origin") ? DataComponentPatch.builder().set(biggerreactorsrework.registries.CoolantComponents.ORIGIN.get(),nbt.getStringOr("origin", "")).build() : DataComponentPatch.EMPTY;
+            inComponents=condenser && newTransition.genericHot() ? biggerreactorsrework.registries.CoolantComponents.heated(newTransition) : DataComponentPatch.EMPTY;
             outComponents=!condenser && newTransition.genericHot() ? biggerreactorsrework.registries.CoolantComponents.heated(newTransition) : DataComponentPatch.EMPTY;
             inAmount = Math.max(0, nbt.getLongOr("inAmount", 0L));
             outAmount = Math.max(0, nbt.getLongOr("outAmount", 0L));
-            thermalRemainder=Math.max(0,Math.min(Math.nextDown(newTransition.latentHeat),nbt.getDoubleOr("thermalRemainder", 0D)));
-            if(!Double.isFinite(thermalRemainder))thermalRemainder=0;
+            thermalRemainder=0;
             unresolved=null;
             transitionUpdate();
             clearSelectionIfEmpty();

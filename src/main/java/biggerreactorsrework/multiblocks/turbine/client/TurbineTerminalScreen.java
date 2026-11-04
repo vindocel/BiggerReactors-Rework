@@ -54,7 +54,7 @@ public class TurbineTerminalScreen extends ModScreen<TurbineTerminalContainer> {
     private Fluid exhaustFluid = Fluids.EMPTY;
 
     public TurbineTerminalScreen(TurbineTerminalContainer container, Inventory playerInventory, Component title) {
-        super(container, playerInventory, Component.translatable("screen.biggerreactorsrework.turbine_terminal"), 200, 152);
+        super(container, playerInventory, Component.translatable("screen.biggerreactorsrework.turbine_terminal"), 200, 168);
 
         // Initialize turbine state.
         turbineState = (TurbineState) this.getMenu().getGuiPacket();
@@ -168,6 +168,15 @@ public class TurbineTerminalScreen extends ModScreen<TurbineTerminalContainer> {
             return true;
         };
         this.addScreenElement(ventStateToggle);
+
+        // (Left) Balanced water outputs toggle:
+        Biselector<TurbineTerminalContainer> balanceToggle = new Biselector<>(this, 8, 146, Component.translatable("thermal.biggerreactorsrework.balanced_outputs"),
+                () -> turbineState.balancedOutputs ? 1 : 0, SelectorColors.CYAN);
+        balanceToggle.onMouseReleased = (mX, mY, btn) -> {
+            this.getMenu().executeRequest("balancedOutputs", !turbineState.balancedOutputs);
+            return true;
+        };
+        this.addScreenElement(balanceToggle);
 
         // (Right) Flow rate increase button:
         InteractiveElement<TurbineTerminalContainer> flowRateIncreaseButton = new InteractiveElement<>(this, 177, 92, 14, 15, 0, 0, Component.translatable("screen.biggerreactorsrework.turbine_terminal.flow_rate_increase.tooltip"));
@@ -311,7 +320,7 @@ public class TurbineTerminalScreen extends ModScreen<TurbineTerminalContainer> {
      * @param partialTicks Partial ticks.
      */
     @Override
-    public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTicks) {
+    public void extractRenderState(@Nonnull GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTicks) {
         super.extractRenderState(graphics, mouseX, mouseY, partialTicks);
 
         // Render text for turbine tachometer:
@@ -356,6 +365,9 @@ public class TurbineTerminalScreen extends ModScreen<TurbineTerminalContainer> {
             // Text for venting no exhaust:
             GuiArt.scrollingText(graphics, this.getFont(), Component.translatable("screen.biggerreactorsrework.turbine_terminal.vent_state_toggle.closed").getString(), this.getLeftPos() + 58, this.getTopPos() + 134, this.imageWidth - 6 - 58, GuiTheme.textColor());
         }
+
+        // Render text for balanced water outputs:
+        GuiArt.scrollingText(graphics, this.getFont(), Component.translatable("thermal.biggerreactorsrework.balanced_outputs").getString(), this.getLeftPos() + 42, this.getTopPos() + 150, this.imageWidth - 6 - 42, GuiTheme.textColor());
     }
 
     /**
@@ -363,7 +375,7 @@ public class TurbineTerminalScreen extends ModScreen<TurbineTerminalContainer> {
      */
     @Override
     protected void drawBackground(@Nonnull GuiGraphicsExtractor graphics, int x, int y) {
-        GuiArt.panel(graphics, x, y, 200, 152, this.frame());
+        GuiArt.panel(graphics, x, y, 200, 168, this.frame());
         GuiArt.fill(graphics, x + 6, y + 36, x + 105, y + 37, GuiArt.SEPARATOR);
         GuiArt.fill(graphics, x + 6, y + 55, x + 105, y + 56, GuiArt.SEPARATOR);
         GuiArt.fill(graphics, x + 6, y + 74, x + 105, y + 75, GuiArt.SEPARATOR);

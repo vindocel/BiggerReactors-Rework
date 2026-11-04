@@ -1,4 +1,6 @@
+// Modified 2026-11-02: static thermal class.
 {
+    passiveClass: "NONE",
     type: "registry",
     location: "bloodmagic:life_essence_block",
     absorption: 0.7,

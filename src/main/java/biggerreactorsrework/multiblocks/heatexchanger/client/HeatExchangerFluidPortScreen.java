@@ -28,7 +28,7 @@ public class HeatExchangerFluidPortScreen extends ModScreen<HeatExchangerFluidPo
     private HeatExchangerFluidPortState heatExchangerFluidPortState;
 
     public HeatExchangerFluidPortScreen(HeatExchangerFluidPortContainer container, Inventory playerInventory, Component title) {
-        super(container, playerInventory, title, 176, 72);
+        super(container, playerInventory, title, 176, 92);
 
         // Initialize access port state.
         heatExchangerFluidPortState = (HeatExchangerFluidPortState) this.getMenu().getGuiPacket();
@@ -57,10 +57,27 @@ public class HeatExchangerFluidPortScreen extends ModScreen<HeatExchangerFluidPo
     /**
      * Initialize controls.
      */
+    private Biselector<HeatExchangerFluidPortContainer> maintenance;
+
+    private boolean showRecovery() {
+        return heatExchangerFluidPortState.direction;
+    }
+
     public void initControls() {
+        maintenance = new Biselector<>(this,8,66,Component.translatable("thermal.biggerreactorsrework.recover_hot_coolant_tooltip"),()->heatExchangerFluidPortState.maintenanceCold?1:0,SelectorColors.CYAN);
+        maintenance.onMouseReleased = (mx, my, button) -> {
+            if (!showRecovery()) return false;
+            getMenu().executeRequest("recoverInput", !heatExchangerFluidPortState.maintenanceCold);
+            return true;
+        };
+        maintenance.disable();
+        addScreenElement(maintenance);
+
         // (Left) Direction toggle:
         Biselector<HeatExchangerFluidPortContainer> directionToggle = new Biselector<>(this, 8, 33, Component.translatable("screen.biggerreactorsrework.heat_exchanger_fluid_port.direction_toggle.tooltip"),
-                () -> heatExchangerFluidPortState.direction ? 0 : 1, SelectorColors.BLUE);
+                () -> heatExchangerFluidPortState.direction ? 0 : 1,
+                () -> heatExchangerFluidPortState.condenser ? SelectorColors.RED : SelectorColors.CYAN,
+                () -> heatExchangerFluidPortState.condenser ? SelectorColors.CYAN : SelectorColors.RED);
         directionToggle.onMouseReleased = (mX, mY, btn) -> {
             // Click logic.
             this.getMenu().executeRequest("setDirection", directionToggle.getState() == 0 ? 1 : 0);
@@ -99,7 +116,14 @@ public class HeatExchangerFluidPortScreen extends ModScreen<HeatExchangerFluidPo
      * @param partialTicks Partial ticks.
      */
     @Override
-    public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTicks) {
+    public void extractRenderState(@Nonnull GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTicks) {
+        String recoveryKey = heatExchangerFluidPortState.condenser
+                ? "thermal.biggerreactorsrework.recover_hot_coolant"
+                : "thermal.biggerreactorsrework.recover_water";
+        if (showRecovery()) {
+            maintenance.tooltip = Component.translatable(recoveryKey + "_tooltip");
+            maintenance.enable();
+        } else maintenance.disable();
         super.extractRenderState(graphics, mouseX, mouseY, partialTicks);
 
         // Render text to show what channel this is connected to.
@@ -111,17 +135,14 @@ public class HeatExchangerFluidPortScreen extends ModScreen<HeatExchangerFluidPo
             graphics.text(this.getFont(), Component.translatable("screen.biggerreactorsrework.heat_exchanger_fluid_port.channel_type.evaporator").getString(), this.getLeftPos() + 8, this.getTopPos() + 22, GuiTheme.textColor(), false);
         }
 
-        // Render text for input/output direction:
-        if (heatExchangerFluidPortState.direction) {
-            // Text for an inlet:
-            graphics.text(this.getFont(), Component.translatable("screen.biggerreactorsrework.heat_exchanger_fluid_port.direction_toggle.input").getString(), this.getLeftPos() + 42, this.getTopPos() + 37, GuiTheme.textColor(), false);
-        } else {
-            // Text for an outlet:
-            graphics.text(this.getFont(), Component.translatable("screen.biggerreactorsrework.heat_exchanger_fluid_port.direction_toggle.output").getString(), this.getLeftPos() + 42, this.getTopPos() + 37, GuiTheme.textColor(), false);
-        }
+        String circuit = heatExchangerFluidPortState.condenser ? "coolant_" : "";
+        String direction = heatExchangerFluidPortState.direction ? "input" : "output";
+        graphics.text(getFont(), Component.translatable("screen.biggerreactorsrework.heat_exchanger_fluid_port.direction_toggle."
+                + circuit + direction), getLeftPos() + 42, getTopPos() + 37, GuiTheme.textColor(), false);
 
         // Render text for manual tank eject:
         graphics.text(this.getFont(), Component.translatable("screen.biggerreactorsrework.heat_exchanger_fluid_port.manual_dump").getString(), this.getLeftPos() + 26, this.getTopPos() + 53, GuiTheme.textColor(), false);
+        if (showRecovery()) GuiArt.scrollingText(graphics,getFont(),Component.translatable(recoveryKey).getString(),getLeftPos()+42,getTopPos()+70,126,GuiTheme.textColor());
     }
 
     @Override
