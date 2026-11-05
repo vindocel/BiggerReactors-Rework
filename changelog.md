@@ -7,7 +7,7 @@
 - Reactor item outlets automatically send cyanite. Fuel inlets can recover stored fuel. Direction selectors and labels show the current port mode in color. The Industrial Processor automatically sends finished items through configured item output faces.
 - Reactor heat follows fuel actually consumed. Manifold contact and useful occupancy set a permanent efficiency percentage. The terminal shows heat in kJ and the reasons for losses.
 - Heat exchangers use fixed batches and accept multiple paths per circuit. A direct channel link processes 2,000 hot mB/t, and blue channels hold four times as much fluid as red channels.
-- Turbine speed follows steam flow up to 2,200 RPM. The default efficiency peaks are 900 and 1,800 RPM, with a penalty above 1,800 RPM. Coil material sets the base FE per steam mB. Reactors, exchangers and turbine water outlets can optionally balance their output.
+- Turbine speed follows steam flow up to 2,200 RPM. Efficiency is 100% from 900 to 1,000 RPM and from 1,800 to 1,900 RPM, ramps up just before each band, returns to 50% after 1,000 RPM and falls gradually above 1,900 RPM. Coil material sets the base FE per steam mB (for example iron 2.75, gold 5.25, diamond 7.25, ludicrite 9.25). Reactors, exchangers and turbine water outlets can optionally balance their output.
 - Passive moderators have individual cooling and fuel yields. Air provides 5% cooling in passive reactors.
 - The Industrial Processor uses the `industrial_processor` block ID and `industrial_processing` recipe type. It recycles cyanite, makes Liquid Obsidian, and converts 1 Blue Ice and 200 mB of Liquid Obsidian into 100 mB of Frozen Obsidian.
 - Frozen Obsidian glows and freezes entities when placed. Heated coolant burns entities and keeps its origin in a filled bucket. Steam uses tanks and pipes and has a translucent white animation.
@@ -58,6 +58,7 @@
 
 - Heated Coolant Buckets preserve the coolant origin in ports, tanks and placed sources.
 
+- Diamond blocks are now turbine coils (7.25 FE per steam mB, 1,250 mB/t), and can be mixed with other coil materials in the same turbine.
 - Blue Ice is now a solid reactor moderator with the same default properties as diamond blocks, listed in the guide's moderator table.
 - Added a customization guide for modpack creators and server administrators.
 - Fill reactor, turbine and heat-exchanger fluid inlets with buckets or compatible containers, and collect supported outlet fluids. Creative buckets are retained; refused transfers keep their contents without spilling. Ordinary buckets cannot collect heated coolant whose identity requires fluid components.

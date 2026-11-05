@@ -148,7 +148,7 @@ Model migration is idempotent. Known bundled legacy profile signatures map to th
 | `Turbine.FrictionDragMultiplier`, `AerodynamicDragMultiplier`, `CoilDragMultiplier` | `0.0005`, `0.0005`, `10` |
 | `Turbine.EffectiveGridFrequency`, `EfficiencyPeaks` (`[1,)`) | `30`, `2` |
 
-Turbine output is **handled steam × the coils’ base FE per steam mB × speed efficiency**. Rated steam capacity is the smaller of blade capacity at 1,800 RPM and total coil capacity. Mixed coils use their average FE per mB. With engaged coils and reference steam, half the rated flow targets 900 RPM and the full rated flow targets 1,800 RPM. Extra steam can drive the rotor to 2,200 RPM, with declining efficiency and no extra handled volume above rated capacity. The intake limit is rated capacity scaled by 2,200/1,800, bounded by the structure. Other vapors scale with `latentHeat × turbineMultiplier / 10`. The grid frequency and efficiency-peak settings control the restored efficiency curve. The default peaks are 900 and 1,800 RPM.
+Turbine output is **handled steam × the coils’ base FE per steam mB × speed efficiency**. Rated steam capacity is the smaller of blade capacity at 1,800 RPM and total coil capacity. Mixed coils use their average FE per mB. With engaged coils and reference steam, half the rated flow targets 900 RPM and the full rated flow targets 1,800 RPM. Extra steam can drive the rotor to 2,200 RPM, with declining efficiency and no extra handled volume above rated capacity. The intake limit is rated capacity scaled by 2,200/1,800, bounded by the structure. Other vapors scale with `latentHeat × turbineMultiplier / 10`. Efficiency is 100% from each peak to 100 RPM above it (900–1,000 and 1,800–1,900 RPM by default). It ramps up from 50% over the last 1/18 of RPM before each peak (850 and 1,700 RPM), falls back to 50% over 1/6 of the lower peak after its band (1,000–1,150 RPM), and falls gradually above the top band, never below 50%. Elsewhere it is 50%. The grid frequency sets the top peak (frequency × 60) and the efficiency-peak count sets how many halvings below it also peak.
 
 ### 3.4 Heat exchanger
 
@@ -310,7 +310,7 @@ Changing a diamond value does not change Blue Ice: they are separate entries. Th
 | `extractionRate` | Above `0` | Steam mB/t each block handles = `extractionRate × 5000`, rounded |
 | `bonus` | Above `0`, below `2` | Retained for compatibility; no longer affects generation |
 
-Bundled examples: iron 2.75 FE/mB and 500 mB/t, gold 5.25 and 875, ludicrite 9.25 and 1,750.
+Bundled examples: iron 2.75 FE/mB and 500 mB/t, gold 5.25 and 875, diamond 7.25 and 1,250, ludicrite 9.25 and 1,750. Different coil materials can be mixed in the same turbine: capacities add up and FE per mB is their average.
 
 ## 9. Coolants and fluid transitions
 

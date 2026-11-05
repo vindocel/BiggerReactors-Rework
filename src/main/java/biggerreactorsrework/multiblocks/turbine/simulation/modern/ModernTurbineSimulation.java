@@ -164,19 +164,38 @@ public class ModernTurbineSimulation implements ITurbineSimulation {
         return Math.min(MAX_RPM, load * (coilEngaged && coilCapacity > 0 ? NOMINAL_RPM : MAX_RPM));
     }
 
-    /** The original grid efficiency curve, applied to the current coil's FE per mB. */
+    public static final double BASE_SPEED_EFFICIENCY = 0.5;
+    /** RPM above each peak that still runs at 100%, so the flow can be tuned with some margin. */
+    public static final double PEAK_PLATEAU_RPM = 100;
+
+    /**
+     * Speed efficiency: 100% from each peak (default 900 and 1,800 RPM) to 100 RPM above it, a short ramp up before
+     * each peak, a ramp down after the lower plateaus and a gradual overspeed penalty after the top one.
+     */
     public static double speedEfficiency(double speed) {
         if (speed <= 0) return 0;
         double frequency = Config.CONFIG.Turbine.EffectiveGridFrequency;
-        double peak = frequency * 60;
-        double minimum = peak / Math.pow(2, Config.CONFIG.Turbine.EfficiencyPeaks - 0.5);
-        if (speed < minimum) return 0.5;
-        if (speed > peak) {
-            double excess = speed - peak;
-            return Math.max(0, 1 - excess * excess / (8 * frequency * peak));
+        double top = frequency * 60;
+        double best = BASE_SPEED_EFFICIENCY;
+        for (int i = 0; i < Math.max(1, Config.CONFIG.Turbine.EfficiencyPeaks); i++) {
+            double peak = top / Math.pow(2, i);
+            double end = peak + PEAK_PLATEAU_RPM;
+            double value;
+            if (speed < peak - peak / 18) value = BASE_SPEED_EFFICIENCY;
+            else if (speed < peak) value = ramp((speed - (peak - peak / 18)) / (peak / 18));
+            else if (speed <= end) value = 1;
+            else if (i == 0) {
+                double excess = speed - end;
+                value = Math.max(BASE_SPEED_EFFICIENCY, 1 - excess * excess / (8 * frequency * top));
+            } else value = ramp(1 - (speed - end) / (peak / 6));
+            best = Math.max(best, value);
         }
-        double harmonic = 1 - 2 * Math.log(speed / peak) / Math.log(2);
-        return 0.75 - 0.25 * Math.cos(harmonic * Math.PI);
+        return best;
+    }
+
+    private static double ramp(double fraction) {
+        double x = Math.clamp(fraction, 0, 1);
+        return BASE_SPEED_EFFICIENCY + (1 - BASE_SPEED_EFFICIENCY) * x * x * (3 - 2 * x);
     }
     
     @Override
