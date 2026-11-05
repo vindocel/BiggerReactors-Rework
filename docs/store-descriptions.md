@@ -96,7 +96,7 @@ Track fuel and waste, coolant reserves, fuel burn and current versus potential c
 
 A full hot output or missing cold coolant stops conversion for that moment, and the heat of that tick is lost while fuel keeps burning. Keep coolant flowing in and out to use every kJ.
 
-![Reactor interface with fuel, waste and coolant bars, a "Limited by control rods" statistics message and the light/dark settings window](https://cdn.modrinth.com/data/IXXgM5v4/images/747b8050aefac5e085eb630555d1adf31b72f8ee.png)
+![Reactor interface with fuel, waste and coolant bars, a "Limited by control rods" statistics message and the light/dark settings window](https://cdn.modrinth.com/data/IXXgM5v4/images/e866f4717b252325952b810dc608a668d85c9826.png)
 
 ---
 
@@ -160,7 +160,7 @@ The primary circuit cools your reactor's hot coolant back into its reusable form
 Compare current and potential coolant conversion, water consumption and steam production. Tank levels, processed heat, useful steam heat and operating messages identify input, output and channel-layout limits. Each batch checks both circuits together.
 
 <!-- Heat exchanger interface. -->
-![Heat exchanger interface with primary and secondary tanks, temperatures, flow rates and the statistics panel](https://cdn.modrinth.com/data/IXXgM5v4/images/95f0b5feb18653dba17f02a61fa9e181967ea85e.png)
+![Heat exchanger interface with primary and secondary tanks, temperatures, flow rates and the statistics panel](https://cdn.modrinth.com/data/IXXgM5v4/images/4f18e96aca12aa174a0542b44d14e92d629d6940.png)
 
 ### 🛡️ Keep your outputs moving
 
@@ -191,7 +191,7 @@ Set the steam flow, coil state and condensate handling. Coil material sets the b
 
 Turbines show a subtle, gently moving white haze behind their windows according to stored steam and actual operating flow. Steam remains visible when it is converted as quickly as it arrives; switched-off turbines show only their stored reserve. Occasional condensation droplets fall from any block with free space below after a few seconds of rotating operation. Rotor speed is limited to 2,200 RPM. Assembled reactor, turbine, heat-exchanger and battery ports show connections on the outer and inner faces, with closed chassis sides that fit neatly beside glass.
 
-![Turbine interface showing rotor speed, FE output, steam flow, efficiency, coil and vent controls with the statistics panel](https://cdn.modrinth.com/data/IXXgM5v4/images/6cb949b6a6eb0fcb812ba5321e2b670ebecdff6d.png)
+![Turbine interface showing rotor speed, FE output, steam flow, efficiency, coil and vent controls with the statistics panel](https://cdn.modrinth.com/data/IXXgM5v4/images/a40d1b58a77b6b5591b2483a158146b0d5d9f7a2.png)
 
 ---
 
@@ -211,7 +211,7 @@ Build a multiblock battery with casing, a terminal, energy ports and interior ce
 
 Check stored energy, input and output rates, and installed cell capacity. The terminal also brings together the charging slots and equipped-gear controls.
 
-![Battery terminal with stored energy, input and output rates, cell count, the + and − item slots and equipped gear slots](https://cdn.modrinth.com/data/IXXgM5v4/images/7923c1037b7ccc8cd90504319d3d88e12ac32d9c.png)
+![Battery terminal with stored energy, input and output rates, cell count, the + and − item slots and equipped gear slots](https://cdn.modrinth.com/data/IXXgM5v4/images/04c368bbd4b8b639d456edf0a046beaf6a2ce7dd.png)
 
 ### 🔴 Automate with stored charge
 
