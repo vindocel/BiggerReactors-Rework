@@ -65,13 +65,14 @@ public class ReactorAccessPortTile extends ReactorBaseTile implements IItemHandl
     }
     
     private ReactorAccessPort.PortDirection direction = INLET;
-    private boolean fuelMode = false;
+    private boolean recoverFuel = false;
     
     public boolean isInlet() {
         return direction == INLET;
     }
     
     public void setDirection(ReactorAccessPort.PortDirection direction) {
+        if (this.direction != direction) recoverFuel = false;
         this.direction = direction;
         this.setChanged();
     }
@@ -81,8 +82,12 @@ public class ReactorAccessPortTile extends ReactorBaseTile implements IItemHandl
         if (compound.contains("direction")) {
             direction = biggerreactorsrework.core.util.SavedValues.enumValue(ReactorAccessPort.PortDirection.class, compound.getString("direction"), ReactorAccessPort.PortDirection.INLET);
         }
-        if (compound.contains("fuelMode")) {
-            fuelMode = compound.getBoolean("fuelMode");
+        // Modified 2026-11-04: fuel recovery moved to the inlet; saved fuel outlets become recovering inlets.
+        if (!isInlet() && compound.getBoolean("fuelMode")) {
+            direction = INLET;
+            recoverFuel = true;
+        } else {
+            recoverFuel = isInlet() && compound.getBoolean("recoverFuel");
         }
     }
     
@@ -90,7 +95,7 @@ public class ReactorAccessPortTile extends ReactorBaseTile implements IItemHandl
     protected CompoundTag writeNBT() {
         CompoundTag NBT = new CompoundTag();
         NBT.putString("direction", String.valueOf(direction));
-        NBT.putBoolean("fuelMode", fuelMode);
+        NBT.putBoolean("recoverFuel", recoverFuel);
         return NBT;
     }
     
@@ -141,7 +146,7 @@ public class ReactorAccessPortTile extends ReactorBaseTile implements IItemHandl
     @Nonnull
     @Override
     public ItemStack insertItem(int slot, ItemStack stack, boolean simulate) {
-        if (!isInlet() || nullableController() == null || slot != FUEL_INSERT_SLOT) {
+        if (!isInlet() || recoverFuel || nullableController() == null || slot != FUEL_INSERT_SLOT) {
             return stack;
         }
         stack = stack.copy();
@@ -161,17 +166,17 @@ public class ReactorAccessPortTile extends ReactorBaseTile implements IItemHandl
     @Nonnull
     @Override
     public ItemStack extractItem(int slot, int amount, boolean simulate) {
-        if (isInlet() || nullableController() == null || slot == FUEL_INSERT_SLOT) {
+        if (nullableController() == null) {
             return ItemStack.EMPTY;
         }
         
-        if (slot == WASTE_SLOT && !fuelMode) {
+        if (slot == WASTE_SLOT && !isInlet()) {
             long maxExtractable = controller().extractWaste(amount * Config.CONFIG.Reactor.FuelMBPerIngot, true);
             long toExtracted = maxExtractable - (maxExtractable % Config.CONFIG.Reactor.FuelMBPerIngot);
             long extracted = controller().extractWaste(toExtracted, simulate);
             
             return new ItemStack(CyaniteIngot.INSTANCE, (int) Math.min(amount, extracted / Config.CONFIG.Reactor.FuelMBPerIngot));
-        } else if (slot == FUEL_SLOT && fuelMode) {
+        } else if (slot == FUEL_SLOT && isInlet() && recoverFuel) {
             long maxExtractable = controller().extractFuel(amount * Config.CONFIG.Reactor.FuelMBPerIngot, true);
             long toExtracted = maxExtractable - (maxExtractable % Config.CONFIG.Reactor.FuelMBPerIngot);
             long extracted = controller().extractFuel(toExtracted, simulate);
@@ -205,52 +210,27 @@ public class ReactorAccessPortTile extends ReactorBaseTile implements IItemHandl
         }
     }
     
-    public int pushWaste(int waste, boolean simulated) {
-        neighborChanged();
-        if (itemOutput != null) {
-            waste /= Config.CONFIG.Reactor.FuelMBPerIngot;
-            int wasteHandled = 0;
-            for (int i = 0; i < itemOutput.getSlots(); i++) {
-                if (waste == 0) {
-                    break;
-                }
-                ItemStack toInsertStack = new ItemStack(CyaniteIngot.INSTANCE, waste);
-                ItemStack remainingStack = itemOutput.insertItem(i, toInsertStack, simulated);
-                wasteHandled += toInsertStack.getCount() - remainingStack.getCount();
-                waste -= toInsertStack.getCount() - remainingStack.getCount();
-            }
-            return (int) (wasteHandled * Config.CONFIG.Reactor.FuelMBPerIngot);
-        }
-        return 0;
+    // Modified 2026-11-04: outlets always send cyanite; a recovering inlet sends its stored fuel.
+    public void ejectSelected() {
+        if (!isInlet()) ejectWaste();
+        else if (recoverFuel) ejectItems(FUEL_SLOT);
     }
-    
+
     public void ejectWaste() {
-        controller().extractWaste(pushWaste((int) controller().extractWaste(Integer.MAX_VALUE, true), false), false);
+        if (!isInlet()) ejectItems(WASTE_SLOT);
     }
-    
-    public int pushFuel(int fuel, boolean simulated) {
+
+    private void ejectItems(int slot) {
         neighborChanged();
-        if (itemOutput != null) {
-            fuel /= Config.CONFIG.Reactor.FuelMBPerIngot;
-            int fuelHandled = 0;
-            for (int i = 0; i < itemOutput.getSlots(); i++) {
-                if (fuel == 0) {
-                    break;
-                }
-                ItemStack toInsertStack = new ItemStack(UraniumIngot.INSTANCE, fuel);
-                ItemStack remainingStack = itemOutput.insertItem(i, toInsertStack, simulated);
-                fuelHandled += toInsertStack.getCount() - remainingStack.getCount();
-                fuel -= toInsertStack.getCount() - remainingStack.getCount();
-            }
-            return (int) (fuelHandled * Config.CONFIG.Reactor.FuelMBPerIngot);
-        }
-        return 0;
+        if (itemOutput == null || nullableController() == null) return;
+
+        ItemStack available = extractItem(slot, 64, true);
+        if (available.isEmpty()) return;
+
+        int accepted = available.getCount() - net.neoforged.neoforge.items.ItemHandlerHelper.insertItem(itemOutput, available, false).getCount();
+        if (accepted > 0) extractItem(slot, accepted, false);
     }
-    
-    public void ejectFuel() {
-        controller().extractFuel(pushFuel((int) controller().extractFuel(Integer.MAX_VALUE, true), false), false);
-    }
-    
+
     @Nullable
     Direction itemOutputDirection;
     boolean connected;
@@ -287,19 +267,16 @@ public class ReactorAccessPortTile extends ReactorBaseTile implements IItemHandl
         }
         
         // Change fuel/waste ejection.
-        if (requestName.equals("setFuelMode")) {
-            if (!(requestData instanceof Integer value) || value < 0 || value > 1) return;
-            this.fuelMode = ((Integer) requestData != 0);
-            this.setChanged();
+        if (requestName.equals("recoverFuel")) {
+            if (isInlet() && requestData instanceof Boolean value) {
+                recoverFuel = value;
+                setChanged();
+            }
             return;
         }
         
         if (requestName.equals("ejectWaste")) {
-            if (fuelMode) {
-                ejectFuel();
-            } else {
-                ejectWaste();
-            }
+            ejectSelected();
             return;
         }
         
@@ -326,6 +303,6 @@ public class ReactorAccessPortTile extends ReactorBaseTile implements IItemHandl
     @Override
     public void updateState() {
         reactorAccessPortState.direction = (this.direction == INLET);
-        reactorAccessPortState.fuelMode = this.fuelMode;
+        reactorAccessPortState.recoverFuel = this.recoverFuel;
     }
 }

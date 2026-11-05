@@ -49,6 +49,8 @@ public class CommonReactorTerminalScreen extends ModScreen<ReactorTerminalContai
      * Width of the readouts in the left column, up to the end of its separators.
      */
     public static final int READOUT_WIDTH = 78;
+    // Modified 2026-11-04: shorter panel once waste ejection moved to the access ports.
+    static final int HEIGHT = 136;
     /**
      * The title ends before the icons over the gauges.
      */
@@ -59,7 +61,7 @@ public class CommonReactorTerminalScreen extends ModScreen<ReactorTerminalContai
 
     public CommonReactorTerminalScreen(ReactorTerminalContainer container, Inventory playerInventory, Component title) {
         // We override whatever Minecraft wants to set the title to. It wants "Reactor Terminal," but that's too long.
-        super(container, playerInventory, Component.translatable("screen.biggerreactorsrework.reactor_terminal"), RenderHelper.getBlankTextureResource(), 200, 152);
+        super(container, playerInventory, Component.translatable("screen.biggerreactorsrework.reactor_terminal"), RenderHelper.getBlankTextureResource(), 200, HEIGHT);
 
         // Initialize reactor terminal state.
         initialState = (ReactorState) this.getMenu().getGuiPacket();
@@ -143,45 +145,11 @@ public class CommonReactorTerminalScreen extends ModScreen<ReactorTerminalContai
         };
         screen.addScreenElement(activityToggle);
 
-        // (Left) Auto-eject toggle:
-        Biselector<ReactorTerminalContainer> autoEjectToggle = new Biselector<>(screen, 8, 114, Component.translatable("screen.biggerreactorsrework.reactor_terminal.auto_eject_toggle.tooltip"),
-                () -> reactorState.doAutoEject ? 1 : 0, SelectorColors.CYAN);
-        autoEjectToggle.onMouseReleased = (mX, mY, btn) -> {
-            // Click logic.
-            screen.getMenu().executeRequest("setAutoEject", autoEjectToggle.getState() == 0 ? 1 : 0);
-            return true;
-        };
-        screen.addScreenElement(autoEjectToggle);
-
-        Biselector<ReactorTerminalContainer> balance = new Biselector<>(screen,8,130,
+        Biselector<ReactorTerminalContainer> balance = new Biselector<>(screen,8,114,
             Component.translatable("thermal.biggerreactorsrework.balanced_outputs"),()->reactorState.balancedOutputs?1:0,SelectorColors.CYAN);
         balance.onMouseReleased=(mX,mY,btn)->{screen.getMenu().executeRequest("balancedOutputs",!reactorState.balancedOutputs);return true;};
         screen.addScreenElement(balance);
 
-        // (Left) Manual eject button:
-        InteractiveElement<ReactorTerminalContainer> manualEjectButton = new InteractiveElement<>(screen, 8, 130, 15, 15, 0, 0, Component.translatable("screen.biggerreactorsrework.reactor_terminal.manual_eject.tooltip"));
-        manualEjectButton.onMouseReleased = (mX, mY, btn) -> {
-            // Click logic. Extra check necessary since this is an "in-class" button.
-            if (manualEjectButton.isMouseOver(mX, mY)) {
-                // Mouse is hovering, do the thing.
-                //screen.getContainer().executeRequest("ejectWaste", true);
-                Minecraft.getInstance().player.sendSystemMessage(Component.literal("No effect. This button will be removed in the future."));
-                Minecraft.getInstance().player.sendSystemMessage(Component.literal("Use the access ports to eject waste!"));
-                // Play the selection sound.
-                manualEjectButton.playSound(SoundEvents.UI_BUTTON_CLICK);
-                return true;
-            } else {
-                // It ain't hovered, don't do the thing.
-                return false;
-            }
-        };
-        manualEjectButton.onRender = ((mS, mX, mY) -> {
-            // Custom rendering.
-            GuiArt.button(mS, manualEjectButton.x, manualEjectButton.y, manualEjectButton.width, manualEjectButton.height, manualEjectButton.isMouseOver(mX, mY), GuiIcon.EJECT, screen.getFrame());
-        });
-        // TODO: Remove with reactor manual eject.
-        // This element will be removed soon, in favor of having the eject button be in the access ports.
-        //screen.addElement(manualEjectButton);
     }
 
     /**
@@ -261,14 +229,13 @@ public class CommonReactorTerminalScreen extends ModScreen<ReactorTerminalContai
      *
      * @param poseStack       The current pose stack.
      * @param reactorActivity The reactor status to draw.
-     * @param doAutoEject     The auto-eject status to draw.
      * @param heatStored      The heat value to draw.
      * @param fuelUsageRate   The fuel usage rate to draw.
      * @param reactivityRate  The reactivity rate to draw.
      * @param statusRight     Where the status lines next to the toggles must end, relative to the screen.
      * @implNote Output rate is not rendered by this function, since it changes depending on reactor type. Do that yourself.
      */
-    public static void renderStatusText(@Nonnull GuiGraphics graphics, @Nonnull ModScreen<ReactorTerminalContainer> screen, ReactorActivity reactorActivity, boolean doAutoEject, double heatStored, double fuelUsageRate, double reactivityRate, int statusRight) {
+    public static void renderStatusText(@Nonnull GuiGraphics graphics, @Nonnull ModScreen<ReactorTerminalContainer> screen, ReactorActivity reactorActivity, double heatStored, double fuelUsageRate, double reactivityRate, int statusRight) {
         // Render text for reactor temperature (no fancy suffix for Celsius):
         renderReadout(graphics, screen, RenderHelper.formatValue(heatStored,1,"kJ/t",true), 23);
 
@@ -288,20 +255,8 @@ public class CommonReactorTerminalScreen extends ModScreen<ReactorTerminalContai
             GuiArt.scrollingText(graphics, screen.getFont(), Component.translatable("screen.biggerreactorsrework.reactor_terminal.activity_toggle.offline").getString(), screen.getGuiLeft() + 42, screen.getGuiTop() + 102, statusRight - 42, GuiTheme.textColor());
         }
 
-        // Render text for auto-eject status:
-        if (doAutoEject) {
-            // Text for enabled auto-ejection:
-            GuiArt.scrollingText(graphics, screen.getFont(), Component.translatable("screen.biggerreactorsrework.reactor_terminal.auto_eject_toggle.enabled").getString(), screen.getGuiLeft() + 42, screen.getGuiTop() + 118, statusRight - 42, GuiTheme.textColor());
-        } else {
-            // Text for disabled auto-ejection:
-            GuiArt.scrollingText(graphics, screen.getFont(), Component.translatable("screen.biggerreactorsrework.reactor_terminal.auto_eject_toggle.disabled").getString(), screen.getGuiLeft() + 42, screen.getGuiTop() + 118, statusRight - 42, GuiTheme.textColor());
-        }
+        GuiArt.scrollingText(graphics,screen.getFont(),Component.translatable("thermal.biggerreactorsrework.balanced_outputs").getString(),screen.getGuiLeft()+42,screen.getGuiTop()+118,statusRight-42,GuiTheme.textColor());
 
-        GuiArt.scrollingText(graphics,screen.getFont(),Component.translatable("thermal.biggerreactorsrework.balanced_outputs").getString(),screen.getGuiLeft()+42,screen.getGuiTop()+134,statusRight-42,GuiTheme.textColor());
-
-        // Render text for manual eject button:
-        // TODO: Remove with reactor manual eject.
-        //screen.getFont().drawString(mStack, Component.translatable("screen.biggerreactorsrework.reactor_terminal.manual_eject").getString(), screen.getGuiLeft() + 26, screen.getGuiTop() + 134, GuiTheme.textColor());
     }
 
     @Override

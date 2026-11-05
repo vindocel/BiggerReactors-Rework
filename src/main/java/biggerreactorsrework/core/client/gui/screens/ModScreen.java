@@ -47,6 +47,7 @@ public abstract class ModScreen<T extends AbstractContainerMenu> extends Abstrac
     private final GuiSettingsWindow settingsWindow = new GuiSettingsWindow(this);
     private final biggerreactorsrework.client.GuiStatisticsWindow statisticsWindow=new biggerreactorsrework.client.GuiStatisticsWindow(this);
     public biggerreactorsrework.client.GuiStatisticsWindow statisticsWindow(){return statisticsWindow;}
+    public int statisticsHeight(){return 236;}
     public boolean hasStatistics(){return menu instanceof biggerreactorsrework.multiblocks.reactor.containers.ReactorTerminalContainer || menu instanceof biggerreactorsrework.multiblocks.heatexchanger.containers.HeatExchangerTerminalContainer || menu instanceof biggerreactorsrework.multiblocks.turbine.containers.TurbineTerminalContainer;}
 
     public GuiSettingsWindow settingsWindow() { return settingsWindow; }

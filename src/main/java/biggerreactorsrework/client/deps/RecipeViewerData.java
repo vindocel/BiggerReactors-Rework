@@ -279,7 +279,12 @@ public final class RecipeViewerData {
                 g.fill(BAR_X, barY, BAR_X + fill, barY + BAR_HEIGHT, color(stat));
                 g.fill(BAR_X, barY, BAR_X + fill, barY + 1, FastColor.ARGB32.lerp(0.35f, color(stat), GuiArt.WHITE));
                 String value = display(stat);
-                g.drawString(font, value, width - font.width(value), y, text, false);
+                int valueLeft = BAR_X + BAR_WIDTH + 3;
+                int valueWidth = width - valueLeft;
+                if (valueWidth > 0) {
+                    int x = Math.max(valueLeft, width - font.width(value));
+                    GuiArt.scrollingText(g, font, value, x, y, width - x, text);
+                }
             }
         }
 
@@ -425,9 +430,10 @@ public final class RecipeViewerData {
         public static List<Component> waterTooltip() { return waterTooltip(null); }
 
         public static List<Component> waterTooltip(biggerreactorsrework.machine.recipe.ReprocessingRecipe recipe) {
-            long water = recipe == null ? water() : recipe.totalFluid();
-            return List.of(Component.translatable("recipe_viewer.biggerreactorsrework.industrial_processing.water",
-                    RenderHelper.formatValue(water / 1000.0, "B", true)));
+            long amount = recipe == null ? water() : recipe.totalFluid();
+            var fluid = recipe == null ? Fluids.WATER : recipe.fluid();
+            return List.of(Component.translatable("recipe_viewer.biggerreactorsrework.industrial_processing.fluid",
+                    fluid.getFluidType().getDescription(), RenderHelper.formatValue(amount / 1000.0, "B", true)));
         }
 
         public static List<Component> timeTooltip() { return timeTooltip(null); }

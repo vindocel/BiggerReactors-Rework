@@ -10,8 +10,8 @@ import javax.annotation.Nullable;
 import java.util.function.BooleanSupplier;
 
 /**
- * A compact turbine reaching the target. Modified 2026-11-03: power is the fixed coil generation per steam mB times
- * the flow both blades and coils take, so each rotor size needs exactly the blade layers and coils for that flow.
+ * A compact turbine reaching the target. Modified 2026-11-04: tune flow against the same speed efficiency curve
+ * used by the assembled turbine.
  * Spacer layers make it at least {@code minShaft} tall. A rotor shorter than three blocks above its width gets extra
  * blade layers to reach that look; a taller one stays as it is.
  */
@@ -40,7 +40,9 @@ final class TurbineSearch {
             benches++;
             var sim = design.simulation(data);
             sim.idealSupply(steam);
-            double power = sim.steadyPower(size);
+            long tuned = tuneFlow(sim, size, target);
+            design = design.withFlow(tuned);
+            double power = sim.steadyPower(tuned);
             if (best == null || better(design, power, best, bestPower, target)) {
                 best = design;
                 bestPower = power;
@@ -52,10 +54,32 @@ final class TurbineSearch {
             int preferredShaft = best.width() + 3 - 2;
             if (best.shaft() < preferredShaft && preferredShaft <= maxShaft) {
                 var shaped = new TurbineDesign(best.arm(), best.bladeLayers() + preferredShaft - best.shaft(), best.spacer(), best.coils(), coil, best.flow());
-                return new Choice(shaped, bestPower, benches);
+                var sim = shaped.simulation(data);
+                sim.idealSupply(steam);
+                long tuned = tuneFlow(sim, best.flow(), target);
+                double power = sim.steadyPower(tuned);
+                if (power >= target) return new Choice(shaped.withFlow(tuned), power, benches + 1);
             }
         }
         return new Choice(best, bestPower, benches);
+    }
+
+    // Seek the upper efficiency peak when the raw coil rate falls short.
+    private static long tuneFlow(ModernTurbineSimulation sim, long initial, long target) {
+        long lower = Math.min(initial, sim.flowRateLimit());
+        if (sim.steadyPower(lower) >= target) return lower;
+        double rpmPerMB = sim.steadyRPM(1);
+        if (rpmPerMB <= 0) return lower;
+        long peak = Math.min(sim.flowRateLimit(), Math.round(ModernTurbineSimulation.NOMINAL_RPM / rpmPerMB));
+        if (sim.steadyPower(peak) < target) return sim.steadyPower(peak) > sim.steadyPower(lower) ? peak : lower;
+        long upper = peak;
+        lower = Math.min(upper, Math.max(lower, (long) Math.ceil(peak / Math.sqrt(2))));
+        while (lower < upper) {
+            long middle = lower + (upper - lower) / 2;
+            if (sim.steadyPower(middle) >= target) upper = middle;
+            else lower = middle + 1;
+        }
+        return lower;
     }
 
     private static boolean better(TurbineDesign a, double ap, TurbineDesign b, double bp, long target) {

@@ -27,6 +27,30 @@ public final class IndustrialProcessorGameTests {
         t.fluidFor(null).fill(new FluidStack(Fluids.WATER,1000),FluidAction.EXECUTE);return t;
     }
     @GameTest(template="empty_7x7x7")
+    public static void configuredFluidOutputPushesToAdjacentInput(GameTestHelper h) {
+        var source = machine(h);
+        var destinationPos = new BlockPos(3, 2, 2);
+        h.setBlock(destinationPos, IndustrialProcessor.INSTANCE);
+        var destination = (IndustrialProcessorTile) h.getBlockEntity(destinationPos);
+        int fluidBatch = biggerreactorsrework.machine.side.Transmission.FLUID.ordinal() * 2;
+        source.runRequest("sideClearAll", null);
+        source.runRequest("sideBatch", fluidBatch);
+        source.runRequest("sideBatch", fluidBatch);
+        destination.runRequest("sideClearAll", null);
+
+        source.itemHandlerFor(null).insertItem(0, new ItemStack(Items.OBSIDIAN), false);
+        for (int i = 0; i < 200; i++) source.tick();
+        h.assertTrue(source.fluidFor(null).getFluidInTank(1).getAmount() == 100, "closed destination lost fluid");
+
+        destination.runRequest("sideBatch", fluidBatch);
+        for (int i = 0; i < 10; i++) source.tick();
+        var received = destination.fluidFor(null).getFluidInTank(0);
+        h.assertTrue(received.getFluid() == LiquidObsidian.INSTANCE && received.getAmount() == 100, "adjacent input did not receive the product automatically");
+        h.assertTrue(source.fluidFor(null).getFluidInTank(1).isEmpty(), "accepted product remained in the output");
+        h.succeed();
+    }
+
+    @GameTest(template="empty_7x7x7")
     public static void obsidianUsesExactlyOneBlockOneHundredWaterAndTwoHundredFE(GameTestHelper h) {
         var t=machine(h);t.getItemHandler().setStackInSlot(1,new ItemStack(BlutoniumIngot.INSTANCE,64));
         t.itemHandlerFor(null).insertItem(0,new ItemStack(Items.OBSIDIAN),false);

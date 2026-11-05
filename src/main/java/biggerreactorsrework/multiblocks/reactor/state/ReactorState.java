@@ -19,10 +19,6 @@ public class ReactorState implements GuiSync.IGUIPacket {
      */
     public ReactorType reactorType = ReactorType.PASSIVE;
 
-    /**
-     * Is auto-ejection of waste enabled.
-     */
-    public boolean doAutoEject = false;
 
     /**
      * The amount of energy stored in the reactor.
@@ -122,7 +118,6 @@ public class ReactorState implements GuiSync.IGUIPacket {
         reactorActivity = ReactorActivity.fromInt((Integer) data.get("reactorActivity"));
         reactorType = ReactorType.fromInt((Integer) data.get("reactorType"));
 
-        doAutoEject = (Boolean) data.get("doAutoEject");
 
         energyStored = (Long) data.get("energyStored");
         energyCapacity = (Long) data.get("energyCapacity");
@@ -164,7 +159,6 @@ public class ReactorState implements GuiSync.IGUIPacket {
         data.put("reactorActivity", reactorActivity.toInt());
         data.put("reactorType", reactorType.toInt());
 
-        data.put("doAutoEject", doAutoEject);
 
         data.put("energyStored", energyStored);
         data.put("energyCapacity", energyCapacity);

@@ -22,7 +22,10 @@ public final class CoolantComponents {
     public static String origin(DataComponentPatch components){var value=components.get(ORIGIN.get());return value==null || value.isEmpty()?"":value.get();}
     @javax.annotation.Nullable
     public static net.minecraft.world.level.material.Fluid sourceFluid(FluidStack stack) {
-        String token=stack.get(ORIGIN.get());
+        return sourceFluid(stack.get(ORIGIN.get()));
+    }
+    @javax.annotation.Nullable
+    public static net.minecraft.world.level.material.Fluid sourceFluid(@javax.annotation.Nullable String token) {
         if(token==null || token.indexOf('@')<=0)return null;
         var key=ResourceLocation.tryParse(token.substring(0,token.indexOf('@')));
         return key!=null && net.minecraft.core.registries.BuiltInRegistries.FLUID.containsKey(key)?net.minecraft.core.registries.BuiltInRegistries.FLUID.get(key):null;

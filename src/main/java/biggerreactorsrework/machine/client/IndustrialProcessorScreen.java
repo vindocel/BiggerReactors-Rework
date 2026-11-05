@@ -287,10 +287,10 @@ public class IndustrialProcessorScreen extends ModScreen<IndustrialProcessorCont
     }
 
     /**
-     * An automation switch: the request that toggles it, whether it is on, whether it pulls in (or pushes out) and its
+     * An automation switch: the request that toggles it, whether it is on and its
      * translation key suffix.
      */
-    private record AutoSwitch(String request, boolean active, boolean input, String key) {
+    private record AutoSwitch(String request, boolean active, String key) {
     }
 
     /**
@@ -300,12 +300,10 @@ public class IndustrialProcessorScreen extends ModScreen<IndustrialProcessorCont
         List<AutoSwitch> switches = new ArrayList<>();
         switch (this.tab) {
             case ITEM -> {
-                switches.add(new AutoSwitch("autoInput", this.industrialProcessorState.autoInput, true, "auto_input"));
-                switches.add(new AutoSwitch("autoEject", this.industrialProcessorState.autoEject, false, "auto_eject"));
+                switches.add(new AutoSwitch("autoInput", this.industrialProcessorState.autoInput, "auto_input"));
             }
             case FLUID -> {
-                switches.add(new AutoSwitch("autoInputFluid",this.industrialProcessorState.autoInputFluid,true,"auto_input_fluid"));
-                switches.add(new AutoSwitch("autoEjectFluid",this.industrialProcessorState.autoEjectFluid,false,"auto_eject_fluid"));
+                switches.add(new AutoSwitch("autoInputFluid",this.industrialProcessorState.autoInputFluid,"auto_input_fluid"));
             }
             case ENERGY -> {
             }
@@ -383,7 +381,7 @@ public class IndustrialProcessorScreen extends ModScreen<IndustrialProcessorCont
             int y = top + TOP_BAR_Y;
             // A switch that is on keeps the teal fill.
             GuiArt.button(graphics, x, y, SWITCH_WIDTH, SWITCH_HEIGHT, inside(mouseX, mouseY, x, y, SWITCH_WIDTH, SWITCH_HEIGHT),
-                    toggle.active(), false, toggle.input() ? GuiIcon.AUTO_INPUT : GuiIcon.AUTO_EJECT, this.frame());
+                    toggle.active(), false, GuiIcon.AUTO_INPUT, this.frame());
         }
         GuiArt.button(graphics, this.closeX(), top + TOP_BAR_Y, CLOSE_WIDTH, CLOSE_HEIGHT,
                 inside(mouseX, mouseY, this.closeX(), top + TOP_BAR_Y, CLOSE_WIDTH, CLOSE_HEIGHT), GuiIcon.CLOSE, this.frame());

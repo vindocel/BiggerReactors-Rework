@@ -58,14 +58,25 @@ public class ReactorCoolantPortScreen extends ModScreen<ReactorCoolantPortContai
     /**
      * Initialize controls.
      */
+    private Biselector<ReactorCoolantPortContainer> maintenance;
+
+    private boolean showRecovery() {
+        return reactorCoolantPortState.direction;
+    }
+
     public void initControls() {
-        Biselector<ReactorCoolantPortContainer> maintenance=new Biselector<>(this,8,50,Component.translatable("thermal.biggerreactorsrework.maintenance_cold"),()->reactorCoolantPortState.maintenanceCold?1:0,SelectorColors.CYAN);
-        maintenance.onMouseReleased=(mx,my,button)->{getMenu().executeRequest("maintenanceCold",!reactorCoolantPortState.maintenanceCold);return true;};
+        maintenance = new Biselector<>(this,8,50,Component.translatable("thermal.biggerreactorsrework.recover_cold_coolant_tooltip"),()->reactorCoolantPortState.maintenanceCold?1:0,SelectorColors.CYAN);
+        maintenance.onMouseReleased = (mx, my, button) -> {
+            if (!showRecovery()) return false;
+            getMenu().executeRequest("recoverInput", !reactorCoolantPortState.maintenanceCold);
+            return true;
+        };
+        maintenance.disable();
         addScreenElement(maintenance);
 
         // (Left) Direction toggle:
         Biselector<ReactorCoolantPortContainer> directionToggle = new Biselector<>(this, 8, 18, Component.translatable("screen.biggerreactorsrework.reactor_coolant_port.direction_toggle.tooltip"),
-                () -> reactorCoolantPortState.direction ? 0 : 1, SelectorColors.RED);
+                () -> reactorCoolantPortState.direction ? 0 : 1, SelectorColors.CYAN, SelectorColors.RED);
         directionToggle.onMouseReleased = (mX, mY, btn) -> {
             // Click logic.
             this.getMenu().executeRequest("setDirection", directionToggle.getState() == 0 ? 1 : 0);
@@ -105,6 +116,8 @@ public class ReactorCoolantPortScreen extends ModScreen<ReactorCoolantPortContai
      */
     @Override
     public void render(@Nonnull GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
+        if (showRecovery()) maintenance.enable();
+        else maintenance.disable();
         super.render(graphics, mouseX, mouseY, partialTicks);
 
         // Render text for input/output direction:
@@ -119,7 +132,7 @@ public class ReactorCoolantPortScreen extends ModScreen<ReactorCoolantPortContai
 
         // Render text for manual tank eject:
         graphics.drawString(this.getFont(), Component.translatable("screen.biggerreactorsrework.reactor_coolant_port.manual_dump").getString(), this.getGuiLeft() + 26, this.getGuiTop() + 38, GuiTheme.textColor(), false);
-        GuiArt.scrollingText(graphics,getFont(),Component.translatable("thermal.biggerreactorsrework.maintenance_label").getString(),getGuiLeft()+42,getGuiTop()+54,92,GuiTheme.textColor());
+        if (showRecovery()) GuiArt.scrollingText(graphics,getFont(),Component.translatable("thermal.biggerreactorsrework.recover_cold_coolant").getString(),getGuiLeft()+42,getGuiTop()+54,92,GuiTheme.textColor());
     }
 
     @Override

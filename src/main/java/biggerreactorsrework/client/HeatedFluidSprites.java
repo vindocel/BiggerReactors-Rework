@@ -26,15 +26,23 @@ public final class HeatedFluidSprites implements SpriteSource {
     public static void register(RegisterSpriteSourceTypesEvent event){TYPE=new SpriteSourceType(MapCodec.unit(HeatedFluidSprites::new));event.register(ResourceLocation.fromNamespaceAndPath(BiggerReactors.modid,"heated_fluids"),TYPE);}
     public SpriteSourceType type(){return TYPE;}
     private static ResourceLocation id(Fluid source,boolean flowing){var key=BuiltInRegistries.FLUID.getKey(source);return ResourceLocation.fromNamespaceAndPath(BiggerReactors.modid,"heated/"+key.getNamespace()+"/"+key.getPath()+(flowing?"_flow":"_still"));}
-    public static Fluid source(FluidStack stack){
-        String token=stack.get(CoolantComponents.ORIGIN.get());
-        if(token==null || !token.contains("@"))return Fluids.EMPTY;
-        var key=ResourceLocation.tryParse(token.substring(0,token.indexOf('@')));
-        return key!=null && BuiltInRegistries.FLUID.containsKey(key)?BuiltInRegistries.FLUID.get(key):Fluids.EMPTY;
+    public static ResourceLocation fallback(boolean flowing){
+        return ResourceLocation.fromNamespaceAndPath(BiggerReactors.modid,flowing?"block/fluid/heated_coolant_flowing":"block/fluid/heated_coolant_still");
     }
     public static ResourceLocation texture(FluidStack stack,boolean flowing){
-        var source=source(stack);var candidate=id(source,flowing);
-        return AVAILABLE.contains(candidate)?candidate:ResourceLocation.fromNamespaceAndPath(BiggerReactors.modid,"block/fluid/liquid_obsidian_still");
+        return texture(CoolantComponents.sourceFluid(stack),flowing);
+    }
+    public static ResourceLocation texture(@javax.annotation.Nullable Fluid source,boolean flowing){
+        if(source==null)return fallback(flowing);
+        var candidate=id(source,flowing);
+        return AVAILABLE.contains(candidate)?candidate:fallback(flowing);
+    }
+    @javax.annotation.Nullable
+    public static Fluid placedSource(net.minecraft.core.BlockPos pos){
+        var level=net.minecraft.client.Minecraft.getInstance().level;
+        if(level==null)return null;
+        var chunk=level.getChunkSource().getChunk(pos.getX()>>4,pos.getZ()>>4,false);
+        return CoolantComponents.sourceFluid(biggerreactorsrework.fluids.PlacedCoolantOrigins.get(chunk,pos));
     }
     public static boolean missing(java.util.List<biggerreactorsrework.registries.FluidTransitionRegistry.FluidTransition> profiles) {
         return profiles.stream().filter(t->t.genericHot()).anyMatch(t->!AVAILABLE.contains(id(t.liquids.getFirst(),false)));
@@ -45,6 +53,7 @@ public final class HeatedFluidSprites implements SpriteSource {
         var eligible=new java.util.HashSet<Fluid>();
         eligible.add(biggerreactorsrework.fluids.LiquidObsidian.INSTANCE);
         eligible.add(biggerreactorsrework.fluids.FrozenObsidian.INSTANCE);
+        eligible.add(HeatedCoolant.INSTANCE);
         var cryo=ResourceLocation.fromNamespaceAndPath("ad_astra","cryo_fuel");
         if(BuiltInRegistries.FLUID.containsKey(cryo))eligible.add(BuiltInRegistries.FLUID.get(cryo));
         for(var profile:biggerreactorsrework.registries.CoolantSync.profiles())if(profile.genericHot())eligible.addAll(profile.liquids);
@@ -59,12 +68,15 @@ public final class HeatedFluidSprites implements SpriteSource {
         }
     }
     private void addSource(ResourceManager resources,Output output,Fluid source) {
-            if(source==Fluids.EMPTY || source==HeatedCoolant.INSTANCE || !source.isSource(source.defaultFluidState()))return;
+            if(source==Fluids.EMPTY || !source.isSource(source.defaultFluidState()))return;
             var extension=IClientFluidTypeExtensions.of(source);
             for(boolean flowing:new boolean[]{false,true}) {
                 ResourceLocation sourceTexture;
                 int sourceTint;
-                try {
+                if(source==HeatedCoolant.INSTANCE) {
+                    sourceTexture=ResourceLocation.fromNamespaceAndPath(BiggerReactors.modid,flowing?"block/fluid/liquid_obsidian_flowing":"block/fluid/liquid_obsidian_still");
+                    sourceTint=0xFFFFFFFF;
+                } else try {
                     sourceTexture=flowing?extension.getFlowingTexture(new FluidStack(source,1)):extension.getStillTexture(new FluidStack(source,1));
                     sourceTint=extension.getTintColor(new FluidStack(source,1));
                 } catch(RuntimeException unavailable) {
@@ -80,7 +92,7 @@ public final class HeatedFluidSprites implements SpriteSource {
                 final boolean frozen=source==biggerreactorsrework.fluids.FrozenObsidian.INSTANCE;
                 var resource=resources.getResource(texture.withPath(p->"textures/"+p+".png"));
                 if(resource.isEmpty())continue;
-                var target=id(source,flowing);
+                var target=source==HeatedCoolant.INSTANCE?fallback(flowing):id(source,flowing);
                 AVAILABLE.add(target);
                 output.add(target,loader->{
                     var original=loader.loadSprite(texture,resource.get());
@@ -92,6 +104,9 @@ public final class HeatedFluidSprites implements SpriteSource {
                             double r=(pixel&255)*((tint>>16)&255)/255d,g=((pixel>>8)&255)*((tint>>8)&255)/255d,b=((pixel>>16)&255)*(tint&255)/255d;
                             double light=Math.max(r,Math.max(g,b));
                             int red=(int)Math.min(255,Math.max(r*.45,light*.8)+48),green=(int)(g*.42),blue=(int)(b*.36);
+                            if(source==HeatedCoolant.INSTANCE){
+                                red=(int)Math.min(255,112+light*.85);green=(int)(g*.65);blue=(int)(b*.45);
+                            }
                             if(frozen){
                                 double scale=(r*.3+g*.59+b*.11)/FROZEN_LUMA;
                                 red=(int)Math.min(255,0xEB*scale);green=(int)Math.min(255,0x05*scale);blue=(int)Math.min(255,0x2E*scale);

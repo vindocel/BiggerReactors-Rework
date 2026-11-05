@@ -39,7 +39,6 @@ public class IndustrialProcessorState implements GuiSync.IGUIPacket {
     // Modified 2026-10-27: additional output tank; legacy machine registry is retained.
     public int outputStored=0,outputCapacity=0;
     public String outputFluid="minecraft:empty",inputFluid="minecraft:water";
-    public boolean autoEjectFluid=false;
     public String condition="no_item";
 
     /**
@@ -53,7 +52,6 @@ public class IndustrialProcessorState implements GuiSync.IGUIPacket {
      * Automation switches.
      */
     public boolean autoInput = false;
-    public boolean autoEject = false;
     public boolean autoInputFluid = false;
 
     /**
@@ -78,13 +76,11 @@ public class IndustrialProcessorState implements GuiSync.IGUIPacket {
         condition=(String)data.get("condition");
         outputStored=(Integer)data.get("outputStored");outputCapacity=(Integer)data.get("outputCapacity");
         outputFluid=(String)data.get("outputFluid");inputFluid=(String)data.get("inputFluid");
-        autoEjectFluid=(Integer)data.get("autoEjectFluid")!=0;
 
         this.itemSides = (Integer) data.get("itemSides");
         this.fluidSides = (Integer) data.get("fluidSides");
         this.energySides = (Integer) data.get("energySides");
         this.autoInput = (Integer) data.get("autoInput") != 0;
-        this.autoEject = (Integer) data.get("autoEject") != 0;
         this.autoInputFluid = (Integer) data.get("autoInputFluid") != 0;
     }
 
@@ -105,13 +101,11 @@ public class IndustrialProcessorState implements GuiSync.IGUIPacket {
         data.put("condition",condition);
         data.put("outputStored",outputStored);data.put("outputCapacity",outputCapacity);
         data.put("outputFluid",outputFluid);data.put("inputFluid",inputFluid);
-        data.put("autoEjectFluid",autoEjectFluid?1:0);
 
         data.put("itemSides", this.itemSides);
         data.put("fluidSides", this.fluidSides);
         data.put("energySides", this.energySides);
         data.put("autoInput", this.autoInput ? 1 : 0);
-        data.put("autoEject", this.autoEject ? 1 : 0);
         data.put("autoInputFluid", this.autoInputFluid ? 1 : 0);
 
         return data;

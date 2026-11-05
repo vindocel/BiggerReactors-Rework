@@ -19,6 +19,9 @@ public @interface RegisterFluid {
     /** Added 2026-11-03: light emitted by the fluid where it is drawn. */
     int light() default 0;
     
+    /** Use water movement for entities in the placed fluid, including landing without fall damage. */
+    boolean waterLikeMovement() default false;
+
     /** Added 2026-11-03: entities inside the placed fluid freeze as in powder snow. */
     boolean freezes() default false;
     

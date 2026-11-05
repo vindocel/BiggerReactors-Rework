@@ -12,7 +12,7 @@ import net.minecraft.world.level.material.Fluids;
 import net.neoforged.neoforge.gametest.GameTestHolder;
 import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
 
-// Added 2026-11-03: turbine output is the handled steam times the coil material's FE per mB.
+// Turbine output is the handled steam times the coil material's FE per mB and the speed efficiency.
 @GameTestHolder(BiggerReactors.modid) @PrefixGameTestTemplate(false)
 public final class TurbineGenerationRuleGameTests {
     private static long run(ModernTurbineSimulation sim, int ticks) {
@@ -34,22 +34,48 @@ public final class TurbineGenerationRuleGameTests {
         h.assertTrue(gold.fePerMB() == 5.25 && gold.steamPerTick() == 875, "gold rule changed");
         h.assertTrue(new TurbineCoilRegistry.CoilData(1.15, 1.02, .35).fePerMB() == 9.25, "ludicrite rule changed");
 
-        var within = new TurbineDesign(1, 3, 0, 4, Blocks.IRON_BLOCK, 300).simulation(iron);
-        h.assertTrue(within.bladeCapacity() > 400, "reference rotor too small");
-        long first = run(within, 1);
-        h.assertTrue(first < 825, "start-up generated full power before spinning up");
-        h.assertTrue(run(within, 1000) == 825 && within.RPM() == ModernTurbineSimulation.NOMINAL_RPM, "300 mB/t of iron coils did not give 825 FE/t");
+        for (double rpm : new double[]{900, 950, 1000, 1800, 1850, 1900})
+            h.assertTrue(ModernTurbineSimulation.speedEfficiency(rpm) == 1, "no 100% plateau at " + rpm);
+        for (double rpm : new double[]{800, 1150, 1300, 1700})
+            h.assertTrue(ModernTurbineSimulation.speedEfficiency(rpm) == 0.5, "not at the base efficiency at " + rpm);
+        double rising = ModernTurbineSimulation.speedEfficiency(875), falling = ModernTurbineSimulation.speedEfficiency(1075);
+        h.assertTrue(rising > 0.5 && rising < 1 && falling > 0.5 && falling < 1, "missing ramps around the lower plateau");
+        h.assertTrue(ModernTurbineSimulation.speedEfficiency(2000) < 1
+                && ModernTurbineSimulation.speedEfficiency(2200) < ModernTurbineSimulation.speedEfficiency(2000), "no overspeed penalty");
 
-        var coilLimited = new TurbineDesign(1, 3, 0, 1, Blocks.IRON_BLOCK, 1000).simulation(iron);
-        h.assertTrue(run(coilLimited, 1000) == 1375, "one iron coil did not cap at 500 mB/t");
+        var sim = new TurbineDesign(1, 3, 0, 2, Blocks.IRON_BLOCK, 500).simulation(iron);
+        run(sim, 1000);
+        h.assertTrue(sim.RPM() == 900 && sim.steadyPower(500) == 1375, "900 RPM peak changed");
+        sim.setNominalFlowRate(707);
+        run(sim, 1000);
+        h.assertTrue(sim.RPM() > 1200 && sim.RPM() < 1300
+                && sim.bladeEfficiencyLastTick() < 0.51, "efficiency trough missing");
+        sim.setNominalFlowRate(1000);
+        h.assertTrue(run(sim, 1000) == 2750 && sim.RPM() == 1800, "1800 RPM peak changed");
+        sim.setNominalFlowRate(sim.flowRateLimit());
+        long overspeed = run(sim, 1000);
+        h.assertTrue(sim.RPM() == 2200 && overspeed > 0 && overspeed < 2750,
+                "rotor must overspeed with lower generation and stop at the governor");
 
-        var golden = new TurbineDesign(1, 3, 0, 6, Blocks.GOLD_BLOCK, 1000).simulation(gold);
-        h.assertTrue(run(golden, 1000) == 5250 && golden.steadyPower(1000) == 5250, "gold example did not give 5,250 FE/t");
+        // Excess supply stays in the inlet at the governor, and reduced supply lowers speed.
+        var steam = FluidTransitionRegistry.liquidTransition(Fluids.WATER);
+        long intakeLimit = sim.flowRateLimit();
+        sim.fluidTank().dumpVapor();
+        sim.fluidTank().dumpLiquid();
+        long supplied = sim.fluidTank().fill(steam.gases.getFirst(), net.minecraft.core.component.DataComponentPatch.EMPTY,
+                intakeLimit + 500, false);
+        h.assertTrue(supplied == intakeLimit + 500, "test did not supply excess steam");
+        sim.tick();
+        h.assertTrue(sim.RPM() == 2200 && sim.flowLastTick() == intakeLimit
+                && sim.fluidTank().vaporAmount() == 500, "governor consumed excess steam");
+        sim.tick();
+        h.assertTrue(sim.nominalFlowRate() == intakeLimit && sim.flowLastTick() == 500 && sim.RPM() < 2200,
+                "reduced supply did not slow the rotor with the same flow setting");
 
-        var bladeLimited = new TurbineDesign(1, 1, 0, 40, Blocks.GOLD_BLOCK, 20000).simulation(gold);
-        long expected = (long) Math.floor(bladeLimited.bladeCapacity() * 5.25);
-        h.assertTrue(bladeLimited.bladeCapacity() < bladeLimited.coilCapacity() && bladeLimited.flowRateLimit() == (long) bladeLimited.bladeCapacity(), "flow limit is not the usable steam");
-        h.assertTrue(Math.abs(run(bladeLimited, 1000) - expected) <= 6, "blades did not limit the handled steam");
+        var golden = new TurbineDesign(1, 3, 0, 2, Blocks.GOLD_BLOCK, 875).simulation(gold);
+        long goldOutput = run(golden, 1000);
+        h.assertTrue(golden.RPM() == 900 && Math.abs(goldOutput - 4593.75) < 1,
+                "gold rate changed at the 900 RPM peak");
         h.succeed();
     }
 

@@ -13,6 +13,7 @@ import biggerreactorsrework.core.client.gui.RenderHelper;
 import org.joml.Vector3f;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 /**
  * Draws the pieces every Bigger Reactors screen is made of (panel, slots, buttons, tabs, selectors, text boxes) with
@@ -197,8 +198,15 @@ public final class GuiArt {
      * switch's color.
      */
     public static void toggleSwitch(@Nonnull GuiGraphics graphics, int x, int y, boolean on, boolean hovered, boolean disabled, SelectorColors color, @Nonnull GuiFrame frame) {
+        toggleSwitch(graphics, x, y, on, hovered, disabled, null, color, frame);
+    }
+
+    // Modified 2026-11-04: an optional color for the off position shows the port mode in both states.
+    public static void toggleSwitch(@Nonnull GuiGraphics graphics, int x, int y, boolean on, boolean hovered, boolean disabled,
+                                    @Nullable SelectorColors offColor, SelectorColors onColor, @Nonnull GuiFrame frame) {
+        SelectorColors color = on ? onColor : offColor;
         toggleFrame(graphics, x, y, SWITCH_WIDTH, hovered, disabled, frame);
-        if (on) {
+        if (color != null) {
             // Status colors are semantic indicators, not neutral chrome; retain their exact original RGB.
             graphics.fill(x + 12, y + 3, x + 20, y + 4, disabled ? GuiTheme.chromeColor(SWITCH_LIT_TOP_DISABLED) : color.switchTop);
             graphics.fill(x + 12, y + 4, x + 20, y + 10, disabled ? GuiTheme.chromeColor(SWITCH_LIT_FILL_DISABLED) : color.switchFill);

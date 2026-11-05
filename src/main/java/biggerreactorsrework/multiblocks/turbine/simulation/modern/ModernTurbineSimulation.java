@@ -149,9 +149,53 @@ public class ModernTurbineSimulation implements ITurbineSimulation {
     
     @Override
     public long flowRateLimit() {
-        // Modified 2026-11-03: the limit is the steam the blades and coils can actually use.
-        double usable = coilCapacity > 0 ? Math.min(bladeCapacity(), coilCapacity) : bladeCapacity();
-        return Math.min(maxMaxFlowRate, (long) Math.floor(usable));
+        // Modified 2026-11-04: allow steam above the nominal load so the rotor can reach the governor.
+        return Math.min(maxMaxFlowRate, (long) Math.ceil(nominalSteamCapacity() * MAX_RPM / NOMINAL_RPM));
+    }
+
+    public double nominalSteamCapacity() {
+        return coilCapacity > 0 ? Math.min(bladeCapacity(), coilCapacity) : bladeCapacity();
+    }
+
+    public double steadyRPM(double flow) {
+        double capacity = nominalSteamCapacity();
+        if (capacity <= 0 || flow <= 0) return 0;
+        double load = flow * steamFactor(fluidTank.activeTransition()) / capacity;
+        return Math.min(MAX_RPM, load * (coilEngaged && coilCapacity > 0 ? NOMINAL_RPM : MAX_RPM));
+    }
+
+    public static final double BASE_SPEED_EFFICIENCY = 0.5;
+    /** RPM above each peak that still runs at 100%, so the flow can be tuned with some margin. */
+    public static final double PEAK_PLATEAU_RPM = 100;
+
+    /**
+     * Speed efficiency: 100% from each peak (default 900 and 1,800 RPM) to 100 RPM above it, a short ramp up before
+     * each peak, a ramp down after the lower plateaus and a gradual overspeed penalty after the top one.
+     */
+    public static double speedEfficiency(double speed) {
+        if (speed <= 0) return 0;
+        double frequency = Config.CONFIG.Turbine.EffectiveGridFrequency;
+        double top = frequency * 60;
+        double best = BASE_SPEED_EFFICIENCY;
+        for (int i = 0; i < Math.max(1, Config.CONFIG.Turbine.EfficiencyPeaks); i++) {
+            double peak = top / Math.pow(2, i);
+            double end = peak + PEAK_PLATEAU_RPM;
+            double value;
+            if (speed < peak - peak / 18) value = BASE_SPEED_EFFICIENCY;
+            else if (speed < peak) value = ramp((speed - (peak - peak / 18)) / (peak / 18));
+            else if (speed <= end) value = 1;
+            else if (i == 0) {
+                double excess = speed - end;
+                value = Math.max(BASE_SPEED_EFFICIENCY, 1 - excess * excess / (8 * frequency * top));
+            } else value = ramp(1 - (speed - end) / (peak / 6));
+            best = Math.max(best, value);
+        }
+        return best;
+    }
+
+    private static double ramp(double fraction) {
+        double x = Math.clamp(fraction, 0, 1);
+        return BASE_SPEED_EFFICIENCY + (1 - BASE_SPEED_EFFICIENCY) * x * x * (3 - 2 * x);
     }
     
     @Override
@@ -184,10 +228,15 @@ public class ModernTurbineSimulation implements ITurbineSimulation {
         return transition == null ? 1 : Math.max(0, transition.latentHeat * transition.turbineMultiplier / 10);
     }
 
-    /** FE/t at nominal speed for a steady flow; the same rule {@link #tick()} applies once the rotor is up to speed. */
+    /** FE/t once the rotor has settled at the speed driven by this flow. */
     public double steadyPower(double flow) {
-        double useful = Math.min(Math.max(0, flow), bladeCapacity());
-        return coilEngaged ? Math.min(useful, coilCapacity) * fePerMB() : 0;
+        double admitted = Math.min(flow, flowRateLimit());
+        return powerAtSpeed(admitted, steadyRPM(admitted));
+    }
+
+    private double powerAtSpeed(double flow, double speed) {
+        double useful = Math.min(Math.max(0, flow), nominalSteamCapacity());
+        return coilEngaged ? useful * fePerMB() * speedEfficiency(speed) : 0;
     }
 
     @Override
@@ -199,24 +248,20 @@ public class ModernTurbineSimulation implements ITurbineSimulation {
             fluidTank.flow(0, ventState != VentState.CLOSED);
             flow = 0;
         }
-        double torque = flow * steamFactor(fluidTank.activeTransition());
-        double useful = Math.min(flow, bladeCapacity());
-        rotorEfficiencyLastTick = flow > 0 ? useful / flow : 0;
-        
         if (ventState == VentState.ALL) {
             fluidTank.dumpLiquid();
         }
         
-        boolean loaded = coilEngaged && coilCapacity > 0;
-        double target = torque > 0 ? (loaded ? NOMINAL_RPM : MAX_RPM) : 0;
+        double target = steadyRPM(flow);
         if (rpm < target) {
             rpm = Math.min(target, rpm + NOMINAL_RPM / SPIN_UP_TICKS);
         } else if (rpm > target) {
             rpm = Math.max(target, rpm - NOMINAL_RPM / SPIN_DOWN_TICKS);
         }
-        
+
+        rotorEfficiencyLastTick = flow > 0 ? Math.min(flow, nominalSteamCapacity()) / flow * speedEfficiency(rpm) : 0;
         if (coilEngaged) {
-            double generated = steadyPower(useful) * Math.min(1, rpm / NOMINAL_RPM) + feRemainder;
+            double generated = powerAtSpeed(flow, rpm) + feRemainder;
             long whole = (long) Math.floor(generated);
             feRemainder = generated - whole;
             energyGeneratedLastTick = whole;
@@ -269,7 +314,7 @@ public class ModernTurbineSimulation implements ITurbineSimulation {
         fluidTank.idealSupply(transition);
     }
 
-    /** Flow that the blades and coils both take, and its power at nominal speed. */
+    /** Intake capacity and power at the selected steady flow. */
     public java.util.function.Supplier<biggerreactorsrework.core.util.Statistics.Potential> capacityStudy() {
         double efficient = flowRateLimit();
         double flow = Math.min(maxFlowRate, efficient);

@@ -32,7 +32,7 @@ public record CalculatorCatalog(List<String> fuels, List<String> moderators, Lis
                                 Map<String, TurbineCoilRegistry.CoilData> coilProperties,
                                 @Nullable FluidTransitionRegistry.FluidTransition water) {
     /** Bumped whenever the search or the virtual plant changes in a way that changes results. */
-    public static final int ENGINE_VERSION = 4;
+    public static final int ENGINE_VERSION = 5;
 
     public record Coolant(String id, Route route) { }
 

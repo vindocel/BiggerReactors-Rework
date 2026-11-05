@@ -29,7 +29,7 @@ public class PassiveReactorTerminalScreen extends ModScreen<ReactorTerminalConta
     private ReactorState reactorState;
 
     public PassiveReactorTerminalScreen(ReactorTerminalContainer container, Inventory playerInventory, Component title) {
-        super(container, playerInventory, title, 200, 152);
+        super(container, playerInventory, title, 200, CommonReactorTerminalScreen.HEIGHT);
 
         // Initialize reactor state.
         reactorState = (ReactorState) this.getMenu().getGuiPacket();
@@ -113,7 +113,7 @@ public class PassiveReactorTerminalScreen extends ModScreen<ReactorTerminalConta
         super.render(graphics, mouseX, mouseY, partialTicks);
 
         // Render the other text:
-        CommonReactorTerminalScreen.renderStatusText(graphics, this, reactorState.reactorActivity, reactorState.doAutoEject,
+        CommonReactorTerminalScreen.renderStatusText(graphics, this, reactorState.reactorActivity,
                 reactorState.heatGenerated, reactorState.fuelUsageRate, reactorState.structuralEfficiency,
                 this.imageWidth - 6);
 
@@ -126,7 +126,7 @@ public class PassiveReactorTerminalScreen extends ModScreen<ReactorTerminalConta
      */
     @Override
     protected void drawBackground(@Nonnull GuiGraphics graphics, int x, int y) {
-        GuiArt.panel(graphics, x, y, 200, 152, this.frame());
+        GuiArt.panel(graphics, x, y, 200, CommonReactorTerminalScreen.HEIGHT, this.frame());
         GuiArt.fill(graphics, x + 6, y + 36, x + 105, y + 37, GuiArt.SEPARATOR);
         GuiArt.fill(graphics, x + 6, y + 55, x + 105, y + 56, GuiArt.SEPARATOR);
         GuiArt.fill(graphics, x + 6, y + 74, x + 105, y + 75, GuiArt.SEPARATOR);

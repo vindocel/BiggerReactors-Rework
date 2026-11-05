@@ -12,7 +12,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BucketItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.level.saveddata.SavedData;
@@ -29,6 +28,7 @@ public final class HeatedCoolantBucket {
     private HeatedCoolantBucket() { }
 
     public static void register(IEventBus modBus) {
+        PlacedCoolantOrigins.register(modBus);
         modBus.addListener(RegisterCapabilitiesEvent.class, event -> event.registerItem(Capabilities.FluidHandler.ITEM,
                 (stack, context) -> new Wrapper(stack), HeatedCoolant.INSTANCE.getBucket()));
     }
@@ -53,11 +53,8 @@ public final class HeatedCoolantBucket {
     }
 
     /** Called by the placed block when an empty bucket collects a source. */
-    public static ItemStack pickup(LevelAccessor level, BlockPos pos, ItemStack bucket) {
-        if (!bucket.isEmpty() && level instanceof ServerLevel server) {
-            String origin = Origins.get(server).take(pos);
-            if (origin != null) bucket.set(CoolantComponents.ORIGIN.get(), origin);
-        }
+    public static ItemStack pickup(@Nullable String origin, ItemStack bucket) {
+        if (!bucket.isEmpty() && origin != null) bucket.set(CoolantComponents.ORIGIN.get(), origin);
         return bucket;
     }
 
@@ -77,7 +74,7 @@ public final class HeatedCoolantBucket {
             if (origin == null) return false;
             boolean placed = super.emptyContents(player, level, pos, hit, container);
             if (placed && level instanceof ServerLevel server && level.getFluidState(pos).isSourceOfType(HeatedCoolant.INSTANCE))
-                Origins.get(server).put(pos, origin);
+                PlacedCoolantOrigins.put(server, pos, origin);
             return placed;
         }
     }
@@ -93,7 +90,7 @@ public final class HeatedCoolantBucket {
         }
     }
 
-    /** Origins of placed heated coolant sources, per dimension. */
+    /** Origins saved per dimension by earlier versions, moved into chunk data as each chunk loads. */
     static final class Origins extends SavedData {
         private static final String NAME = BiggerReactors.modid + "_heated_coolant_origins";
         private final Long2ObjectOpenHashMap<String> origins = new Long2ObjectOpenHashMap<>();
@@ -110,16 +107,19 @@ public final class HeatedCoolantBucket {
             return origins;
         }
 
-        void put(BlockPos pos, String origin) {
-            origins.put(pos.asLong(), origin);
-            setDirty();
-        }
-
-        @Nullable
-        String take(BlockPos pos) {
-            String origin = origins.remove(pos.asLong());
-            if (origin != null) setDirty();
-            return origin;
+        void migrate(net.minecraft.world.level.chunk.LevelChunk chunk) {
+            if (origins.isEmpty()) return;
+            var iterator = origins.long2ObjectEntrySet().iterator();
+            while (iterator.hasNext()) {
+                var entry = iterator.next();
+                var pos = BlockPos.of(entry.getLongKey());
+                if (chunk.getPos().x != (pos.getX() >> 4) || chunk.getPos().z != (pos.getZ() >> 4)) continue;
+                if (chunk.getFluidState(pos).isSourceOfType(HeatedCoolant.INSTANCE)) {
+                    PlacedCoolantOrigins.put(chunk, pos, entry.getValue());
+                }
+                iterator.remove();
+                setDirty();
+            }
         }
 
         @Override

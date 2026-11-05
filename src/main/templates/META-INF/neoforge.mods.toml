@@ -55,3 +55,6 @@ This rework is not affiliated with or endorsed by the original authors.
     versionRange="[2101.7.2-build.377,)"
     ordering="AFTER"
     side="BOTH"
+
+[[mixins]]
+config="biggerreactorsrework.coolant-particles.mixins.json"

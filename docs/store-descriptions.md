@@ -24,7 +24,7 @@ Design your own reactor, turn its heat into steam, drive a turbine and store the
 | 🖥️ Redesigned interfaces | Metallic frames, clearer resource bars and consistent machine controls. |
 | 🔊 Original machine sounds | Distinct reactor, heat-exchanger and turbine sounds, with turbine audio following rotor speed and individual volume/mute controls for each multiblock. |
 | 💡 Soft machine lighting | Operating terminals, reactor fuel, hot exchanger fluids and the running Industrial Processor emit a modest glow, and Frozen Obsidian makes reactor manifolds shine brighter than the fuel. |
-| 📊 Predictable numbers | Heat in kJ, fixed steam per coolant and fixed FE per steam mB for each coil: work out your plant's output before you build it. Statistics show capacities, current and potential rates and bottlenecks. |
+| 📊 Predictable numbers | Heat in kJ, fixed steam per coolant and a base FE per steam mB for each coil: work out your plant's output before you build it. Statistics show capacities, current and potential rates and bottlenecks. |
 | 🔋 Multiblock battery | Expandable FE storage, item charging and equipped-gear charging. |
 | 🔴 Battery redstone sensor | Configurable charge thresholds and full/empty signals for connected machine automation. |
 | 📖 In-game guide | Interactive multiblock views, recipes and operating advice. |
@@ -51,6 +51,9 @@ Place **reactor coolant manifolds directly beside the fuel rods**. Feed a suppor
 - 🛢️ Coolant stays contained inside the manifolds, with visible fluid inside the machine.
 - 🧱 Solid blocks left in spare spaces do not add moderator bonuses in liquid mode.
 - 🪣 Fill reactor, turbine and heat-exchanger fluid ports by hand with buckets, without opening a screen. A Heated Coolant Bucket remembers which coolant it came from; steam is a gas and only moves through tanks and pipes.
+- 💧 Fluid outlets automatically feed compatible pipes or tanks connected directly to them. The Industrial Processor does the same on faces configured for fluid output.
+- 🛠️ Recover stored cold coolant through the reactor inlet or stored hot coolant and water through their respective heat exchanger inlets.
+- 📦 Reactor item outlets automatically send cyanite to a connected inventory. Fuel inlets can recover stored fuel. The Industrial Processor sends finished items from its configured item output faces.
 - ♨️ The reactor produces **steam or heated coolant**; the turbine produces the electricity.
 
 > 💡 **Liquid cooling can generate more FE per unit of fuel than direct generation with solid moderators.** Build a properly supplied plant with a turbine and, when needed, a heat exchanger. Its output depends on usable fuel, layout, control rods and circulation.
@@ -122,7 +125,7 @@ Liquid Obsidian circulates as a reusable coolant. It heats up into **Heated Liqu
 
 *Snatches heat in an instant, but obsidian's stubbornness makes it slow to cool again. That's why it boils more steam and needs more water.*
 
-Cool Liquid Obsidian with blue ice to make the strongest bundled coolant: **40 steam mB for every ten hot mB**, turning from vivid cyan to glowing red in the reactor. It shines brighter than the fuel, cold or hot, lighting up your manifolds. Spilled in the world, it freezes anyone who wades in, just like powder snow, while every heated coolant burns like lava.
+Cool Liquid Obsidian with blue ice to make the strongest bundled coolant: **40 steam mB for every ten hot mB**, turning from vivid cyan to glowing red in the reactor. It shines brighter than the fuel, cold or hot, lighting up your manifolds. In the world, Liquid Obsidian, Frozen Obsidian and the mod's heated coolant use water-like movement and currents. Frozen Obsidian freezes entities like powder snow, and heated coolant burns them like lava.
 
 > 🔎 Explore coolant properties and conversions through the in-game guide, machine statistics and JEI/EMI/REI. Use that information to tune your own plant.
 
@@ -174,7 +177,7 @@ Build your turbine, choose its rotor and coils, and tune the selected steam flow
 Right-click a shaft, blade or bearing while holding rotor blades to fill the available arms ring by ring, then continue to the next level. You can start once the base outline, both aligned bearings and the continuous shaft are in place, before closing the walls or roof. Arm lengths follow your turbine's interior, including horizontal and off-center rotors. Sneak with an empty hand to remove a blade, or sneak with blades to place them manually. Breaking a shaft with the correct tool collects its attached blades into your inventory, with overflow dropped beside the shaft.
 
 - 🎛️ Adjust flow to suit your steam supply and turbine design; the turbine only draws the steam its blades and coils can actually use.
-- 🪙 Better coils mean more FE per steam mB and more steam per block.
+- 🪙 Better coils mean more FE per steam mB and more steam per block, and different coil materials can share one turbine.
 - 📊 Monitor rotor speed, blade and coil capacity and gross generation.
 - ⚖️ Optional balanced outputs share the returned water equally between outlet ports, for example to feed two exchangers.
 - 🔁 Return condensed water to the exchanger for a closed water circuit.
@@ -184,7 +187,7 @@ Right-click a shaft, blade or bearing while holding rotor blades to fill the ava
 
 ### 🖥️ Turbine controls and statistics
 
-Set the steam flow, coil state and condensate handling. Generation is predictable: each steam mB the blades and coils handle gives a fixed amount of FE set by the coil material, from **2.75 FE with iron** to **5.25 FE with gold** and **9.25 FE with ludicrite**, and each coil block handles a fixed steam flow (500, 875 and 1,750 mB/t). The rotor spins up to 1,800 RPM in 20 seconds. Statistics show the usable steam limit, blade and coil capacity, FE per steam mB, current and potential conversion and gross FE generation.
+Set the steam flow, coil state and condensate handling. Coil material sets the base energy per handled steam mB, from **2.75 FE with iron** to **5.25 FE with gold**, **7.25 FE with diamond** and **9.25 FE with ludicrite**, and each coil block handles a fixed steam flow (500, 875, 1,250 and 1,750 mB/t). Coil materials can be mixed in the same turbine: capacities add up and FE per mB is their average. Tune the flow to hold **900–1,000 or 1,800–1,900 RPM** for 100% efficiency. The rotor can reach **2,200 RPM**, with declining efficiency above 1,900 RPM. Steam above the intake limit stays in the inlet tank. Inserting the reactor's control rods further reduces steam supply and lets the turbine settle at a lower speed. Statistics show the steam intake limit, blade and coil capacity, FE per steam mB, current and potential conversion and gross FE generation.
 
 Turbines show a subtle, gently moving white haze behind their windows according to stored steam and actual operating flow. Steam remains visible when it is converted as quickly as it arrives; switched-off turbines show only their stored reserve. Occasional condensation droplets fall from any block with free space below after a few seconds of rotating operation. Rotor speed is limited to 2,200 RPM. Assembled reactor, turbine, heat-exchanger and battery ports show connections on the outer and inner faces, with closed chassis sides that fit neatly beside glass.
 
@@ -197,7 +200,8 @@ Turbines show a subtle, gently moving white haze behind their windows according 
 Build a multiblock battery with casing, a terminal, energy ports and interior cells. **Each cell adds storage and transfer capacity.**
 
 - ➕ **Upper slot:** charge an item using the battery's energy.
-- ➖ **Lower slot:** transfer energy from an item into the battery.
+- ➖ **Lower slot:** transfer energy from an item or a charged battery cell into the battery.
+- 📊 **Statistics:** see a charge bar with the fill percentage, the cell count, stored energy, total capacity and current and maximum transfer rates.
 - 🛡️ **Equipped gear:** FE-compatible armor and offhand items shown beside the interface charge automatically while the terminal is open.
 - 🔌 **Shared transfer budget:** ports, item slots and equipped gear use the battery's available output capacity.
 
@@ -305,7 +309,7 @@ Use the Industrial Processor: **1 obsidian block + 100 mB water + FE → 100 mB 
 Use the Industrial Processor: **1 blue ice + 200 mB Liquid Obsidian + FE → 100 mB Frozen Obsidian**. It needs more water in the exchanger, but returns 40 steam mB for every ten hot mB.
 
 **How much FE will my plant make?**
-Fuel mB/t × 12,500 × structure % gives the steam (or hot coolant) per tick; the exchanger multiplies hot coolant by its recipe; the turbine turns each handled steam mB into the FE of its coils. The in-game guide and statistics show every number.
+Fuel mB/t × 12,500 × structure % gives the steam (or hot coolant) per tick; the exchanger multiplies hot coolant by its recipe; the turbine multiplies handled steam by the coils’ base FE per mB and the efficiency at the current RPM. The in-game guide and statistics show every number.
 
 **Will my old lava and obsidian coolant loop keep working?**  
 Affected reactors and heat exchangers report an invalid fluid and stop. Empty both affected tanks, then refill with a supported coolant. Stored lava is not automatically converted into Heated Liquid Obsidian.

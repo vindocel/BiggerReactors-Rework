@@ -3,6 +3,7 @@
 ## Added
 
 - Fill reactor, turbine and heat-exchanger fluid inlets with buckets or compatible containers, and collect supported outlet fluids. Creative buckets are retained; refused transfers keep their contents without spilling. Heated coolant fills a Heated Coolant Bucket that remembers which coolant it came from, in tanks, ports and when placed in the world.
+- Diamond blocks are now turbine coils (7.25 FE per steam mB, 1,250 mB/t), and can be mixed with other coil materials in the same turbine.
 - Blue Ice is now a solid reactor moderator with the same default properties as diamond blocks, listed in the guide's moderator table.
 - Added a customization guide for modpack creators and server administrators.
 - Added optional CC:Tweaked support for reactor, turbine and heat-exchanger computer ports, with live telemetry, controls and wired-modem discovery. It works alongside the existing OpenComputers support on the same port blocks, and the ports can be crafted when either mod is installed.
@@ -21,17 +22,23 @@
 - Steam can no longer be collected or placed with buckets; move it through tanks and pipes. Its texture is now a translucent, animated white gas.
 - The Industrial Processor now uses `industrial_processor` and `industrial_processing` identifiers throughout.
 - Heat is measured in kJ: one mB of fuel gives 12,500 kJ, and with water each kJ makes one steam mB.
-- Turbines generate a fixed amount of FE per steam mB set by the coil material (for example iron 2.75, gold 5.25, ludicrite 9.25), limited by blade and coil capacity. Turbines only draw the steam they can use, and their flow limit shows that usable amount. Each coil block handles a fixed steam flow, the rotor reaches 1,800 RPM in 20 seconds, and the guide, recipe viewers and statistics show these values.
+- Coil material sets the base FE per steam mB (for example iron 2.75, gold 5.25, diamond 7.25, ludicrite 9.25), limited by blade and coil capacity. Turbine speed follows steam flow up to 2,200 RPM. Efficiency is 100% from 900 to 1,000 RPM and from 1,800 to 1,900 RPM, ramps up just before each band, returns to 50% after 1,000 RPM and falls gradually above 1,900 RPM. Intake stops at the flow that holds the rotor at 2,200 RPM, and the extra steam stays in the inlet. The calculator, guide, recipe viewers and statistics use the same rule.
 - Each passive moderator now cools by its own conductivity (conductivity ÷ 5, up to 100%) and every kJ removed gives 8.9 RF, so a Ludicrite-cooled reactor makes about 42% less than the same reactor on water with a Ludicrite-coil turbine, while the rarest materials beat it by about 15%, so materials no longer share four fixed classes. Air cools 5% in solid reactors, so even a 3×3×3 reactor makes a little power. The guide and recipe viewers show each material's cooling and RF per fuel mB.
 - Each directly touching heat-exchanger channel pair processes 2,000 hot mB/t, four times as much as before, and water/steam channels hold four times as much as coolant channels.
-- Added persistent optional balanced outputs for reactors, heat exchangers and turbine water, plus input-stock maintenance extraction. Thermal migration preserves fuel fractions, cold/hot stock, overfill, controls and stored FE; known legacy coolant signatures adopt the new recipes, while unknown stock remains recoverable.
+- Added persistent optional balanced outputs for reactors, heat exchangers and turbine water. Thermal migration preserves fuel fractions, cold/hot stock, overfill, controls and stored FE; known legacy coolant signatures adopt the new recipes, while unknown stock remains recoverable.
 
 - Industrial Processor recipes in the guide now show inputs side by side, a single output slot and labelled fluid, energy and time.
 - Rotor shafts and blades now have slimmer targeting outlines, so it is easier to aim at the parts around and behind them. Their collision is unchanged.
 - Spinning turbine blades now hurt players within their swept area, with damage increasing with rotor speed. Coasting rotors remain dangerous; armor and normal immunities still apply.
 - Assembled resource ports now show their connection face on the outside and inside, with closed chassis sides matching their machine. Loose ports retain their original appearance.
 - Turbine windows now show a gently moving white steam film. It follows stored steam even while switched off and actual steam throughput while operating, so fully consumed input remains visible. The film fades in and out smoothly and is compatible with shader packs. Occasional condensation drips from any block with free space below after a few seconds of continuous rotating operation, in standing and lying turbines.
-- Assembled battery cells only show their energy bands while charged.
+- Assembled battery cells show steady blue bars when empty and animated bars when charged.
+- Fluid outlets automatically push into compatible adjacent pipes or tanks. The Industrial Processor always pushes from configured fluid output faces.
+- Coolant recovery moved to the reactor's cold inlet and both heat exchanger inlets (hot coolant and water). Recovering pauses filling and offers the inlet stock; product outlets always send the processed fluid.
+- Reactor item outlets automatically send cyanite, and fuel inlets can recover stored fuel. The reactor terminal's waste ejection switch and the access port's manual eject were removed. The Industrial Processor automatically sends finished items through configured item output faces.
+- Direction selectors and labels show the current port mode in color: cyan and red for fluid and energy, green and blue for fuel and cyanite.
+- The battery terminal has a compact Statistics tab with a charge bar and can recover energy from charged battery cells in its lower slot.
+- Moved Balanced Outputs below the reactor activity control and shortened the terminal panel.
 - Reduced repeated rotor and fluid-mesh rendering work without removing rotor, coolant or connected-glass detail.
 
 ## Fixed
@@ -42,6 +49,11 @@
 - Opening and closing reactor, turbine and heat-exchanger statistics now plays the normal button click.
 - Machines, ores and material blocks now declare map colors, so map mods show them in colors close to their textures instead of black.
 - Reducing configured battery cell capacity no longer deletes stored energy. Overfull batteries stop accepting energy until their charge falls below the new limit.
+- Heated coolant keeps its source appearance in tanks, recipe cards and placed flows. Unknown sources use a red heated texture.
+- Placed Liquid Obsidian, Frozen Obsidian and heated coolant now cancel fall damage like water, matching its movement and currents.
+- Liquid Obsidian and Frozen Obsidian color their splashes and bubbles to match the fluid.
+- Removed the brown stripe that repeated where battery cells joined vertically.
+- Long numeric values in recipe viewers scroll within their own column, and Industrial Processor recipes name the fluid they use.
 - Turbine rotors now stop accelerating at 2,200 RPM, including with disengaged coils or excess steam, so generation no longer falls to zero from overspeed. Existing overspeed saves recover on the next simulation tick.
 
 # 1.21.1-0.1.5 (BiggerReactors-Rework, unreleased)

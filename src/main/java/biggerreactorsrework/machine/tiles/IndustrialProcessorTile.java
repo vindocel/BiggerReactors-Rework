@@ -150,7 +150,6 @@ public class IndustrialProcessorTile extends BlockEntity implements MenuProvider
      * Automation: pull cyanite from item input sides, push blutonium through item output sides, pull water from water
      * input sides.
      */
-    private boolean autoEjectFluid = false;
     private final FluidTank outputTank = new FluidTank(Config.CONFIG.IndustrialProcessor.WaterTankCapacity) {
         @Override protected void onContentsChanged() { IndustrialProcessorTile.this.setChanged(); }
     };
@@ -167,7 +166,6 @@ public class IndustrialProcessorTile extends BlockEntity implements MenuProvider
         };
     }
     private boolean autoInput = false;
-    private boolean autoEject = false;
     private boolean autoInputFluid = false;
     /**
      * "Anti-cheat" item stack, to ensure players don't swap items mid-process.
@@ -311,11 +309,6 @@ public class IndustrialProcessorTile extends BlockEntity implements MenuProvider
                 this.autoInput = !this.autoInput;
                 this.setChanged();
             }
-            case "autoEject" -> {
-                this.autoEject = !this.autoEject;
-                this.setChanged();
-            }
-            case "autoEjectFluid" -> { this.autoEjectFluid=!this.autoEjectFluid;this.setChanged(); }
             case "autoInputFluid" -> {
                 this.autoInputFluid = !this.autoInputFluid;
                 this.setChanged();
@@ -368,7 +361,7 @@ public class IndustrialProcessorTile extends BlockEntity implements MenuProvider
     /**
      * Pushes blutonium into the blocks on the item output sides.
      */
-    private void autoEjectCycle() {
+    private void pushItemOutput() {
         for (RelativeFace face : RelativeFace.VALUES) {
             if (this.itemHandler.getStackInSlot(IndustrialProcessorItemHandler.OUTPUT_SLOT_INDEX).isEmpty()) {
                 return;
@@ -388,11 +381,8 @@ public class IndustrialProcessorTile extends BlockEntity implements MenuProvider
         }
     }
 
-    /**
-     * Pulls water from the blocks on the water input sides, at the configured transfer rate.
-     */
-    // Modified 2026-10-26: use the recipe's fluid instead of assuming water.
-    private void autoEjectFluidCycle() {
+    /** Modified 2026-11-04: pushes the recipe's fluid to adjacent handlers on configured output faces. */
+    private void pushFluidOutput() {
         for(RelativeFace face:RelativeFace.VALUES) {
             var route=this.route(face,Transmission.FLUID);
             if(route!=SideRoute.FLUID_OUTPUT && route!=SideRoute.FLUID_INPUT_OUTPUT)continue;
@@ -516,7 +506,6 @@ public class IndustrialProcessorTile extends BlockEntity implements MenuProvider
         this.industrialProcessorState.outputCapacity = outputTank.getCapacity();
         this.industrialProcessorState.outputFluid = net.minecraft.core.registries.BuiltInRegistries.FLUID.getKey(outputTank.getFluid().getFluid()).toString();
         this.industrialProcessorState.inputFluid = net.minecraft.core.registries.BuiltInRegistries.FLUID.getKey(fluidTank.getFluid().getFluid()).toString();
-        this.industrialProcessorState.autoEjectFluid = autoEjectFluid;
         var entry=biggerreactorsrework.machine.recipe.ReprocessingRecipes.all(level).stream()
             .filter(r->r.value().matches(new net.minecraft.world.item.crafting.SingleRecipeInput(itemHandler.getStackInSlot(0)),level)).findFirst().orElse(null);
         String condition="no_item";
@@ -531,7 +520,6 @@ public class IndustrialProcessorTile extends BlockEntity implements MenuProvider
         this.industrialProcessorState.fluidSides = this.sides.pack(Transmission.FLUID);
         this.industrialProcessorState.energySides = this.sides.pack(Transmission.ENERGY);
         this.industrialProcessorState.autoInput = this.autoInput;
-        this.industrialProcessorState.autoEject = this.autoEject;
         this.industrialProcessorState.autoInputFluid = this.autoInputFluid;
     }
 
@@ -573,12 +561,10 @@ public class IndustrialProcessorTile extends BlockEntity implements MenuProvider
         // Read fluids.
         this.fluidTank.readFromNBT(registries, childCompound.getCompound("fluidTank"));
         this.outputTank.readFromNBT(registries, childCompound.getCompound("outputTank"));
-        this.autoEjectFluid = childCompound.getBoolean("autoEjectFluid");
         this.itemPresentLastTick = this.itemHandler.getStackInSlot(IndustrialProcessorItemHandler.INPUT_SLOT_INDEX).copy();
         // Read sides and automation.
         this.sides.load(childCompound.getCompound("sides"));
         this.autoInput = childCompound.getBoolean("autoInput");
-        this.autoEject = childCompound.getBoolean("autoEject");
         this.autoInputFluid = childCompound.getBoolean("autoInputFluid");
         this.updateState();
     }
@@ -602,11 +588,9 @@ public class IndustrialProcessorTile extends BlockEntity implements MenuProvider
         // Write fluids.
         childCompound.put("fluidTank", this.fluidTank.writeToNBT(registries, new CompoundTag()));
         childCompound.put("outputTank", this.outputTank.writeToNBT(registries,new CompoundTag()));
-        childCompound.putBoolean("autoEjectFluid",autoEjectFluid);
         // Write sides and automation.
         childCompound.put("sides", this.sides.save());
         childCompound.putBoolean("autoInput", this.autoInput);
-        childCompound.putBoolean("autoEject", this.autoEject);
         childCompound.putBoolean("autoInputFluid", this.autoInputFluid);
 
         parentCompound.put("industrialProcessorState", childCompound);
@@ -714,15 +698,14 @@ public class IndustrialProcessorTile extends BlockEntity implements MenuProvider
             doUpdate = true;
         }
 
-        if (this.autoEject) {
-            this.autoEjectCycle();
-        }
+        // Modified 2026-11-04: configured output faces always send finished items and fluid.
+        pushItemOutput();
 
         if (doUpdate) {
             this.setChanged();
         }
 
-        if(autoEjectFluid)autoEjectFluidCycle();
+        if (!outputTank.isEmpty()) pushFluidOutput();
 
         // Update the current machine state.
         this.updateState();

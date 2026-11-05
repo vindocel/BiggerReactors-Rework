@@ -23,7 +23,7 @@ public final class GuiStatisticsWindow {
     public boolean open(){return screen.hasStatistics() && open;}
     public boolean rendering(){return rendering;}
     private int width(){return Math.min(260,Math.max(140,screen.width-16));}
-    private int height(){return Math.min(236,Math.max(72,screen.height-20));}
+    private int height(){return Math.min(screen.statisticsHeight(),Math.max(72,screen.height-20));}
     private int x(){return Mth.clamp((screen.width-width())/2+offsetX,4,Math.max(4,screen.width-width()-4));}
     private int y(){return Mth.clamp((screen.height-height())/2+offsetY,4,Math.max(4,screen.height-height()-4));}
     /** The area the open window covers, kept free of other overlays. */
@@ -59,20 +59,21 @@ public final class GuiStatisticsWindow {
     }
     private static final int ROW=11,HEADING=15,BAR_ROW=15;
     private static final java.util.Map<String,String> SECTIONS=new java.util.HashMap<>();
-    private static final java.util.List<String> SECTION_ORDER=java.util.List.of("structure","fuel","fluids","performance");
+    private static final java.util.List<String> SECTION_ORDER=java.util.List.of("structure","fuel","fluids","performance","energy");
     static {
         for(var key:java.util.List.of("dimensions","fuel_rods","rotor_shafts","condenser_channels","evaporator_channels","contacts","heat_path"))SECTIONS.put(key,"structure");
         for(var key:java.util.List.of("fuel_capacity","fuel_stored","waste","fuel_temperature"))SECTIONS.put(key,"fuel");
+        for(var key:java.util.List.of("battery_charge","battery_cells","battery_stored","battery_capacity","battery_input","battery_output","battery_max_input","battery_max_output"))SECTIONS.put(key,"energy");
         for(var key:java.util.List.of("pair","cold_capacity","primary_capacity","water_capacity","cold_stored","hot_stored","water_stored","steam_stored",
                 "input_current","output_current","water_discarded","vent","primary_temperature","secondary_temperature","thermal_storage_change"))SECTIONS.put(key,"fluids");
         for(var key:java.util.List.of("burn_current","burn_potential","manual_limit","conversion_current","conversion_potential","steam_current","steam_potential",
                 "water_potential","power_current","power_gross","power_potential","rpm","efficiency","flow_selected","flow_structural","flow_efficient",
                 "output_occupancy","output_retained","output_limit"))SECTIONS.put(key,"performance");
     }
-    private static final java.util.regex.Pattern AMOUNT=java.util.regex.Pattern.compile("(-?[0-9][0-9.,]*) (mB/t|mB|FE/t)");
+    private static final java.util.regex.Pattern AMOUNT=java.util.regex.Pattern.compile("(-?[0-9][0-9.,]*) (mB/t|mB|FE/t|FE)");
 
     /** One drawn line: a section heading, or a label with its value and, for current rates, how close they are to the potential. */
-    private record Line(Component label,Component value,boolean heading,double progress){
+    private record Line(Component label,Component value,boolean heading,double progress,int progressColor){
         int height(){return heading?HEADING:progress>=0?BAR_ROW:ROW;}
     }
 
@@ -89,7 +90,7 @@ public final class GuiStatisticsWindow {
         return Component.literal(switch(m.group(2)){
             case "mB/t"->biggerreactorsrework.core.client.gui.RenderHelper.formatValue(v/1000.0,"B/t",true);
             case "mB"->biggerreactorsrework.core.client.gui.RenderHelper.formatValue(v/1000.0,"B",true);
-            default->biggerreactorsrework.core.client.gui.RenderHelper.formatValue(v,"FE/t");
+            default->biggerreactorsrework.core.client.gui.RenderHelper.formatValue(v,m.group(2));
         });
     }
     private static int statusColor(String status){
@@ -116,16 +117,23 @@ public final class GuiStatisticsWindow {
         var lines=new java.util.ArrayList<Line>();
         for(var section:grouped.entrySet()){
             if(section.getValue().isEmpty())continue;
-            lines.add(new Line(Component.translatable("screen.biggerreactorsrework.statistics.section."+section.getKey()),Component.empty(),true,-1));
+            lines.add(new Line(Component.translatable("screen.biggerreactorsrework.statistics.section."+section.getKey()),Component.empty(),true,-1,0));
             for(var row:section.getValue()){
                 String key=String.valueOf(row.get("key")),value=String.valueOf(row.get("value"));
                 double progress=-1;
-                if(key.endsWith("_current") || key.equals("power_gross")){
+                int progressColor=0;
+                if (key.equals("battery_charge") && value.endsWith("%")) {
+                    double percent=number(value.substring(0,value.length()-1));
+                    if (Double.isFinite(percent)) {
+                        progress=Mth.clamp(percent/100,0,1);
+                        progressColor=0xFF2DAFCE;
+                    }
+                } else if(key.endsWith("_current") || key.equals("power_gross")){
                     double potential=amount(values.getOrDefault(key.equals("power_gross")?"power_potential":key.substring(0,key.length()-8)+"_potential",""));
                     double current=amount(value);
                     if(potential>0 && !Double.isNaN(current))progress=Mth.clamp(current/potential,0,1);
                 }
-                lines.add(new Line(Component.translatable("screen.biggerreactorsrework.statistics."+key),pretty(value),false,progress));
+                lines.add(new Line(Component.translatable("screen.biggerreactorsrework.statistics."+key),pretty(value),false,progress,progressColor));
             }
         }
         return lines;
@@ -155,12 +163,15 @@ public final class GuiStatisticsWindow {
                     :font.split(Component.translatable("screen.biggerreactorsrework.statistics.reference").append(": ").append(value(reference)),right-left-10);
             int cardHeight=14+referenceLines.size()*10;
             int color=status==null?0xFF8A8A8A:statusColor(status);
-            g.fill(left,top,right,top+cardHeight,GuiTheme.dark()?0x22FFFFFF:0x22000000);
-            g.fill(left,top,left+2,top+cardHeight,color);
-            g.fill(left+6,top+4,left+11,top+9,color);
-            GuiArt.scrollingText(g,font,statusText,left+14,top+3,right-left-18,color);
-            for(int i=0;i<referenceLines.size();i++)g.drawString(font,referenceLines.get(i),left+6,top+14+i*10,mutedColor(),false);
-            int listTop=top+cardHeight+4,listBottom=y+h-7;
+            int listTop=top,listBottom=y+h-7;
+            if (status != null || reference != null || rows.isEmpty()) {
+                g.fill(left,top,right,top+cardHeight,GuiTheme.dark()?0x22FFFFFF:0x22000000);
+                g.fill(left,top,left+2,top+cardHeight,color);
+                g.fill(left+6,top+4,left+11,top+9,color);
+                GuiArt.scrollingText(g,font,statusText,left+14,top+3,right-left-18,color);
+                for(int i=0;i<referenceLines.size();i++)g.drawString(font,referenceLines.get(i),left+6,top+14+i*10,mutedColor(),false);
+                listTop+=cardHeight+4;
+            }
             var lines=lines(rows);
             int total=0;for(var line:lines)total+=line.height();
             maxScroll=Math.max(0,total-(listBottom-listTop));scroll=Mth.clamp(scroll,0,maxScroll);
@@ -182,7 +193,7 @@ public final class GuiStatisticsWindow {
                         if(line.progress()>=0){
                             int barLeft=left+3,barRight=rowRight-2,barY=ly+11;
                             double p=line.progress();
-                            int fill=p>=.9?0xFF3FA34D:p>=.5?0xFFD0A030:0xFFC0503A;
+                            int fill=line.progressColor()!=0?line.progressColor():p>=.9?0xFF3FA34D:p>=.5?0xFFD0A030:0xFFC0503A;
                             g.fill(barLeft,barY,barRight,barY+2,GuiTheme.dark()?0x40FFFFFF:0x40000000);
                             g.fill(barLeft,barY,barLeft+(int)Math.round((barRight-barLeft)*p),barY+2,fill);
                         }

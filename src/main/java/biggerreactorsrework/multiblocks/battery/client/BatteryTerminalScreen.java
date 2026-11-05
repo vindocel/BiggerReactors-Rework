@@ -71,8 +71,6 @@ public class BatteryTerminalScreen extends ModScreen<BatteryTerminalContainer> {
                 RenderHelper.formatValue(batteryState.lastInput, "FE/t")).getString(), x, y + 46, READOUT_WIDTH, color);
         GuiArt.scrollingText(graphics, this.getFont(), Component.translatable("screen.biggerreactorsrework.battery_terminal.output_rate",
                 RenderHelper.formatValue(batteryState.lastOutput, "FE/t")).getString(), x, y + 68, READOUT_WIDTH, color);
-        GuiArt.scrollingText(graphics, this.getFont(), Component.translatable("screen.biggerreactorsrework.battery_terminal.summary",
-                batteryState.cellCount, RenderHelper.formatValue(batteryState.transferLimit, "FE/t")).getString(), this.getGuiLeft() + 8, y + SEPARATOR_Y + 4, WIDTH - 16, color);
 
         if (this.hoveredSlot != null && this.hoveredSlot.index < 2 && !this.hoveredSlot.hasItem() && this.menu.getCarried().isEmpty()) {
             String key = this.hoveredSlot.index == 0 ? "discharge_slot" : "charge_slot";
@@ -136,5 +134,15 @@ public class BatteryTerminalScreen extends ModScreen<BatteryTerminalContainer> {
     public boolean hasAppearanceSettings() {
         // Modified 2026-10-29: do not save a clicked-block theme before the shared identity arrives.
         return batteryState != null && batteryState.appearanceReady;
+    }
+
+    @Override
+    public boolean hasStatistics() {
+        return true;
+    }
+
+    @Override
+    public int statisticsHeight() {
+        return 139;
     }
 }

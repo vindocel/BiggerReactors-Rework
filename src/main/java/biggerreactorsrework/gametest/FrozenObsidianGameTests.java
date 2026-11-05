@@ -3,6 +3,7 @@ package biggerreactorsrework.gametest;
 import biggerreactorsrework.BiggerReactors;
 import biggerreactorsrework.fluids.FrozenObsidian;
 import biggerreactorsrework.fluids.HeatedCoolant;
+import biggerreactorsrework.fluids.HeatedCoolantBucket;
 import biggerreactorsrework.fluids.LiquidObsidian;
 import biggerreactorsrework.fluids.Steam;
 import biggerreactorsrework.multiblocks.MachineLighting;
@@ -51,6 +52,58 @@ public final class FrozenObsidianGameTests {
         h.assertTrue(r.fluid() == LiquidObsidian.INSTANCE && r.totalFluid() == 200, "recipe does not take 200 mB of Liquid Obsidian");
         h.assertTrue(r.fluidResult().getAmount() == 100, "recipe does not make 100 mB");
         h.succeed();
+    }
+
+    @GameTest(template="empty_7x7x7")
+    public static void placedCoolantsMatchWaterTravelAndCurrent(GameTestHelper h) {
+        var water = measureTravel(h, (net.minecraft.world.level.material.FlowingFluid) net.minecraft.world.level.material.Fluids.WATER);
+        h.assertTrue(water.x > 0 && Math.abs(water.y) > 0.0001, "water baseline did not push or allow travel");
+        for (var coolant : new net.minecraft.world.level.material.FlowingFluid[]{LiquidObsidian.INSTANCE, FrozenObsidian.INSTANCE, HeatedCoolant.INSTANCE}) {
+            var movement = measureTravel(h, coolant);
+            h.assertTrue(Math.abs(movement.x - water.x) < 0.000001 && Math.abs(movement.y - water.y) < 0.000001,
+                    "coolant current or travel differs from water: " + coolant + " " + movement + ", water " + water);
+            h.assertTrue(coolant.getFluidType().getFallDistanceModifier(null) == 0, "coolant keeps fall damage: " + coolant);
+        }
+        h.succeed();
+    }
+
+    private static net.minecraft.world.phys.Vec3 measureTravel(GameTestHelper h, net.minecraft.world.level.material.FlowingFluid fluid) {
+        var pos = new net.minecraft.core.BlockPos(3, 2, 3);
+        h.setBlock(pos.below(), net.minecraft.world.level.block.Blocks.STONE);
+        h.setBlock(pos.west(), fluid.defaultFluidState().createLegacyBlock());
+        h.setBlock(pos, fluid.getFlowing(7, false).createLegacyBlock());
+        var pig = h.spawn(net.minecraft.world.entity.EntityType.PIG, pos);
+        pig.setYRot(0);
+        pig.baseTick();
+        h.assertTrue(pig.isInFluidType(fluid.getFluidType()), "entity did not enter fluid movement in " + fluid);
+        double current = pig.getDeltaMovement().x;
+        double startX = pig.getX();
+        pig.travel(new net.minecraft.world.phys.Vec3(-1, 0, 0));
+        double travel = pig.getX() - startX;
+        pig.discard();
+        return new net.minecraft.world.phys.Vec3(current, travel, 0);
+    }
+
+    @GameTest(template="empty_7x7x7")
+    public static void heatedCoolantFlowKeepsOrigin(GameTestHelper h) {
+        var profile = FluidTransitionRegistry.liquidTransition(FrozenObsidian.INSTANCE);
+        var hot = new FluidStack(HeatedCoolant.INSTANCE, 1000);
+        hot.applyComponents(CoolantComponents.heated(profile));
+        var bucket = HeatedCoolantBucket.filled(hot);
+        var placer = (HeatedCoolantBucket.BucketWithOrigin) bucket.getItem();
+        var source = h.absolutePos(new net.minecraft.core.BlockPos(3, 4, 3));
+        var flow = source.below();
+        h.assertTrue(placer.emptyContents(null, h.getLevel(), source, null, bucket), "heated coolant was not placed");
+        h.startSequence().thenWaitUntil(() -> {
+            h.assertTrue(HeatedCoolant.INSTANCE.isSame(h.getLevel().getFluidState(flow).getType()), "heated coolant has not flowed");
+        }).thenExecute(() -> {
+            var chunk = h.getLevel().getChunkAt(flow);
+            h.assertTrue(HeatedCoolantBucket.origin(bucket).equals(biggerreactorsrework.fluids.PlacedCoolantOrigins.get(chunk, flow)),
+                    "flow lost its source's coolant origin");
+            h.getLevel().setBlock(flow, net.minecraft.world.level.block.Blocks.STONE.defaultBlockState(), 3);
+            h.assertTrue(biggerreactorsrework.fluids.PlacedCoolantOrigins.get(chunk, flow) == null,
+                    "replaced fluid left a stale origin");
+        }).thenSucceed();
     }
 
     @GameTest(template="empty_7x7x7", timeoutTicks=100)

@@ -59,10 +59,13 @@ public class ReactorAccessPortScreen extends ModScreen<ReactorAccessPortContaine
     /**
      * Initialize controls.
      */
+    private Biselector<ReactorAccessPortContainer> recoveryToggle;
+
+    // Modified 2026-11-04: outlets always send cyanite; inlets can recover stored fuel.
     public void initControls() {
         // (Left) Direction toggle:
         Biselector<ReactorAccessPortContainer> directionToggle = new Biselector<>(this, 8, 18, Component.translatable("screen.biggerreactorsrework.reactor_access_port.direction_toggle.tooltip"),
-                () -> reactorAccessPortState.direction ? 0 : 1, SelectorColors.BLUE);
+                () -> reactorAccessPortState.direction ? 0 : 1, SelectorColors.GREEN, SelectorColors.BLUE);
         directionToggle.onMouseReleased = (mX, mY, btn) -> {
             // Click logic.
             this.getMenu().executeRequest("setDirection", directionToggle.getState() == 0 ? 1 : 0);
@@ -70,40 +73,16 @@ public class ReactorAccessPortScreen extends ModScreen<ReactorAccessPortContaine
         };
         this.addScreenElement(directionToggle);
 
-        // (Left) Fuel mode toggle:
-        Biselector<ReactorAccessPortContainer> fuelModeToggle = new Biselector<>(this, 8, 34, Component.translatable("screen.biggerreactorsrework.reactor_access_port.fuel_mode_toggle.tooltip"),
-                () -> reactorAccessPortState.fuelMode ? 1 : 0, SelectorColors.YELLOW);
-        fuelModeToggle.onMouseReleased = (mX, mY, btn) -> {
-            // Click logic.
-            this.getMenu().executeRequest("setFuelMode", fuelModeToggle.getState() == 0 ? 1 : 0);
+        recoveryToggle = new Biselector<>(this, 8, 34,
+                Component.translatable("screen.biggerreactorsrework.reactor_access_port.recover_fuel.tooltip"),
+                () -> reactorAccessPortState.recoverFuel ? 1 : 0, SelectorColors.GREEN);
+        recoveryToggle.onMouseReleased = (mouseX, mouseY, button) -> {
+            if (!reactorAccessPortState.direction) return false;
+            getMenu().executeRequest("recoverFuel", recoveryToggle.getState() == 0);
             return true;
         };
-        fuelModeToggle.onTick = () -> {
-            // Check if the element should be enabled.
-            fuelModeToggle.actionEnable = (directionToggle.getState() != 0);
-        };
-        this.addScreenElement(fuelModeToggle);
-
-        // (Left) Manual eject button:
-        InteractiveElement<ReactorAccessPortContainer> manualEjectButton = new InteractiveElement<>(this, 8, 50, 15, 15, 0, 0, Component.translatable("screen.biggerreactorsrework.reactor_access_port.manual_eject.tooltip"));
-        manualEjectButton.onMouseReleased = (mX, mY, btn) -> {
-            // Click logic. Extra check necessary since this is an "in-class" button.
-            if (manualEjectButton.isMouseOver(mX, mY)) {
-                // Mouse is hovering, do the thing.
-                this.getMenu().executeRequest("ejectWaste", true);
-                // Play the selection sound.
-                manualEjectButton.playSound(SoundEvents.UI_BUTTON_CLICK);
-                return true;
-            } else {
-                // It ain't hovered, don't do the thing.
-                return false;
-            }
-        };
-        manualEjectButton.onRender = ((mS, mX, mY) -> {
-            // Custom rendering.
-            GuiArt.button(mS, manualEjectButton.x, manualEjectButton.y, manualEjectButton.width, manualEjectButton.height, manualEjectButton.isMouseOver(mX, mY), GuiIcon.EJECT, this.frame());
-        });
-        this.addScreenElement(manualEjectButton);
+        recoveryToggle.disable();
+        addScreenElement(recoveryToggle);
     }
 
     /**
@@ -116,6 +95,8 @@ public class ReactorAccessPortScreen extends ModScreen<ReactorAccessPortContaine
      */
     @Override
     public void render(@Nonnull GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
+        if (reactorAccessPortState.direction) recoveryToggle.enable();
+        else recoveryToggle.disable();
         super.render(graphics, mouseX, mouseY, partialTicks);
 
         // Render text for input/output direction:
@@ -128,24 +109,11 @@ public class ReactorAccessPortScreen extends ModScreen<ReactorAccessPortContaine
             graphics.drawString(this.getFont(), Component.translatable("screen.biggerreactorsrework.reactor_access_port.direction_toggle.output").getString(), this.getGuiLeft() + 42, this.getGuiTop() + 22, GuiTheme.textColor(), false);
         }
 
-        // Check if we render output type:
-        if (!reactorAccessPortState.direction) {
-            // Render text for fuel/waste mode:
-            if (reactorAccessPortState.fuelMode) {
-                // Text for an inlet:
-                graphics.drawString(this.getFont(), Component.translatable("screen.biggerreactorsrework.reactor_access_port.fuel_mode_toggle.fuel").getString(), this.getGuiLeft() + 42, this.getGuiTop() + 38, GuiTheme.textColor(), false);
-
-            } else {
-                // Text for an outlet:
-                graphics.drawString(this.getFont(), Component.translatable("screen.biggerreactorsrework.reactor_access_port.fuel_mode_toggle.waste").getString(), this.getGuiLeft() + 42, this.getGuiTop() + 38, GuiTheme.textColor(), false);
-            }
-        } else {
-            // Text for no output:
-            graphics.drawString(this.getFont(), Component.translatable("screen.biggerreactorsrework.reactor_access_port.fuel_mode_toggle.nope").getString(), this.getGuiLeft() + 42, this.getGuiTop() + 38, GuiTheme.textColor(), false);
+        if (reactorAccessPortState.direction) {
+            GuiArt.scrollingText(graphics, getFont(),
+                    Component.translatable("screen.biggerreactorsrework.reactor_access_port.recover_fuel"),
+                    getGuiLeft() + 42, getGuiTop() + 38, imageWidth - 50, GuiTheme.textColor());
         }
-
-        // Render text for manual waste eject:
-        graphics.drawString(this.getFont(), Component.translatable("screen.biggerreactorsrework.reactor_access_port.manual_eject").getString(), this.getGuiLeft() + 26, this.getGuiTop() + 54, GuiTheme.textColor(), false);
     }
 
     @Override

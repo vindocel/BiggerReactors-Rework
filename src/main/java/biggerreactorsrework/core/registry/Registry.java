@@ -552,7 +552,8 @@ public class Registry {
             
             Supplier<? extends ModFluid> stillSupplier = () -> fluids[0];
             Supplier<? extends ModFluid> flowingSupplier = () -> fluids[1];
-            final var fluidType = new FluidType(FluidType.Properties.create().descriptionId("fluid." + modid + "." + name).lightLevel(annotation.light())) {
+            final var fluidType = new FluidType(FluidType.Properties.create().descriptionId("fluid." + modid + "." + name).lightLevel(annotation.light())
+                    .fallDistanceModifier(annotation.waterLikeMovement() ? 0F : 0.5F)) {
                 @Override public net.minecraft.network.chat.Component getDescription(net.neoforged.neoforge.fluids.FluidStack stack) {
                     return name.equals("heated_coolant") ? biggerreactorsrework.registries.CoolantComponents.name(stack) : super.getDescription(stack);
                 }
@@ -599,8 +600,15 @@ public class Registry {
             blockArray[0] = new LiquidBlock(stillInstance, Block.Properties.of().replaceable().noCollission().explosionResistance(100.0F).noLootTable()) {
                 @Override public String getDescriptionId() { return "fluid." + modid + "." + name; }
                 @Override public net.minecraft.world.item.ItemStack pickupBlock(@javax.annotation.Nullable net.minecraft.world.entity.player.Player player, net.minecraft.world.level.LevelAccessor level, net.minecraft.core.BlockPos pos, BlockState state) {
+                    String origin = name.equals("heated_coolant") && level instanceof net.minecraft.server.level.ServerLevel server
+                            ? biggerreactorsrework.fluids.PlacedCoolantOrigins.get(server.getChunkAt(pos), pos) : null;
                     var bucket = super.pickupBlock(player, level, pos, state);
-                    return name.equals("heated_coolant") ? biggerreactorsrework.fluids.HeatedCoolantBucket.pickup(level, pos, bucket) : bucket;
+                    return biggerreactorsrework.fluids.HeatedCoolantBucket.pickup(origin, bucket);
+                }
+                @Override protected void onRemove(BlockState state, net.minecraft.world.level.Level level, net.minecraft.core.BlockPos pos, BlockState newState, boolean movedByPiston) {
+                    super.onRemove(state, level, pos, newState, movedByPiston);
+                    if (name.equals("heated_coolant") && !newState.is(this) && level instanceof net.minecraft.server.level.ServerLevel server)
+                        biggerreactorsrework.fluids.PlacedCoolantOrigins.put(server, pos, null);
                 }
                 @Override protected void entityInside(BlockState state, net.minecraft.world.level.Level level, net.minecraft.core.BlockPos pos, net.minecraft.world.entity.Entity entity) {
                     super.entityInside(state, level, pos, entity);

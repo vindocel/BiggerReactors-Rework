@@ -33,6 +33,22 @@ public final class BiggerReactorsClient {
     }
 
     public static boolean connected() { return net.minecraft.client.Minecraft.getInstance().getConnection()!=null; }
+
+    public static void refreshPlacedCoolant(net.neoforged.neoforge.attachment.IAttachmentHolder holder,
+                                           @javax.annotation.Nullable java.util.Map<String, String> previous, java.util.Map<String, String> next) {
+        if (!(holder instanceof net.minecraft.world.level.chunk.LevelChunk chunk)) return;
+        var client = net.minecraft.client.Minecraft.getInstance();
+        if (client.level != chunk.getLevel()) return;
+        var dirtySections = new java.util.HashSet<net.minecraft.core.SectionPos>();
+        var changed = new java.util.HashSet<>(next.keySet());
+        if (previous != null) changed.addAll(previous.keySet());
+        for (String key : changed) {
+            if (!java.util.Objects.equals(previous == null ? null : previous.get(key), next.get(key))) {
+                dirtySections.add(net.minecraft.core.SectionPos.of(net.minecraft.core.BlockPos.of(Long.parseLong(key))));
+            }
+        }
+        for (var section : dirtySections) client.levelRenderer.setSectionDirtyWithNeighbors(section.x(), section.y(), section.z());
+    }
     private static boolean coolantReloadPending;
     public static void refreshCoolantSprites(java.util.List<biggerreactorsrework.registries.FluidTransitionRegistry.FluidTransition> profiles) {
         if (!coolantReloadPending && biggerreactorsrework.client.HeatedFluidSprites.missing(profiles)) {
@@ -48,6 +64,11 @@ public final class BiggerReactorsClient {
     }
 
     static void init(IEventBus modBus) {
+        modBus.addListener((net.neoforged.neoforge.client.event.RegisterParticleProvidersEvent event) -> {
+            event.registerSpriteSet(biggerreactorsrework.registries.ModParticles.COOLANT_BUBBLE.get(), net.minecraft.client.particle.BubbleParticle.Provider::new);
+            event.registerSpriteSet(biggerreactorsrework.registries.ModParticles.COOLANT_BUBBLE_POP.get(), net.minecraft.client.particle.BubblePopParticle.Provider::new);
+            event.registerSpriteSet(biggerreactorsrework.registries.ModParticles.COOLANT_SPLASH.get(), net.minecraft.client.particle.SplashParticle.Provider::new);
+        });
         // Modified 2026-10-28: positional loops and per-machine local volume.
         biggerreactorsrework.client.sound.MachineSoundManager.init();
         modBus.addListener(biggerreactorsrework.client.HeatedFluidSprites::register);
@@ -107,7 +128,16 @@ public final class BiggerReactorsClient {
             event.registerFluidType(new IClientFluidTypeExtensions() {
                 @Override
                 public ResourceLocation getStillTexture() {
-                    return info.type()==biggerreactorsrework.fluids.HeatedCoolant.INSTANCE.getFluidType()?ResourceLocation.fromNamespaceAndPath(BiggerReactors.modid,"block/fluid/liquid_obsidian_still"):info.stillTexture();
+                    return heated()?biggerreactorsrework.client.HeatedFluidSprites.fallback(false):info.stillTexture();
+                }
+                private boolean heated() {
+                    return info.type()==biggerreactorsrework.fluids.HeatedCoolant.INSTANCE.getFluidType();
+                }
+                @Override public ResourceLocation getStillTexture(net.minecraft.world.level.material.FluidState state, net.minecraft.world.level.BlockAndTintGetter getter, net.minecraft.core.BlockPos pos) {
+                    return heated()?biggerreactorsrework.client.HeatedFluidSprites.texture(biggerreactorsrework.client.HeatedFluidSprites.placedSource(pos),false):getStillTexture();
+                }
+                @Override public ResourceLocation getFlowingTexture(net.minecraft.world.level.material.FluidState state, net.minecraft.world.level.BlockAndTintGetter getter, net.minecraft.core.BlockPos pos) {
+                    return heated()?biggerreactorsrework.client.HeatedFluidSprites.texture(biggerreactorsrework.client.HeatedFluidSprites.placedSource(pos),true):getFlowingTexture();
                 }
                 @Override public ResourceLocation getStillTexture(net.neoforged.neoforge.fluids.FluidStack stack) {
                     return stack.getFluid()==biggerreactorsrework.fluids.HeatedCoolant.INSTANCE?biggerreactorsrework.client.HeatedFluidSprites.texture(stack,false):getStillTexture();
@@ -118,7 +148,7 @@ public final class BiggerReactorsClient {
                 
                 @Override
                 public ResourceLocation getFlowingTexture() {
-                    return info.flowingTexture();
+                    return heated()?biggerreactorsrework.client.HeatedFluidSprites.fallback(true):info.flowingTexture();
                 }
                 
                 @Override

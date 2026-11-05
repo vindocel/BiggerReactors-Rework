@@ -327,9 +327,6 @@ public class ReactorMultiblockController extends MultiblockController<ReactorBas
             // Modified 2026-10-30: tolerate invalid saved activity and reject invalid command values.
             reactorActivity = biggerreactorsrework.core.util.SavedValues.enumValue(ReactorActivity.class, compound.getString("reactorState").toUpperCase(Locale.US), ReactorActivity.INACTIVE);
         }
-        if (compound.contains("autoEjectWaste")) {
-            autoEjectWaste = compound.getBoolean("autoEjectWaste");
-        }
         
         if (compound.contains("simulationData")) {
             simulation = null;
@@ -348,7 +345,6 @@ public class ReactorMultiblockController extends MultiblockController<ReactorBas
         compound.putBoolean("balancedOutputs",balancedOutputs);compound.putInt("outputCursor",outputCursor);compound.putInt("maintenanceCursor",maintenanceCursor);
         {
             compound.putString("reactorState", reactorActivity.toString());
-            compound.putBoolean("autoEjectWaste", autoEjectWaste);
             if (simulation != null) {
                 var phosCompound = simulation.save();
                 if (phosCompound != null) {
@@ -604,9 +600,7 @@ public class ReactorMultiblockController extends MultiblockController<ReactorBas
                 reactorActivity == ReactorActivity.ACTIVE && CoreEvents.tickNumber() < soundActiveUntil, 0);
         if(coolantTank!=null)coolantTank.sampleFlows();
         if(CoreEvents.tickNumber()%10==0)updateCoolantRendering();
-        if (autoEjectWaste) {
-            ejectWaste();
-        }
+        accessPorts.forEach(ReactorAccessPortTile::ejectSelected);
         
         var battery = simulation.battery();
         if (battery != null) {
@@ -619,7 +613,7 @@ public class ReactorMultiblockController extends MultiblockController<ReactorBas
             if (balancedOutputs) {
                 for (boolean maintenance : new boolean[]{false,true}) {
                     int phase=maintenance?0:1;
-                    var targets=coolantPorts.stream().filter(p->p.maintenanceCold==maintenance)
+                    var targets=coolantPorts.stream().filter(p->p.isRecoveringInput()==maintenance)
                             .sorted(java.util.Comparator.comparing(ReactorCoolantPortTile::getBlockPos))
                             .<java.util.function.LongUnaryOperator>map(p->p::offerFluid).toList();
                     var result=biggerreactorsrework.thermal.BalancedOutput.distribute(coolantTank.fluidAmountInTank(phase),targets,maintenance?maintenanceCursor:outputCursor);
@@ -819,38 +813,18 @@ public class ReactorMultiblockController extends MultiblockController<ReactorBas
         dirty();
     }
     
-    private boolean autoEjectWaste = true;
-    
     public synchronized void ejectWaste() {
-        if (simulation == null) {
-            return;
-        }
-        for (ReactorAccessPortTile accessPort : accessPorts) {
-            if (accessPort.isInlet()) {
-                continue;
-            }
-            long wastePushed = accessPort.pushWaste((int) simulation.fuelTank().waste(), false);
-            forceDirty = simulation.fuelTank().extractWaste(wastePushed, false) > 0;
-            
-        }
-        
-        // outlets have already taken as much as they can, now just hose it out the inlets too
-        // this will only actually do anything with items, so, we only care if there is a full ingot or more
-        // if/when fluid fueling is added, only oulets will output it
-        if (simulation.fuelTank().waste() > Config.CONFIG.Reactor.FuelMBPerIngot) {
-            for (ReactorAccessPortTile accessPort : accessPorts) {
-                long wastePushed = accessPort.pushWaste((int) simulation.fuelTank().waste(), false);
-                forceDirty = simulation.fuelTank().extractWaste(wastePushed, false) > 0;
-            }
+        if (simulation != null) {
+            accessPorts.forEach(ReactorAccessPortTile::ejectWaste);
         }
     }
-    
+
     public synchronized long extractWaste(long mb, boolean simulated) {
         if (simulation == null || assemblyState() != AssemblyState.ASSEMBLED) {
             return 0;
         }
         long wasteExtracted = simulation.fuelTank().extractWaste(mb, simulated);
-        forceDirty = wasteExtracted > 0 && !simulated;
+        forceDirty |= wasteExtracted > 0 && !simulated;
         return wasteExtracted;
     }
     
@@ -859,7 +833,7 @@ public class ReactorMultiblockController extends MultiblockController<ReactorBas
             return 0;
         }
         long fuelExtracted = simulation.fuelTank().extractFuel(mb, simulated);
-        forceDirty = fuelExtracted > 0 && !simulated;
+        forceDirty |= fuelExtracted > 0 && !simulated;
         return fuelExtracted;
     }
     
@@ -888,7 +862,6 @@ public class ReactorMultiblockController extends MultiblockController<ReactorBas
         reactorState.reactorActivity = reactorActivity;
         reactorState.reactorType = simulation.battery() != null ? ReactorType.PASSIVE : ReactorType.ACTIVE;
         
-        reactorState.doAutoEject = autoEjectWaste;
         reactorState.balancedOutputs=balancedOutputs;
         var thermal=simulation.thermal();
         reactorState.heatGenerated=thermal.generated();reactorState.heatCapturable=thermal.capturable();reactorState.structuralEfficiency=thermal.structuralEfficiency();
@@ -947,13 +920,6 @@ public class ReactorMultiblockController extends MultiblockController<ReactorBas
             }
             
             // Enable or disable waste ejection.
-            case "setAutoEject" -> {
-                if (!(requestData instanceof Integer value) || value < 0 || value > 1) {
-                    return;
-                }
-                autoEjectWaste = ((Integer) requestData != 0);
-            }
-            
             // Manually eject waste.
             case "ejectWaste" -> ejectWaste();
             
@@ -972,7 +938,6 @@ public class ReactorMultiblockController extends MultiblockController<ReactorBas
     public DebugInfo getControllerDebugInfo() {
         final var info = new DebugInfo("Reactor Controller");
         info.add("State: " + reactorActivity);
-        info.add("AutoEjectWaste: " + autoEjectWaste);
         if (simulation == null) {
             info.add("Simulation is null");
         } else {

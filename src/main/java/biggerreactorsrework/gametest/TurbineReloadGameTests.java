@@ -262,8 +262,8 @@ public final class TurbineReloadGameTests {
                 if (coils) h.assertTrue(sim.FEGeneratedLastTick() > 0, "generation stopped at the speed limit");
                 sim.battery().extract(Long.MAX_VALUE);
             }
-            // Engaged coils hold the rotor at nominal speed; free rotors run up to the limit.
-            h.assertTrue(sim.RPM() == (coils ? 1800 : 2200), "rotor did not settle at its speed: " + sim.RPM());
+            // Both loaded and free rotors reach the governor under excess steam.
+            h.assertTrue(sim.RPM() == 2200, "rotor did not settle at its speed: " + sim.RPM());
         }
         sim.setActive(false);
         sim.tick();

@@ -528,7 +528,7 @@ public class HeatExchangerMultiblockController extends MultiblockController<Heat
             for(boolean circuit:new boolean[]{true,false}) for(boolean maintenance:new boolean[]{false,true}) {
                 int phase=maintenance?0:1;
                 var tank=circuit?condenserTank:evaporatorTank;
-                var targets=fluidPorts.stream().filter(p->p.isCondenser()==circuit && p.maintenanceCold==maintenance).sorted(java.util.Comparator.comparing(HeatExchangerFluidPortTile::getBlockPos))
+                var targets=fluidPorts.stream().filter(p->p.isCondenser()==circuit && p.isRecoveringInput()==maintenance).sorted(java.util.Comparator.comparing(HeatExchangerFluidPortTile::getBlockPos))
                     .<java.util.function.LongUnaryOperator>map(p->p::offerFluid).toList();
                 var result=biggerreactorsrework.thermal.BalancedOutput.distribute(tank.fluidAmountInTank(phase),targets,maintenance?(circuit?primaryMaintenanceCursor:secondaryMaintenanceCursor):(circuit?primaryCursor:secondaryCursor));
                 tank.maintenanceDrain(phase,tank.maintenanceFluid(phase),tank.maintenanceComponents(phase),result.accepted(),false);

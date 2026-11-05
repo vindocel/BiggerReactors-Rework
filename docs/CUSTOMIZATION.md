@@ -114,7 +114,11 @@ Passive materials have explicit static `passiveClass` values: `NONE`, `BASIC`, `
 
 Legacy reactor radiation, fertility, temperature, output/fuel multipliers and simulation scheduling keys remain readable for configuration compatibility but do not control model 1. This includes `FuelUsageMultiplier`, `OutputMultiplier`, `PassiveOutputMultiplier`, `ActiveOutputMultiplier`, `MaxFuelTemperature`, `PassiveCoolingTransferEfficiency`, `SimulationRays`, `IrradiationDistance`, `ModeSpecific`, `useFullPassSimulation`, off-thread flags and the older physics constants. Use the versioned thermal settings and explicit material classes instead. Deprecated computer temperature methods return ambient kelvin, fertility returns 1. The new `thermal()` CC:Tweaked/OpenComputers snapshot separates kJ/t heat, RF/t potential/accepted/discarded power, usable fuel, burn and geometry. The wire protocol is 6.
 
-Reactors, exchangers and turbines have persistent **Balanced outputs**, off by default: equal shares across accepting outlets, refusal redistribution and rotating integer remainders. Exchanger circuits are balanced separately; turbines balance their returned water. Outlets can select **Extract input stock for maintenance** to recover cold/input stock, including overfill with zero productive capacity. The ordinary output setting also recovers recognized-fluid quarantine stock. Unknown/uninstalled fluid IDs stay preserved until their fluid becomes available. Generic heated coolant needs a component-compatible container.
+Fluid outlets automatically push to adjacent handlers that accept insertion. The Industrial Processor also pushes through faces configured for fluid output or fluid input/output. An outlet keeps its fluid when the adjacent block cannot accept it.
+
+Reactor item outlets automatically push cyanite into adjacent inventories. Enable **Recover fuel** on a fuel inlet to pause fueling through that port and return stored fuel to a connected inventory. Existing fuel outlets migrate to inlets with recovery enabled. Industrial Processor item output faces automatically push the finished product.
+
+Reactors, exchangers and turbines have persistent **Balanced outputs**, off by default: equal shares across accepting outlets, refusal redistribution and rotating integer remainders. Exchanger circuits are balanced separately; turbines balance their returned water. The reactor's cold coolant inlet and both exchanger inlets can recover stored input, including overfill with zero productive capacity. Recovery pauses filling through that port and is cleared when the port changes direction. Normal outlets recover recognized-fluid quarantine stock from the output tank. Unknown/uninstalled fluid IDs stay preserved until their fluid becomes available. Generic heated coolant needs a component-compatible container.
 
 ### 3.2.1 Fixed coolant processing
 
@@ -143,7 +147,7 @@ Model migration is idempotent. Known bundled legacy profile signatures map to th
 | `Turbine.FrictionDragMultiplier`, `AerodynamicDragMultiplier`, `CoilDragMultiplier` | `0.0005`, `0.0005`, `10` |
 | `Turbine.EffectiveGridFrequency`, `EfficiencyPeaks` (`[1,)`) | `30`, `2` |
 
-Turbine generation is fixed: **FE/t = handled steam × the coils' FE per steam mB**. Handled steam is the smallest of the selected flow, the blade capacity at 1,800 RPM (`BladeSteamPerKilometre` × blade metres per revolution × 2π × 1,800 / 1000) and the coil capacity (sum of each coil block's steam per tick). Mixed coils use the average FE per mB. The turbine only draws the steam it can use: its flow limit and selectable flow are the smaller of the blade and coil capacity (and the structural limit); the rest stays stored. Other vapors scale by `latentHeat × turbineMultiplier / 10`. The rotor reaches 1,800 RPM in 20 s with steam and output ramps with it; it stops in 30 s without steam. Disengaged coils generate nothing and let the rotor reach 2,200 RPM. The mass, drag, grid frequency and efficiency-peak keys remain readable but no longer change generation.
+Turbine output is **handled steam × the coils’ base FE per steam mB × speed efficiency**. Rated steam capacity is the smaller of blade capacity at 1,800 RPM and total coil capacity. Mixed coils use their average FE per mB. With engaged coils and reference steam, half the rated flow targets 900 RPM and the full rated flow targets 1,800 RPM. Extra steam can drive the rotor to 2,200 RPM, with declining efficiency and no extra handled volume above rated capacity. The intake limit is rated capacity scaled by 2,200/1,800, bounded by the structure. Other vapors scale with `latentHeat × turbineMultiplier / 10`. Efficiency is 100% from each peak to 100 RPM above it (900–1,000 and 1,800–1,900 RPM by default). It ramps up from 50% over the last 1/18 of RPM before each peak (850 and 1,700 RPM), falls back to 50% over 1/6 of the lower peak after its band (1,000–1,150 RPM), and falls gradually above the top band, never below 50%. Elsewhere it is 50%. The grid frequency sets the top peak (frequency × 60) and the efficiency-peak count sets how many halvings below it also peak.
 
 ### 3.4 Heat exchanger
 
@@ -304,7 +308,7 @@ Changing a diamond value does not change Blue Ice: they are separate entries. Th
 | `extractionRate` | Above `0` | Steam mB/t each block handles = `extractionRate × 5000`, rounded |
 | `bonus` | Above `0`, below `2` | Retained for compatibility; no longer affects generation |
 
-Bundled examples: iron 2.75 FE/mB and 500 mB/t, gold 5.25 and 875, ludicrite 9.25 and 1,750.
+Bundled examples: iron 2.75 FE/mB and 500 mB/t, gold 5.25 and 875, diamond 7.25 and 1,250, ludicrite 9.25 and 1,750. Different coil materials can be mixed in the same turbine: capacities add up and FE per mB is their average.
 
 ## 9. Coolants and fluid transitions
 
@@ -344,7 +348,7 @@ A transition pairs a cold fluid with the fluid it becomes when heated.
 | Cryo Fuel → heated coolant (when installed) | `30` | `773.15` | `2.2` / `1.8` | `0` | `0.59` |
 | Sodium → superheated sodium (when installed) | `40` | `1273.15` | `4` / `4` | `0` | `0.95` |
 
-`biggerreactorsrework:heated_coolant` is a generic hot fluid that remembers its origin through fluid components. Plain buckets cannot keep those components, so they refuse to collect it from a port; pipes and containers that preserve components work normally. A tank holding a fluid whose profile changed stops as invalid until it is emptied manually.
+`biggerreactorsrework:heated_coolant` is a generic hot fluid that remembers its origin through fluid components. Collecting it with an empty bucket gives a Heated Coolant Bucket that stores the origin. Placing and collecting the source preserves its origin in the world. Component-aware pipes and tanks also preserve it. A tank holding a fluid whose profile changed stops as invalid until it is emptied manually.
 
 ## 10. Industrial Processor recipes
 
@@ -441,7 +445,7 @@ These are fixed in the code:
 - Rotor contact damage: 1 to 10 hearts per second depending on RPM, for players in the blades' swept area.
 - Automatic reactor and heat-exchanger slowdown when output stays full.
 - Fluids as reactor moderators.
-- The heated-coolant identity rule, and its refusal in plain buckets.
+- Heated-coolant identity in filled buckets, placed sources and compatible tanks.
 - Block and item IDs, the guide's chapters, and the machines' screens.
 - Reward-free advancements: their rewards and triggers are not options, though a datapack can replace an advancement file like any other.
 - Separate fuel physics. Custom fuels change the yield only.
@@ -475,7 +479,7 @@ Changes do not rewrite existing worlds. Reassemble a machine (break and replace 
 | All custom fuels stopped working | One invalid definition made the text invalid | `Ignoring invalid Reactor.CustomFuelEntries` in the log |
 | A moderator has no effect | The reactor is in liquid mode, or the block is a fluid | [Section 7](#7-solid-moderators) |
 | A coolant stops the reactor | Its profile changed while stored | Empty both tanks with the port's manual clear |
-| A plain bucket will not collect heated coolant | Intended: it would lose the coolant's identity | Use pipes or a container that preserves fluid components |
+| A Heated Coolant Bucket cannot be placed | It has no coolant origin | Fill it from an outlet with identified heated coolant |
 | A bucket does nothing at a port | Port not assembled, wrong direction, wrong fluid, or under 1,000 mB of room | The port's screen |
 | Ore still appears | The chunk was generated before the change | Explore new terrain |
 | A script value was refused on `/reload` | Options require a restart | Restart the world or server |
