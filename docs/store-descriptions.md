@@ -177,7 +177,7 @@ Build your turbine, choose its rotor and coils, and tune the selected steam flow
 Right-click a shaft, blade or bearing while holding rotor blades to fill the available arms ring by ring, then continue to the next level. You can start once the base outline, both aligned bearings and the continuous shaft are in place, before closing the walls or roof. Arm lengths follow your turbine's interior, including horizontal and off-center rotors. Sneak with an empty hand to remove a blade, or sneak with blades to place them manually. Breaking a shaft with the correct tool collects its attached blades into your inventory, with overflow dropped beside the shaft.
 
 - 🎛️ Adjust flow to suit your steam supply and turbine design; the turbine only draws the steam its blades and coils can actually use.
-- 🪙 Better coils mean more FE per steam mB and more steam per block.
+- 🪙 Better coils mean more FE per steam mB and more steam per block, and different coil materials can share one turbine.
 - 📊 Monitor rotor speed, blade and coil capacity and gross generation.
 - ⚖️ Optional balanced outputs share the returned water equally between outlet ports, for example to feed two exchangers.
 - 🔁 Return condensed water to the exchanger for a closed water circuit.
@@ -187,7 +187,7 @@ Right-click a shaft, blade or bearing while holding rotor blades to fill the ava
 
 ### 🖥️ Turbine controls and statistics
 
-Set the steam flow, coil state and condensate handling. Coil material sets the base energy per handled steam mB, from **2.75 FE with iron** to **5.25 FE with gold** and **9.25 FE with ludicrite**, and each coil block handles a fixed steam flow (500, 875 and 1,750 mB/t). Tune the flow for peak efficiency at **900 or 1,800 RPM**. The rotor can reach **2,200 RPM**, with declining efficiency above 1,800 RPM. Steam above the intake limit stays in the inlet tank. Inserting the reactor's control rods further reduces steam supply and lets the turbine settle at a lower speed. Statistics show the steam intake limit, blade and coil capacity, FE per steam mB, current and potential conversion and gross FE generation.
+Set the steam flow, coil state and condensate handling. Coil material sets the base energy per handled steam mB, from **2.75 FE with iron** to **5.25 FE with gold**, **7.25 FE with diamond** and **9.25 FE with ludicrite**, and each coil block handles a fixed steam flow (500, 875, 1,250 and 1,750 mB/t). Coil materials can be mixed in the same turbine: capacities add up and FE per mB is their average. Tune the flow to hold **900–1,000 or 1,800–1,900 RPM** for 100% efficiency. The rotor can reach **2,200 RPM**, with declining efficiency above 1,900 RPM. Steam above the intake limit stays in the inlet tank. Inserting the reactor's control rods further reduces steam supply and lets the turbine settle at a lower speed. Statistics show the steam intake limit, blade and coil capacity, FE per steam mB, current and potential conversion and gross FE generation.
 
 Turbines show a subtle, gently moving white haze behind their windows according to stored steam and actual operating flow. Steam remains visible when it is converted as quickly as it arrives; switched-off turbines show only their stored reserve. Occasional condensation droplets fall from any block with free space below after a few seconds of rotating operation. Rotor speed is limited to 2,200 RPM. Assembled reactor, turbine, heat-exchanger and battery ports show connections on the outer and inner faces, with closed chassis sides that fit neatly beside glass.
 

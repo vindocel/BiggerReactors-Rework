@@ -1,0 +1,7 @@
+{
+    type: "tag",
+    location: "c:storage_blocks/diamond",
+    efficiency: .9,
+    extractionRate: 0.25,
+    bonus: 1,
+}
