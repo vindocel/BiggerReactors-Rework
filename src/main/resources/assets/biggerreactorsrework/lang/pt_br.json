@@ -411,7 +411,7 @@
   "screen.biggerreactorsrework.settings.background": "Cor do fundo",
   "screen.biggerreactorsrework.settings.light": "Claro",
   "screen.biggerreactorsrework.settings.dark": "Escuro",
-  "screen.biggerreactorsrework.settings.all": "Aparência de todas as máquinas",
+  "screen.biggerreactorsrework.settings.all": "Aplicar a todas as máquinas",
   "screen.biggerreactorsrework.settings.all.on": "Ativado: a cor escolhida é usada em todas as máquinas.",
   "screen.biggerreactorsrework.settings.all.off": "Desativado: a cor vale apenas para esta máquina. O volume é sempre individual.",
   "block.biggerreactorsrework.battery_casing": "Carcaça da Bateria",

@@ -17,7 +17,8 @@ import javax.annotation.Nullable;
 public interface IEnergyTile extends IModularTile {
     
     @RegisterCapability
-    CapabilityRegistration ENERGY_HANDLER_CAP_REGISTRATION = CapabilityRegistration.lazyTileCaps(IEnergyTile.class, () -> EnergyHandlerWrappers.wrap(IEnergyTile::energyHandler));
+    CapabilityRegistration ENERGY_HANDLER_CAP_REGISTRATION = CapabilityRegistration.lazyTileCaps(IEnergyTile.class,
+            () -> EnergyHandlerWrappers.wrap((IEnergyTile tile, Direction side) -> side == null ? null : tile.energyHandler(side)));
     
     @API
     IEnergyHandler energyHandler(Direction direction);
