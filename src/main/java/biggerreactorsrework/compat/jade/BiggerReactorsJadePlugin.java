@@ -58,7 +58,7 @@ public class BiggerReactorsJadePlugin implements IWailaPlugin {
         @Override
         public void appendServerData(CompoundTag data, BlockAccessor accessor) {
             if (accessor.getBlockEntity() instanceof IndustrialProcessorTile tile) {
-                IEnergyStorage storage = tile.energyFor(null);
+                IEnergyStorage storage = tile.energyBuffer();
                 data.putLong(ENERGY, storage.getEnergyStored());
                 data.putLong(CAPACITY, storage.getMaxEnergyStored());
             } else if (accessor.getBlockEntity() instanceof BatteryBaseTile tile) {

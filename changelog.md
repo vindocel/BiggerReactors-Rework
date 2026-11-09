@@ -1,3 +1,15 @@
+# 1.21.1-0.1.7 (BiggerReactors-Rework)
+
+## Changed
+
+- Machine settings use a switch for shared appearance. Reactor, turbine and heat exchanger terminals use a compact volume bar.
+- Machine popups now have their close button on the left.
+
+## Fixed
+
+- Fixed duplicate Jade energy bars on the Industrial Processor and multiblock energy ports when another provider queries energy without a side.
+- Removed the volume control from the silent battery terminal.
+
 # 1.21.1-0.1.6 (BiggerReactors-Rework, unreleased)
 
 ## Added

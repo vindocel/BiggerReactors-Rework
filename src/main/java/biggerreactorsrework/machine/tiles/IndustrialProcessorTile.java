@@ -64,7 +64,9 @@ public class IndustrialProcessorTile extends BlockEntity implements MenuProvider
     @RegisterCapability
     private static final CapabilityRegistration ITEM_HANDLER_CAP_REGISTRATION = CapabilityRegistration.tileCap(Capabilities.ItemHandler.BLOCK, IndustrialProcessorTile.class, (IndustrialProcessorTile tile, @Nullable Direction side) -> tile.itemHandlerFor(side));
     @RegisterCapability
-    private static final CapabilityRegistration ENERGY_CAP_REGISTRATION = CapabilityRegistration.tileCap(Capabilities.EnergyStorage.BLOCK, IndustrialProcessorTile.class, (IndustrialProcessorTile tile, @Nullable Direction side) -> tile.energyFor(side));
+    private static final CapabilityRegistration ENERGY_CAP_REGISTRATION = CapabilityRegistration.tileCap(Capabilities.EnergyStorage.BLOCK,
+            IndustrialProcessorTile.class, (IndustrialProcessorTile tile, @Nullable Direction side) ->
+                    side == null ? null : tile.energyFor(side));
     @RegisterCapability
     private static final CapabilityRegistration FLUID_HANDLER_CAP_REGISTRATION = CapabilityRegistration.tileCap(Capabilities.FluidHandler.BLOCK, IndustrialProcessorTile.class, (IndustrialProcessorTile tile, @Nullable Direction side) -> tile.fluidFor(side));
 
@@ -254,6 +256,10 @@ public class IndustrialProcessorTile extends BlockEntity implements MenuProvider
      * Energy input on the configured faces; the {@code null} side sees the storage, which never gives energy back.
      */
     @Nullable
+    public IEnergyStorage energyBuffer() {
+        return this.energyStorage;
+    }
+
     public IEnergyStorage energyFor(@Nullable Direction side) {
         if (side == null || this.route(side, Transmission.ENERGY) == SideRoute.ENERGY_INPUT) {
             return this.energyStorage;

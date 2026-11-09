@@ -1,6 +1,9 @@
 package biggerreactorsrework.client;
 
 import biggerreactorsrework.core.client.gui.screens.ModScreen;
+import biggerreactorsrework.multiblocks.heatexchanger.containers.HeatExchangerTerminalContainer;
+import biggerreactorsrework.multiblocks.reactor.containers.ReactorTerminalContainer;
+import biggerreactorsrework.multiblocks.turbine.containers.TurbineTerminalContainer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
@@ -16,6 +19,14 @@ public final class GuiSettingsWindow {
     private static final int HEIGHT = 106;
     private static final int CLOSE_WIDTH = 10;
     private static final int CLOSE_HEIGHT = 11;
+    private static final int APPLY_Y = 78;
+    private static final int VOLUME_Y = 122;
+    private static final int VOLUME_BUTTON = 12;
+    private static final int VOLUME_GAP = 4;
+    private static final int VOLUME_STEPS = 10;
+    private static final int SEGMENT_SIZE = 8;
+    private static final int SEGMENT_PITCH = SEGMENT_SIZE + 1;
+    private static final int BAR_WIDTH = VOLUME_STEPS * SEGMENT_PITCH - 1;
     private final ModScreen<?> screen;
     private boolean open;
     private boolean dragging;
@@ -27,7 +38,12 @@ public final class GuiSettingsWindow {
     private double dragX, dragY;
 
     public GuiSettingsWindow(ModScreen<?> screen) { this.screen = screen; }
-    private boolean hasSound() { return screen.hasStatistics(); }
+    private boolean hasSound() {
+        var menu = screen.getMenu();
+        return menu instanceof ReactorTerminalContainer
+                || menu instanceof TurbineTerminalContainer
+                || menu instanceof HeatExchangerTerminalContainer;
+    }
     private int height() { return hasSound() ? 152 : HEIGHT; }
     private int choices() { return hasSound() ? 6 : 4; }
 
@@ -63,8 +79,12 @@ public final class GuiSettingsWindow {
         return Component.translatable("screen.biggerreactorsrework.settings." + key);
     }
 
-    private int closeX() { return x() + WIDTH - 6 - CLOSE_WIDTH; }
+    private int closeX() { return x() + 6; }
     private int closeY() { return y() + 6; }
+    private int applyX() { return x() + WIDTH - 6 - GuiArt.SWITCH_WIDTH; }
+    private int barX() { return x() + (WIDTH - BAR_WIDTH) / 2; }
+    private int minusX() { return barX() - VOLUME_GAP - VOLUME_BUTTON; }
+    private int plusX() { return barX() + BAR_WIDTH + VOLUME_GAP; }
 
     /** The tab belongs to the machine background, below item counts and auxiliary windows. */
     public void renderTab(GuiGraphics g, int mouseX, int mouseY) {
@@ -90,7 +110,7 @@ public final class GuiSettingsWindow {
             }
             int x = x(), y = y();
             GuiArt.panel(g, x, y, WIDTH, height(), screen.getFrame());
-            GuiArt.scrollingText(g, screen.getFont(), text("title").getString(), x + 8, y + 8, WIDTH - 38, GuiTheme.textColor());
+            GuiArt.scrollingText(g, screen.getFont(), text("title").getString(), x + 22, y + 8, WIDTH - 30, GuiTheme.textColor());
             GuiArt.button(g, closeX(), closeY(), CLOSE_WIDTH, CLOSE_HEIGHT,
                     focus == 3 || inside(mouseX, mouseY, closeX(), closeY(), CLOSE_WIDTH, CLOSE_HEIGHT), GuiIcon.CLOSE, screen.getFrame());
             g.drawString(screen.getFont(), text("background"), x + 12, y + 28, GuiTheme.textColor(), false);
@@ -98,12 +118,12 @@ public final class GuiSettingsWindow {
             choice(g, x + 12, y + 42, GuiTheme.LIGHT_PANEL, !dark, "light", 0, mouseX, mouseY);
             choice(g, x + 100, y + 42, GuiTheme.DARK_PANEL, dark, "dark", 1, mouseX, mouseY);
             boolean all = GuiThemes.applyToAll();
-            GuiArt.buttonBackground(g, x + 12, y + 78, WIDTH - 24, 18,
-                    inside(mouseX, mouseY, x + 12, y + 78, WIDTH - 24, 18), all, false, screen.getFrame());
-            if (all) GuiIcon.CONFIRM.draw(g, x + 18, y + 83);
-            GuiArt.scrollingText(g, screen.getFont(), text("all").getString(), x + 32, y + 83, WIDTH - 48, 0xFFFFFFFF);
-            if (focus == 2) GuiArt.ring(g, x + 12, y + 78, 18, 0xFFACDC42);
-            if (inside(mouseX, mouseY, x + 12, y + 78, WIDTH - 24, 18)) {
+            int applyX = applyX(), applyY = y + APPLY_Y;
+            boolean hovered = inside(mouseX, mouseY, applyX, applyY, GuiArt.SWITCH_WIDTH, GuiArt.TOGGLE_HEIGHT);
+            GuiArt.scrollingText(g, screen.getFont(), text("all"), x + 6, applyY + 3,
+                    applyX - x - 8, GuiTheme.textColor());
+            GuiArt.toggleSwitch(g, applyX, applyY, all, hovered || focus == 2, false, SelectorColors.CYAN, screen.getFrame());
+            if (hovered) {
                 g.renderTooltip(screen.getFont(), text(all ? "all.on" : "all.off"), mouseX, mouseY);
             }
             if (hasSound()) volume(g, x, y, mouseX, mouseY);
@@ -126,24 +146,31 @@ public final class GuiSettingsWindow {
         int value = GuiThemes.volume(screen.machinePos());
         Component level = value == 0 ? text("volume.mute") : Component.literal(value + "%");
         g.drawString(screen.getFont(), Component.translatable("screen.biggerreactorsrework.settings.volume", level), x + 12, y + 105, GuiTheme.textColor(), false);
-        for (int i = 0; i < 12; i++) {
-            int bx = x + 12 + i * 14;
-            boolean selected = i > 0 && i < 11 && value >= i * 10;
-            GuiArt.buttonBackground(g, bx, y + 122, 12, 18, inside(mx, my, bx, y + 122, 12, 18), selected, false, screen.getFrame());
-            if (i == 0 || i == 11) {
-                g.drawString(screen.getFont(), i == 0 ? "−" : "+", bx + 3, y + 127, 0xFFFFFFFF, false);
-                if (focus == (i == 0 ? 4 : 5)) GuiArt.ring(g, bx, y + 122, 12, 18, 0xFFACDC42);
-            } else g.fill(bx + 3, y + 126, bx + 9, y + 136, selected ? 0xFF36CFEE : 0xFF44545B);
+        int rowY = y + VOLUME_Y;
+        volumeButton(g, minusX(), rowY, mx, my, "−", 4);
+        volumeButton(g, plusX(), rowY, mx, my, "+", 5);
+        int segmentY = rowY + (VOLUME_BUTTON - SEGMENT_SIZE) / 2;
+        for (int i = 0; i < VOLUME_STEPS; i++) {
+            int sx = barX() + i * SEGMENT_PITCH;
+            g.fill(sx, segmentY, sx + SEGMENT_SIZE, segmentY + SEGMENT_SIZE,
+                    value >= (i + 1) * 10 ? 0xFF36CFEE : 0xFF44545B);
         }
-        if (inside(mx, my, x + 12, y + 103, 166, 37)) {
-            String help = inside(mx, my, x + 12, y + 122, 12, 18) ? "volume.decrease"
-                    : inside(mx, my, x + 166, y + 122, 12, 18) ? "volume.increase" : "volume.help";
+        if (inside(mx, my, x + 12, y + 103, WIDTH - 24, VOLUME_Y + VOLUME_BUTTON - 103)) {
+            String help = inside(mx, my, minusX(), rowY, VOLUME_BUTTON, VOLUME_BUTTON) ? "volume.decrease"
+                    : inside(mx, my, plusX(), rowY, VOLUME_BUTTON, VOLUME_BUTTON) ? "volume.increase" : "volume.help";
             g.renderTooltip(screen.getFont(), text(help), mx, my);
         }
     }
 
+    private void volumeButton(GuiGraphics g, int x, int y, int mx, int my, String label, int index) {
+        GuiArt.buttonBackground(g, x, y, VOLUME_BUTTON, VOLUME_BUTTON,
+                inside(mx, my, x, y, VOLUME_BUTTON, VOLUME_BUTTON), false, false, screen.getFrame());
+        g.drawString(screen.getFont(), label, x + (VOLUME_BUTTON - screen.getFont().width(label)) / 2, y + 2, 0xFFFFFFFF, false);
+        if (focus == index) GuiArt.ring(g, x, y, VOLUME_BUTTON, 0xFFACDC42);
+    }
+
     private void setBarVolume(double mx) {
-        int segment = Mth.clamp((int)((mx - x() - 26) / 14) + 1, 1, 10);
+        int segment = Mth.clamp((int)((mx - barX()) / SEGMENT_PITCH) + 1, 1, VOLUME_STEPS);
         GuiThemes.setVolume(screen.machinePos(), segment * 10);
     }
 
@@ -164,16 +191,16 @@ public final class GuiSettingsWindow {
             activate(0);
         } else if (inside(mx, my, x() + 100, y() + 42, 78, 22)) {
             activate(1);
-        } else if (inside(mx, my, x() + 12, y() + 78, WIDTH - 24, 18)) {
+        } else if (inside(mx, my, applyX(), y() + APPLY_Y, GuiArt.SWITCH_WIDTH, GuiArt.TOGGLE_HEIGHT)) {
             activate(2);
-        } else if (hasSound() && inside(mx, my, x() + 12, y() + 122, 12, 18)) {
+        } else if (hasSound() && inside(mx, my, minusX(), y() + VOLUME_Y, VOLUME_BUTTON, VOLUME_BUTTON)) {
             activate(4);
-        } else if (hasSound() && inside(mx, my, x() + 166, y() + 122, 12, 18)) {
+        } else if (hasSound() && inside(mx, my, plusX(), y() + VOLUME_Y, VOLUME_BUTTON, VOLUME_BUTTON)) {
             activate(5);
-        } else if (hasSound() && inside(mx, my, x() + 26, y() + 122, 138, 18)) {
+        } else if (hasSound() && inside(mx, my, barX(), y() + VOLUME_Y, BAR_WIDTH, VOLUME_BUTTON)) {
             volumeDragging = true;
             setBarVolume(mx);
-        } else if (inside(mx, my, x(), y(), WIDTH - 25, 22)) {
+        } else if (inside(mx, my, x(), y(), WIDTH, 22)) {
             dragging = true;
             dragX = mx - x();
             dragY = my - y();

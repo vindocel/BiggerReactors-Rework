@@ -235,7 +235,7 @@ public class IndustrialProcessorScreen extends ModScreen<IndustrialProcessorCont
     }
 
     private int closeX() {
-        return this.windowX() + WINDOW_WIDTH - 6 - CLOSE_WIDTH;
+        return this.windowX() + 6;
     }
 
     private int resetX() {
@@ -247,10 +247,10 @@ public class IndustrialProcessorScreen extends ModScreen<IndustrialProcessorCont
     }
 
     /**
-     * Automation switches sit in the top bar, right-aligned before the close button.
+     * Automation switches sit at the right end of the top bar.
      */
     private int switchX(int index, int count) {
-        return this.closeX() - (count - index) * (SWITCH_WIDTH + 2);
+        return this.windowX() + WINDOW_WIDTH - 6 - SWITCH_WIDTH - (count - index - 1) * (SWITCH_WIDTH + 2);
     }
 
     private void syncSides() {
@@ -371,10 +371,13 @@ public class IndustrialProcessorScreen extends ModScreen<IndustrialProcessorCont
             }
         }
 
-        graphics.drawString(this.getFont(), Component.translatable(this.tab.translationKey()), left + 7, top + 8, GuiTheme.textColor(), false);
+        List<AutoSwitch> switches = this.autoSwitches();
+        int titleX = this.closeX() + CLOSE_WIDTH + 6;
+        int titleEnd = switches.isEmpty() ? left + WINDOW_WIDTH - 6 : this.switchX(0, switches.size());
+        GuiArt.scrollingText(graphics, this.getFont(), Component.translatable(this.tab.translationKey()).getString(),
+                titleX, top + 8, titleEnd - titleX - 4, GuiTheme.textColor());
 
         // Top bar: automation switches and the close button.
-        List<AutoSwitch> switches = this.autoSwitches();
         for (int i = 0; i < switches.size(); i++) {
             AutoSwitch toggle = switches.get(i);
             int x = this.switchX(i, switches.size());

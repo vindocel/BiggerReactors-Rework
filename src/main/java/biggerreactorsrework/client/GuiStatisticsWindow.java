@@ -148,8 +148,8 @@ public final class GuiStatisticsWindow {
             var font=screen.getFont();
             int x=x(),y=y(),w=width(),h=height(),text=GuiTheme.textColor();
             GuiArt.panel(g,x,y,w,h,screen.getFrame());
-            g.drawString(font,Component.translatable("screen.biggerreactorsrework.statistics.title"),x+8,y+8,text,false);
-            GuiArt.button(g,x+w-20,y+5,12,12,mx>=x+w-20 && mx<x+w-8 && my>=y+5 && my<y+17,GuiIcon.CLOSE,screen.getFrame());
+            g.drawString(font,Component.translatable("screen.biggerreactorsrework.statistics.title"),x+24,y+8,text,false);
+            GuiArt.button(g,x+6,y+5,12,12,onClose(mx,my),GuiIcon.CLOSE,screen.getFrame());
             var rows=GuiSync.statistics((GuiSync.IGUIPacketProvider)screen.getMenu());
             String status=null,reference=null;
             for(var row:rows){
@@ -217,8 +217,8 @@ public final class GuiStatisticsWindow {
         consumeRelease=true;
         if(button==0){
             if(onTab(mx,my)){open=!open;dragging=false;clickSound();}
-            else if(mx>=x()+width()-20 && mx<x()+width()-8 && my>=y()+5 && my<y()+17){open=false;clickSound();}
-            else if(mx>=x() && mx<x()+width()-22 && my>=y() && my<y()+20){dragging=true;dragX=mx-x();dragY=my-y();}
+            else if(onClose(mx,my)){open=false;clickSound();}
+            else if(mx>=x() && mx<x()+width() && my>=y() && my<y()+20){dragging=true;dragX=mx-x();dragY=my-y();}
         }
         return true;
     }
@@ -226,6 +226,10 @@ public final class GuiStatisticsWindow {
         net.minecraft.client.Minecraft.getInstance().getSoundManager().play(net.minecraft.client.resources.sounds.SimpleSoundInstance.forUI(
                 net.minecraft.sounds.SoundEvents.UI_BUTTON_CLICK,1.0F));
     }
+    private boolean onClose(double mx, double my) {
+        return mx >= x() + 6 && mx < x() + 18 && my >= y() + 5 && my < y() + 17;
+    }
+
     public boolean release(){boolean consumed=consumeRelease;consumeRelease=false;dragging=false;return consumed;}
     public boolean drag(double mx,double my){
         if(!open() || !dragging)return false;

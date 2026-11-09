@@ -442,7 +442,7 @@
   "screen.biggerreactorsrework.settings.background": "Background color",
   "screen.biggerreactorsrework.settings.light": "Light",
   "screen.biggerreactorsrework.settings.dark": "Dark",
-  "screen.biggerreactorsrework.settings.all": "Appearance for all machines",
+  "screen.biggerreactorsrework.settings.all": "Apply to all machines",
   "screen.biggerreactorsrework.settings.all.on": "Enabled: the selected color is used for all machines.",
   "screen.biggerreactorsrework.settings.all.off": "Disabled: the color applies only to this machine. Volume is always individual.",
   "block.biggerreactorsrework.battery_casing": "Battery Casing",
