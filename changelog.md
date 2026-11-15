@@ -9,6 +9,7 @@
 
 - Fixed duplicate Jade energy bars on the Industrial Processor and multiblock energy ports when another provider queries energy without a side.
 - Removed the volume control from the silent battery terminal.
+- Fixed a server crash when a reactor's fuel tank held more than its capacity (for example after lowering the fuel rod capacity in the config or rebuilding a reactor with fewer rods); the fuel rods now render as full.
 
 # 26.1.2-0.1.6 (BiggerReactors-Rework, unreleased)
 

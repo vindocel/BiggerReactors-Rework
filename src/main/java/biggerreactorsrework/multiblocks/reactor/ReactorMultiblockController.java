@@ -664,9 +664,11 @@ public class ReactorMultiblockController extends MultiblockController<ReactorBas
             return;
         }
         
+        long capacity = simulation.fuelTank().capacity();
         long rodPixels = fuelRodsByLevel.size() * 16L;
-        long fuelPixels = (simulation.fuelTank().totalStored() * rodPixels) / simulation.fuelTank().capacity();
-        long wastePixels = (simulation.fuelTank().waste() * rodPixels) / simulation.fuelTank().capacity();
+        // Modified 2026-11-15: an overfilled tank renders as full instead of indexing levels above the reactor.
+        long fuelPixels = Math.min(simulation.fuelTank().totalStored(), capacity) * rodPixels / capacity;
+        long wastePixels = Math.min(simulation.fuelTank().waste(), capacity) * rodPixels / capacity;
         
         if (!forceFullUpdate && fuelPixels == currentFuelRenderLevel && wastePixels == currentWasteRenderLevel) {
             return;
