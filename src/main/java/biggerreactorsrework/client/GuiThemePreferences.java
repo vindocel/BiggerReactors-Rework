@@ -24,6 +24,11 @@ final class GuiThemePreferences {
     }
 
     boolean applyToAll() { return applyToAll; }
+    boolean globalDark() { return allDark; }
+    void globalPreferences(boolean dark, boolean shared) {
+        allDark = dark;
+        applyToAll = shared;
+    }
 
     boolean dark(String machine) {
         return applyToAll ? allDark : machines.getOrDefault(machine, allDark);

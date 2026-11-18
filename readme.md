@@ -11,7 +11,7 @@ It runs with only Minecraft, NeoForge and this mod installed.
 - Optional JEI and Roughly Enough Items integration: Industrial Processor recipes, moderator and coolant properties, turbine coils and heat-exchanger conversions. Machine shortcuts open the installed viewer. EMI and OpenComputers remain inactive on this line until compatible builds are available.
 - Optional CC:Tweaked integration: the reactor, turbine and heat-exchanger computer ports expose live telemetry and controls through native peripherals, including wired modems. OpenComputers support is retained separately for its compatible builds.
 - Requires Java 25 and NeoForge 26.1.2.126 or newer for Minecraft 26.1.2. The other lines live on `mc/1.21.1` and `mc/26.3`.
-- Optional official KubeJS 26.1.2 integration for configuration and material events. Native configuration files and the in-game editor work without scripting mods.
+- Optional official KubeJS 26.1.2 integration for configuration and material events. Native configuration files and the Mods menu editor work without scripting mods. The editor provides category tabs, contextual help and validated drafts, with local-world saving and read-only script values.
 - `runClient` uses `run/`, including the user's 26.1.2 mods. Automated tests and verification worlds use isolated subfolders in `run/mc-26.1.2/`.
 
 ## Origin and credits

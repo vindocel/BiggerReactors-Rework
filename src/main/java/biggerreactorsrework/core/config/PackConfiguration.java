@@ -62,6 +62,78 @@ public final class PackConfiguration {
     public static boolean editable(Option option) {
         return option.registration.isLocalLoaded() && (option.registration.configType == ConfigType.CLIENT || !ConfigManager.hasActiveWorld());
     }
+
+    /** Saves one editor transaction after validating every value and its current script ownership. */
+    public static synchronized void saveEditorValues(Map<String, ?> requested, boolean client) throws IOException {
+        if (!client && !ConfigManager.isLocalServerThread()) {
+            throw new IllegalStateException("Server settings require the integrated server thread");
+        }
+        var catalog = options();
+        var checked = new LinkedHashMap<Option, String>();
+        for (var entry : requested.entrySet()) {
+            var option = catalog.stream().filter(o -> o.key.equals(entry.getKey())
+                    && (o.registration.configType == ConfigType.CLIENT) == client).findFirst().orElseThrow();
+            if (!option.registration.isLocalLoaded() || scriptedKeys().contains(option.key)) {
+                throw new IllegalStateException("Configuration is read-only: " + option.key);
+            }
+            checked.put(option, option.checked(entry.getValue()));
+        }
+        var before = new LinkedHashMap<ConfigRegistration, Element>();
+        var previousOriginals = new LinkedHashMap<>(originals);
+        var files = new LinkedHashMap<Path, byte[]>();
+        try {
+            for (var option : checked.keySet()) {
+                before.computeIfAbsent(option.registration, r -> r.rootConfigSpecNode.generateSyncElement());
+                Path path = option.registration.writeFile.toPath().toAbsolutePath();
+                if (!files.containsKey(path)) files.put(path, Files.exists(path) ? Files.readAllBytes(path) : null);
+            }
+            checked.forEach((option, value) -> option.node.writeFromString(value));
+            for (var registration : before.keySet()) {
+                // Script values belong only to memory. Persist the file values underneath them.
+                Element effective = registration.rootConfigSpecNode.generateSyncElement();
+                try {
+                    for (var option : catalog) if (option.registration == registration && overrides.containsKey(option.key)) {
+                        option.node.writeFromString(fileValue(option.key));
+                    }
+                    writeEditorFile(registration.writeFile.toPath().toAbsolutePath(),
+                            registration.fileFormat.parse(registration.rootConfigSpecNode.generateCurrentElement(true)));
+                    if (originals.containsKey(registration)) originals.put(registration, registration.rootConfigSpecNode.generateSyncElement());
+                } finally {
+                    registration.rootConfigSpecNode.writeElement(effective);
+                }
+            }
+        } catch (IOException | RuntimeException failure) {
+            originals.clear();
+            originals.putAll(previousOriginals);
+            before.forEach((registration, tree) -> registration.rootConfigSpecNode.writeElement(tree));
+            for (var entry : files.entrySet()) {
+                try {
+                    if (entry.getValue() == null) Files.deleteIfExists(entry.getKey());
+                    else Files.write(entry.getKey(), entry.getValue());
+                } catch (IOException rollback) { failure.addSuppressed(rollback); }
+            }
+            throw failure;
+        }
+        if (!checked.isEmpty()) ConfigManager.rulesChanged();
+    }
+
+    private static void writeEditorFile(Path destination, String contents) throws IOException {
+        Files.createDirectories(destination.getParent());
+        Path temporary = Files.createTempFile(destination.getParent(), destination.getFileName().toString(), ".tmp");
+        try {
+            Files.writeString(temporary, contents, StandardCharsets.UTF_8);
+            try { Files.move(temporary, destination, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE); }
+            catch (AtomicMoveNotSupportedException ignored) { Files.move(temporary, destination, StandardCopyOption.REPLACE_EXISTING); }
+        } finally {
+            Files.deleteIfExists(temporary);
+        }
+    }
+
+    private static Set<String> remoteScriptedKeys = Set.of();
+    public static Set<String> scriptedKeys() {
+        return ConfigManager.hasRemoteServer() ? remoteScriptedKeys : overrides.keySet();
+    }
+    static void remoteScriptedKeys(Set<String> keys) { remoteScriptedKeys = Set.copyOf(keys); }
     public static void save(Option option, String raw) throws IOException {
         if (!editable(option)) throw new IllegalStateException("Server rules can only be edited locally before opening a world");
         String value = option.checked(raw);

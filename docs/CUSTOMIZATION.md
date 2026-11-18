@@ -41,7 +41,7 @@ This guide is for modpack creators, server administrators and modders. You do no
 
 | Mechanism | What it changes | How it applies |
 |---|---|---|
-| **Configuration screen** | The same values as the files below, from **Mods → BiggerReactors-Rework → Config** | Restart the game for machine and world-generation rules |
+| **Configuration screen** | The same values as the files below, from **Mods → BiggerReactors-Rework → Config** | Save with Done in a local world; restart/reassemble when required |
 | **Configuration files** | Machine limits, simulation constants, battery values, uranium generation, fuel yields | Edit with the game closed, then start it |
 | **Datapack** | Moderators, coils, coolants, fuels by data map, recipes, tags | `/reload`; machines already assembled may need reassembly |
 | **KubeJS** (optional) | Server options in memory, plus materials and fuels | World or server restart for options; `/reload` for materials |
@@ -61,7 +61,11 @@ The mod writes its own files the first time it starts:
 
 There is no per-world copy of these files: they apply to the whole instance or server.
 
-**The screen.** It needs no other mod. Search by option name, open an option, and read its comment, default and valid range. Invalid text disables saving. Gameplay rules are read-only while a world is open, including singleplayer: close the world to edit them. A connected client never changes its server's rules.
+**The screen.** Open Mods → BiggerReactors-Rework → Config. Appearance, Reactor, Turbine, and Machines and world tabs group the existing options. The right panel shows contextual help, defaults, limits, and script ownership. Edit a separate draft, reset one row, restore tab defaults, or undo changes in that tab. Done validates and saves; Escape discards the draft. The fuel list has its own Done and Cancel buttons that update or discard only the list draft.
+
+Gameplay rules are editable only in an open local world, saved on the integrated server thread. The main menu and remote multiplayer servers are read-only. Values controlled by KubeJS are locked and checked again at save time. Integer settings retain their exact precision. Script overrides stay in memory and are not written into TOML files.
+
+The Appearance tab edits the existing shared light/dark preferences. Individual machine choices and volume preferences are retained. Each machine keeps its own frame color.
 
 **Advanced options.** The file lists only the common options until `EnableAdvancedConfig = true` is set at its top; the others appear after the next load. They are the options marked *advanced* below.
 

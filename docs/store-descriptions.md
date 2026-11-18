@@ -327,7 +327,7 @@ Check the operating message and the assumptions shown in the statistics panel. P
 
 ## ⚙️ Configure your modpack
 
-Open **Mods → BiggerReactors-Rework → Config** to search and edit the mod's local settings without installing a configuration library or scripting mod. Set battery capacity and input/output per cell, tune machine parameters, define fuel yields for registered items or tags, and disable uranium generation in new terrain. Existing ore is preserved. Restart the game after changing machine or world-generation rules; gameplay settings are locked while a world is open.
+Open **Mods → BiggerReactors-Rework → Config** to edit settings in category tabs with contextual help, defaults, undo and draft validation without installing a configuration library or scripting mod. Set battery capacity and input/output per cell, tune machine parameters, define fuel yields for registered items or tags, and disable uranium generation in new terrain. Existing ore is preserved. Restart the game after changing machine or world-generation rules; gameplay settings are editable in a local world, while the main menu and remote servers are read-only. Script-controlled values stay locked.
 
 Server owners and pack authors can also use **optional KubeJS events** to override configuration and define reactor fuels, moderators, turbine coils and fluid transitions. Server rules take priority for connected players, and script overrides do not overwrite their local files. The base mod works without KubeJS.
 

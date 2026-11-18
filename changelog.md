@@ -2,6 +2,9 @@
 
 ## Changed
 
+- Replaced the Mods configuration editor with category tabs, contextual help, draft validation, reset, defaults, undo and a fuel-list editor. Local-world settings can be saved while script-owned values remain read-only.
+- Preserved screen and texture colors with Dark Mode and Dark Mode Everywhere using scoped palette protection.
+- Clarified that CC:Tweaked is optional in the automation guide.
 - Machine settings use a switch for shared appearance. Reactor, turbine and heat exchanger terminals use a compact volume bar.
 - Machine popups now have their close button on the left.
 

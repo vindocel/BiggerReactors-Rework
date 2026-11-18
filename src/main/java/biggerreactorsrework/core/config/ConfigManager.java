@@ -50,6 +50,11 @@ public class ConfigManager {
     public static long revision() { return revision; }
     // Modified 2026-11-01: configuration edits share synchronization and remain local outside active worlds.
     public static boolean hasActiveWorld() { return server != null || connectedToServer; }
+    public static boolean hasRemoteServer() { return connectedToServer && server == null; }
+    public static boolean isLocalServerThread() {
+        return FMLEnvironment.getDist().isClient()
+                && server != null && !server.isDedicatedServer() && server.isSameThread();
+    }
     public static void rulesChanged() {
         revision++;
         biggerreactorsrework.calculator.service.CalculatorService.invalidate();
@@ -217,6 +222,7 @@ public class ConfigManager {
     }
 
     public static void restoreLocalConfigs() {
+        PackConfiguration.remoteScriptedKeys(java.util.Set.of());
         syncedConfigs().forEach(ConfigRegistration::unloadRemoteConfig);
         revision++;
     }
@@ -246,6 +252,7 @@ public class ConfigManager {
         DataCompound compound = new DataCompound();
         compound.put("initialLogin", initialLogin);
         compound.put("configs", configs);
+        compound.put("scriptedKeys", new java.util.ArrayList<>(PackConfiguration.overrides().keySet()));
         return compound;
     }
     
@@ -261,6 +268,8 @@ public class ConfigManager {
     public static void applyRemoteSnapshot(DataCompound compound) {
         // Modified 2026-11-01: integrated client and server already share the same fields. Do not save script rules as local preferences.
         if (FMLEnvironment.getDist().isClient() && server != null && !server.isDedicatedServer()) { revision++; return; }
+        PackConfiguration.remoteScriptedKeys(compound.getList("scriptedKeys").stream()
+                .filter(String.class::isInstance).map(String.class::cast).collect(java.util.stream.Collectors.toSet()));
         boolean initialLogin = compound.getBoolean("initialLogin");
         final var configs = compound.getMap("configs");
         for (final var entry : configs.entrySet()) {

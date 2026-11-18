@@ -36,6 +36,20 @@ public final class GuiThemes {
 
     public static boolean dark(BlockPos pos) { return preferences().dark(appearanceKey(pos)); }
     public static boolean applyToAll() { return preferences().applyToAll(); }
+    public static java.util.Map<String, Object> globalPreferences() {
+        return java.util.Map.of("appearance.dark", preferences().globalDark(), "appearance.shared", preferences().applyToAll());
+    }
+
+    public static void setGlobalPreferences(java.util.Map<String, Object> values) {
+        boolean dark = preferences().globalDark(), shared = preferences().applyToAll();
+        preferences().globalPreferences((Boolean) values.get("appearance.dark"), (Boolean) values.get("appearance.shared"));
+        try {
+            persist();
+        } catch (IOException failure) {
+            preferences().globalPreferences(dark, shared);
+            throw new java.io.UncheckedIOException(failure);
+        }
+    }
     // Modified 2026-10-28: every terminal of a multiblock shares its canonical position.
     public static int volume(BlockPos pos) { return preferences().volume(volumeKey(pos)); }
     public static void setVolume(BlockPos pos, int percent) {
@@ -91,6 +105,14 @@ public final class GuiThemes {
     }
 
     private static void save() {
+        try {
+            persist();
+        } catch (IOException | RuntimeException e) {
+            BiggerReactors.LOGGER.warn("Could not save GUI themes", e);
+        }
+    }
+
+    private static void persist() throws IOException {
         Path target = path();
         Path temporary = target.resolveSibling(target.getFileName() + ".tmp");
         try {
@@ -99,8 +121,8 @@ public final class GuiThemes {
                 preferences().write(writer);
             }
             Files.move(temporary, target, StandardCopyOption.REPLACE_EXISTING);
-        } catch (IOException | RuntimeException e) {
-            BiggerReactors.LOGGER.warn("Could not save GUI themes", e);
+        } finally {
+            Files.deleteIfExists(temporary);
         }
     }
 }

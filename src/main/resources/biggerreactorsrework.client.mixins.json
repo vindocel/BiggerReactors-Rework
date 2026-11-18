@@ -3,6 +3,13 @@
   "minVersion": "0.8",
   "package": "biggerreactorsrework.compat.iris.mixin",
   "compatibilityLevel": "JAVA_25",
-  "client": ["ItemOverlaySamplerMixin"],
-  "injectors": { "defaultRequire": 1 }
+  "client": [
+    "ItemOverlaySamplerMixin",
+    "ScreenPaletteMixin",
+    "ScreenEventPaletteMixin",
+    "DarkModeTextureMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
 }

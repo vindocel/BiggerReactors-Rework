@@ -78,6 +78,7 @@ public final class BiggerReactorsClient {
                     biggerreactorsrework.client.calculator.CalculatorClient.disconnected();
                 });
         modBus.addListener((net.neoforged.neoforge.client.event.RegisterRenderPipelinesEvent event) -> event.registerPipeline(biggerreactorsrework.client.GuiTheme.DARK_PIPELINE));
+        modBus.addListener(biggerreactorsrework.client.config.ConfigPaint::registerPipelines);
         modBus.addListener(BiggerReactorsClient::registerFluidModels);
         net.neoforged.neoforge.common.NeoForge.EVENT_BUS.addListener((net.neoforged.neoforge.event.entity.player.ItemTooltipEvent event) -> {
             if (event.getItemStack().getItem() instanceof net.minecraft.world.item.BlockItem item && item.getBlock() instanceof biggerreactorsrework.core.modular.block.BlockTooltip block) {
@@ -89,7 +90,6 @@ public final class BiggerReactorsClient {
         modBus.addListener((net.neoforged.neoforge.client.event.RegisterPictureInPictureRenderersEvent event) ->
                 biggerreactorsrework.client.guide.GuidePictures.register(event));
         modBus.addListener(biggerreactorsrework.compat.DarkModeCompat::onInterModEnqueue);
-        biggerreactorsrework.compat.DarkModeCompat.register();
         // Added 2026-11-03: describe the Frozen Obsidian process on its bucket.
         net.neoforged.neoforge.common.NeoForge.EVENT_BUS.addListener((net.neoforged.neoforge.event.entity.player.ItemTooltipEvent event) -> {
             if (event.getItemStack().is(biggerreactorsrework.fluids.FrozenObsidian.INSTANCE.getBucket()))

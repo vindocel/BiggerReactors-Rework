@@ -6,6 +6,23 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
 class GuiThemePreferencesTest {
+    @Test void globalEditorPreservesIndividualChoicesAndVolumes() {
+        var themes = new GuiThemePreferences();
+        themes.setApplyToAll("reactor", false);
+        themes.choose("reactor", true);
+        themes.setVolume("reactor", 30);
+        themes.globalPreferences(false, true);
+        assertFalse(themes.dark("reactor"));
+        themes.globalPreferences(false, false);
+        assertTrue(themes.dark("reactor"));
+        assertEquals(30, themes.volume("reactor"));
+        var writer = new StringWriter();
+        themes.write(writer);
+        var restored = GuiThemePreferences.read(new StringReader(writer.toString()));
+        assertFalse(restored.globalDark());
+        assertFalse(restored.applyToAll());
+        assertTrue(restored.dark("reactor"));
+    }
     @Test void volumeIsIndependentOfTypePositionWorldAndGlobalTheme() {
         var themes = new GuiThemePreferences();
         String reactor = "world1|overworld|1,2,3|audio:0";

@@ -19,6 +19,22 @@ import net.minecraft.world.level.levelgen.placement.PlacementModifier;
 /** Added 2026-11-01: real ore-filter decoding, fuel transfer, saved battery energy and optional script dispatch. */
 public final class PackConfigurationGameTests {
     private static PackConfiguration.Option option(String key) { return PackConfiguration.serverOptions().get(key); }
+    @GameTest(template="empty_7x7x7")
+    public static void editorRejectsDedicatedServerWritesAndPreservesLongPrecision(GameTestHelper h) {
+        var capacity = option("Battery.CellCapacity");
+        String original = capacity.current();
+        h.assertTrue(capacity.checked("9007199254740993").equals("9007199254740993"), "long value lost precision");
+        boolean rejected = false;
+        try {
+            PackConfiguration.saveEditorValues(java.util.Map.of("Battery.CellCapacity", "9007199254740993"), false);
+        } catch (IllegalStateException expected) {
+            rejected = true;
+        } catch (java.io.IOException failure) {
+            throw new AssertionError(failure);
+        }
+        h.assertTrue(rejected && capacity.current().equals(original), "dedicated server accepted editor write");
+        h.succeed();
+    }
     private static void rejects(GameTestHelper h, Runnable action) {
         boolean rejected = false; try { action.run(); } catch (IllegalArgumentException | IllegalStateException expected) { rejected = true; }
         h.assertTrue(rejected, "unsafe edit was accepted");
