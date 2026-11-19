@@ -1,6 +1,14 @@
+//? if =26.1.2 || =26.3 {
 package biggerreactorsrework.multiblocks.turbine.blocks;
 
 import net.minecraft.core.BlockPos;
+//?} else if =1.21.1 {
+/*package biggerreactorsrework.multiblocks.turbine.blocks;
+
+import net.minecraft.MethodsReturnNonnullByDefault;
+import net.minecraft.core.BlockPos;
+*/
+//?}
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import biggerreactorsrework.multiblocks.turbine.tiles.TurbineTerminalTile;
@@ -11,22 +19,37 @@ import biggerreactorsrework.core.registry.RegisterBlock;
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 
+//? if =26.1.2 || =26.3 {
 @ParametersAreNonnullByDefault
 public class TurbineTerminal extends TurbineBaseBlock implements IAssemblyStateBlock, IFaceDirectionBlock {
-    
+//?} else if =1.21.1 {
+/*@ParametersAreNonnullByDefault
+@MethodsReturnNonnullByDefault
+public class TurbineTerminal extends TurbineBaseBlock implements IAssemblyStateBlock, IFaceDirectionBlock {
+*/
+//?}
+
+//? if =26.1.2 || =26.3 {
     @RegisterBlock(name = "turbine_terminal", tileEntityClass = TurbineTerminalTile.class)
     public static final TurbineTerminal INSTANCE = biggerreactorsrework.core.registry.RegistryIds.named("turbine_terminal", () -> new TurbineTerminal());
-    
+
     public TurbineTerminal() {
+//?} else if =1.21.1 {
+/*    @RegisterBlock(name = "turbine_terminal", tileEntityClass = TurbineTerminalTile.class)
+    public static final TurbineTerminal INSTANCE = new TurbineTerminal();
+
+    public TurbineTerminal() {
+*/
+//?}
         super();
     }
-    
+
     @Nullable
     @Override
     public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
         return TurbineTerminalTile.SUPPLIER.create(pos, state);
     }
-    
+
     @Override
     public boolean usesTurbineState() {
         return true;

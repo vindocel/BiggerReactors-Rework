@@ -1,6 +1,14 @@
+//? if =26.1.2 || =26.3 {
 package biggerreactorsrework.multiblocks.reactor.blocks;
 
 import net.minecraft.core.BlockPos;
+//?} else if =1.21.1 {
+/*package biggerreactorsrework.multiblocks.reactor.blocks;
+
+import net.minecraft.MethodsReturnNonnullByDefault;
+import net.minecraft.core.BlockPos;
+*/
+//?}
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
@@ -21,32 +29,53 @@ import javax.annotation.ParametersAreNonnullByDefault;
 
 import static biggerreactorsrework.multiblocks.reactor.blocks.ReactorAccessPort.PortDirection.*;
 
+//? if =26.1.2 || =26.3 {
 @ParametersAreNonnullByDefault
 public class ReactorCoolantPort extends ReactorBaseBlock implements IAssemblyStateBlock, IFaceDirectionBlock {
+//?} else if =1.21.1 {
+/*@ParametersAreNonnullByDefault
+@MethodsReturnNonnullByDefault
+public class ReactorCoolantPort extends ReactorBaseBlock implements IAssemblyStateBlock, IFaceDirectionBlock {
+*/
+//?}
 
+//? if =26.1.2 || =26.3 {
     @RegisterBlock(name = "reactor_coolant_port", tileEntityClass = ReactorCoolantPortTile.class)
     public static final ReactorCoolantPort INSTANCE = biggerreactorsrework.core.registry.RegistryIds.named("reactor_coolant_port", () -> new ReactorCoolantPort());
-    
+
     public ReactorCoolantPort() {
+//?} else if =1.21.1 {
+/*    @RegisterBlock(name = "reactor_coolant_port", tileEntityClass = ReactorCoolantPortTile.class)
+    public static final ReactorCoolantPort INSTANCE = new ReactorCoolantPort();
+
+    public ReactorCoolantPort() {
+*/
+//?}
         super();
         registerDefaultState(defaultBlockState().setValue(PORT_DIRECTION_ENUM_PROPERTY, INLET));
     }
-    
+
     @Nullable
     @Override
     public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
         return ReactorCoolantPortTile.SUPPLIER.create(pos, state);
     }
-    
+
     @Override
     protected void buildStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
         builder.add(PORT_DIRECTION_ENUM_PROPERTY);
     }
-    
+
     @Override
+//? if =26.1.2 || =26.3 {
     public InteractionResult onUse(BlockState state, Level worldIn, BlockPos pos, Player player, InteractionHand handIn, BlockHitResult hit) {
         // Modified 2026-11-01: containers use the port before ordinary menu/wrench interaction.
         var container = biggerreactorsrework.core.fluids.FluidPortInteraction.use(worldIn, pos, player, handIn, hit);
+//?} else if =1.21.1 {
+/*    public InteractionResult onUse(BlockState state, Level worldIn, BlockPos pos, Player player, InteractionHand handIn, BlockHitResult hit) {
+        var container = biggerreactorsrework.core.fluids.FluidPortInteraction.use(worldIn, pos, player, handIn, hit);
+*/
+//?}
         if (container != InteractionResult.PASS) return container;
         if (handIn == InteractionHand.MAIN_HAND) {
             if (Util.isWrench(player.getMainHandItem().getItem())) {
@@ -65,7 +94,7 @@ public class ReactorCoolantPort extends ReactorBaseBlock implements IAssemblySta
         }
         return super.onUse(state, worldIn, pos, player, handIn, hit);
     }
-    
+
     @Override
     public void onNeighborChange(BlockState state, Level worldIn, BlockPos pos, Block blockIn, BlockPos fromPos, boolean isMoving) {
         super.onNeighborChange(state, worldIn, pos, blockIn, fromPos, isMoving);

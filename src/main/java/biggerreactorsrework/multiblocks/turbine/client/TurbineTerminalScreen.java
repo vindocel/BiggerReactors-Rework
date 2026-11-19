@@ -2,14 +2,28 @@ package biggerreactorsrework.multiblocks.turbine.client;
 
 import biggerreactorsrework.client.GuiTheme;
 
+//? if =26.1.2 || =26.3 {
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.Screen;
+//?} else if =1.21.1 {
+/*import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.screens.Screen;
+*/
+//?}
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
+//? if =26.1.2 || =26.3 {
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvents;
+//?} else if =1.21.1 {
+/*import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.sounds.SoundEvents;
+*/
+//?}
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
@@ -57,10 +71,18 @@ public class TurbineTerminalScreen extends ModScreen<TurbineTerminalContainer> {
         super(container, playerInventory, Component.translatable("screen.biggerreactorsrework.turbine_terminal"), 200, 168);
 
         // Initialize turbine state.
+//? if =26.1.2 || =26.3 {
         turbineState = (TurbineState) this.getMenu().getGuiPacket();
         intakeFluid = BuiltInRegistries.FLUID.getValue(Identifier.parse(turbineState.intakeResourceLocation));
         exhaustFluid = BuiltInRegistries.FLUID.getValue(Identifier.parse(turbineState.exhaustResourceLocation));
     }
+//?} else if =1.21.1 {
+/*        turbineState = (TurbineState) this.getMenu().getGuiPacket();
+        intakeFluid = BuiltInRegistries.FLUID.get(ResourceLocation.parse(turbineState.intakeResourceLocation));
+        exhaustFluid = BuiltInRegistries.FLUID.get(ResourceLocation.parse(turbineState.exhaustResourceLocation));
+    }
+*/
+//?}
 
     /**
      * Initialize the screen.
@@ -184,11 +206,20 @@ public class TurbineTerminalScreen extends ModScreen<TurbineTerminalContainer> {
             // Click logic. Extra check necessary since this is an "in-class" button.
             if (flowRateIncreaseButton.isMouseOver(mX, mY)) {
                 // Calculate amount of change:
+//? if =26.1.2 || =26.3 {
                 long delta;
                 if (net.minecraft.client.Minecraft.getInstance().hasShiftDown() && net.minecraft.client.Minecraft.getInstance().hasControlDown()) delta = Config.CONFIG.Turbine.GUI.DeltaMBHCtrlShift;
                 else if (net.minecraft.client.Minecraft.getInstance().hasControlDown()) delta = Config.CONFIG.Turbine.GUI.DeltaMBCtrl;
                 else if (net.minecraft.client.Minecraft.getInstance().hasShiftDown()) delta = Config.CONFIG.Turbine.GUI.DeltaMBShift;
                 else delta = Config.CONFIG.Turbine.GUI.DeltaMB;
+//?} else if =1.21.1 {
+/*                long delta;
+                if (Screen.hasShiftDown() && Screen.hasControlDown()) delta = Config.CONFIG.Turbine.GUI.DeltaMBHCtrlShift;
+                else if (Screen.hasControlDown()) delta = Config.CONFIG.Turbine.GUI.DeltaMBCtrl;
+                else if (Screen.hasShiftDown()) delta = Config.CONFIG.Turbine.GUI.DeltaMBShift;
+                else delta = Config.CONFIG.Turbine.GUI.DeltaMB;
+*/
+//?}
                 // Mouse is hovering, do the thing.
                 this.getMenu().executeRequest("changeFlowRate", delta);
                 // Play the selection sound.
@@ -201,7 +232,8 @@ public class TurbineTerminalScreen extends ModScreen<TurbineTerminalContainer> {
         };
         flowRateIncreaseButton.onRender = ((graphics, mX, mY) -> {
             // Custom rendering.
-            GuiArt.button(graphics, flowRateIncreaseButton.x, flowRateIncreaseButton.y, flowRateIncreaseButton.width, flowRateIncreaseButton.height, flowRateIncreaseButton.isMouseOver(mX, mY), GuiIcon.ARROW_UP, this.frame());
+            GuiArt.buttonBackground(graphics, flowRateIncreaseButton.x, flowRateIncreaseButton.y, flowRateIncreaseButton.width, flowRateIncreaseButton.height, flowRateIncreaseButton.isMouseOver(mX, mY), false, false, this.frame());
+            GuiIcon.ARROW_UP.draw(graphics, flowRateIncreaseButton.x + (flowRateIncreaseButton.width - GuiIcon.ARROW_UP.width()) / 2, flowRateIncreaseButton.y + (flowRateIncreaseButton.height - GuiIcon.ARROW_UP.height()) / 2 + 1);
         });
         this.addScreenElement(flowRateIncreaseButton);
 
@@ -211,11 +243,20 @@ public class TurbineTerminalScreen extends ModScreen<TurbineTerminalContainer> {
             // Click logic. Extra check necessary since this is an "in-class" button.
             if (flowRateDecreaseButton.isMouseOver(mX, mY)) {
                 // Calculate amount of change:
+//? if =26.1.2 || =26.3 {
                 long delta;
                 if (net.minecraft.client.Minecraft.getInstance().hasShiftDown() && net.minecraft.client.Minecraft.getInstance().hasControlDown()) delta = -Config.CONFIG.Turbine.GUI.DeltaMBHCtrlShift;
                 else if (net.minecraft.client.Minecraft.getInstance().hasControlDown()) delta = -Config.CONFIG.Turbine.GUI.DeltaMBCtrl;
                 else if (net.minecraft.client.Minecraft.getInstance().hasShiftDown()) delta = -Config.CONFIG.Turbine.GUI.DeltaMBShift;
                 else delta = -Config.CONFIG.Turbine.GUI.DeltaMB;
+//?} else if =1.21.1 {
+/*                long delta;
+                if (Screen.hasShiftDown() && Screen.hasControlDown()) delta = -Config.CONFIG.Turbine.GUI.DeltaMBHCtrlShift;
+                else if (Screen.hasControlDown()) delta = -Config.CONFIG.Turbine.GUI.DeltaMBCtrl;
+                else if (Screen.hasShiftDown()) delta = -Config.CONFIG.Turbine.GUI.DeltaMBShift;
+                else delta = -Config.CONFIG.Turbine.GUI.DeltaMB;
+*/
+//?}
                 // Mouse is hovering, do the thing.
                 this.getMenu().executeRequest("changeFlowRate", delta);
                 // Play the selection sound.
@@ -228,7 +269,8 @@ public class TurbineTerminalScreen extends ModScreen<TurbineTerminalContainer> {
         };
         flowRateDecreaseButton.onRender = (graphics, mX, mY) -> {
             // Custom rendering.
-            GuiArt.button(graphics, flowRateDecreaseButton.x, flowRateDecreaseButton.y, flowRateDecreaseButton.width, flowRateDecreaseButton.height, flowRateDecreaseButton.isMouseOver(mX, mY), GuiIcon.ARROW_DOWN, this.frame());
+            GuiArt.buttonBackground(graphics, flowRateDecreaseButton.x, flowRateDecreaseButton.y, flowRateDecreaseButton.width, flowRateDecreaseButton.height, flowRateDecreaseButton.isMouseOver(mX, mY), false, false, this.frame());
+            GuiIcon.ARROW_DOWN.draw(graphics, flowRateDecreaseButton.x + (flowRateDecreaseButton.width - GuiIcon.ARROW_DOWN.width()) / 2, flowRateDecreaseButton.y + (flowRateDecreaseButton.height - GuiIcon.ARROW_DOWN.height()) / 2 + 1);
         };
         this.addScreenElement(flowRateDecreaseButton);
     }
@@ -238,26 +280,54 @@ public class TurbineTerminalScreen extends ModScreen<TurbineTerminalContainer> {
      */
     private void initGauges() {
         // (Top) Tachometer gauge:
+//? if =26.1.2 || =26.3 {
         RenderedElement<TurbineTerminalContainer> tachometerGauge = new RenderedElement<>(this, 109, 25, 18, 64, 0, 152, Component.empty());
         tachometerGauge.onRender = (@Nonnull GuiGraphicsExtractor graphics, int mX, int mY) -> TurbineTerminalScreen.renderTachometerGauge(graphics, tachometerGauge, turbineState.currentRPM, turbineState.maxRPM);
         this.addScreenElement(tachometerGauge);
+//?} else if =1.21.1 {
+/*        RenderedElement<TurbineTerminalContainer> tachometerGauge = new RenderedElement<>(this, 109, 25, 18, 64, 0, 152, Component.empty());
+        tachometerGauge.onRender = (@Nonnull GuiGraphics graphics, int mX, int mY) -> TurbineTerminalScreen.renderTachometerGauge(graphics, tachometerGauge, turbineState.currentRPM, turbineState.maxRPM);
+        this.addScreenElement(tachometerGauge);
+*/
+//?}
 
         // (Top) Hot intake tank:
+//? if =26.1.2 || =26.3 {
         RenderedElement<TurbineTerminalContainer> intakeTank = new RenderedElement<>(this, 131, 25, 18, 64, 0, 152, Component.empty());
         intakeTank.onRender = (@Nonnull GuiGraphicsExtractor graphics, int mX, int mY) -> CommonRender.renderFluidGauge(graphics,
                 intakeTank, turbineState.intakeStored, turbineState.intakeCapacity, intakeFluid);
+//?} else if =1.21.1 {
+/*        RenderedElement<TurbineTerminalContainer> intakeTank = new RenderedElement<>(this, 131, 25, 18, 64, 0, 152, Component.empty());
+        intakeTank.onRender = (@Nonnull GuiGraphics graphics, int mX, int mY) -> CommonRender.renderFluidGauge(graphics,
+                intakeTank, turbineState.intakeStored, turbineState.intakeCapacity, intakeFluid);
+*/
+//?}
         this.addScreenElement(intakeTank);
 
         // (Top) Cold exhaust tank:
+//? if =26.1.2 || =26.3 {
         RenderedElement<TurbineTerminalContainer> exhaustTank = new RenderedElement<>(this, 153, 25, 18, 64, 0, 152, Component.empty());
         exhaustTank.onRender = (@Nonnull GuiGraphicsExtractor graphics, int mX, int mY) -> CommonRender.renderFluidGauge(graphics,
                 exhaustTank, turbineState.exhaustStored, turbineState.exhaustCapacity, exhaustFluid);
+//?} else if =1.21.1 {
+/*        RenderedElement<TurbineTerminalContainer> exhaustTank = new RenderedElement<>(this, 153, 25, 18, 64, 0, 152, Component.empty());
+        exhaustTank.onRender = (@Nonnull GuiGraphics graphics, int mX, int mY) -> CommonRender.renderFluidGauge(graphics,
+                exhaustTank, turbineState.exhaustStored, turbineState.exhaustCapacity, exhaustFluid);
+*/
+//?}
         this.addScreenElement(exhaustTank);
 
         // (Top) Internal battery:
+//? if =26.1.2 || =26.3 {
         RenderedElement<TurbineTerminalContainer> internalBattery = new RenderedElement<>(this, 175, 25, 18, 64, 0, 152, Component.empty());
         internalBattery.onRender = (@Nonnull GuiGraphicsExtractor graphics, int mX, int mY) -> CommonRender.renderEnergyGauge(graphics,
                 internalBattery, turbineState.energyStored, turbineState.energyCapacity);
+//?} else if =1.21.1 {
+/*        RenderedElement<TurbineTerminalContainer> internalBattery = new RenderedElement<>(this, 175, 25, 18, 64, 0, 152, Component.empty());
+        internalBattery.onRender = (@Nonnull GuiGraphics graphics, int mX, int mY) -> CommonRender.renderEnergyGauge(graphics,
+                internalBattery, turbineState.energyStored, turbineState.energyCapacity);
+*/
+//?}
         this.addScreenElement(internalBattery);
     }
 
@@ -266,15 +336,29 @@ public class TurbineTerminalScreen extends ModScreen<TurbineTerminalContainer> {
      */
     private void initSymbols() {
         // (Top) Intake tank symbol:
+//? if =26.1.2 || =26.3 {
         RenderedElement<TurbineTerminalContainer> intakeTankSymbol = new RenderedElement<>(this, 132, 6, 16, 16, 0, 0, Component.translatable("screen.biggerreactorsrework.turbine_terminal.intake_tank.tooltip"));
         intakeTankSymbol.onRender = (@Nonnull GuiGraphicsExtractor graphics, int mX, int mY) -> GuiArt.fluidSymbol(graphics,
                 intakeTankSymbol.x, intakeTankSymbol.y, intakeFluid, GuiIcon.DROP_INPUT_MASK, GuiIcon.DROP_INPUT, GuiTheme.panelColor(), true);
+//?} else if =1.21.1 {
+/*        RenderedElement<TurbineTerminalContainer> intakeTankSymbol = new RenderedElement<>(this, 132, 6, 16, 16, 0, 0, Component.translatable("screen.biggerreactorsrework.turbine_terminal.intake_tank.tooltip"));
+        intakeTankSymbol.onRender = (@Nonnull GuiGraphics graphics, int mX, int mY) -> GuiArt.fluidSymbol(graphics,
+                intakeTankSymbol.x, intakeTankSymbol.y, intakeFluid, GuiIcon.DROP_INPUT_MASK, GuiIcon.DROP_INPUT, GuiTheme.panelColor(), true);
+*/
+//?}
         this.addScreenElement(intakeTankSymbol);
 
         // (Top) Exhaust tank symbol:
+//? if =26.1.2 || =26.3 {
         RenderedElement<TurbineTerminalContainer> exhaustTankSymbol = new RenderedElement<>(this, 154, 6, 16, 16, 0, 0, Component.translatable("screen.biggerreactorsrework.turbine_terminal.exhaust_tank.tooltip"));
         exhaustTankSymbol.onRender = (@Nonnull GuiGraphicsExtractor graphics, int mX, int mY) -> GuiArt.fluidSymbol(graphics,
                 exhaustTankSymbol.x, exhaustTankSymbol.y, exhaustFluid, GuiIcon.DROP_OUTPUT_MASK, GuiIcon.DROP_OUTPUT, GuiTheme.panelColor(), true);
+//?} else if =1.21.1 {
+/*        RenderedElement<TurbineTerminalContainer> exhaustTankSymbol = new RenderedElement<>(this, 154, 6, 16, 16, 0, 0, Component.translatable("screen.biggerreactorsrework.turbine_terminal.exhaust_tank.tooltip"));
+        exhaustTankSymbol.onRender = (@Nonnull GuiGraphics graphics, int mX, int mY) -> GuiArt.fluidSymbol(graphics,
+                exhaustTankSymbol.x, exhaustTankSymbol.y, exhaustFluid, GuiIcon.DROP_OUTPUT_MASK, GuiIcon.DROP_OUTPUT, GuiTheme.panelColor(), true);
+*/
+//?}
         this.addScreenElement(exhaustTankSymbol);
     }
 
@@ -288,10 +372,18 @@ public class TurbineTerminalScreen extends ModScreen<TurbineTerminalContainer> {
         turbineState = (TurbineState) this.getMenu().getGuiPacket();
         super.containerTick();
         // Check if intake type changed.
+//? if =26.1.2 || =26.3 {
         if (!turbineState.intakeResourceLocation.equals(Objects.requireNonNull(BuiltInRegistries.FLUID.getKey(intakeFluid)).toString())) {
             intakeFluid = BuiltInRegistries.FLUID.getValue(Identifier.parse(turbineState.intakeResourceLocation));
         }
+//?} else if =1.21.1 {
+/*        if (!turbineState.intakeResourceLocation.equals(Objects.requireNonNull(BuiltInRegistries.FLUID.getKey(intakeFluid)).toString())) {
+            intakeFluid = BuiltInRegistries.FLUID.get(ResourceLocation.parse(turbineState.intakeResourceLocation));
+        }
+*/
+//?}
         // Check if exhaust type changed.
+//? if =26.1.2 || =26.3 {
         if (!turbineState.exhaustResourceLocation.equals(Objects.requireNonNull(BuiltInRegistries.FLUID.getKey(exhaustFluid)).toString())) {
             exhaustFluid = BuiltInRegistries.FLUID.getValue(Identifier.parse(turbineState.exhaustResourceLocation));
         }
@@ -307,6 +399,24 @@ public class TurbineTerminalScreen extends ModScreen<TurbineTerminalContainer> {
      */
     public static void renderTachometerGauge(@Nonnull GuiGraphicsExtractor graphics, @Nonnull RenderedElement<TurbineTerminalContainer> symbol, double currentRPM, double maxRPM) {
         GaugeBar.drawSpeed(graphics, symbol.x, symbol.y, currentRPM, maxRPM);
+//?} else if =1.21.1 {
+/*        if (!turbineState.exhaustResourceLocation.equals(Objects.requireNonNull(BuiltInRegistries.FLUID.getKey(exhaustFluid)).toString())) {
+            exhaustFluid = BuiltInRegistries.FLUID.get(ResourceLocation.parse(turbineState.exhaustResourceLocation));
+        }
+    }
+
+    /^*
+     * Render a turbine tachometer gauge.
+     *
+     * @param poseStack  The current pose stack.
+     * @param symbol     The symbol to draw as.
+     * @param currentRPM The rpm value to draw.
+     * @param maxRPM     The max rpm capacity this gauge can display.
+     ^/
+    public static void renderTachometerGauge(@Nonnull GuiGraphics graphics, @Nonnull RenderedElement<TurbineTerminalContainer> symbol, double currentRPM, double maxRPM) {
+        GaugeBar.drawSpeed(graphics, symbol.x, symbol.y, currentRPM, maxRPM);
+*/
+//?}
         // Update tooltip.
         symbol.tooltip = Component.literal(String.format("%.1f/%.1f RPM", currentRPM, maxRPM));
     }
@@ -319,6 +429,7 @@ public class TurbineTerminalScreen extends ModScreen<TurbineTerminalContainer> {
      * @param mouseY       The y position of the mouse.
      * @param partialTicks Partial ticks.
      */
+//? if =26.1.2 || =26.3 {
     @Override
     public void extractRenderState(@Nonnull GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTicks) {
         super.extractRenderState(graphics, mouseX, mouseY, partialTicks);
@@ -344,8 +455,37 @@ public class TurbineTerminalScreen extends ModScreen<TurbineTerminalContainer> {
             // Text for an offline turbine:
             GuiArt.scrollingText(graphics, this.getFont(), Component.translatable("screen.biggerreactorsrework.turbine_terminal.activity_toggle.offline").getString(), this.getLeftPos() + 42, this.getTopPos() + 102, STATUS_RIGHT - 42, GuiTheme.textColor());
         }
+//?} else if =1.21.1 {
+/*    @Override
+    public void render(@Nonnull GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
+        super.render(graphics, mouseX, mouseY, partialTicks);
+
+        // Render text for turbine tachometer:
+        GuiArt.scrollingText(graphics, this.getFont(), RenderHelper.formatValue((this.turbineState.currentRPM), 1, "RPM", false), this.getGuiLeft() + 27, this.getGuiTop() + 23, READOUT_WIDTH, GuiTheme.textColor());
+
+        // Render text for output rate:
+        GuiArt.scrollingText(graphics, this.getFont(), RenderHelper.formatValue(this.turbineState.turbineOutputRate, "FE/t"), this.getGuiLeft() + 27, this.getGuiTop() + 42, READOUT_WIDTH, GuiTheme.textColor());
+
+        // Render text for flow rate:
+        GuiArt.scrollingText(graphics, this.getFont(), String.format("%,d mB/t", this.turbineState.flowRate), this.getGuiLeft() + 27, this.getGuiTop() + 61, READOUT_WIDTH, GuiTheme.textColor());
+
+        // Render text for reactivity rate (no fancy suffix for percentages):
+        GuiArt.scrollingText(graphics, this.getFont(), String.format("%.1f%%", (this.turbineState.efficiencyRate * 100.0)), this.getGuiLeft() + 27, this.getGuiTop() + 80, READOUT_WIDTH, GuiTheme.textColor());
+
+        // Render text for online/offline status:
+        if (this.turbineState.turbineActivity == TurbineActivity.ACTIVE) {
+            // Text for an online turbine:
+            GuiArt.scrollingText(graphics, this.getFont(), Component.translatable("screen.biggerreactorsrework.turbine_terminal.activity_toggle.online").getString(), this.getGuiLeft() + 42, this.getGuiTop() + 102, STATUS_RIGHT - 42, GuiTheme.textColor());
+
+        } else {
+            // Text for an offline turbine:
+            GuiArt.scrollingText(graphics, this.getFont(), Component.translatable("screen.biggerreactorsrework.turbine_terminal.activity_toggle.offline").getString(), this.getGuiLeft() + 42, this.getGuiTop() + 102, STATUS_RIGHT - 42, GuiTheme.textColor());
+        }
+*/
+//?}
 
         // Render text for coil engage status:
+//? if =26.1.2 || =26.3 {
         if (this.turbineState.coilStatus) {
             // Text for engaged coils:
             GuiArt.scrollingText(graphics, this.getFont(), Component.translatable("screen.biggerreactorsrework.turbine_terminal.coil_engage_toggle.engaged").getString(), this.getLeftPos() + 42, this.getTopPos() + 118, STATUS_RIGHT - 42, GuiTheme.textColor());
@@ -353,8 +493,19 @@ public class TurbineTerminalScreen extends ModScreen<TurbineTerminalContainer> {
             // Text for disengaged coils:
             GuiArt.scrollingText(graphics, this.getFont(), Component.translatable("screen.biggerreactorsrework.turbine_terminal.coil_engage_toggle.disengaged").getString(), this.getLeftPos() + 42, this.getTopPos() + 118, STATUS_RIGHT - 42, GuiTheme.textColor());
         }
+//?} else if =1.21.1 {
+/*        if (this.turbineState.coilStatus) {
+            // Text for engaged coils:
+            GuiArt.scrollingText(graphics, this.getFont(), Component.translatable("screen.biggerreactorsrework.turbine_terminal.coil_engage_toggle.engaged").getString(), this.getGuiLeft() + 42, this.getGuiTop() + 118, STATUS_RIGHT - 42, GuiTheme.textColor());
+        } else {
+            // Text for disengaged coils:
+            GuiArt.scrollingText(graphics, this.getFont(), Component.translatable("screen.biggerreactorsrework.turbine_terminal.coil_engage_toggle.disengaged").getString(), this.getGuiLeft() + 42, this.getGuiTop() + 118, STATUS_RIGHT - 42, GuiTheme.textColor());
+        }
+*/
+//?}
 
         // Render text for vent state:
+//? if =26.1.2 || =26.3 {
         if (this.turbineState.ventState == VentState.OVERFLOW) {
             // Text for venting overflow exhaust:
             GuiArt.scrollingText(graphics, this.getFont(), Component.translatable("screen.biggerreactorsrework.turbine_terminal.vent_state_toggle.overflow").getString(), this.getLeftPos() + 58, this.getTopPos() + 134, this.imageWidth - 6 - 58, GuiTheme.textColor());
@@ -369,13 +520,37 @@ public class TurbineTerminalScreen extends ModScreen<TurbineTerminalContainer> {
         // Render text for balanced water outputs:
         GuiArt.scrollingText(graphics, this.getFont(), Component.translatable("thermal.biggerreactorsrework.balanced_outputs").getString(), this.getLeftPos() + 42, this.getTopPos() + 150, this.imageWidth - 6 - 42, GuiTheme.textColor());
     }
+//?} else if =1.21.1 {
+/*        if (this.turbineState.ventState == VentState.OVERFLOW) {
+            // Text for venting overflow exhaust:
+            GuiArt.scrollingText(graphics, this.getFont(), Component.translatable("screen.biggerreactorsrework.turbine_terminal.vent_state_toggle.overflow").getString(), this.getGuiLeft() + 58, this.getGuiTop() + 134, this.imageWidth - 6 - 58, GuiTheme.textColor());
+        } else if (this.turbineState.ventState == VentState.ALL) {
+            // Text for venting all exhaust:
+            GuiArt.scrollingText(graphics, this.getFont(), Component.translatable("screen.biggerreactorsrework.turbine_terminal.vent_state_toggle.all").getString(), this.getGuiLeft() + 58, this.getGuiTop() + 134, this.imageWidth - 6 - 58, GuiTheme.textColor());
+        } else {
+            // Text for venting no exhaust:
+            GuiArt.scrollingText(graphics, this.getFont(), Component.translatable("screen.biggerreactorsrework.turbine_terminal.vent_state_toggle.closed").getString(), this.getGuiLeft() + 58, this.getGuiTop() + 134, this.imageWidth - 6 - 58, GuiTheme.textColor());
+        }
+
+        // Render text for balanced water outputs:
+        GuiArt.scrollingText(graphics, this.getFont(), Component.translatable("thermal.biggerreactorsrework.balanced_outputs").getString(), this.getGuiLeft() + 42, this.getGuiTop() + 150, this.imageWidth - 6 - 42, GuiTheme.textColor());
+    }
+*/
+//?}
 
     /**
      * Draw the panel and its fixed details.
      */
+//? if =26.1.2 || =26.3 {
     @Override
     protected void drawBackground(@Nonnull GuiGraphicsExtractor graphics, int x, int y) {
         GuiArt.panel(graphics, x, y, 200, 168, this.frame());
+//?} else if =1.21.1 {
+/*    @Override
+    protected void drawBackground(@Nonnull GuiGraphics graphics, int x, int y) {
+        GuiArt.panel(graphics, x, y, 200, 168, this.frame());
+*/
+//?}
         GuiArt.fill(graphics, x + 6, y + 36, x + 105, y + 37, GuiArt.SEPARATOR);
         GuiArt.fill(graphics, x + 6, y + 55, x + 105, y + 56, GuiArt.SEPARATOR);
         GuiArt.fill(graphics, x + 6, y + 74, x + 105, y + 75, GuiArt.SEPARATOR);

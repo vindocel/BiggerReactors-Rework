@@ -27,10 +27,20 @@ import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import net.neoforged.neoforge.gametest.*;
 
 import java.util.*;
+//? if =26.1.2 || =26.3 {
 import java.util.function.Consumer;
 
 /** Added 2026-10-29: real clicks with Carry On present/absent, including loose pickup and carried placement. */
 public final class CarryOnGameTests {
+//?} else if =1.21.1 {
+/*import java.util.function.Consumer;
+
+/^* Added 2026-10-29: real clicks with Carry On present/absent, including loose pickup and carried placement. ^/
+@GameTestHolder(BiggerReactors.modid)
+@PrefixGameTestTemplate(false)
+public final class CarryOnGameTests {
+*/
+//?}
     private static final class MenuPlayer extends FakePlayer {
         int opened;
         MenuPlayer(ServerLevel level) { super(level, new GameProfile(UUID.randomUUID(), "CarryOnTest")); }
@@ -156,11 +166,18 @@ public final class CarryOnGameTests {
         h.startSequence().thenWaitUntil(() -> h.assertTrue(h.getBlockState(new BlockPos(0,1,1)).getValue(IAssemblyStateBlock.ASSEMBLED), "machine not ready"))
                 .thenExecute(() -> {
                     var player = new MenuPlayer(h.getLevel());
+//? if =26.1.2 {
                     var data = carryData(player);
                     // Modified 2026-11-01: Carry On 26.1.2 also records the player and source position.
                     invoke(data, "setBlock", new Class<?>[]{BlockState.class, BlockEntity.class, net.minecraft.server.level.ServerPlayer.class, BlockPos.class},
                             Blocks.STONE.defaultBlockState(), null, player, h.absolutePos(new BlockPos(5,1,5)));
                     var pos = h.absolutePos(new BlockPos(0,2,1));
+//?} else if =1.21.1 || =26.3 {
+/*                    var data = carryData(player);
+                    invoke(data, "setBlock", new Class<?>[]{BlockState.class, BlockEntity.class}, Blocks.STONE.defaultBlockState(), null);
+                    var pos = h.absolutePos(new BlockPos(0,2,1));
+*/
+//?}
                     click(player, pos);
                     h.assertTrue(h.getLevel().getBlockState(pos.above()).is(Blocks.STONE), "carried block placement was blocked");
                     h.assertTrue(!carrying(player), "placed block remained in Carry On inventory");

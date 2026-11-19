@@ -13,22 +13,36 @@ import biggerreactorsrework.multiblocks.battery.state.BatteryState;
 import biggerreactorsrework.core.multiblock.validated.IValidatedMultiblock;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.SimpleMenuProvider;
+//? if =26.1.2 || =26.3 {
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.core.BlockPos;
+//?} else if =1.21.1 {
+/*import net.minecraft.world.entity.player.Player;
+import net.minecraft.MethodsReturnNonnullByDefault;
+import net.minecraft.core.BlockPos;
+*/
+//?}
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 
+//? if =26.1.2 || =26.3 {
 @ParametersAreNonnullByDefault
 public class BatteryBaseTile extends ModularTile implements IMultiblockTile<BatteryBaseTile, BatteryBaseBlock, BatteryMultiblockController>,
+//?} else if =1.21.1 {
+/*@ParametersAreNonnullByDefault
+@MethodsReturnNonnullByDefault
+public class BatteryBaseTile extends ModularTile implements IMultiblockTile<BatteryBaseTile, BatteryBaseBlock, BatteryMultiblockController>,
+*/
+//?}
         IRectangularMultiblockTile<BatteryBaseTile, BatteryBaseBlock, BatteryMultiblockController>,
         IPersistentMultiblockTile<BatteryBaseTile, BatteryBaseBlock, BatteryMultiblockController>,
         ITouchingMultiblockTile<BatteryBaseTile, BatteryBaseBlock, BatteryMultiblockController> {
     public BatteryBaseTile(BlockEntityType<?> tileEntityTypeIn, BlockPos pos, BlockState state) {
         super(tileEntityTypeIn, pos, state);
     }
-    
+
     @Override
     public final BatteryMultiblockController createController() {
         if (level == null) {
@@ -36,31 +50,31 @@ public class BatteryBaseTile extends ModularTile implements IMultiblockTile<Batt
         }
         return new BatteryMultiblockController(level);
     }
-    
+
     private BatteryState batteryState;
-    
+
     public BatteryState batteryState() {
         if (batteryState == null) {
             batteryState = new BatteryState(this);
         }
         return batteryState;
     }
-    
+
     public void updateBatteryState() {
         if (nullableController() != null) {
             controller().updateDataPacket(batteryState());
         }
     }
-    
+
     public boolean isBatteryAssembled() {
         return nullableController() != null && controller().assemblyState() == IValidatedMultiblock.AssemblyState.ASSEMBLED;
     }
-    
+
     public void openTerminal(Player player) {
         player.openMenu(new SimpleMenuProvider((windowId, inventory, menuPlayer) -> new BatteryTerminalContainer(windowId, worldPosition, menuPlayer),
                 Component.translatable(BatteryTerminal.INSTANCE.getDescriptionId())), worldPosition);
     }
-    
+
     public void runRequest(String requestName, Object requestData) {
         if (nullableController() != null) {
             controller().runRequest(requestName, requestData);

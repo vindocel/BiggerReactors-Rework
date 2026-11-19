@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "III",
+    "III",
+    "III"
+  ],
+  "key": {
+    "I": {
+      "tag": "c:ingots/graphite"
+    }
+  },
+  "result": {
+    "id": "biggerreactorsrework:graphite_block"
+  }
+}

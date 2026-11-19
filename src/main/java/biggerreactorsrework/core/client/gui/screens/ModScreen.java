@@ -1,10 +1,18 @@
+//? if =26.1.2 {
 package biggerreactorsrework.core.client.gui.screens;
 
 // Modified 2026-11-01: native Minecraft 26.1.2 API.
 import biggerreactorsrework.client.GuiTheme;
+//?} else if =1.21.1 || =26.3 {
+/*package biggerreactorsrework.core.client.gui.screens;
+
+import biggerreactorsrework.client.GuiTheme;
+*/
+//?}
 
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.vertex.PoseStack;
+//? if =26.1.2 || =26.3 {
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
@@ -17,6 +25,21 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import biggerreactorsrework.client.GuiArt;
+//?} else if =1.21.1 {
+/*import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.client.gui.screens.inventory.MenuAccess;
+import net.minecraft.client.renderer.texture.Tickable;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import biggerreactorsrework.client.GuiArt;
+*/
+//?}
 import biggerreactorsrework.client.GuiFrame;
 import biggerreactorsrework.client.GuiSettingsWindow;
 import biggerreactorsrework.core.client.gui.GuiSync;
@@ -27,6 +50,7 @@ import biggerreactorsrework.core.client.gui.api.ITooltip;
 import biggerreactorsrework.core.client.gui.elements.AbstractElement;
 
 import javax.annotation.Nonnull;
+//? if =26.1.2 || =26.3 {
 import java.util.List;
 
 /**
@@ -37,6 +61,20 @@ import java.util.List;
  * @param <T> Screens must have a screen container implementing {@link net.minecraft.world.inventory.AbstractContainerMenu AbstractContainerMenu}.
  */
 @SuppressWarnings("rawtypes")
+//?} else if =1.21.1 {
+/*import java.util.List;
+
+/^*
+ * Basic screen. This may be used to build your own GUIs for mods, or can be safely ignored if you'd rather roll your own.
+ * This abstraction also assumes you are working with GUIs that have an associated container. If not, then you are advised
+ * to use the vanilla system for containerless GUIs (which, for the most part, is pretty alright).
+ *
+ * @param <T> Screens must have a screen container implementing {@link net.minecraft.world.inventory.AbstractContainerMenu AbstractContainerMenu}.
+ ^/
+@OnlyIn(Dist.CLIENT)
+@SuppressWarnings("rawtypes")
+*/
+//?}
 public abstract class ModScreen<T extends AbstractContainerMenu> extends AbstractContainerScreen<T> implements MenuAccess<T> {
 
     /**
@@ -46,11 +84,20 @@ public abstract class ModScreen<T extends AbstractContainerMenu> extends Abstrac
 
     private final GuiSettingsWindow settingsWindow = new GuiSettingsWindow(this);
     private final biggerreactorsrework.client.GuiStatisticsWindow statisticsWindow=new biggerreactorsrework.client.GuiStatisticsWindow(this);
+//? if =26.1.2 || =26.3 {
     public biggerreactorsrework.client.GuiStatisticsWindow statisticsWindow(){return statisticsWindow;}
     public boolean hasStatistics(){return menu instanceof biggerreactorsrework.multiblocks.reactor.containers.ReactorTerminalContainer || menu instanceof biggerreactorsrework.multiblocks.heatexchanger.containers.HeatExchangerTerminalContainer || menu instanceof biggerreactorsrework.multiblocks.turbine.containers.TurbineTerminalContainer;}
     public int statisticsHeight(){return 236;}
 
     public GuiSettingsWindow settingsWindow() { return settingsWindow; }
+//?} else if =1.21.1 {
+/*    public biggerreactorsrework.client.GuiStatisticsWindow statisticsWindow(){return statisticsWindow;}
+    public int statisticsHeight(){return 236;}
+    public boolean hasStatistics(){return menu instanceof biggerreactorsrework.multiblocks.reactor.containers.ReactorTerminalContainer || menu instanceof biggerreactorsrework.multiblocks.heatexchanger.containers.HeatExchangerTerminalContainer || menu instanceof biggerreactorsrework.multiblocks.turbine.containers.TurbineTerminalContainer;}
+
+    public GuiSettingsWindow settingsWindow() { return settingsWindow; }
+*/
+//?}
 
     /** Which of the two popups is drawn above the other and receives input first. */
     private boolean statisticsInFront = true;
@@ -65,10 +112,18 @@ public abstract class ModScreen<T extends AbstractContainerMenu> extends Abstrac
 
     public BlockPos machinePos() {
         return ((GuiSync.IGUIPacketProvider) this.menu).machinePos();
+//? if =26.1.2 || =26.3 {
     }
 
     /** Left side, away from the Industrial Processor's routing tab. */
     public int settingsTabX() { return this.leftPos - GuiFrame.TAB_SIZE; }
+//?} else if =1.21.1 {
+/*    }
+
+    /^* Left side, away from the processor's existing right-side routing tab. ^/
+    public int settingsTabX() { return this.leftPos - GuiFrame.TAB_SIZE; }
+*/
+//?}
     public int settingsTabY() { return this.topPos + 4; }
 
     /** Parts drawn outside the panel (side tabs and open popups); recipe viewer overlays keep clear of them. */
@@ -86,6 +141,7 @@ public abstract class ModScreen<T extends AbstractContainerMenu> extends Abstrac
     /**
      * Space kept between the title and the edges of the panel.
      */
+//? if =26.1.2 || =26.3 {
     protected static final int TITLE_MARGIN = 8;
 
     /**
@@ -112,6 +168,37 @@ public abstract class ModScreen<T extends AbstractContainerMenu> extends Abstrac
      * Constructor for screens drawn in code (see {@link #drawBackground(GuiGraphicsExtractor, int, int)}).
      */
     public ModScreen(T screenContainer, Inventory playerInventory, Component title, int width, int height) {
+//?} else if =1.21.1 {
+/*    protected static final int TITLE_MARGIN = 8;
+
+    /^*
+     * The texture map this screen accesses.
+     ^/
+    protected ResourceLocation textureAtlas;
+
+    /^*
+     * Player inventory
+     ^/
+    protected Inventory inventory;
+
+    /^*
+     * This constructor makes no assumptions.
+     ^/
+    public ModScreen(T screenContainer, Inventory playerInventory, Component title, ResourceLocation textureAtlas, int width, int height) {
+        super(screenContainer, playerInventory, title);
+        this.inventory = playerInventory;
+        this.textureAtlas = textureAtlas;
+        this.imageWidth = width;
+        this.imageHeight = height;
+        this.screenElements = Lists.newArrayList();
+    }
+
+    /^*
+     * Constructor for screens drawn in code (see {@link #drawBackground(GuiGraphics, int, int)}).
+     ^/
+    public ModScreen(T screenContainer, Inventory playerInventory, Component title, int width, int height) {
+*/
+//?}
         this(screenContainer, playerInventory, title, RenderHelper.getBlankTextureResource(), width, height);
     }
 
@@ -152,6 +239,7 @@ public abstract class ModScreen<T extends AbstractContainerMenu> extends Abstrac
      */
     public Font getFont() {
         return this.font;
+//? if =26.1.2 || =26.3 {
     }
 
     /**
@@ -161,6 +249,18 @@ public abstract class ModScreen<T extends AbstractContainerMenu> extends Abstrac
      */
     public void setTextureAtlas(Identifier textureAtlas) {
         this.textureAtlas = textureAtlas;
+//?} else if =1.21.1 {
+/*    }
+
+    /^*
+     * Update the current texture atlas.
+     *
+     * @param textureAtlas The atlas to switch to.
+     ^/
+    public void setTextureAtlas(ResourceLocation textureAtlas) {
+        this.textureAtlas = textureAtlas;
+*/
+//?}
     }
 
     /**
@@ -171,19 +271,31 @@ public abstract class ModScreen<T extends AbstractContainerMenu> extends Abstrac
      * @param mouseY       The y position of the mouse.
      * @param partialTicks Partial ticks.
      */
+//? if =26.1.2 || =26.3 {
     @Override
     public void extractRenderState(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float partialTicks) {
         super.extractRenderState(guiGraphics, mouseX, mouseY, partialTicks);
 
         // Draw tooltips for all the elements that belong to this screen.
         for (AbstractElement element : this.screenElements) {
+//?} else if =1.21.1 {
+/*    @Override
+    public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks) {
+        // super.render draws the background (blur included) itself; drawing it here too would blur twice per frame
+        super.render(guiGraphics, mouseX, mouseY, partialTicks);
+
+        // Draw tooltips for all the elements that belong to this screen.
+        this.renderTooltip(guiGraphics, mouseX, mouseY);
+        for (AbstractElement element : this.screenElements) {
+*/
+//?}
             // Check conditions, and render.
             if (element instanceof ITooltip) {
                 ((ITooltip) element).renderTooltip(guiGraphics, mouseX, mouseY);
             }
         }
     }
-    
+
     /**
      * Draw the foreground.
      *
@@ -191,10 +303,18 @@ public abstract class ModScreen<T extends AbstractContainerMenu> extends Abstrac
      * @param mouseX    The x position of the mouse.
      * @param mouseY    The y position of the mouse.
      */
+//? if =26.1.2 || =26.3 {
     @Override
     protected void extractLabels(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY) {
         // Bind to the correct texture & reset render color.
         RenderHelper.bindTexture(this.textureAtlas);
+//?} else if =1.21.1 {
+/*    @Override
+    public void renderLabels(GuiGraphics guiGraphics, int mouseX, int mouseY) {
+        // Bind to the correct texture & reset render color.
+        RenderHelper.bindTexture(this.textureAtlas);
+*/
+//?}
         RenderHelper.setRenderColor(1.0F, 1.0F, 1.0F, 1.0F);
 
         // Draw all the elements that belong to this screen.
@@ -207,9 +327,16 @@ public abstract class ModScreen<T extends AbstractContainerMenu> extends Abstrac
 
         // Draw title; one too long for its room slides inside it.
         String title = this.title.getString();
+//? if =26.1.2 || =26.3 {
         if (this.font.width(title) <= this.titleWidth()) {
             guiGraphics.text(this.font, title, this.titleLabelX, this.titleLabelY, GuiTheme.textColor(), false);
         } else {
+//?} else if =1.21.1 {
+/*        if (this.font.width(title) <= this.titleWidth()) {
+            guiGraphics.drawString(this.font, title, this.titleLabelX, this.titleLabelY, GuiTheme.textColor(), false);
+        } else {
+*/
+//?}
             GuiArt.scrollingText(guiGraphics, this.font, title, TITLE_MARGIN, this.titleLabelY, this.titleWidth(), GuiTheme.textColor());
         }
     }
@@ -230,13 +357,23 @@ public abstract class ModScreen<T extends AbstractContainerMenu> extends Abstrac
      * @param mouseX       The x position of the mouse.
      * @param mouseY       The y position of the mouse.
      */
+//? if =26.1.2 || =26.3 {
     @Override
     public void extractBackground(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float partialTicks) {
         super.extractBackground(guiGraphics, mouseX, mouseY, partialTicks);
         RenderHelper.setRenderColor(1.0F, 1.0F, 1.0F, 1.0F);
         this.drawBackground(guiGraphics, this.getLeftPos(), this.getTopPos());
         this.settingsWindow.renderTab(guiGraphics, mouseX, mouseY);
+//?} else if =1.21.1 {
+/*    @Override
+    protected void renderBg(GuiGraphics guiGraphics, float partialTicks, int mouseX, int mouseY) {
+        RenderHelper.setRenderColor(1.0F, 1.0F, 1.0F, 1.0F);
+        this.drawBackground(guiGraphics, this.getGuiLeft(), this.getGuiTop());
+        this.settingsWindow.renderTab(guiGraphics, mouseX, mouseY);
+*/
+//?}
         this.statisticsWindow.renderTab(guiGraphics,mouseX,mouseY);
+//? if =26.1.2 || =26.3 {
     }
 
     /**
@@ -249,6 +386,21 @@ public abstract class ModScreen<T extends AbstractContainerMenu> extends Abstrac
     protected void drawBackground(GuiGraphicsExtractor graphics, int x, int y) {
         GuiArt.panel(graphics, x, y, this.getImageWidth(), this.getImageHeight(), this.frame());
     }
+//?} else if =1.21.1 {
+/*    }
+
+    /^*
+     * Draw the static part of the screen. By default this is the plain panel; screens add their own details.
+     *
+     * @param graphics The current graphics.
+     * @param x        The left of the screen.
+     * @param y        The top of the screen.
+     ^/
+    protected void drawBackground(GuiGraphics graphics, int x, int y) {
+        GuiArt.panel(graphics, x, y, this.getXSize(), this.getYSize(), this.frame());
+    }
+*/
+//?}
 
     /**
      * Metal frame of this screen, matching the casing of the block it belongs to.
@@ -269,9 +421,16 @@ public abstract class ModScreen<T extends AbstractContainerMenu> extends Abstrac
     /**
      * The frame around the panel belongs to the screen: clicking it must not drop the carried item.
      */
+//? if =26.1.2 || =26.3 {
     @Override
     protected boolean hasClickedOutside(double mouseX, double mouseY, int guiLeft, int guiTop) {
         if (settingsWindow.contains(mouseX, mouseY)) return false;
+//?} else if =1.21.1 {
+/*    @Override
+    protected boolean hasClickedOutside(double mouseX, double mouseY, int guiLeft, int guiTop, int button) {
+        if (settingsWindow.contains(mouseX, mouseY)) return false;
+*/
+//?}
         if (statisticsWindow.contains(mouseX,mouseY))return false;
         return mouseX < guiLeft - GuiFrame.BAND || mouseY < guiTop - GuiFrame.BAND
                 || mouseX >= guiLeft + this.imageWidth + GuiFrame.BAND || mouseY >= guiTop + this.imageHeight + GuiFrame.BAND;
@@ -288,12 +447,22 @@ public abstract class ModScreen<T extends AbstractContainerMenu> extends Abstrac
      * @param areaHeight The height of the area to check.
      * @return True if the mouse is over the desired area, false otherwise.
      */
+//? if =26.1.2 || =26.3 {
     public boolean isMouseOver(double mouseX, double mouseY, double areaX, double areaY, int areaWidth, int areaHeight) {
         // Get actual x and y positions.
         int relativeX = (int) (this.getLeftPos() + areaX);
         int relativeY = (int) (this.getTopPos() + areaY);
         // Check the mouse.
         return ((mouseX > relativeX) && (mouseX < relativeX + areaWidth)
+//?} else if =1.21.1 {
+/*    public boolean isMouseOver(double mouseX, double mouseY, double areaX, double areaY, int areaWidth, int areaHeight) {
+        // Get actual x and y positions.
+        int relativeX = (int) (this.getGuiLeft() + areaX);
+        int relativeY = (int) (this.getGuiTop() + areaY);
+        // Check the mouse.
+        return ((mouseX > relativeX) && (mouseX < relativeX + areaWidth)
+*/
+//?}
                 && (mouseY > relativeY) && (mouseY < relativeY + areaHeight));
     }
 
@@ -303,10 +472,18 @@ public abstract class ModScreen<T extends AbstractContainerMenu> extends Abstrac
     @Override
     public void containerTick() {
         // Iterate through this screen's elements.
+//? if =26.1.2 || =26.3 {
         for (AbstractElement element : this.screenElements) {
             // Trigger.
             element.tick();
         }
+//?} else if =1.21.1 {
+/*        for (AbstractElement element : this.screenElements) {
+            // Trigger.
+            ((Tickable) element).tick();
+        }
+*/
+//?}
     }
 
     /**
@@ -324,6 +501,7 @@ public abstract class ModScreen<T extends AbstractContainerMenu> extends Abstrac
                 element.mouseMoved(mouseX, mouseY);
             }
         }
+//? if =26.1.2 {
     }
     private MouseButtonEvent lastPress, lastRelease, lastDrag;
     private boolean lastDoubleClick;
@@ -377,6 +555,76 @@ public abstract class ModScreen<T extends AbstractContainerMenu> extends Abstrac
      * @return Whether the event was consumed.
      */
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
+//?} else if =1.21.1 {
+/*    }
+    /^*
+     * Triggered when the mouse is clicked.
+     * For most purposes, it is recommended to tie logic to #mouseReleased.
+     *
+     * @param mouseX The x position of the mouse.
+     * @param mouseY The y position of the mouse.
+     * @param button The button clicked.
+     * @return Whether the event was consumed.
+     ^/
+    @Override
+    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+*/
+//?} else if =26.3 {
+/*    }
+    private MouseButtonEvent lastPress, lastRelease, lastDrag;
+    private boolean lastDoubleClick;
+    private KeyEvent lastKeyPress, lastKeyRelease;
+    private CharacterEvent lastCharacter;
+
+    @Override
+    public final boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
+        lastPress = event;
+        lastDoubleClick = doubleClick;
+        return mouseClicked(event.x(), event.y(), event.button());
+    }
+
+    @Override
+    public final boolean mouseReleased(MouseButtonEvent event) {
+        lastRelease = event;
+        return mouseReleased(event.x(), event.y(), event.button());
+    }
+
+    @Override
+    public final boolean mouseDragged(MouseButtonEvent event, double dragX, double dragY) {
+        lastDrag = event;
+        return mouseDragged(event.x(), event.y(), event.button(), dragX, dragY);
+    }
+
+    @Override
+    public final boolean keyPressed(KeyEvent event) {
+        lastKeyPress = event;
+        return keyPressed(event.key(), event.keycode(), event.modifiers());
+    }
+
+    @Override
+    public final boolean keyReleased(KeyEvent event) {
+        lastKeyRelease = event;
+        return keyReleased(event.key(), event.keycode(), event.modifiers());
+    }
+
+    @Override
+    public final boolean charTyped(CharacterEvent event) {
+        lastCharacter = event;
+        return charTyped((char) event.codepoint(), 0);
+    }
+
+    /^*
+     * Triggered when the mouse is clicked.
+     * For most purposes, it is recommended to tie logic to #mouseReleased.
+     *
+     * @param mouseX The x position of the mouse.
+     * @param mouseY The y position of the mouse.
+     * @param button The button clicked.
+     * @return Whether the event was consumed.
+     ^/
+    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+*/
+//?}
         // Iterate through this screen's elements.
         boolean handled = false;
         for (AbstractElement element : this.screenElements) {
@@ -384,6 +632,7 @@ public abstract class ModScreen<T extends AbstractContainerMenu> extends Abstrac
             if (element != null) {
                 handled = (handled || element.mouseClicked(mouseX, mouseY, button));
             }
+//? if =26.1.2 || =26.3 {
         }
         return (handled || super.mouseClicked(lastPress, lastDoubleClick));
     }
@@ -397,6 +646,23 @@ public abstract class ModScreen<T extends AbstractContainerMenu> extends Abstrac
      * @return Whether the event was consumed.
      */
     public boolean mouseReleased(double mouseX, double mouseY, int button) {
+//?} else if =1.21.1 {
+/*        }
+        return (handled || super.mouseClicked(mouseX, mouseY, button));
+    }
+
+    /^*
+     * Triggered when the mouse is released.
+     *
+     * @param mouseX The x position of the mouse.
+     * @param mouseY The y position of the mouse.
+     * @param button The button clicked.
+     * @return Whether the event was consumed.
+     ^/
+    @Override
+    public boolean mouseReleased(double mouseX, double mouseY, int button) {
+*/
+//?}
         // Iterate through this screen's elements.
         boolean handled = false;
         for (AbstractElement element : this.screenElements) {
@@ -404,6 +670,7 @@ public abstract class ModScreen<T extends AbstractContainerMenu> extends Abstrac
             if (element != null) {
                 handled = (handled || element.mouseReleased(mouseX, mouseY, button));
             }
+//? if =26.1.2 || =26.3 {
         }
         return (handled || super.mouseReleased(lastRelease));
     }
@@ -419,6 +686,25 @@ public abstract class ModScreen<T extends AbstractContainerMenu> extends Abstrac
      * @return Whether the event was consumed.
      */
     public boolean mouseDragged(double mouseX, double mouseY, int button, double dragX, double dragY) {
+//?} else if =1.21.1 {
+/*        }
+        return (handled || super.mouseReleased(mouseX, mouseY, button));
+    }
+
+    /^*
+     * Triggered when the mouse is dragged.
+     *
+     * @param mouseX The x position of the mouse.
+     * @param mouseY The y position of the mouse.
+     * @param button The button clicked.
+     * @param dragX  Drag x.
+     * @param dragY  Drag y.
+     * @return Whether the event was consumed.
+     ^/
+    @Override
+    public boolean mouseDragged(double mouseX, double mouseY, int button, double dragX, double dragY) {
+*/
+//?}
         // Iterate through this screen's elements.
         boolean handled = false;
         for (AbstractElement element : this.screenElements) {
@@ -426,9 +712,16 @@ public abstract class ModScreen<T extends AbstractContainerMenu> extends Abstrac
             if (element != null) {
                 handled = (handled || element.mouseDragged(mouseX, mouseY, button, dragX, dragY));
             }
+//? if =26.1.2 || =26.3 {
         }
         return (handled || super.mouseDragged(lastDrag, dragX, dragY));
     }
+//?} else if =1.21.1 {
+/*        }
+        return (handled || super.mouseDragged(mouseX, mouseY, button, dragX, dragY));
+    }
+*/
+//?}
 
     /**
      * Triggered when the mouse is scrolled.
@@ -449,6 +742,7 @@ public abstract class ModScreen<T extends AbstractContainerMenu> extends Abstrac
             }
         }
         return (handled || super.mouseScrolled(mouseX, mouseY, delta, idfk));
+//? if =26.1.2 || =26.3 {
     }
 
     /**
@@ -460,6 +754,21 @@ public abstract class ModScreen<T extends AbstractContainerMenu> extends Abstrac
      * @return Whether the event was consumed.
      */
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+//?} else if =1.21.1 {
+/*    }
+
+    /^*
+     * Triggered when a key is pressed.
+     *
+     * @param keyCode   The key code pressed.
+     * @param scanCode  The scan code pressed.
+     * @param modifiers Any modifiers pressed.
+     * @return Whether the event was consumed.
+     ^/
+    @Override
+    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+*/
+//?}
         // Iterate through this screen's elements.
         boolean handled = false;
         for (AbstractElement element : this.screenElements) {
@@ -467,6 +776,7 @@ public abstract class ModScreen<T extends AbstractContainerMenu> extends Abstrac
             if (element != null) {
                 handled = (handled || element.keyPressed(keyCode, scanCode, modifiers));
             }
+//? if =26.1.2 || =26.3 {
         }
         // Return either the handle status, or the parent's return.
         return (handled || super.keyPressed(lastKeyPress));
@@ -481,6 +791,24 @@ public abstract class ModScreen<T extends AbstractContainerMenu> extends Abstrac
      * @return Whether the event was consumed.
      */
     public boolean keyReleased(int keyCode, int scanCode, int modifiers) {
+//?} else if =1.21.1 {
+/*        }
+        // Return either the handle status, or the parent's return.
+        return (handled || super.keyPressed(keyCode, scanCode, modifiers));
+    }
+
+    /^*
+     * Triggered when a key is released.
+     *
+     * @param keyCode   The key code released.
+     * @param scanCode  The scan code released.
+     * @param modifiers Any modifiers released.
+     * @return Whether the event was consumed.
+     ^/
+    @Override
+    public boolean keyReleased(int keyCode, int scanCode, int modifiers) {
+*/
+//?}
         // Iterate through this screen's elements.
         boolean handled = false;
         for (AbstractElement element : this.screenElements) {
@@ -488,6 +816,7 @@ public abstract class ModScreen<T extends AbstractContainerMenu> extends Abstrac
             if (element != null) {
                 handled = (handled || element.keyReleased(keyCode, scanCode, modifiers));
             }
+//? if =26.1.2 || =26.3 {
         }
         return (handled || super.keyReleased(lastKeyRelease));
     }
@@ -500,6 +829,22 @@ public abstract class ModScreen<T extends AbstractContainerMenu> extends Abstrac
      * @return Whether the event was consumed.
      */
     public boolean charTyped(char codePoint, int modifiers) {
+//?} else if =1.21.1 {
+/*        }
+        return (handled || super.keyReleased(keyCode, scanCode, modifiers));
+    }
+
+    /^*
+     * Triggered when a character is typed.
+     *
+     * @param codePoint The character typed.
+     * @param modifiers Any modifiers released.
+     * @return Whether the event was consumed.
+     ^/
+    @Override
+    public boolean charTyped(char codePoint, int modifiers) {
+*/
+//?}
         // Iterate through this screen's elements.
         boolean handled = false;
         for (AbstractElement element : this.screenElements) {
@@ -507,7 +852,14 @@ public abstract class ModScreen<T extends AbstractContainerMenu> extends Abstrac
             if (element != null) {
                 handled = (handled || element.charTyped(codePoint, modifiers));
             }
+//? if =26.1.2 || =26.3 {
         }
         return (handled || super.charTyped(lastCharacter));
     }
+//?} else if =1.21.1 {
+/*        }
+        return (handled || super.charTyped(codePoint, modifiers));
+    }
+*/
+//?}
 }

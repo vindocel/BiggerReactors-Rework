@@ -1,6 +1,14 @@
+//? if =26.1.2 || =26.3 {
 package biggerreactorsrework.multiblocks.turbine.blocks;
 
 import net.minecraft.core.BlockPos;
+//?} else if =1.21.1 {
+/*package biggerreactorsrework.multiblocks.turbine.blocks;
+
+import net.minecraft.MethodsReturnNonnullByDefault;
+import net.minecraft.core.BlockPos;
+*/
+//?}
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -12,28 +20,43 @@ import biggerreactorsrework.core.registry.RegisterBlock;
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 
+//? if =26.1.2 || =26.3 {
 @ParametersAreNonnullByDefault
 public class TurbineGlass extends TurbineBaseBlock implements IAssemblyStateBlock, IConnectedTexture {
-    
+//?} else if =1.21.1 {
+/*@ParametersAreNonnullByDefault
+@MethodsReturnNonnullByDefault
+public class TurbineGlass extends TurbineBaseBlock implements IAssemblyStateBlock, IConnectedTexture {
+*/
+//?}
+
+//? if =26.1.2 || =26.3 {
     @RegisterBlock(name = "turbine_glass", tileEntityClass = TurbineGlassTile.class)
     public static final TurbineGlass INSTANCE = biggerreactorsrework.core.registry.RegistryIds.named("turbine_glass", () -> new TurbineGlass());
-    
+
     public TurbineGlass() {
+//?} else if =1.21.1 {
+/*    @RegisterBlock(name = "turbine_glass", tileEntityClass = TurbineGlassTile.class)
+    public static final TurbineGlass INSTANCE = new TurbineGlass();
+
+    public TurbineGlass() {
+*/
+//?}
         super(false);
     }
-    
+
     @Nullable
     @Override
     public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
         return TurbineGlassTile.SUPPLIER.create(pos, state);
     }
-    
+
     @SuppressWarnings("deprecation")
     @Override
     public float getShadeBrightness(BlockState p_60472_, BlockGetter p_60473_, BlockPos p_60474_) {
         return 1.0f;
     }
-    
+
     public boolean propagatesSkylightDown(BlockState state, BlockGetter reader, BlockPos pos) {
         return true;
     }

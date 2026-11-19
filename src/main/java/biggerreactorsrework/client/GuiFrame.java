@@ -1,3 +1,4 @@
+//? if =26.1.2 || =26.3 {
 package biggerreactorsrework.client;
 
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -11,6 +12,25 @@ import javax.annotation.Nonnull;
  * from the tones of its casing texture, so the screen matches the block it belongs to.
  */
 public enum GuiFrame {
+//?} else if =1.21.1 {
+/*package biggerreactorsrework.client;
+
+import net.minecraft.client.gui.GuiGraphics;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+
+import javax.annotation.Nonnull;
+
+/^*
+ * Metal frame drawn in code around the screens and their windows: a 4 px band outside the panel (dark outline with
+ * chamfered corners, light bevel on the top and left, shade on the bottom and right, a rivet in each corner) and a soft
+ * shadow under it. Side tabs are ears of the same metal growing out of the band. Each machine has its own metal, taken
+ * from the tones of its casing texture, so the screen matches the block it belongs to.
+ ^/
+@OnlyIn(Dist.CLIENT)
+public enum GuiFrame {
+*/
+//?}
     /**
      * Dark grey of the reactor casing.
      */
@@ -30,11 +50,20 @@ public enum GuiFrame {
      * Warm off-white of the battery casing.
      */
     BATTERY(0xFF25241F, 0xFFF0EEE6, 0xFFE1DED2, 0xFF7F7D74, 0xFFC9C6BA, 0xFF6E6C64, 0xFF9B998F,
+//? if =26.1.2 || =26.3 {
             0xFFFAF9F4, 0xFF9B998F, 0xFF55534C),
     /**
      * Medium grey of the cyanite reprocessor.
      */
     INDUSTRIAL_PROCESSOR(0xFF111111, 0xFFA6A6A6, 0xFF7C7C7C, 0xFF393939, 0xFF5A5A5A, 0xFF2D2D2D, 0xFF6D6D6D,
+//?} else if =1.21.1 {
+/*            0xFFFAF9F4, 0xFF9B998F, 0xFF55534C),
+    /^*
+     * Medium grey of the Industrial Processor.
+     ^/
+    INDUSTRIAL_PROCESSOR(0xFF111111, 0xFFA6A6A6, 0xFF7C7C7C, 0xFF393939, 0xFF5A5A5A, 0xFF2D2D2D, 0xFF6D6D6D,
+*/
+//?}
             0xFFB4B4B4, 0xFF7C7C7C, 0xFF262626);
 
     /**
@@ -93,6 +122,18 @@ public enum GuiFrame {
         this.hue = hsl[0];
         // A softer tone than the metal itself, so the controls lean towards the frame without matching it.
         this.saturation = hsl[1] * 0.6F;
+    }
+
+    /**
+     * Added 2026-11-18: volume segment colors in the palette of each machine frame, lighter on dark backgrounds.
+     */
+    public int volumeSegment(boolean filled, boolean dark) {
+        return switch (this) {
+            case REACTOR -> dark ? (filled ? 0xFFB8B8B8 : 0xFF4C4C4C) : (filled ? 0xFF3A3A3A : 0xFF9C9C9C);
+            case TURBINE -> dark ? (filled ? 0xFFC9D3D8 : 0xFF46535A) : (filled ? 0xFF56666E : 0xFFAAB4B9);
+            case HEAT_EXCHANGER -> dark ? (filled ? 0xFFD08A66 : 0xFF543B2F) : (filled ? 0xFF8C4A2E : 0xFFB89C8C);
+            default -> filled ? 0xFF36CFEE : 0xFF44545B;
+        };
     }
 
     /**
@@ -156,6 +197,7 @@ public enum GuiFrame {
             hue += 1;
         }
         return new float[]{hue, saturation, lightness};
+//? if =26.1.2 || =26.3 {
     }
 
     /**
@@ -163,6 +205,16 @@ public enum GuiFrame {
      */
     public void panel(@Nonnull GuiGraphicsExtractor graphics, int x, int y, int width, int height, int fill) {
         int x0 = x - BAND;
+//?} else if =1.21.1 {
+/*    }
+
+    /^*
+     * The panel at (x, y, width, height), filled with {@code fill}, with the band around it.
+     ^/
+    public void panel(@Nonnull GuiGraphics graphics, int x, int y, int width, int height, int fill) {
+        int x0 = x - BAND;
+*/
+//?}
         int y0 = y - BAND;
         int x1 = x + width + BAND;
         int y1 = y + height + BAND;
@@ -192,6 +244,7 @@ public enum GuiFrame {
         graphics.fill(x, y, x + 1, y + height, this.inner);
         graphics.fill(x, y + height - 1, x + width, y + height, this.innerLight);
         graphics.fill(x + width - 1, y + 1, x + width, y + height, this.innerLight);
+//? if =26.1.2 || =26.3 {
     }
 
     /**
@@ -202,6 +255,19 @@ public enum GuiFrame {
      */
     public void ear(@Nonnull GuiGraphicsExtractor graphics, int x, int y, int height, boolean leftSide) {
         int last = height - 1;
+//?} else if =1.21.1 {
+/*    }
+
+    /^*
+     * Tab ear {@link #TAB_SIZE} wide and {@code height} tall at (x, y): on the left side it ends on the panel's left
+     * edge, on the right side it starts on the panel's right edge; the side next to the panel opens into the band. Tabs
+     * stacked next to each other share one tall ear. Drawn after the panel, so the ear covers the band's outline and the
+     * two read as one piece.
+     ^/
+    public void ear(@Nonnull GuiGraphics graphics, int x, int y, int height, boolean leftSide) {
+        int last = height - 1;
+*/
+//?}
         // Columns counted from the outer side; the band itself takes the last BAND columns.
         int open = TAB_SIZE - BAND;
         this.column(graphics, x, leftSide, 0, y + 2, y + last - 1, this.outline);
@@ -222,27 +288,59 @@ public enum GuiFrame {
      */
     public static int tabButtonX(int earX, boolean leftSide) {
         return earX + (leftSide ? TAB_BUTTON_LEFT : TAB_SIZE - TAB_BUTTON_LEFT - TAB_BUTTON);
+//? if =26.1.2 || =26.3 {
     }
 
     private void row(GuiGraphicsExtractor graphics, int x, boolean leftSide, int from, int to, int y, int color) {
         int a = leftSide ? x + from : x + TAB_SIZE - 1 - to;
+//?} else if =1.21.1 {
+/*    }
+
+    private void row(GuiGraphics graphics, int x, boolean leftSide, int from, int to, int y, int color) {
+        int a = leftSide ? x + from : x + TAB_SIZE - 1 - to;
+*/
+//?}
         int b = leftSide ? x + to : x + TAB_SIZE - 1 - from;
         graphics.fill(a, y, b + 1, y + 1, color);
+//? if =26.1.2 || =26.3 {
     }
 
     private void column(GuiGraphicsExtractor graphics, int x, boolean leftSide, int column, int fromY, int toY, int color) {
         int c = leftSide ? x + column : x + TAB_SIZE - 1 - column;
+//?} else if =1.21.1 {
+/*    }
+
+    private void column(GuiGraphics graphics, int x, boolean leftSide, int column, int fromY, int toY, int color) {
+        int c = leftSide ? x + column : x + TAB_SIZE - 1 - column;
+*/
+//?}
         graphics.fill(c, fromY, c + 1, toY, color);
+//? if =26.1.2 || =26.3 {
     }
 
     private void rivet(GuiGraphicsExtractor graphics, int x, int y) {
         pixel(graphics, x, y, this.rivetLight);
+//?} else if =1.21.1 {
+/*    }
+
+    private void rivet(GuiGraphics graphics, int x, int y) {
+        pixel(graphics, x, y, this.rivetLight);
+*/
+//?}
         pixel(graphics, x + 1, y, this.rivetMid);
         pixel(graphics, x, y + 1, this.rivetMid);
         pixel(graphics, x + 1, y + 1, this.rivetDark);
+//? if =26.1.2 || =26.3 {
     }
 
     private static void pixel(GuiGraphicsExtractor graphics, int x, int y, int color) {
         graphics.fill(x, y, x + 1, y + 1, color);
+//?} else if =1.21.1 {
+/*    }
+
+    private static void pixel(GuiGraphics graphics, int x, int y, int color) {
+        graphics.fill(x, y, x + 1, y + 1, color);
+*/
+//?}
     }
 }

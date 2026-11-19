@@ -30,12 +30,22 @@ import java.util.List;
  * same categories as the JEI plugin.
  */
 @EmiEntrypoint
+//? if =26.1.2 || =26.3 {
 public class BiggerReactorsEmiPlugin implements EmiPlugin {
     static final EmiStack REPROCESSOR = EmiStack.of(IndustrialProcessor.INSTANCE);
     static final EmiStack REACTOR_TERMINAL = EmiStack.of(ReactorTerminal.INSTANCE);
     static final EmiStack TURBINE_TERMINAL = EmiStack.of(TurbineTerminal.INSTANCE);
     static final EmiRecipeCategory CYANITE_REPROCESSING = new EmiRecipeCategory(RecipeViewers.INDUSTRIAL_PROCESSING, REPROCESSOR);
     static final EmiRecipeCategory MODERATOR_BLOCK = new EmiRecipeCategory(RecipeViewers.MODERATOR_BLOCK, REACTOR_TERMINAL);
+//?} else if =1.21.1 {
+/*public class BiggerReactorsEmiPlugin implements EmiPlugin {
+    static final EmiStack PROCESSOR = EmiStack.of(IndustrialProcessor.INSTANCE);
+    static final EmiStack REACTOR_TERMINAL = EmiStack.of(ReactorTerminal.INSTANCE);
+    static final EmiStack TURBINE_TERMINAL = EmiStack.of(TurbineTerminal.INSTANCE);
+    static final EmiRecipeCategory INDUSTRIAL_PROCESSING = new EmiRecipeCategory(RecipeViewers.INDUSTRIAL_PROCESSING, PROCESSOR);
+    static final EmiRecipeCategory MODERATOR_BLOCK = new EmiRecipeCategory(RecipeViewers.MODERATOR_BLOCK, REACTOR_TERMINAL);
+*/
+//?}
     static final EmiRecipeCategory MODERATOR_FLUID = new EmiRecipeCategory(RecipeViewers.MODERATOR_FLUID, REACTOR_TERMINAL);
     static final EmiRecipeCategory TURBINE_COIL = new EmiRecipeCategory(RecipeViewers.TURBINE_COIL, TURBINE_TERMINAL);
     static final EmiStack EXCHANGER=EmiStack.of(biggerreactorsrework.multiblocks.heatexchanger.blocks.HeatExchangerTerminalBlock.INSTANCE);
@@ -49,14 +59,28 @@ public class BiggerReactorsEmiPlugin implements EmiPlugin {
                     consumer.accept(new dev.emi.emi.api.widget.Bounds(area.getX(), area.getY(), area.getWidth(), area.getHeight()));
                 }
             }
+//? if =26.1.2 || =26.3 {
         });
         registry.addCategory(CYANITE_REPROCESSING);
         registry.addCategory(MODERATOR_BLOCK);
+//?} else if =1.21.1 {
+/*        });
+        registry.addCategory(INDUSTRIAL_PROCESSING);
+        registry.addCategory(MODERATOR_BLOCK);
+*/
+//?}
         registry.addCategory(MODERATOR_FLUID);
         registry.addCategory(TURBINE_COIL);
+//? if =26.1.2 || =26.3 {
         registry.addCategory(HEAT_EXCHANGE);
         registry.addWorkstation(CYANITE_REPROCESSING, REPROCESSOR);
         registry.addWorkstation(MODERATOR_BLOCK, REACTOR_TERMINAL);
+//?} else if =1.21.1 {
+/*        registry.addCategory(HEAT_EXCHANGE);
+        registry.addWorkstation(INDUSTRIAL_PROCESSING, PROCESSOR);
+        registry.addWorkstation(MODERATOR_BLOCK, REACTOR_TERMINAL);
+*/
+//?}
         registry.addWorkstation(MODERATOR_FLUID, REACTOR_TERMINAL);
         registry.addWorkstation(TURBINE_COIL, TURBINE_TERMINAL);
         registry.addWorkstation(HEAT_EXCHANGE,EXCHANGER);
@@ -124,9 +148,16 @@ public class BiggerReactorsEmiPlugin implements EmiPlugin {
 
     private static final class Reprocessing extends BasicEmiRecipe {
         private final biggerreactorsrework.machine.recipe.ReprocessingRecipe recipe;
+//? if =26.1.2 || =26.3 {
         Reprocessing(net.minecraft.world.item.crafting.RecipeHolder<biggerreactorsrework.machine.recipe.ReprocessingRecipe> holder) {
             super(CYANITE_REPROCESSING, holder.id(),
                     Cyanite.WIDTH, Cyanite.HEIGHT);
+//?} else if =1.21.1 {
+/*        Reprocessing(net.minecraft.world.item.crafting.RecipeHolder<biggerreactorsrework.machine.recipe.ReprocessingRecipe> holder) {
+            super(INDUSTRIAL_PROCESSING, holder.id(),
+                    Cyanite.WIDTH, Cyanite.HEIGHT);
+*/
+//?}
             recipe = holder.value();
             inputs.add(EmiIngredient.of(recipe.ingredient(), recipe.count()));
             // Water is drawn in the machine's own tank; listing it keeps it in the recipe lookups.

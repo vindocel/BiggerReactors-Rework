@@ -1,3 +1,4 @@
+//? if =26.1.2 || =26.3 {
 package biggerreactorsrework.core.transfer;
 
 import java.util.function.Predicate;
@@ -127,3 +128,5 @@ public class SimpleTank implements FluidTanks {
         return tag;
     }
 }
+//?} else if =1.21.1 {
+//?}

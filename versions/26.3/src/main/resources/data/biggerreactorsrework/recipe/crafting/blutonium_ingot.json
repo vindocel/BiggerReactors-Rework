@@ -1,0 +1,10 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    "biggerreactorsrework:blutonium_block"
+  ],
+  "result": {
+    "id": "biggerreactorsrework:blutonium_ingot",
+    "count": 9
+  }
+}

@@ -10,12 +10,24 @@ import biggerreactorsrework.registries.FluidTransitionRegistry;
 import biggerreactorsrework.util.FluidTransitionTank;
 import net.minecraft.core.component.DataComponentPatch;
 import net.minecraft.gametest.framework.*;
+//? if =26.1.2 || =26.3 {
 import net.minecraft.world.level.material.Fluids;
 import biggerreactorsrework.core.transfer.FluidTanks.FluidAction;
 import net.neoforged.neoforge.gametest.*;
 
 /** Modified 2026-10-26: real tanks and simulation, including transfer order and retained heat. */
 public final class OutputBackpressureGameTests {
+//?} else if =1.21.1 {
+/*import net.minecraft.world.level.material.Fluids;
+import net.neoforged.neoforge.fluids.capability.IFluidHandler.FluidAction;
+import net.neoforged.neoforge.gametest.*;
+
+/^* Modified 2026-10-26: real tanks and simulation, including transfer order and retained heat. ^/
+@GameTestHolder(BiggerReactors.modid)
+@PrefixGameTestTemplate(false)
+public final class OutputBackpressureGameTests {
+*/
+//?}
     private static TimeSlicedReactorSimulation reactor() {
         var d=OperationGameTests.description(3);
         for(int y=0;y<3;y++){d.setManifold(0,y,1,true);d.setManifold(2,y,1,true);d.setManifold(1,y,0,true);d.setManifold(1,y,2,true);}

@@ -142,6 +142,7 @@ public record CalculatorCatalog(List<String> fuels, List<String> moderators, Lis
 
     /** Client-side view of {@link #toClientTag()}; property maps stay empty on the client. */
     public static CalculatorCatalog fromClientTag(CompoundTag tag) {
+//? if =26.1.2 || =26.3 {
         var fuels = new ArrayList<String>();
         tag.getListOrEmpty("fuels").forEach(t -> fuels.add(t.asString().orElse("")));
         var moderators = new ArrayList<String>();
@@ -152,11 +153,32 @@ public record CalculatorCatalog(List<String> fuels, List<String> moderators, Lis
             try {
                 coolants.add(new Coolant(entry.getStringOr("id", ""), Route.valueOf(entry.getStringOr("route", ""))));
             } catch (IllegalArgumentException ignored) {
+//?} else if =1.21.1 {
+/*        var fuels = new ArrayList<String>();
+        tag.getList("fuels", Tag.TAG_STRING).forEach(t -> fuels.add(t.getAsString()));
+        var moderators = new ArrayList<String>();
+        tag.getList("moderators", Tag.TAG_STRING).forEach(t -> moderators.add(t.getAsString()));
+        var coolants = new ArrayList<Coolant>();
+        for (var t : tag.getList("coolants", Tag.TAG_COMPOUND)) {
+            var entry = (CompoundTag) t;
+            try {
+                coolants.add(new Coolant(entry.getString("id"), Route.valueOf(entry.getString("route"))));
+            } catch (IllegalArgumentException ignored) {
+*/
+//?}
             }
         }
+//? if =26.1.2 || =26.3 {
         var coils = new ArrayList<String>();
         tag.getListOrEmpty("coils").forEach(t -> coils.add(t.asString().orElse("")));
         return new CalculatorCatalog(List.copyOf(fuels), List.copyOf(moderators), List.copyOf(coolants), List.copyOf(coils), tag.getStringOr("fingerprint", ""),
                 Map.of(), Map.of(), Map.of(), null);
+//?} else if =1.21.1 {
+/*        var coils = new ArrayList<String>();
+        tag.getList("coils", Tag.TAG_STRING).forEach(t -> coils.add(t.getAsString()));
+        return new CalculatorCatalog(List.copyOf(fuels), List.copyOf(moderators), List.copyOf(coolants), List.copyOf(coils), tag.getString("fingerprint"),
+                Map.of(), Map.of(), Map.of(), null);
+*/
+//?}
     }
 }

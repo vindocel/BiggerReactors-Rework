@@ -7,6 +7,7 @@ import biggerreactorsrework.registries.TurbineCoilRegistry;
 import net.minecraft.world.level.block.Block;
 
 import javax.annotation.Nullable;
+//? if =26.1.2 || =26.3 {
 import java.util.function.BooleanSupplier;
 
 /**
@@ -16,6 +17,18 @@ import java.util.function.BooleanSupplier;
  * blade layers to reach that look; a taller one stays as it is.
  */
 final class TurbineSearch {
+//?} else if =1.21.1 {
+/*import java.util.function.BooleanSupplier;
+
+/^*
+ * A compact turbine reaching the target. Modified 2026-11-04: tune flow against the same speed efficiency curve
+ * used by the assembled turbine.
+ * Spacer layers make it at least {@code minShaft} tall. A rotor shorter than three blocks above its width gets extra
+ * blade layers to reach that look; a taller one stays as it is.
+ ^/
+final class TurbineSearch {
+*/
+//?}
     record Choice(@Nullable TurbineDesign design, double power, int benches) { }
 
     private TurbineSearch() { }
@@ -62,10 +75,18 @@ final class TurbineSearch {
             }
         }
         return new Choice(best, bestPower, benches);
+//? if =26.1.2 || =26.3 {
     }
 
     // Modified 2026-11-03: seek the upper efficiency peak when the raw coil rate falls short.
     private static long tuneFlow(ModernTurbineSimulation sim, long initial, long target) {
+//?} else if =1.21.1 {
+/*    }
+
+    // Seek the upper efficiency peak when the raw coil rate falls short.
+    private static long tuneFlow(ModernTurbineSimulation sim, long initial, long target) {
+*/
+//?}
         long lower = Math.min(initial, sim.flowRateLimit());
         if (sim.steadyPower(lower) >= target) return lower;
         double rpmPerMB = sim.steadyRPM(1);

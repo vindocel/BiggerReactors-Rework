@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "CRC",
+    "RGR",
+    "CRC"
+  ],
+  "key": {
+    "C": "biggerreactorsrework:reactor_casing",
+    "R": "minecraft:redstone",
+    "G": "minecraft:gold_ingot"
+  },
+  "result": {
+    "id": "biggerreactorsrework:reactor_redstone_port"
+  }
+}

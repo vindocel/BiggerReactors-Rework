@@ -1,6 +1,14 @@
+//? if =26.1.2 || =26.3 {
 package biggerreactorsrework.multiblocks.reactor.blocks;
 
 import net.minecraft.core.BlockPos;
+//?} else if =1.21.1 {
+/*package biggerreactorsrework.multiblocks.reactor.blocks;
+
+import net.minecraft.MethodsReturnNonnullByDefault;
+import net.minecraft.core.BlockPos;
+*/
+//?}
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
@@ -20,41 +28,56 @@ import java.util.Locale;
 
 import static biggerreactorsrework.multiblocks.reactor.blocks.ReactorPowerTap.ConnectionState.CONNECTION_STATE_ENUM_PROPERTY;
 
+//? if =26.1.2 || =26.3 {
 @ParametersAreNonnullByDefault
 public class ReactorPowerTap extends ReactorBaseBlock implements IAssemblyStateBlock, IFaceDirectionBlock {
-    
+//?} else if =1.21.1 {
+/*@ParametersAreNonnullByDefault
+@MethodsReturnNonnullByDefault
+public class ReactorPowerTap extends ReactorBaseBlock implements IAssemblyStateBlock, IFaceDirectionBlock {
+*/
+//?}
+
+//? if =26.1.2 || =26.3 {
     @RegisterBlock(name = "reactor_power_tap", tileEntityClass = ReactorPowerTapTile.class)
     public static final ReactorPowerTap INSTANCE = biggerreactorsrework.core.registry.RegistryIds.named("reactor_power_tap", () -> new ReactorPowerTap());
-    
+
     public ReactorPowerTap() {
+//?} else if =1.21.1 {
+/*    @RegisterBlock(name = "reactor_power_tap", tileEntityClass = ReactorPowerTapTile.class)
+    public static final ReactorPowerTap INSTANCE = new ReactorPowerTap();
+
+    public ReactorPowerTap() {
+*/
+//?}
         super();
         registerDefaultState(defaultBlockState().setValue(CONNECTION_STATE_ENUM_PROPERTY, ConnectionState.DISCONNECTED));
     }
-    
+
     public enum ConnectionState implements StringRepresentable {
         CONNECTED,
         DISCONNECTED;
-        
+
         public static final EnumProperty<ConnectionState> CONNECTION_STATE_ENUM_PROPERTY = EnumProperty.create("connectionstate", ConnectionState.class);
-        
+
         @Override
         public String getSerializedName() {
             return toString().toLowerCase(Locale.US);
         }
-        
+
     }
-    
+
     @Override
     protected void buildStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
         builder.add(CONNECTION_STATE_ENUM_PROPERTY);
     }
-    
+
     @Nullable
     @Override
     public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
         return ReactorPowerTapTile.SUPPLIER.create(pos, state);
     }
-    
+
     @Override
     public void onNeighborChange(BlockState state, Level worldIn, BlockPos pos, Block blockIn, BlockPos fromPos, boolean isMoving) {
         super.onNeighborChange(state, worldIn, pos, blockIn, fromPos, isMoving);

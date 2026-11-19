@@ -2,18 +2,33 @@ package biggerreactorsrework.core.parsers;
 
 import com.electronwill.nightconfig.core.Config;
 import com.electronwill.nightconfig.core.io.ParsingException;
+//? if =26.1.2 || =26.3 {
 import com.electronwill.nightconfig.toml.TomlParser;
 
 import javax.annotation.Nullable;
+//?} else if =1.21.1 {
+/*import com.electronwill.nightconfig.toml.TomlParser;
+import net.minecraft.MethodsReturnNonnullByDefault;
+
+import javax.annotation.Nullable;
+*/
+//?}
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+//? if =26.1.2 || =26.3 {
 @ParametersAreNonnullByDefault
 public class TOML {
-    
+//?} else if =1.21.1 {
+/*@ParametersAreNonnullByDefault
+@MethodsReturnNonnullByDefault
+public class TOML {
+*/
+//?}
+
     @Nullable
     public static Element parseString(String string) {
         try {
@@ -23,7 +38,7 @@ public class TOML {
             return null;
         }
     }
-    
+
     private static Element parseObject(Object obj, @Nullable String name) {
         if (obj instanceof Config) {
             return parseObject(((Config) obj).valueMap(), name);
@@ -44,20 +59,20 @@ public class TOML {
         }
         throw new IllegalStateException("Unknown object type");
     }
-    
+
     private static void newLine(int indentLevel, StringBuilder builder) {
         builder.append("\n");
         for (int i = 0; i < indentLevel; i++) {
             builder.append("    ");
         }
     }
-    
+
     public static String parseElement(Element element) {
         StringBuilder builder = new StringBuilder();
         parseElement(element, 0, builder, false, null);
         return builder.substring(2, builder.length() - 2);
     }
-    
+
     private static void parseElement(Element element, int indentLevel, StringBuilder builder, boolean omitComments, @Nullable String currentSectionName) {
         var commentText = "";
         if (!omitComments && element.comment != null) {

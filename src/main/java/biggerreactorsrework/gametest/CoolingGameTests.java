@@ -12,10 +12,20 @@ import net.minecraft.core.component.DataComponentPatch;
 import net.minecraft.gametest.framework.*;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.material.Fluids;
+//? if =26.1.2 || =26.3 {
 import net.neoforged.neoforge.gametest.*;
 
 /** Real registered fluids and production simulation; no client or optional mod required. */
 public final class CoolingGameTests {
+//?} else if =1.21.1 {
+/*import net.neoforged.neoforge.gametest.*;
+
+/^* Real registered fluids and production simulation; no client or optional mod required. ^/
+@GameTestHolder(BiggerReactors.modid)
+@PrefixGameTestTemplate(false)
+public final class CoolingGameTests {
+*/
+//?}
     private static TimeSlicedReactorSimulation reactor(int sides,boolean strongSolid) {
         var d=OperationGameTests.description(3);
         for(int y=0;y<3;y++) {

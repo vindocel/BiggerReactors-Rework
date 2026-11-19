@@ -1,7 +1,15 @@
+//? if =26.1.2 || =26.3 {
 package biggerreactorsrework.client.config;
 
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
+//?} else if =1.21.1 {
+/*package biggerreactorsrework.client.config;
+
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.Button;
+*/
+//?}
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
@@ -59,11 +67,20 @@ final class ConfigListScreen extends Screen {
         }).bounds(left + (rowWidth + 4) / 2, height - 26, rowWidth / 2 - 2, 20).build());
     }
 
+//? if =26.1.2 || =26.3 {
     @Override
     public void extractRenderState(GuiGraphicsExtractor g, int mouseX, int mouseY, float partialTick) {
         if (rebuild) { rebuild = false; rebuildWidgets(); }
         super.extractRenderState(g, mouseX, mouseY, partialTick);
         ConfigPaint.text(g, font, title, (width - font.width(title)) / 2, 10, ConfigStyle.ACCENT, false);
+//?} else if =1.21.1 {
+/*    @Override
+    public void render(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
+        if (rebuild) { rebuild = false; rebuildWidgets(); }
+        super.render(g, mouseX, mouseY, partialTick);
+        ConfigPaint.text(g, font, title, (width - font.width(title)) / 2, 10, ConfigStyle.ACCENT, false);
+*/
+//?}
         Component hint = error.getString().isEmpty() ? hint() : error;
         int y = 27;
         for (var line : font.split(hint, width - 24)) {

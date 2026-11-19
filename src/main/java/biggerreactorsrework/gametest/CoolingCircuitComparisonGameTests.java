@@ -12,6 +12,7 @@ import biggerreactorsrework.util.FluidTransitionTank;
 import net.minecraft.core.component.DataComponentPatch;
 import net.minecraft.gametest.framework.*;
 import net.minecraft.world.level.block.Blocks;
+//? if =26.1.2 || =26.3 {
 import net.minecraft.world.level.material.Fluids;
 import biggerreactorsrework.core.transfer.FluidTanks.FluidAction;
 import net.neoforged.neoforge.gametest.*;
@@ -21,6 +22,20 @@ import java.util.*;
  * No level changes, no balance changes, no infinite primary coolant supply.
  */
 public final class CoolingCircuitComparisonGameTests {
+//?} else if =1.21.1 {
+/*import net.minecraft.world.level.material.Fluids;
+import net.neoforged.neoforge.fluids.capability.IFluidHandler.FluidAction;
+import net.neoforged.neoforge.gametest.*;
+import java.util.*;
+
+/^* Numerical A/B fixture read from New World's reactor at (-36,72,107), 2026-10-25.
+ * No level changes, no balance changes, no infinite primary coolant supply.
+ ^/
+@GameTestHolder(BiggerReactors.modid)
+@PrefixGameTestTemplate(false)
+public final class CoolingCircuitComparisonGameTests {
+*/
+//?}
     private static final int WARM=160000,WINDOW=20000;
 
     private static TimeSlicedReactorSimulation reactor() {
@@ -113,18 +128,33 @@ public final class CoolingCircuitComparisonGameTests {
     /** Added 2026-10-26: identical geometry, charge and controls for every coolant tier. */
     @GameTest(template="empty_7x7x7",timeoutTicks=300)
     public static void coolantProgressionUsesTheSameExchanger(GameTestHelper h)throws Exception {
+//? if =26.1.2 || =26.3 {
         var registry=net.minecraft.core.registries.BuiltInRegistries.FLUID;
         var sodiumKey=net.minecraft.resources.Identifier.parse("mekanism:sodium");
         var cryoKey=net.minecraft.resources.Identifier.parse("ad_astra:cryo_fuel");
         if(!registry.containsKey(sodiumKey) || !registry.containsKey(cryoKey)){h.succeed();return;}
+//?} else if =1.21.1 {
+/*        var registry=net.minecraft.core.registries.BuiltInRegistries.FLUID;
+        var sodiumKey=net.minecraft.resources.ResourceLocation.parse("mekanism:sodium");
+        var cryoKey=net.minecraft.resources.ResourceLocation.parse("ad_astra:cryo_fuel");
+        if(!registry.containsKey(sodiumKey) || !registry.containsKey(cryoKey)){h.succeed();return;}
+*/
+//?}
         var cfg=Config.CONFIG.HeatExchanger;
         var g=new HeatExchangerCapacity.Geometry(19,19,18*cfg.ChannelFEPerKelvinMetreSquared,
             60*cfg.AirFEPerKelvinMetreSquared,60*cfg.AirFEPerKelvinMetreSquared,
             238*cfg.AmbientFEPerKelvinMetreSquared,16*cfg.AirFEPerKelvinUnitVolume,293.15);
         var rows=new ArrayList<Map<String,Object>>();
+//? if =26.1.2 || =26.3 {
         rows.add(measure(h,"water_direct",null,reactor(3),FluidTransitionRegistry.liquidTransition(Fluids.WATER)));
         for(var fluid:List.of(biggerreactorsrework.fluids.LiquidObsidian.INSTANCE,registry.getValue(cryoKey),registry.getValue(sodiumKey)))
             rows.add(measure(h,registry.getKey(fluid).toString(),g,reactor(3),FluidTransitionRegistry.liquidTransition(fluid)));
+//?} else if =1.21.1 {
+/*        rows.add(measure(h,"water_direct",null,reactor(3),FluidTransitionRegistry.liquidTransition(Fluids.WATER)));
+        for(var fluid:List.of(biggerreactorsrework.fluids.LiquidObsidian.INSTANCE,registry.get(cryoKey),registry.get(sodiumKey)))
+            rows.add(measure(h,registry.getKey(fluid).toString(),g,reactor(3),FluidTransitionRegistry.liquidTransition(fluid)));
+*/
+//?}
         StudyReports.write("coolant-progression.json",new com.google.gson.GsonBuilder().setPrettyPrinting().create().toJson(rows));
         BiggerReactors.LOGGER.info("Same-setup coolant progression: {}",rows);
         double water=((Number)rows.getFirst().get("steam_mB_t")).doubleValue();
@@ -163,13 +193,27 @@ public final class CoolingCircuitComparisonGameTests {
         h.succeed();
     }
     @GameTest(template="empty_7x7x7",timeoutTicks=300)
+//? if =26.1.2 || =26.3 {
     public static void obsidianAdvantageAlsoHoldsWithMoreAdjacentChannels(GameTestHelper h) {
         var key=net.minecraft.resources.Identifier.parse("ad_astra:cryo_fuel");
         if(!net.minecraft.core.registries.BuiltInRegistries.FLUID.containsKey(key)){h.succeed();return;}
+//?} else if =1.21.1 {
+/*    public static void obsidianAdvantageAlsoHoldsWithMoreAdjacentChannels(GameTestHelper h) {
+        var key=net.minecraft.resources.ResourceLocation.parse("ad_astra:cryo_fuel");
+        if(!net.minecraft.core.registries.BuiltInRegistries.FLUID.containsKey(key)){h.succeed();return;}
+*/
+//?}
         var geometry=straight(39);
+//? if =26.1.2 || =26.3 {
         var obs=measure(h,"obsidian_39",geometry,reactor(3),FluidTransitionRegistry.liquidTransition(biggerreactorsrework.fluids.LiquidObsidian.INSTANCE));
         var cryo=measure(h,"cryo_39",geometry,reactor(3),FluidTransitionRegistry.liquidTransition(net.minecraft.core.registries.BuiltInRegistries.FLUID.getValue(key)));
         double ratio=((Number)obs.get("steam_per_mB_fuel")).doubleValue()/((Number)cryo.get("steam_per_mB_fuel")).doubleValue();
+//?} else if =1.21.1 {
+/*        var obs=measure(h,"obsidian_39",geometry,reactor(3),FluidTransitionRegistry.liquidTransition(biggerreactorsrework.fluids.LiquidObsidian.INSTANCE));
+        var cryo=measure(h,"cryo_39",geometry,reactor(3),FluidTransitionRegistry.liquidTransition(net.minecraft.core.registries.BuiltInRegistries.FLUID.get(key)));
+        double ratio=((Number)obs.get("steam_per_mB_fuel")).doubleValue()/((Number)cryo.get("steam_per_mB_fuel")).doubleValue();
+*/
+//?}
         BiggerReactors.LOGGER.info("Second obsidian/Cryo reference: ratio={} obsidian={} cryo={}",ratio,obs,cryo);
         h.assertTrue(ratio>1,"second exchanger lost the obsidian advantage: "+ratio);h.succeed();
     }

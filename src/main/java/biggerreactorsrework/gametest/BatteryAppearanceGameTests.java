@@ -5,11 +5,25 @@ import biggerreactorsrework.multiblocks.battery.blocks.*;
 import biggerreactorsrework.multiblocks.battery.containers.BatteryTerminalContainer;
 import biggerreactorsrework.multiblocks.battery.state.BatteryState;
 import biggerreactorsrework.multiblocks.battery.tiles.BatteryBaseTile;
+//? if =26.1.2 || =26.3 {
 import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.GameTestHelper;
 
 /** Added 2026-10-29: terminal and body menus retain their origins but share one synced appearance identity. */
 public final class BatteryAppearanceGameTests {
+//?} else if =1.21.1 {
+/*import net.minecraft.core.BlockPos;
+import net.minecraft.gametest.framework.GameTest;
+import net.minecraft.gametest.framework.GameTestHelper;
+import net.neoforged.neoforge.gametest.GameTestHolder;
+import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
+
+/^* Added 2026-10-29: terminal and body menus retain their origins but share one synced appearance identity. ^/
+@GameTestHolder(BiggerReactors.modid)
+@PrefixGameTestTemplate(false)
+public final class BatteryAppearanceGameTests {
+*/
+//?}
     @GameTest(template = "empty_7x7x7", timeoutTicks = 160)
     public static void allBatteryEntryPointsShareTheTerminalAppearance(GameTestHelper h) {
         for (int x = 1; x <= 3; x++) for (int y = 1; y <= 3; y++) for (int z = 1; z <= 3; z++)
@@ -24,14 +38,28 @@ public final class BatteryAppearanceGameTests {
         h.setBlock(2, 2, 1, BatteryEnergyPort.INSTANCE);
         h.setBlock(2, 2, 3, BatteryEnergyPort.INSTANCE);
         var sensorPos = new BlockPos(2, 1, 2);
+//? if =26.1.2 || =26.3 {
         h.setBlock(sensorPos, BatteryRedstonePort.INSTANCE);
         h.startSequence().thenWaitUntil(() -> h.assertTrue(((BatteryBaseTile) GameTestSupport.be(h,terminal)).isBatteryAssembled(), "battery not ready"))
                 .thenExecute(() -> {
+//?} else if =1.21.1 {
+/*        h.setBlock(sensorPos, BatteryRedstonePort.INSTANCE);
+        h.startSequence().thenWaitUntil(() -> h.assertTrue(((BatteryBaseTile) h.getBlockEntity(terminal)).isBatteryAssembled(), "battery not ready"))
+                .thenExecute(() -> {
+*/
+//?}
                     var player = net.neoforged.neoforge.common.util.FakePlayerFactory.getMinecraft(h.getLevel());
                     var expected = h.absolutePos(terminal);
+//? if =26.1.2 || =26.3 {
                     for (var relative : java.util.List.of(terminal, secondTerminal, body, glass)) {
                         var tile = (BatteryBaseTile) GameTestSupport.be(h,relative);
                         var menu = new BatteryTerminalContainer(42, tile.getBlockPos(), player);
+//?} else if =1.21.1 {
+/*                    for (var relative : java.util.List.of(terminal, secondTerminal, body, glass)) {
+                        var tile = (BatteryBaseTile) h.getBlockEntity(relative);
+                        var menu = new BatteryTerminalContainer(42, tile.getBlockPos(), player);
+*/
+//?}
                         var packet = (BatteryState) menu.getGuiPacket();
                         var data = packet.write();
                         h.assertTrue(expected.asLong() == (Long) data.get("appearancePos"), "appearance depends on clicked block " + relative);
@@ -40,10 +68,18 @@ public final class BatteryAppearanceGameTests {
                         h.assertTrue(!received.appearanceReady, "appearance was editable before its identity arrived");
                         received.read(data);
                         h.assertTrue(received.appearanceReady && received.appearancePos.equals(expected), "appearance identity was lost in synchronization");
+//? if =26.1.2 || =26.3 {
                     }
                     h.assertTrue(GameTestSupport.be(h,new BlockPos(2, 2, 1)) instanceof net.minecraft.world.MenuProvider, "energy port lost its own menu");
                     var sensor = (biggerreactorsrework.multiblocks.battery.tiles.BatteryRedstonePortTile) GameTestSupport.be(h,sensorPos);
                     var sensorMenu = new biggerreactorsrework.multiblocks.battery.containers.BatteryRedstonePortContainer(43, sensor.getBlockPos(), player);
+//?} else if =1.21.1 {
+/*                    }
+                    h.assertTrue(h.getBlockEntity(new BlockPos(2, 2, 1)) instanceof net.minecraft.world.MenuProvider, "energy port lost its own menu");
+                    var sensor = (biggerreactorsrework.multiblocks.battery.tiles.BatteryRedstonePortTile) h.getBlockEntity(sensorPos);
+                    var sensorMenu = new biggerreactorsrework.multiblocks.battery.containers.BatteryRedstonePortContainer(43, sensor.getBlockPos(), player);
+*/
+//?}
                     var snapshot = sensorMenu.getGuiPacket().write();
                     h.assertTrue(expected.asLong() == (Long) snapshot.get("appearancePos"), "sensor uses a different appearance identity");
                     var receivedSensor = biggerreactorsrework.multiblocks.battery.tiles.BatteryRedstonePortTile.SUPPLIER.create(sensor.getBlockPos(), sensor.getBlockState());

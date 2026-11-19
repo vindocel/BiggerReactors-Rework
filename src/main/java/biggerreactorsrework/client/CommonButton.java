@@ -1,16 +1,40 @@
+//? if =26.1.2 || =26.3 {
 package biggerreactorsrework.client;
 
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.network.chat.Component;
+//?} else if =1.21.1 {
+/*package biggerreactorsrework.client;
+
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.network.chat.Component;
+*/
+//?}
 import net.minecraft.sounds.SoundEvents;
+//? if =26.1.2 || =26.3 {
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import biggerreactorsrework.core.client.gui.screens.ModScreen;
+//?} else if =1.21.1 {
+/*import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import biggerreactorsrework.core.client.gui.screens.ModScreen;
+*/
+//?}
 import biggerreactorsrework.core.client.gui.elements.InteractiveElement;
 
 import javax.annotation.Nonnull;
+//? if =26.1.2 || =26.3 {
 import javax.annotation.Nullable;
 
 public class CommonButton<T extends AbstractContainerMenu> extends InteractiveElement<T> {
+//?} else if =1.21.1 {
+/*import javax.annotation.Nullable;
+
+@OnlyIn(Dist.CLIENT)
+public class CommonButton<T extends AbstractContainerMenu> extends InteractiveElement<T> {
+*/
+//?}
 
     /**
      * Glyph drawn on the button.
@@ -47,10 +71,18 @@ public class CommonButton<T extends AbstractContainerMenu> extends InteractiveEl
      * @param mouseX The x position of the mouse.
      * @param mouseY The y position of the mouse.
      */
+//? if =26.1.2 || =26.3 {
     @Override
     public void render(@Nonnull GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
         // Check conditions.
         if (this.renderEnable) {
+//?} else if =1.21.1 {
+/*    @Override
+    public void render(@Nonnull GuiGraphics graphics, int mouseX, int mouseY) {
+        // Check conditions.
+        if (this.renderEnable) {
+*/
+//?}
             boolean disabled = !this.actionEnable;
             GuiArt.button(graphics, this.x, this.y, this.width, this.height, this.isMouseOver(mouseX, mouseY), false, disabled,
                     disabled ? this.disabledGlyph : this.glyph, this.parent.getFrame());

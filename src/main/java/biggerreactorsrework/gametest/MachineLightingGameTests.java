@@ -25,6 +25,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.material.Fluids;
+//? if =26.1.2 || =26.3 {
 import net.neoforged.neoforge.fluids.FluidStack;
 import biggerreactorsrework.core.transfer.FluidTanks.FluidAction;
 import net.neoforged.neoforge.gametest.*;
@@ -32,6 +33,18 @@ import static biggerreactorsrework.core.multiblock.IAssemblyStateBlock.ASSEMBLED
 
 /** Added 2026-10-27: state emission, real processing/coolant transitions and batched relighting. */
 public final class MachineLightingGameTests {
+//?} else if =1.21.1 {
+/*import net.neoforged.neoforge.fluids.FluidStack;
+import net.neoforged.neoforge.fluids.capability.IFluidHandler.FluidAction;
+import net.neoforged.neoforge.gametest.*;
+import static biggerreactorsrework.core.multiblock.IAssemblyStateBlock.ASSEMBLED;
+
+/^* Added 2026-10-27: state emission, real processing/coolant transitions and batched relighting. ^/
+@GameTestHolder(BiggerReactors.modid)
+@PrefixGameTestTemplate(false)
+public final class MachineLightingGameTests {
+*/
+//?}
     @GameTest(template="empty_7x7x7")
     public static void terminalsAndFuelUseVisibleOperatingStates(GameTestHelper h) {
         var reactor=ReactorTerminal.INSTANCE.defaultBlockState().setValue(ReactorActivity.REACTOR_ACTIVITY_ENUM_PROPERTY,ReactorActivity.ACTIVE);
@@ -52,9 +65,16 @@ public final class MachineLightingGameTests {
 
     @GameTest(template="empty_7x7x7")
     public static void industrialLightFollowsProcessingAndPauses(GameTestHelper h) {
+//? if =26.1.2 || =26.3 {
         var pos=new BlockPos(2,2,2);h.setBlock(pos,IndustrialProcessor.INSTANCE);
         var tile=(IndustrialProcessorTile)GameTestSupport.be(h,pos);tile.tick();
         tile.energyFor(null).receiveEnergy(500,false);
+//?} else if =1.21.1 {
+/*        var pos=new BlockPos(2,2,2);h.setBlock(pos,IndustrialProcessor.INSTANCE);
+        var tile=(IndustrialProcessorTile)h.getBlockEntity(pos);tile.tick();
+        tile.energyFor(null).receiveEnergy(500,false);
+*/
+//?}
         tile.fluidFor(null).fill(new FluidStack(Fluids.WATER,1000),FluidAction.EXECUTE);
         tile.itemHandlerFor(null).insertItem(0,new ItemStack(CyaniteIngot.INSTANCE,2),false);tile.tick();
         h.assertTrue(h.getBlockState(pos).getLightEmission()==6,"processing face does not emit light");
@@ -66,9 +86,16 @@ public final class MachineLightingGameTests {
     public static void hotChannelLightTracksConversionDrainingAndDisassembly(GameTestHelper h) {
         GuideStructures.exchanger().parts().forEach(h::setBlock);var terminal=new BlockPos(1,1,0);
         h.startSequence().thenWaitUntil(()->h.assertTrue(h.getBlockState(terminal).getValue(ASSEMBLED),"exchanger not assembled"))
+//? if =26.1.2 || =26.3 {
             .thenExecute(()->{
                 var c=((HeatExchangerBaseTile)GameTestSupport.be(h,terminal)).controller();
                 var profile=FluidTransitionRegistry.liquidTransition(LiquidObsidian.INSTANCE);
+//?} else if =1.21.1 {
+/*            .thenExecute(()->{
+                var c=((HeatExchangerBaseTile)h.getBlockEntity(terminal)).controller();
+                var profile=FluidTransitionRegistry.liquidTransition(LiquidObsidian.INSTANCE);
+*/
+//?}
                 h.assertTrue(c.condenserTank.fill(HeatedCoolant.INSTANCE,CoolantComponents.heated(profile),1000,false)==1000,"hot coolant rejected");
                 c.onReassembled();
                 for(var part:c.condenserChannels)h.assertTrue(part.getBlockState().getLightEmission()==6,"hot path is dark");

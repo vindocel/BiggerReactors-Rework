@@ -8,19 +8,26 @@ public class Queues {
     public static final WorkQueue serverThread;
     public static final WorkQueue clientThread;
     public static final WorkQueue offThread;
-    
+
     @OnModLoad
     private static void onModLoad() {
     }
-    
+
     static {
         WorkQueue serverThread1 = null;
         WorkQueue clientThread1 = null;
         int threads = Runtime.getRuntime().availableProcessors();
         threads = Math.max(1, threads - 1); // if possible, leave a core for the main server threads
+//? if =26.1.2 || =26.3 {
         try {
             if (FMLEnvironment.getDist() == Dist.CLIENT) {
                 threads = Math.max(1, threads - 1); // if possible, leave a core for the main client thread too
+//?} else if =1.21.1 {
+/*        try {
+            if (FMLEnvironment.dist == Dist.CLIENT) {
+                threads = Math.max(1, threads - 1); // if possible, leave a core for the main client thread too
+*/
+//?}
                 clientThread1 = new WorkQueue();
             }
             serverThread1 = new WorkQueue();

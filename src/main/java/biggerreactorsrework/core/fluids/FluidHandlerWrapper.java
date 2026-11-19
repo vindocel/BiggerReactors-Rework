@@ -1,27 +1,63 @@
+//? if =26.1.2 || =26.3 {
 package biggerreactorsrework.core.fluids;
 
 import net.minecraft.core.component.DataComponentPatch;
+//?} else if =1.21.1 {
+/*package biggerreactorsrework.core.fluids;
+
+import net.minecraft.MethodsReturnNonnullByDefault;
+import net.minecraft.core.component.DataComponentPatch;
+*/
+//?}
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
+//? if =26.1.2 || =26.3 {
 import net.neoforged.neoforge.fluids.FluidStack;
 import biggerreactorsrework.core.transfer.FluidTanks;
 
 import javax.annotation.ParametersAreNonnullByDefault;
+//?} else if =1.21.1 {
+/*import net.neoforged.neoforge.fluids.FluidStack;
+import net.neoforged.neoforge.fluids.capability.IFluidHandler;
 
+import javax.annotation.ParametersAreNonnullByDefault;
+*/
+//?}
+
+//? if =26.1.2 || =26.3 {
 @ParametersAreNonnullByDefault
 public class FluidHandlerWrapper implements IFluidTankHandler {
 
     public static IFluidTankHandler wrap(FluidTanks handler) {
         if (handler instanceof IFluidTankHandler) {
+//?} else if =1.21.1 {
+/*@ParametersAreNonnullByDefault
+@MethodsReturnNonnullByDefault
+public class FluidHandlerWrapper implements IFluidTankHandler {
+
+    public static IFluidTankHandler wrap(IFluidHandler handler) {
+        if (handler instanceof IFluidTankHandler) {
+*/
+//?}
             return (IFluidTankHandler) handler;
         }
         return new FluidHandlerWrapper(handler);
+//? if =26.1.2 || =26.3 {
     }
 
     final FluidTanks handler;
 
     private FluidHandlerWrapper(FluidTanks handler) {
         this.handler = handler;
+//?} else if =1.21.1 {
+/*    }
+
+    final IFluidHandler handler;
+
+    private FluidHandlerWrapper(IFluidHandler handler) {
+        this.handler = handler;
+*/
+//?}
     }
 
     @Override

@@ -6,10 +6,18 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ContainerLevelAccess;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.inventory.Slot;
+//? if =26.1.2 || =26.3 {
 import net.minecraft.world.item.ItemStack;
 import biggerreactorsrework.core.transfer.ItemSlots;
 import biggerreactorsrework.core.transfer.SlotsSlot;
 import biggerreactorsrework.machine.blocks.IndustrialProcessor;
+//?} else if =1.21.1 {
+/*import net.minecraft.world.item.ItemStack;
+import net.neoforged.neoforge.items.IItemHandler;
+import net.neoforged.neoforge.items.SlotItemHandler;
+import biggerreactorsrework.machine.blocks.IndustrialProcessor;
+*/
+//?}
 import biggerreactorsrework.machine.tiles.IndustrialProcessorTile;
 import biggerreactorsrework.machine.tiles.impl.IndustrialProcessorItemHandler;
 import biggerreactorsrework.core.client.gui.GuiSync;
@@ -39,6 +47,7 @@ public class IndustrialProcessorContainer extends AbstractContainerMenu implemen
         this.getGuiPacket();
 
         // Populate machine slots.
+//? if =26.1.2 || =26.3 {
         if (this.tileEntity != null) {
             ItemSlots handler = tileEntity.getItemHandler();
             // Add input slot.
@@ -46,6 +55,16 @@ public class IndustrialProcessorContainer extends AbstractContainerMenu implemen
             // Add output slot.
             this.addSlot(new SlotsSlot(handler, IndustrialProcessorItemHandler.OUTPUT_SLOT_INDEX, 116, 56));
         }
+//?} else if =1.21.1 {
+/*        if (this.tileEntity != null) {
+            IItemHandler handler = tileEntity.getItemHandler();
+            // Add input slot.
+            this.addSlot(new SlotItemHandler(handler, IndustrialProcessorItemHandler.INPUT_SLOT_INDEX, 56, 56));
+            // Add output slot.
+            this.addSlot(new SlotItemHandler(handler, IndustrialProcessorItemHandler.OUTPUT_SLOT_INDEX, 116, 56));
+        }
+*/
+//?}
 
         // Populate player inventory.
         this.populatePlayerInventory();
@@ -56,15 +75,29 @@ public class IndustrialProcessorContainer extends AbstractContainerMenu implemen
      */
     @Nullable
     @Override
+//? if =26.1.2 || =26.3 {
     public GuiSync.IGUIPacket getGuiPacket() {
         return this.tileEntity.cyaniteReprocessorState;
     }
+//?} else if =1.21.1 {
+/*    public GuiSync.IGUIPacket getGuiPacket() {
+        return this.tileEntity.industrialProcessorState;
+    }
+*/
+//?}
 
     @Override
     public void executeRequest(String requestName, @Nullable Object requestData) {
+//? if =26.1.2 || =26.3 {
         assert this.tileEntity.getLevel() != null;
         if (this.tileEntity.getLevel().isClientSide()) {
             runRequest(requestName, requestData);
+//?} else if =1.21.1 {
+/*        assert this.tileEntity.getLevel() != null;
+        if (this.tileEntity.getLevel().isClientSide) {
+            runRequest(requestName, requestData);
+*/
+//?}
             return;
         }
         this.tileEntity.runRequest(requestName, requestData);

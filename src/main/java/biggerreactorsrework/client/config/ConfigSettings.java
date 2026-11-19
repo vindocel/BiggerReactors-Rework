@@ -108,7 +108,15 @@ final class ConfigSettings {
         } catch (IOException failure) {
             throw new UncheckedIOException(failure);
         }
+//? if =26.1.2 || =1.21.1 {
     }
 
     static void screen(Minecraft minecraft, Screen screen) { minecraft.setScreen(screen); }
 }
+//?} else if =26.3 {
+/*    }
+
+    static void screen(Minecraft minecraft, Screen screen) { minecraft.gui.setScreen(screen); }
+}
+*/
+//?}

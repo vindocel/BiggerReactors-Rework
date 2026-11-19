@@ -4,9 +4,16 @@ import biggerreactorsrework.calculator.design.MachineLayout;
 import biggerreactorsrework.calculator.design.PlantLayout;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
+//? if =26.1.2 || =26.3 {
 import net.minecraft.nbt.*;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.block.Blocks;
+//?} else if =1.21.1 {
+/*import net.minecraft.nbt.*;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.block.Blocks;
+*/
+//?}
 import net.minecraft.world.level.block.state.BlockState;
 
 import javax.annotation.Nullable;
@@ -76,22 +83,45 @@ public final class PlantCodec {
     /** Null when the data is malformed. Block names this game does not know are collected in {@code missing}. */
     @Nullable
     public static PlantLayout decode(CompoundTag tag, Set<String> missing) {
+//? if =26.1.2 || =26.3 {
         try {
             var machinesTag = tag.getListOrEmpty("machines");
             if (machinesTag.isEmpty() || machinesTag.size() > MAX_MACHINES) return null;
+//?} else if =1.21.1 {
+/*        try {
+            var machinesTag = tag.getList("machines", Tag.TAG_COMPOUND);
+            if (machinesTag.isEmpty() || machinesTag.size() > MAX_MACHINES) return null;
+*/
+//?}
             var machines = new ArrayList<PlantLayout.Placed>();
             for (var element : machinesTag) {
+//? if =26.1.2 || =26.3 {
                 var m = (CompoundTag) element;
                 var kind = MachineLayout.Kind.valueOf(m.getStringOr("kind", ""));
                 int[] size = m.getIntArray("size").orElseGet(() -> new int[0]), offset = m.getIntArray("offset").orElseGet(() -> new int[0]);
                 if (size.length != 3 || offset.length != 3) return null;
+//?} else if =1.21.1 {
+/*                var m = (CompoundTag) element;
+                var kind = MachineLayout.Kind.valueOf(m.getString("kind"));
+                int[] size = m.getIntArray("size"), offset = m.getIntArray("offset");
+                if (size.length != 3 || offset.length != 3) return null;
+*/
+//?}
                 for (int s : size) if (s < 1 || s > MAX_SIDE) return null;
                 long cells = (long) size[0] * size[1] * size[2];
+//? if =26.1.2 || =26.3 {
                 if (cells > MAX_CELLS) return null;
                 var paletteTag = m.getListOrEmpty("palette");
                 if (paletteTag.size() > MAX_PALETTE) return null;
+//?} else if =1.21.1 {
+/*                if (cells > MAX_CELLS) return null;
+                var paletteTag = m.getList("palette", Tag.TAG_COMPOUND);
+                if (paletteTag.size() > MAX_PALETTE) return null;
+*/
+//?}
                 var palette = new ArrayList<BlockState>();
                 for (var p : paletteTag) {
+//? if =26.1.2 || =26.3 {
                     var stateTag = (CompoundTag) p;
                     var state = NbtUtils.readBlockState(BuiltInRegistries.BLOCK, upgradedState(stateTag));
                     var name = Identifier.tryParse(stateTag.getStringOr("Name", ""));
@@ -100,6 +130,17 @@ public final class PlantCodec {
                 }
                 int[] runs = m.getIntArray("cells").orElseGet(() -> new int[0]);
                 if (runs.length % 2 != 0) return null;
+//?} else if =1.21.1 {
+/*                    var stateTag = (CompoundTag) p;
+                    var state = NbtUtils.readBlockState(BuiltInRegistries.BLOCK.asLookup(), stateTag);
+                    var name = ResourceLocation.tryParse(stateTag.getString("Name"));
+                    if (state.is(Blocks.AIR) && (name == null || !name.equals(BuiltInRegistries.BLOCK.getKey(Blocks.AIR)))) missing.add(stateTag.getString("Name"));
+                    palette.add(state);
+                }
+                int[] runs = m.getIntArray("cells");
+                if (runs.length % 2 != 0) return null;
+*/
+//?}
                 long total = 0;
                 for (int i = 0; i < runs.length; i += 2) {
                     if (runs[i] <= 0 || runs[i + 1] < 0 || runs[i + 1] > palette.size()) return null;
@@ -113,18 +154,35 @@ public final class PlantCodec {
                         if (runs[i + 1] == 0) continue;
                         int x = cell / (size[1] * size[2]), y = cell / size[2] % size[1], z = cell % size[2];
                         blocks.put(new BlockPos(x, y, z), palette.get(runs[i + 1] - 1));
+//? if =26.1.2 || =26.3 {
                     }
                 var portsTag = m.getListOrEmpty("ports");
                 if (portsTag.size() > MAX_PORTS) return null;
+//?} else if =1.21.1 {
+/*                    }
+                var portsTag = m.getList("ports", Tag.TAG_COMPOUND);
+                if (portsTag.size() > MAX_PORTS) return null;
+*/
+//?}
                 var ports = new ArrayList<MachineLayout.Port>();
                 for (var p : portsTag) {
+//? if =26.1.2 || =26.3 {
                     var portTag = (CompoundTag) p;
                     int[] pos = portTag.getIntArray("pos").orElseGet(() -> new int[0]);
                     if (pos.length != 3) return null;
                     ports.add(new MachineLayout.Port(new BlockPos(pos[0], pos[1], pos[2]), MachineLayout.Role.valueOf(portTag.getStringOr("role", ""))));
                 }
+//?} else if =1.21.1 {
+/*                    var portTag = (CompoundTag) p;
+                    int[] pos = portTag.getIntArray("pos");
+                    if (pos.length != 3) return null;
+                    ports.add(new MachineLayout.Port(new BlockPos(pos[0], pos[1], pos[2]), MachineLayout.Role.valueOf(portTag.getString("role"))));
+                }
+*/
+//?}
                 machines.add(new PlantLayout.Placed(new MachineLayout(kind, size[0], size[1], size[2], blocks, ports), new BlockPos(offset[0], offset[1], offset[2])));
             }
+//? if =26.1.2 || =26.3 {
             var connections = new ArrayList<PlantLayout.Connection>();
             for (var element : tag.getListOrEmpty("connections")) {
                 var c = (CompoundTag) element;
@@ -132,11 +190,22 @@ public final class PlantCodec {
                 if (from < 0 || to < 0 || from >= machines.size() || to >= machines.size()) return null;
                 connections.add(new PlantLayout.Connection(from, MachineLayout.Role.valueOf(c.getStringOr("fromRole", "")), to, MachineLayout.Role.valueOf(c.getStringOr("toRole", ""))));
             }
+//?} else if =1.21.1 {
+/*            var connections = new ArrayList<PlantLayout.Connection>();
+            for (var element : tag.getList("connections", Tag.TAG_COMPOUND)) {
+                var c = (CompoundTag) element;
+                int from = c.getInt("from"), to = c.getInt("to");
+                if (from < 0 || to < 0 || from >= machines.size() || to >= machines.size()) return null;
+                connections.add(new PlantLayout.Connection(from, MachineLayout.Role.valueOf(c.getString("fromRole")), to, MachineLayout.Role.valueOf(c.getString("toRole"))));
+            }
+*/
+//?}
             if (connections.size() > 4) return null;
             return new PlantLayout(machines, connections);
         } catch (IllegalArgumentException | ClassCastException e) {
             return null;
         }
+//? if =26.1.2 {
     }
 
     /** Modified 2026-11-01: retain native Name/Properties and normalize newer saved preview palettes. */
@@ -152,3 +221,25 @@ public final class PlantCodec {
         return upgraded;
     }
 }
+//?} else if =1.21.1 {
+/*    }
+}
+*/
+//?} else if =26.3 {
+/*    }
+
+    /^* Block states saved by the 1.21.1 line use the keys {@code Name} and {@code Properties}. ^/
+    public static net.minecraft.nbt.CompoundTag upgradedState(net.minecraft.nbt.CompoundTag tag) {
+        if (!tag.contains("Name")) {
+            return tag;
+        }
+        var upgraded = new net.minecraft.nbt.CompoundTag();
+        upgraded.putString("id", tag.getStringOr("Name", ""));
+        if (tag.contains("Properties")) {
+            upgraded.put("properties", tag.getCompoundOrEmpty("Properties"));
+        }
+        return upgraded;
+    }
+}
+*/
+//?}

@@ -19,9 +19,16 @@ public abstract class ComputerPeripheral implements IPeripheral {
         return other instanceof ComputerPeripheral peripheral && peripheral.tile==tile && peripheral.type.equals(type);
     }
     protected final boolean available() {
+//? if =26.1.2 || =26.3 {
         var level=tile.getLevel();
         return level!=null && !level.isClientSide() && ((ComputerPortState.Port)tile).computerPortState().loaded()
                 && level.hasChunkAt(tile.getBlockPos()) && level.getBlockEntity(tile.getBlockPos())==tile;
+//?} else if =1.21.1 {
+/*        var level=tile.getLevel();
+        return level!=null && !level.isClientSide && ((ComputerPortState.Port)tile).computerPortState().loaded()
+                && level.hasChunkAt(tile.getBlockPos()) && level.getBlockEntity(tile.getBlockPos())==tile;
+*/
+//?}
     }
     protected final void checkThread() throws LuaException {
         var server=tile.getLevel()==null?null:tile.getLevel().getServer();

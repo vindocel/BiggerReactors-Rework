@@ -3,6 +3,7 @@ package biggerreactorsrework.core.registry;
 import it.unimi.dsi.fastutil.objects.ReferenceArrayList;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.neoforged.neoforge.capabilities.BlockCapability;
+//? if =26.1.2 || =26.3 {
 import net.neoforged.neoforge.capabilities.ICapabilityProvider;
 import biggerreactorsrework.core.transfer.FluidTanks;
 import biggerreactorsrework.core.transfer.ItemSlots;
@@ -16,20 +17,28 @@ import net.neoforged.neoforge.transfer.fluid.FluidResource;
 import net.neoforged.neoforge.transfer.item.ItemResource;
 
 import java.util.List;
+//?} else if =1.21.1 {
+/*import net.neoforged.neoforge.capabilities.ICapabilityProvider;
+import biggerreactorsrework.core.util.Pair;
+
+import java.util.List;
+*/
+//?}
 import java.util.function.Function;
 import java.util.function.Supplier;
 
 public class CapabilityRegistration {
-    
+
     public static <O extends T, T, C> CapabilityRegistration tileCap(BlockCapability<T, C> capability, Class<O> tileClass) {
         if (!BlockEntity.class.isAssignableFrom(tileClass)) {
             throw new IllegalArgumentException("Automatic tile entity capability must have class extending from BlockEntity");
         }
         ICapabilityProvider<O, C, T> provider = (o, c) -> (T) o;
-        
+
         return new TileCapRegistration<>(capability, tileClass, provider);
+//? if =26.1.2 || =26.3 {
     }
-    
+
     public static <O extends ItemSlots & TransferSnapshots> CapabilityRegistration tileItems(Class<O> tileClass) {
         return new TileCapRegistration<O, ResourceHandler<ItemResource>, Direction>(Capabilities.Item.BLOCK, tileClass, (tile, side) -> Transfer.exposeItems(tile, tile));
     }
@@ -39,40 +48,46 @@ public class CapabilityRegistration {
     }
 
     public static <O, T, C> CapabilityRegistration tileCap(BlockCapability<T, C> capability, Class<O> tileClass, Function<O, T> capabilityProvider) {
+//?} else if =1.21.1 {
+/*    }
+
+    public static <O, T, C> CapabilityRegistration tileCap(BlockCapability<T, C> capability, Class<O> tileClass, Function<O, T> capabilityProvider) {
+*/
+//?}
         return tileCap(capability, tileClass, (O o, C c) -> capabilityProvider.apply(o));
     }
-    
+
     public static <O, T, C> CapabilityRegistration tileCap(BlockCapability<T, C> capability, Class<O> tileClass, ICapabilityProvider<O, C, T> capabilityProvider) {
         return new TileCapRegistration<>(capability, tileClass, capabilityProvider);
     }
-    
+
     public static <O> CapabilityRegistration lazyTileCaps(Class<O> tileClass, Supplier<List<Pair<BlockCapability<?, ?>, ICapabilityProvider<O, ?, ?>>>> capsSupplier) {
         return new TileCapRegistration.Lazy<>(tileClass, capsSupplier);
     }
-    
+
     private CapabilityRegistration() {
     }
-    
+
     static class TileCapRegistration<O, T, C> extends CapabilityRegistration {
         final BlockCapability<T, C> capability;
         final Class<O> tileClass;
         final ICapabilityProvider<O, C, T> capabilityProvider;
-        
+
         TileCapRegistration(BlockCapability<T, C> capability, Class<O> tileClass, ICapabilityProvider<O, C, T> capabilityProvider) {
             this.capability = capability;
             this.tileClass = tileClass;
             this.capabilityProvider = capabilityProvider;
         }
-        
+
         static class Lazy<O> extends CapabilityRegistration {
             final Class<O> tileClass;
             final Supplier<List<Pair<BlockCapability<?, ?>, ICapabilityProvider<O, ?, ?>>>> supplier;
-            
+
             Lazy(Class<O> tileClass, Supplier<List<Pair<BlockCapability<?, ?>, ICapabilityProvider<O, ?, ?>>>> supplier) {
                 this.tileClass = tileClass;
                 this.supplier = supplier;
             }
-            
+
             List<TileCapRegistration<O, ?, ?>> registrations() {
                 var pairs = supplier.get();
                 var registrations = new ReferenceArrayList<TileCapRegistration<O, ?, ?>>();

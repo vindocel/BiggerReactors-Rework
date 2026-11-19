@@ -1,6 +1,14 @@
+//? if =26.1.2 || =26.3 {
 package biggerreactorsrework.multiblocks.turbine.tiles;
 
 import net.minecraft.core.BlockPos;
+//?} else if =1.21.1 {
+/*package biggerreactorsrework.multiblocks.turbine.tiles;
+
+import net.minecraft.MethodsReturnNonnullByDefault;
+import net.minecraft.core.BlockPos;
+*/
+//?}
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import biggerreactorsrework.core.registry.RegisterTile;
@@ -8,8 +16,15 @@ import biggerreactorsrework.core.registry.RegisterTile;
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 
+//? if =26.1.2 || =26.3 {
 @ParametersAreNonnullByDefault
 public class TurbineComputerPortTile extends TurbineBaseTile implements biggerreactorsrework.compat.ComputerPortState.Port {
+//?} else if =1.21.1 {
+/*@ParametersAreNonnullByDefault
+@MethodsReturnNonnullByDefault
+public class TurbineComputerPortTile extends TurbineBaseTile implements biggerreactorsrework.compat.ComputerPortState.Port {
+*/
+//?}
 
     @RegisterTile("turbine_computer_port")
     public static final BlockEntityType.BlockEntitySupplier<TurbineComputerPortTile> SUPPLIER = new RegisterTile.Producer<>(TurbineComputerPortTile::new);

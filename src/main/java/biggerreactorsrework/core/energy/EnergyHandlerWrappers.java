@@ -9,11 +9,18 @@ import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
 import net.neoforged.neoforge.capabilities.BlockCapability;
 import net.neoforged.neoforge.capabilities.Capabilities;
+//? if =26.1.2 || =26.3 {
 import net.neoforged.neoforge.capabilities.ICapabilityProvider;
 import biggerreactorsrework.core.transfer.EnergyStore;
 import biggerreactorsrework.core.transfer.Transfer;
 import net.neoforged.neoforge.transfer.energy.EnergyHandler;
 import biggerreactorsrework.core.registry.OnModLoad;
+//?} else if =1.21.1 {
+/*import net.neoforged.neoforge.capabilities.ICapabilityProvider;
+import net.neoforged.neoforge.energy.IEnergyStorage;
+import biggerreactorsrework.core.registry.OnModLoad;
+*/
+//?}
 import biggerreactorsrework.core.util.NonnullDefault;
 import biggerreactorsrework.core.util.Pair;
 import biggerreactorsrework.core.util.Util;
@@ -26,7 +33,7 @@ import java.util.function.Function;
 
 @NonnullDefault
 public class EnergyHandlerWrappers {
-    
+
     private record WrapperRegistration<T>(BlockCapability<T, Direction> capability,
                                           Function<T, IEnergyHandler> toWrapperConstructor,
                                           Function<IEnergyHandler, T> fromWrapperConstructor,
@@ -34,32 +41,32 @@ public class EnergyHandlerWrappers {
         IEnergyHandler wrapTo(T optional) {
             return toWrapperConstructor.apply(optional);
         }
-        
+
         T wrapFrom(IEnergyHandler optional) {
             //noinspection ConstantConditions
             return fromWrapperConstructor.apply(optional);
         }
     }
-    
+
     private static final ObjectArrayList<WrapperRegistration<?>> supportedCapabilitiesList = new ObjectArrayList<>();
     private static final Object2ObjectMap<BlockCapability<?, Direction>, WrapperRegistration<?>> supportedCapabilitiesMap = new Object2ObjectOpenHashMap<>();
-    
+
     public static synchronized <T> void registerWrapper(BlockCapability<T, Direction> capability, Function<T, IEnergyHandler> toWrapperConstructor, Function<IEnergyHandler, T> fromWrapperConstructor, int priority) {
         registerWrapper(new WrapperRegistration<>(capability, toWrapperConstructor, fromWrapperConstructor, priority));
     }
-    
+
     public static synchronized <T> void registerWrapper(WrapperRegistration<T> registration) {
         supportedCapabilitiesList.add(registration);
         final Comparator<WrapperRegistration<?>> comparator = Comparator.comparingInt(WrapperRegistration::priority);
         supportedCapabilitiesList.sort(comparator.reversed());
         supportedCapabilitiesMap.put(registration.capability, registration);
     }
-    
+
     static {
         // ensure that identity always registered and is max priority
 //        registerWrapper(IEnergyHandler.CAPABILITY, Function.identity(), Function.identity(), Integer.MAX_VALUE);
     }
-    
+
     @Nullable
     public static IEnergyHandler findCapability(ServerLevel level, BlockPos pos, Direction direction) {
         for (int i = 0; i < supportedCapabilitiesList.size(); i++) {
@@ -78,7 +85,7 @@ public class EnergyHandlerWrappers {
         }
         return null;
     }
-    
+
     @Nullable
     public static <T> T attemptWrap(BlockCapability<T, Direction> capability, @Nullable IEnergyHandler handler) {
         //noinspection unchecked
@@ -89,7 +96,7 @@ public class EnergyHandlerWrappers {
         }
         return registration.wrapFrom(handler);
     }
-    
+
     public static <O> List<Pair<BlockCapability<?, ?>, ICapabilityProvider<O, ?, ?>>> wrap(ICapabilityProvider<O, Direction, IEnergyHandler> baseProducer) {
         var capList = new ReferenceArrayList<Pair<BlockCapability<?, ?>, ICapabilityProvider<O, ?, ?>>>();
         for (var wrapperRegistration : supportedCapabilitiesList) {
@@ -107,80 +114,111 @@ public class EnergyHandlerWrappers {
         }
         return capList;
     }
-    
+
+//? if =26.1.2 || =26.3 {
     private static class Neo {
-        
+
         public static final BlockCapability<EnergyHandler, Direction> FORGE_ENERGY_CAPABILITY = Capabilities.Energy.BLOCK;
 
         @OnModLoad
         public static void onModLoad() {
             registerWrapper(FORGE_ENERGY_CAPABILITY, handler -> new ToWrapper(Transfer.energy(handler)), handler -> Transfer.exposeEnergy(new FromWrapper(handler), handler), Integer.MIN_VALUE);
         }
+//?} else if =1.21.1 {
+/*    private static class Neo {
 
+        public static final BlockCapability<IEnergyStorage, Direction> FORGE_ENERGY_CAPABILITY = Capabilities.EnergyStorage.BLOCK;
+
+        @OnModLoad
+        public static void onModLoad() {
+            registerWrapper(FORGE_ENERGY_CAPABILITY, ToWrapper::new, FromWrapper::new, Integer.MIN_VALUE);
+        }
+*/
+//?}
+
+//? if =26.1.2 || =26.3 {
         private static class ToWrapper implements IEnergyHandler {
-            
+
             private final EnergyStore forgeStorage;
-            
+
             ToWrapper(EnergyStore forgeStorage) {
                 this.forgeStorage = forgeStorage;
+//?} else if =1.21.1 {
+/*        private static class ToWrapper implements IEnergyHandler {
+
+            private final IEnergyStorage forgeStorage;
+
+            ToWrapper(IEnergyStorage forgeStorage) {
+                this.forgeStorage = forgeStorage;
+*/
+//?}
             }
-            
+
             @Override
             public long insertEnergy(long maxInsert, boolean simulate) {
                 return forgeStorage.receiveEnergy(Util.clampToInt(maxInsert), simulate);
             }
-            
+
             @Override
             public long extractEnergy(long maxExtract, boolean simulate) {
                 return forgeStorage.extractEnergy(Util.clampToInt(maxExtract), simulate);
             }
-            
+
             @Override
             public long energyStored() {
                 return forgeStorage.getEnergyStored();
             }
-            
+
             @Override
             public long maxEnergyStored() {
                 return forgeStorage.getMaxEnergyStored();
             }
+//? if =26.1.2 || =26.3 {
         }
-        
+
         private static class FromWrapper implements EnergyStore {
-            
+
             private final IEnergyHandler phosHandler;
-            
+//?} else if =1.21.1 {
+/*        }
+
+        private static class FromWrapper implements IEnergyStorage {
+
+            private final IEnergyHandler phosHandler;
+*/
+//?}
+
             private FromWrapper(IEnergyHandler phosHandler) {
                 this.phosHandler = phosHandler;
             }
-            
+
             @Override
             public int receiveEnergy(int maxReceive, boolean simulate) {
                 // toIntExact is fine here because it is an exceptional case if its not within the int range,
                 // as you cant ask for anything outside the int range
                 return (int) PowerDistribution.bounded(maxReceive, phosHandler.insertEnergy(Math.max(0, maxReceive), simulate));
             }
-            
+
             @Override
             public int extractEnergy(int maxExtract, boolean simulate) {
                 return (int) PowerDistribution.bounded(maxExtract, phosHandler.extractEnergy(Math.max(0, maxExtract), simulate));
             }
-            
+
             @Override
             public int getEnergyStored() {
                 return Util.clampToInt(phosHandler.energyStored());
             }
-            
+
             @Override
             public int getMaxEnergyStored() {
                 return Util.clampToInt(phosHandler.maxEnergyStored());
             }
-            
+
             @Override
             public boolean canExtract() {
                 return true;
             }
-            
+
             @Override
             public boolean canReceive() {
                 return true;

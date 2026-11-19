@@ -1,8 +1,17 @@
+//? if =26.1.2 || =26.3 {
 package biggerreactorsrework.gametest;
 
 import biggerreactorsrework.multiblocks.reactor.ReactorMultiblockController;
+//?} else if =1.21.1 {
+/*package biggerreactorsrework.gametest;
+
+import biggerreactorsrework.BiggerReactors;
+import biggerreactorsrework.multiblocks.reactor.ReactorMultiblockController;
+*/
+//?}
 import biggerreactorsrework.multiblocks.reactor.blocks.*;
 import biggerreactorsrework.multiblocks.reactor.tiles.*;
+//? if =26.1.2 || =26.3 {
 import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.world.level.block.Blocks;
@@ -12,6 +21,21 @@ public final class FuelRenderOverfillGameTests {
     private static final BlockPos TERMINAL=new BlockPos(1,4,2),BROKEN=new BlockPos(3,4,2);
     private static ReactorTerminalTile terminal(GameTestHelper h){return (ReactorTerminalTile)GameTestSupport.be(h,TERMINAL);}
     private static boolean ready(GameTestHelper h){var t=terminal(h);return t.nullableController()!=null && t.controller().simulation()!=null;}
+//?} else if =1.21.1 {
+/*import net.minecraft.core.BlockPos;
+import net.minecraft.gametest.framework.*;
+import net.minecraft.world.level.block.Blocks;
+import net.neoforged.neoforge.gametest.*;
+
+/^* Added 2026-11-15: fuel rod rendering must tolerate a fuel tank holding more than its capacity. ^/
+@GameTestHolder(BiggerReactors.modid)
+@PrefixGameTestTemplate(false)
+public final class FuelRenderOverfillGameTests {
+    private static final BlockPos TERMINAL=new BlockPos(1,4,2),BROKEN=new BlockPos(3,4,2);
+    private static ReactorTerminalTile terminal(GameTestHelper h){return (ReactorTerminalTile)h.getBlockEntity(TERMINAL);}
+    private static boolean ready(GameTestHelper h){var t=terminal(h);return t.nullableController()!=null && t.controller().simulation()!=null;}
+*/
+//?}
     private static void build(GameTestHelper h) {
         for(int x=1;x<=3;x++)for(int y=1;y<=8;y++)for(int z=1;z<=3;z++)
             if(x!=2 || z!=2 || y==1)h.setBlock(x,y,z,ReactorCasing.INSTANCE);

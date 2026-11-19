@@ -1,6 +1,14 @@
+//? if =26.1.2 || =26.3 {
 package biggerreactorsrework.multiblocks.reactor.tiles;
 
 import net.minecraft.core.BlockPos;
+//?} else if =1.21.1 {
+/*package biggerreactorsrework.multiblocks.reactor.tiles;
+
+import net.minecraft.MethodsReturnNonnullByDefault;
+import net.minecraft.core.BlockPos;
+*/
+//?}
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
@@ -20,24 +28,24 @@ import static biggerreactorsrework.multiblocks.reactor.blocks.ReactorPowerTap.Co
 
 @NonnullDefault
 public class ReactorPowerTapTile extends ReactorBaseTile implements IEnergyTile, IEnergyHandler, IEventMultiblock.AssemblyStateTransition {
-    
+
     @RegisterTile("reactor_power_tap")
     public static final BlockEntityType.BlockEntitySupplier<ReactorPowerTapTile> SUPPLIER = new RegisterTile.Producer<>(ReactorPowerTapTile::new);
-    
+
     public ReactorPowerTapTile(BlockEntityType<?> TYPE, BlockPos pos, BlockState state) {
         super(TYPE, pos, state);
     }
-    
+
     private boolean connected = false;
     @Nullable
     Direction powerOutputDirection = null;
-    
-    
+
+
     @Override
     public IEnergyHandler energyHandler(Direction direction) {
         return this;
     }
-    
+
     private void setConnected(boolean newState) {
         if (newState != connected) {
             connected = newState;
@@ -45,10 +53,10 @@ public class ReactorPowerTapTile extends ReactorBaseTile implements IEnergyTile,
             level.setBlock(worldPosition, getBlockState().setValue(CONNECTION_STATE_ENUM_PROPERTY, connected ? CONNECTED : DISCONNECTED), 3);
         }
     }
-    
+
     @Nullable
     CachedWrappedBlockCapability<IEnergyHandler, Direction> output = null;
-    
+
     public long distributePower(long toDistribute, boolean simulate) {
         if(output == null) {
             return 0;
@@ -59,8 +67,9 @@ public class ReactorPowerTapTile extends ReactorBaseTile implements IEnergyTile,
             return 0;
         }
         return Math.max(0, outputCap.insertEnergy(toDistribute, simulate));
+//? if =26.1.2 || =26.3 {
     }
-    
+
     @Override
     public Object transferSnapshot() {
         var battery = nullableController() == null ? null : (controller().simulation() == null ? null : controller().simulation().battery());
@@ -76,10 +85,16 @@ public class ReactorPowerTapTile extends ReactorBaseTile implements IEnergyTile,
     }
 
     @Override
+//?} else if =1.21.1 {
+/*    }
+
+    @Override
+*/
+//?}
     public long insertEnergy(long maxInsert, boolean simulate) {
         return 0;
     }
-    
+
     @Override
     public long extractEnergy(long maxExtract, boolean simulate) {
         if (maxExtract <= 0 || nullableController() == null || controller().assemblyState() != IValidatedMultiblock.AssemblyState.ASSEMBLED) {
@@ -100,7 +115,7 @@ public class ReactorPowerTapTile extends ReactorBaseTile implements IEnergyTile,
         }
         return toExtract;
     }
-    
+
     @Override
     public long energyStored() {
         if (nullableController() != null) {
@@ -116,7 +131,7 @@ public class ReactorPowerTapTile extends ReactorBaseTile implements IEnergyTile,
         }
         return 0;
     }
-    
+
     @Override
     public long maxEnergyStored() {
         if (nullableController() != null) {
@@ -132,7 +147,7 @@ public class ReactorPowerTapTile extends ReactorBaseTile implements IEnergyTile,
         }
         return 0;
     }
-    
+
     @SuppressWarnings("DuplicatedCode")
     public void neighborChanged() {
         output = null;
@@ -143,7 +158,7 @@ public class ReactorPowerTapTile extends ReactorBaseTile implements IEnergyTile,
         output = findEnergyCapability(powerOutputDirection);
         setConnected(output.getCapability() != null);
     }
-    
+
     @Override
     public void onAssemblyStateTransition(IValidatedMultiblock.AssemblyState oldState, IValidatedMultiblock.AssemblyState newState) {
         if (newState == IValidatedMultiblock.AssemblyState.ASSEMBLED) {

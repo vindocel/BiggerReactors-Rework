@@ -231,10 +231,18 @@ public final class TurbineRotorLayout {
     private static int capacity(BlockPos shaft,Direction d,BlockPos min,BlockPos max) {
         return d.getAxisDirection()==Direction.AxisDirection.POSITIVE?max.get(d.getAxis())-shaft.get(d.getAxis())-1:shaft.get(d.getAxis())-min.get(d.getAxis())-1;
     }
+//? if =26.1.2 || =26.3 {
     private static InteractionResult fail(Player player,String reason) {
         player.sendOverlayMessage(Component.translatable("message.biggerreactorsrework.rotor."+reason));
         // The block handled this gesture. Consuming it prevents vanilla from trying an unrelated face placement.
         return InteractionResult.CONSUME;
+//?} else if =1.21.1 {
+/*    private static InteractionResult fail(Player player,String reason) {
+        player.displayClientMessage(Component.translatable("message.biggerreactorsrework.rotor."+reason),true);
+        // The block handled this gesture. Consuming it prevents vanilla from trying an unrelated face placement.
+        return InteractionResult.CONSUME;
+*/
+//?}
     }
     /** Native placement, including manual placement, receives the actual arm orientation before assembly. */
     public static BlockState placementState(BlockPlaceContext context,BlockState fallback) {
@@ -270,9 +278,16 @@ public final class TurbineRotorLayout {
     private static boolean remove(ServerLevel level,Player player,BlockPos pos,BlockPos dropOrigin,boolean taking) {
         var state=loaded(level,pos);
         if(state==null||!state.is(TurbineRotorBlade.INSTANCE)||!level.mayInteract(player,pos)
+//? if =26.1.2 || =26.3 {
                 ||net.neoforged.neoforge.common.CommonHooks.fireBlockBreak(level,
                     ((ServerPlayer)player).gameMode.getGameModeForPlayer(),player,pos,state).isCanceled())return false;
         boolean drops=!player.hasInfiniteMaterials()&&(taking||player.hasCorrectToolForDrops(state));
+//?} else if =1.21.1 {
+/*                ||net.neoforged.neoforge.common.CommonHooks.fireBlockBreak(level,
+                    ((ServerPlayer)player).gameMode.getGameModeForPlayer(),(ServerPlayer)player,pos,state).isCanceled())return false;
+        boolean drops=!player.hasInfiniteMaterials()&&(taking||player.hasCorrectToolForDrops(state));
+*/
+//?}
         var items=drops?(taking?List.of(new ItemStack(TurbineRotorBlade.INSTANCE)):Block.getDrops(state,level,pos,level.getBlockEntity(pos),player,player.getMainHandItem())):List.<ItemStack>of();
         if(!level.destroyBlock(pos,false,player))return false;
         for(var stack:items) {player.getInventory().add(stack);if(!stack.isEmpty())Block.popResource(level,dropOrigin,stack);}

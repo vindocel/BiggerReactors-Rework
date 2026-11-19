@@ -27,9 +27,15 @@ import java.util.concurrent.CompletableFuture;
 
 /** Incremental native datagen; existing IDs and balances are preserved. */
 public final class ModDataGeneration {
+//? if =26.1.2 || =26.3 {
     private static ResourceLocation id(String path){return ResourceLocation.fromNamespaceAndPath(BiggerReactors.modid,path);}
     public static void register(net.neoforged.bus.api.IEventBus modBus){modBus.addListener(ModDataGeneration::gather);}
     public static void gather(GatherDataEvent event){
+//?} else if =1.21.1 {
+/*    private static ResourceLocation id(String path){return ResourceLocation.fromNamespaceAndPath(BiggerReactors.modid,path);}
+    public static void gather(GatherDataEvent event){
+*/
+//?}
         var generator=event.getGenerator();var output=generator.getPackOutput();var lookup=event.getLookupProvider();
         generator.addProvider(event.includeServer(),new Recipes(output,lookup));
         generator.addProvider(event.includeServer(),new LootTableProvider(output,Set.of(),List.of(new LootTableProvider.SubProviderEntry(Loot::new,LootContextParamSets.BLOCK)),lookup));

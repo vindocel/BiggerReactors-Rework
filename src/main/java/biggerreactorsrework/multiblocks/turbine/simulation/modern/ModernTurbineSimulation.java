@@ -17,42 +17,42 @@ public class ModernTurbineSimulation implements ITurbineSimulation {
     public static final double NOMINAL_RPM = 1800;
     /** Ticks to reach nominal speed with any steam (20 s), and to stop from it without steam (30 s). */
     private static final double SPIN_UP_TICKS = 400, SPIN_DOWN_TICKS = 600;
-    
+
     private int x, y, z;
-    
+
     private boolean active = false;
-    
+
     private long coilSize;
     private double coilFESum;
     private long coilCapacity;
-    
+
     private double rotorCapacityPerRPM;
-    
+
     private long maxFlowRate = -1;
     private long maxMaxFlowRate = 0;
-    
+
     private int rotorShafts;
     private double rotorAxialMass;
     private double rotorMass;
     private double linearBladeMetersPerRevolution = 0;
-    
+
     private VentState ventState = VentState.OVERFLOW;
     private boolean coilEngaged = true;
-    
+
     private double rpm = 0;
     private double feRemainder = 0;
     private final FluidTank fluidTank = new FluidTank();
     private final Battery battery = new Battery();
-    
+
     private double energyGeneratedLastTick;
     private double rotorEfficiencyLastTick;
-    
+
     @Override
     public void reset() {
         rpm = 0;
         feRemainder = 0;
     }
-    
+
     @Override
     public void resize(int x, int y, int z) {
         this.x = x;
@@ -63,7 +63,7 @@ public class ModernTurbineSimulation implements ITurbineSimulation {
         coilCapacity = 0;
         maxMaxFlowRate = (((long) x * z) - 1 /* bearing*/) * Config.CONFIG.Turbine.FlowRatePerBlock;
     }
-    
+
     @Override
     public void setRotorConfiguration(ArrayList<Vector4i> rotorConfiguration) {
         rotorMass = 0;
@@ -75,82 +75,89 @@ public class ModernTurbineSimulation implements ITurbineSimulation {
             linearBladeMetersPerRevolution += rangeFromZeroSum(vector4i.w);
             rotorMass += vector4i.x + vector4i.y + vector4i.z + vector4i.w;
         }
-        
+
         rotorCapacityPerRPM = linearBladeMetersPerRevolution * Config.CONFIG.Turbine.BladeSteamPerKilometre;
         rotorCapacityPerRPM /= 1000; // metre / kilometre
-        
+
         rotorShafts = rotorConfiguration.size();
-        
+
         rotorAxialMass = rotorShafts * Config.CONFIG.Turbine.RotorAxialMassPerShaft;
         rotorAxialMass += linearBladeMetersPerRevolution * Config.CONFIG.Turbine.RotorAxialMassPerBlade;
-        
+
         rotorCapacityPerRPM *= 2 * Math.PI;
-        
+
         rotorMass *= Config.CONFIG.Turbine.RotorAxialMassPerBlade;
         rotorMass += (double) rotorShafts * Config.CONFIG.Turbine.RotorAxialMassPerShaft;
-        
+
         if (maxFlowRate == -1) {
             setNominalFlowRate((long) (rotorCapacityPerRPM * 1800));
         }
     }
-    
+
     private long rangeFromZeroSum(long upper) {
         return ((1 + upper) * upper) / 2;
     }
-    
+
     @Override
     public void setCoilData(int x, int y, TurbineCoilRegistry.CoilData coilData) {
         coilFESum += coilData.fePerMB();
         coilCapacity += coilData.steamPerTick();
         coilSize++;
     }
-    
+
     @Override
     public void updateInternalValues() {
         battery.setCapacity((coilSize + 1) * Config.CONFIG.Turbine.BatterySizePerCoilBlock);
         fluidTank.perSideCapacity = (((long) x * y * z) - ((long) rotorShafts + coilSize)) * Config.CONFIG.Turbine.TankVolumePerBlock;
     }
-    
+
     @Override
     public void setVentState(VentState state) {
         ventState = state;
     }
-    
+
     @Override
     public VentState ventState() {
         return ventState;
     }
-    
+
     @Override
     public double RPM() {
         return rpm;
     }
-    
+
     @Override
     public double bladeEfficiencyLastTick() {
         return rotorEfficiencyLastTick;
     }
-    
+
     @Override
     public long flowLastTick() {
         return fluidTank.transitionedLastTick();
     }
-    
+
     @Override
     public long nominalFlowRate() {
         return Math.min(maxFlowRate, flowRateLimit());
     }
-    
+
     @Override
     public void setNominalFlowRate(long flowRate) {
         maxFlowRate = flowRate;
         maxFlowRate = Math.min(flowRateLimit(), Math.max(0, flowRate));
     }
-    
+
     @Override
+//? if =26.1.2 || =26.3 {
     public long flowRateLimit() {
         // Modified 2026-11-03: allow steam above the nominal load so the rotor can reach the governor.
         return Math.min(maxMaxFlowRate, (long) Math.ceil(nominalSteamCapacity() * MAX_RPM / NOMINAL_RPM));
+//?} else if =1.21.1 {
+/*    public long flowRateLimit() {
+        // Modified 2026-11-04: allow steam above the nominal load so the rotor can reach the governor.
+        return Math.min(maxMaxFlowRate, (long) Math.ceil(nominalSteamCapacity() * MAX_RPM / NOMINAL_RPM));
+*/
+//?}
     }
 
     public double nominalSteamCapacity() {
@@ -197,17 +204,17 @@ public class ModernTurbineSimulation implements ITurbineSimulation {
         double x = Math.clamp(fraction, 0, 1);
         return BASE_SPEED_EFFICIENCY + (1 - BASE_SPEED_EFFICIENCY) * x * x * (3 - 2 * x);
     }
-    
+
     @Override
     public ITurbineBattery battery() {
         return battery;
     }
-    
+
     @Override
     public ITurbineFluidTank fluidTank() {
         return fluidTank;
     }
-    
+
     /** Average FE per steam mB of the coils, for this turbine's steam. */
     public double fePerMB() {
         var transition = fluidTank.activeTransition();
@@ -251,7 +258,7 @@ public class ModernTurbineSimulation implements ITurbineSimulation {
         if (ventState == VentState.ALL) {
             fluidTank.dumpLiquid();
         }
-        
+
         double target = steadyRPM(flow);
         if (rpm < target) {
             rpm = Math.min(target, rpm + NOMINAL_RPM / SPIN_UP_TICKS);
@@ -273,37 +280,37 @@ public class ModernTurbineSimulation implements ITurbineSimulation {
             feRemainder = 0;
         }
     }
-    
+
     @Override
     public void setActive(boolean active) {
         this.active = active;
     }
-    
+
     @Override
     public boolean active() {
         return active;
     }
-    
+
     @Override
     public void setCoilEngaged(boolean engaged) {
         coilEngaged = engaged;
     }
-    
+
     @Override
     public boolean coilEngaged() {
         return coilEngaged;
     }
-    
+
     @Override
     public long FEGeneratedLastTick() {
         return (long) energyGeneratedLastTick;
     }
-    
+
     @Override
     public long bladeSurfaceArea() {
         return 0;
     }
-    
+
     @Override
     public double rotorMass() {
         return rotorAxialMass;
@@ -321,12 +328,12 @@ public class ModernTurbineSimulation implements ITurbineSimulation {
         double power = steadyPower(flow);
         return () -> new biggerreactorsrework.core.util.Statistics.Potential(efficient, flow, power);
     }
-    
+
     @Override
     public String debugString() {
         return "";
     }
-    
+
     @Override
     public CompoundTag serializeNBT() {
         CompoundTag nbt = new CompoundTag();
@@ -340,8 +347,9 @@ public class ModernTurbineSimulation implements ITurbineSimulation {
         nbt.putBoolean("active", active);
         return nbt;
     }
-    
+
     @Override
+//? if =26.1.2 || =26.3 {
     public void deserializeNBT(CompoundTag nbt) {
         fluidTank.deserializeNBT(nbt.getCompoundOrEmpty("fluidTank"));
         battery.deserializeNBT(nbt.getCompoundOrEmpty("battery"));
@@ -354,4 +362,19 @@ public class ModernTurbineSimulation implements ITurbineSimulation {
         coilEngaged = nbt.getBooleanOr("coilEngaged", false);
         active = nbt.getBooleanOr("active", false);
     }
+//?} else if =1.21.1 {
+/*    public void deserializeNBT(CompoundTag nbt) {
+        fluidTank.deserializeNBT(nbt.getCompound("fluidTank"));
+        battery.deserializeNBT(nbt.getCompound("battery"));
+        // Modified 2026-10-30: invalid saved controls cannot prevent the machine loading.
+        int vent = nbt.getInt("ventState");
+        ventState = vent >= 0 && vent <= 2 ? VentState.fromInt(vent) : VentState.OVERFLOW;
+        rpm = Math.min(MAX_RPM, biggerreactorsrework.core.util.SavedValues.nonNegative(nbt.getDouble("rpm"), 0));
+        feRemainder = Math.min(1, biggerreactorsrework.core.util.SavedValues.nonNegative(nbt.getDouble("feRemainder"), 0));
+        maxFlowRate = Math.max(0, nbt.getLong("maxFlowRate"));
+        coilEngaged = nbt.getBoolean("coilEngaged");
+        active = nbt.getBoolean("active");
+    }
+*/
+//?}
 }

@@ -9,12 +9,24 @@ import biggerreactorsrework.registries.FluidTransitionRegistry;
 import biggerreactorsrework.util.FluidTransitionTank;
 import net.minecraft.core.component.DataComponentPatch;
 import net.minecraft.gametest.framework.*;
+//? if =26.1.2 || =26.3 {
 import net.minecraft.world.level.material.Fluids;
 import biggerreactorsrework.core.transfer.FluidTanks.FluidAction;
 import net.neoforged.neoforge.gametest.*;
 
 /** Empty means unselected even if the last conversion left fractional thermal energy. */
 public final class EmptyCoolantTankGameTests {
+//?} else if =1.21.1 {
+/*import net.minecraft.world.level.material.Fluids;
+import net.neoforged.neoforge.fluids.capability.IFluidHandler.FluidAction;
+import net.neoforged.neoforge.gametest.*;
+
+/^* Empty means unselected even if the last conversion left fractional thermal energy. ^/
+@GameTestHolder(BiggerReactors.modid)
+@PrefixGameTestTemplate(false)
+public final class EmptyCoolantTankGameTests {
+*/
+//?}
     @GameTest(template="empty_7x7x7")
     public static void lastDrainClearsBothExchangerProfiles(GameTestHelper h) {
         var steam=FluidTransitionRegistry.liquidTransition(Fluids.WATER).gases.getFirst();

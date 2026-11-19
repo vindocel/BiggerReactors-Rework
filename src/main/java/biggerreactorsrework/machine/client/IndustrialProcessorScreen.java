@@ -3,20 +3,38 @@ package biggerreactorsrework.machine.client;
 import biggerreactorsrework.client.GuiTheme;
 
 import net.minecraft.ChatFormatting;
+//? if =26.1.2 || =26.3 {
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.Screen;
+//?} else if =1.21.1 {
+/*import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.screens.Screen;
+*/
+//?}
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Mth;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.item.ItemStack;
+//? if =26.1.2 || =26.3 {
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.level.material.Fluids;
 import biggerreactorsrework.BiggerReactors;
+//?} else if =1.21.1 {
+/*import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.level.material.Fluids;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import biggerreactorsrework.BiggerReactors;
+*/
+//?}
 import biggerreactorsrework.client.CommonRender;
 import biggerreactorsrework.client.GaugeBar;
 import biggerreactorsrework.client.GuiArt;
@@ -35,12 +53,22 @@ import biggerreactorsrework.core.client.gui.screens.ModScreen;
 import biggerreactorsrework.core.client.gui.RenderHelper;
 import biggerreactorsrework.core.client.gui.elements.RenderedElement;
 import biggerreactorsrework.core.client.gui.elements.TooltipElement;
+//? if =26.1.2 || =26.3 {
 import biggerreactorsrework.client.deps.RecipeViewers;
 
 
 import javax.annotation.Nonnull;
+//?} else if =1.21.1 {
+/*import biggerreactorsrework.client.deps.RecipeViewers;
+
+import org.lwjgl.glfw.GLFW;
+
+import javax.annotation.Nonnull;
+*/
+//?}
 import javax.annotation.Nullable;
 import java.util.ArrayList;
+//? if =26.1.2 || =26.3 {
 import java.util.List;
 
 // Modified 2026-10-27: input water beside FE, separate product tank and a dedicated title row.
@@ -55,6 +83,24 @@ public class IndustrialProcessorScreen extends ModScreen<IndustrialProcessorCont
 
     // Tabs are ears of the metal frame; stacked tabs share one ear with their buttons 2 px apart.
     private static final int TAB_SIZE = GuiFrame.TAB_SIZE;
+//?} else if =1.21.1 {
+/*import java.util.List;
+
+@OnlyIn(Dist.CLIENT)
+// Modified 2026-10-27: input water beside FE, separate product tank and a dedicated title row.
+public class IndustrialProcessorScreen extends ModScreen<IndustrialProcessorContainer> {
+
+
+    private IndustrialProcessorState industrialProcessorState;
+
+    // Side configuration: a tab on the right edge of the screen opens a window over it, with one tab per material.
+    private static final ResourceLocation FRONT_SPRITE = ResourceLocation.fromNamespaceAndPath(BiggerReactors.modid, "block/industrial_processor");
+    private static final ResourceLocation CASING_SPRITE = ResourceLocation.fromNamespaceAndPath(BiggerReactors.modid, "block/reactor/casing/disassembled");
+
+    // Tabs are ears of the metal frame; stacked tabs share one ear with their buttons 2 px apart.
+    private static final int TAB_SIZE = GuiFrame.TAB_SIZE;
+*/
+//?}
     private static final int TAB_PITCH = GuiFrame.TAB_BUTTON + 2;
     private static final int SIDE_TAB_Y = 4;
     private static final int WINDOW_WIDTH = 120;
@@ -65,10 +111,10 @@ public class IndustrialProcessorScreen extends ModScreen<IndustrialProcessorCont
     private static final int[] ROWS = {20, 44, 68};
     private static final int BUTTON_SIZE = 15;
     // Automation switches and the close button share one size, which centers their 4x3 and 4x5 glyphs exactly.
-    private static final int CLOSE_WIDTH = 10;
-    private static final int CLOSE_HEIGHT = 11;
+    private static final int CLOSE_WIDTH = GuiArt.CLOSE_SIZE;
+    private static final int CLOSE_HEIGHT = GuiArt.CLOSE_SIZE;
     private static final int SWITCH_WIDTH = CLOSE_WIDTH;
-    private static final int SWITCH_HEIGHT = CLOSE_HEIGHT;
+    private static final int SWITCH_HEIGHT = GuiArt.CLOSE_SIZE;
     private static final int TOP_BAR_Y = 6;
     private static final int TOP_BAR_HEIGHT = 19;
 
@@ -103,17 +149,27 @@ public class IndustrialProcessorScreen extends ModScreen<IndustrialProcessorCont
     private RenderedElement<IndustrialProcessorContainer> progressBar;
 
     public IndustrialProcessorScreen(IndustrialProcessorContainer container, Inventory playerInventory, Component title) {
+//? if =26.1.2 || =26.3 {
         super(container, playerInventory, title, 176, 190);
 
         // Initialize reprocessor state.
         cyaniteReprocessorState = (IndustrialProcessorState) this.getMenu().getGuiPacket();
     }
+//?} else if =1.21.1 {
+/*        super(container, playerInventory, title, 176, 190);
+
+        // Initialize processor state.
+        industrialProcessorState = (IndustrialProcessorState) this.getMenu().getGuiPacket();
+    }
+*/
+//?}
 
     /**
      * Initialize the screen.
      */
     @Override
     public void init() {
+//? if =26.1.2 || =26.3 {
         super.init();
 
         // Set title to be drawn in the center.
@@ -121,6 +177,16 @@ public class IndustrialProcessorScreen extends ModScreen<IndustrialProcessorCont
 
         // Initialize tooltips:
         this.initTooltips();
+//?} else if =1.21.1 {
+/*        super.init();
+
+        // Set title to be drawn in the center.
+        this.titleLabelX = (this.getXSize() / 2) - (this.getFont().width(this.getTitle()) / 2);
+
+        // Initialize tooltips:
+        this.initTooltips();
+*/
+//?}
 
         // Initialize gauges:
         this.initGauges();
@@ -142,18 +208,36 @@ public class IndustrialProcessorScreen extends ModScreen<IndustrialProcessorCont
      */
     public void initGauges() {
         // (Top) Internal battery:
+//? if =26.1.2 || =26.3 {
         RenderedElement<IndustrialProcessorContainer> internalBattery = new RenderedElement<>(this, 7, 40, 18, 64, 0, 0, Component.empty());
         internalBattery.onRender = (@Nonnull GuiGraphicsExtractor graphics, int mX, int mY) -> CommonRender.renderEnergyGauge(graphics,
                 internalBattery, cyaniteReprocessorState.energyStored, cyaniteReprocessorState.energyCapacity);
         this.addScreenElement(internalBattery);
+//?} else if =1.21.1 {
+/*        RenderedElement<IndustrialProcessorContainer> internalBattery = new RenderedElement<>(this, 7, 40, 18, 64, 0, 0, Component.empty());
+        internalBattery.onRender = (@Nonnull GuiGraphics graphics, int mX, int mY) -> CommonRender.renderEnergyGauge(graphics,
+                internalBattery, industrialProcessorState.energyStored, industrialProcessorState.energyCapacity);
+        this.addScreenElement(internalBattery);
+*/
+//?}
 
         // (Top) Water tank:
+//? if =26.1.2 || =26.3 {
         RenderedElement<IndustrialProcessorContainer> waterTank = new RenderedElement<>(this, 28, 40, 18, 64, 0, 0, Component.empty());
         waterTank.onRender = (@Nonnull GuiGraphicsExtractor graphics, int mX, int mY) -> CommonRender.renderFluidGauge(graphics,
                 waterTank, cyaniteReprocessorState.waterStored, cyaniteReprocessorState.waterCapacity,
                 net.minecraft.core.registries.BuiltInRegistries.FLUID.getValue(Identifier.parse(cyaniteReprocessorState.inputFluid)));
         this.addScreenElement(waterTank);
+//?} else if =1.21.1 {
+/*        RenderedElement<IndustrialProcessorContainer> waterTank = new RenderedElement<>(this, 28, 40, 18, 64, 0, 0, Component.empty());
+        waterTank.onRender = (@Nonnull GuiGraphics graphics, int mX, int mY) -> CommonRender.renderFluidGauge(graphics,
+                waterTank, industrialProcessorState.waterStored, industrialProcessorState.waterCapacity,
+                net.minecraft.core.registries.BuiltInRegistries.FLUID.get(ResourceLocation.parse(industrialProcessorState.inputFluid)));
+        this.addScreenElement(waterTank);
+*/
+//?}
         var outputTank = new RenderedElement<IndustrialProcessorContainer>(this,151,40,18,64,0,0,Component.empty());
+//? if =26.1.2 || =26.3 {
         outputTank.onRender=(graphics,mX,mY)->CommonRender.renderFluidGauge(graphics,outputTank,
             cyaniteReprocessorState.outputStored,cyaniteReprocessorState.outputCapacity,
             net.minecraft.core.registries.BuiltInRegistries.FLUID.getValue(Identifier.parse(cyaniteReprocessorState.outputFluid)));
@@ -162,15 +246,34 @@ public class IndustrialProcessorScreen extends ModScreen<IndustrialProcessorCont
         status.onRender=(g,mx,my)->g.text(this.getFont(),this.getFont().plainSubstrByWidth(
             Component.translatable("screen.biggerreactorsrework.industrial_processor."+cyaniteReprocessorState.condition).getString(),90),status.x,status.y,GuiTheme.textColor(),false);
         this.addScreenElement(status);
+//?} else if =1.21.1 {
+/*        outputTank.onRender=(graphics,mX,mY)->CommonRender.renderFluidGauge(graphics,outputTank,
+            industrialProcessorState.outputStored,industrialProcessorState.outputCapacity,
+            net.minecraft.core.registries.BuiltInRegistries.FLUID.get(ResourceLocation.parse(industrialProcessorState.outputFluid)));
+        this.addScreenElement(outputTank);
+        var status=new RenderedElement<IndustrialProcessorContainer>(this,54,84,90,10,0,0,null);
+        status.onRender=(g,mx,my)->g.drawString(this.getFont(),this.getFont().plainSubstrByWidth(
+            Component.translatable("screen.biggerreactorsrework.industrial_processor."+industrialProcessorState.condition).getString(),90),status.x,status.y,GuiTheme.textColor(),false);
+        this.addScreenElement(status);
+*/
+//?}
 
         // (Center) Progress bar:
         // With a recipe viewer installed, clicking the arrow shows the reprocessing recipe.
         RenderedElement<IndustrialProcessorContainer> progressBar = new RenderedElement<>(this, 83, 55, 24, 18, 0, 0,
                 RecipeViewers.available() ? Component.translatable("screen.biggerreactorsrework.show_recipes") : null);
+//? if =26.1.2 || =26.3 {
         this.progressBar = progressBar;
         progressBar.onRender = (@Nonnull GuiGraphicsExtractor graphics, int mX, int mY) -> GaugeBar.drawProgressArrow(graphics,
                 progressBar.x, progressBar.y, cyaniteReprocessorState.workTime, cyaniteReprocessorState.workTimeTotal);
         this.addScreenElement(progressBar);
+//?} else if =1.21.1 {
+/*        this.progressBar = progressBar;
+        progressBar.onRender = (@Nonnull GuiGraphics graphics, int mX, int mY) -> GaugeBar.drawProgressArrow(graphics,
+                progressBar.x, progressBar.y, industrialProcessorState.workTime, industrialProcessorState.workTimeTotal);
+        this.addScreenElement(progressBar);
+*/
+//?}
     }
 
     /**
@@ -178,15 +281,29 @@ public class IndustrialProcessorScreen extends ModScreen<IndustrialProcessorCont
      */
     public void initSymbols() {
         // (Right) Water tank symbol:
+//? if =26.1.2 || =26.3 {
         RenderedElement<IndustrialProcessorContainer> waterTankSymbol = new RenderedElement<>(this, 29, 21, 16, 16, 0, 0, Component.translatable("screen.biggerreactorsrework.industrial_processor.water_tank.tooltip"));
         waterTankSymbol.onRender = (@Nonnull GuiGraphicsExtractor graphics, int mX, int mY) -> GuiArt.fluidSymbol(graphics,
                 waterTankSymbol.x, waterTankSymbol.y, Fluids.WATER.getSource(), GuiIcon.WATER_DROP_MASK, GuiIcon.WATER_DROP, GuiTheme.panelColor(), true);
+//?} else if =1.21.1 {
+/*        RenderedElement<IndustrialProcessorContainer> waterTankSymbol = new RenderedElement<>(this, 29, 21, 16, 16, 0, 0, Component.translatable("screen.biggerreactorsrework.industrial_processor.water_tank.tooltip"));
+        waterTankSymbol.onRender = (@Nonnull GuiGraphics graphics, int mX, int mY) -> GuiArt.fluidSymbol(graphics,
+                waterTankSymbol.x, waterTankSymbol.y, Fluids.WATER.getSource(), GuiIcon.WATER_DROP_MASK, GuiIcon.WATER_DROP, GuiTheme.panelColor(), true);
+*/
+//?}
         this.addScreenElement(waterTankSymbol);
         var outputSymbol=new RenderedElement<IndustrialProcessorContainer>(this,152,21,16,16,0,0,
             Component.translatable("screen.biggerreactorsrework.industrial_processor.output"));
+//? if =26.1.2 || =26.3 {
         outputSymbol.onRender=(g,mx,my)->GuiArt.fluidSymbol(g,outputSymbol.x,outputSymbol.y,
             cyaniteReprocessorState.outputStored>0?net.minecraft.core.registries.BuiltInRegistries.FLUID.getValue(Identifier.parse(cyaniteReprocessorState.outputFluid)):biggerreactorsrework.fluids.LiquidObsidian.INSTANCE,
             GuiIcon.WATER_DROP_MASK,GuiIcon.WATER_DROP,GuiTheme.panelColor(),true);
+//?} else if =1.21.1 {
+/*        outputSymbol.onRender=(g,mx,my)->GuiArt.fluidSymbol(g,outputSymbol.x,outputSymbol.y,
+            industrialProcessorState.outputStored>0?net.minecraft.core.registries.BuiltInRegistries.FLUID.get(ResourceLocation.parse(industrialProcessorState.outputFluid)):biggerreactorsrework.fluids.LiquidObsidian.INSTANCE,
+            GuiIcon.WATER_DROP_MASK,GuiIcon.WATER_DROP,GuiTheme.panelColor(),true);
+*/
+//?}
         this.addScreenElement(outputSymbol);
     }
 
@@ -201,24 +318,52 @@ public class IndustrialProcessorScreen extends ModScreen<IndustrialProcessorCont
         return areas;
     }
 
+//? if =26.1.2 || =26.3 {
     private int sideTabX() {
         return this.getLeftPos() + this.getImageWidth();
     }
+//?} else if =1.21.1 {
+/*    private int sideTabX() {
+        return this.getGuiLeft() + this.getXSize();
+    }
+*/
+//?}
 
+//? if =26.1.2 || =26.3 {
     private int sideTabY() {
         return this.getTopPos() + SIDE_TAB_Y;
     }
+//?} else if =1.21.1 {
+/*    private int sideTabY() {
+        return this.getGuiTop() + SIDE_TAB_Y;
+    }
+*/
+//?}
 
     /**
      * The window, with its tabs, always stays inside the game window.
      */
+//? if =26.1.2 || =26.3 {
     private int defaultWindowX() {
         return this.getLeftPos() + (this.getImageWidth() - WINDOW_WIDTH) / 2;
     }
+//?} else if =1.21.1 {
+/*    private int defaultWindowX() {
+        return this.getGuiLeft() + (this.getXSize() - WINDOW_WIDTH) / 2;
+    }
+*/
+//?}
 
+//? if =26.1.2 || =26.3 {
     private int defaultWindowY() {
         return this.getTopPos() + WINDOW_Y;
     }
+//?} else if =1.21.1 {
+/*    private int defaultWindowY() {
+        return this.getGuiTop() + WINDOW_Y;
+    }
+*/
+//?}
 
     private int windowX() {
         int x = this.defaultWindowX() + windowOffsetX;
@@ -249,11 +394,20 @@ public class IndustrialProcessorScreen extends ModScreen<IndustrialProcessorCont
         return this.windowX() + WINDOW_WIDTH - 6 - SWITCH_WIDTH - (count - index - 1) * (SWITCH_WIDTH + 2);
     }
 
+//? if =26.1.2 || =26.3 {
     private void syncSides() {
         this.sides.unpack(Transmission.ITEM, this.cyaniteReprocessorState.itemSides);
         this.sides.unpack(Transmission.FLUID, this.cyaniteReprocessorState.fluidSides);
         this.sides.unpack(Transmission.ENERGY, this.cyaniteReprocessorState.energySides);
     }
+//?} else if =1.21.1 {
+/*    private void syncSides() {
+        this.sides.unpack(Transmission.ITEM, this.industrialProcessorState.itemSides);
+        this.sides.unpack(Transmission.FLUID, this.industrialProcessorState.fluidSides);
+        this.sides.unpack(Transmission.ENERGY, this.industrialProcessorState.energySides);
+    }
+*/
+//?}
 
     private static boolean inside(double mouseX, double mouseY, int x, int y, int width, int height) {
         return mouseX >= x && mouseX < x + width && mouseY >= y && mouseY < y + height;
@@ -295,18 +449,29 @@ public class IndustrialProcessorScreen extends ModScreen<IndustrialProcessorCont
     private List<AutoSwitch> autoSwitches() {
         List<AutoSwitch> switches = new ArrayList<>();
         switch (this.tab) {
+//? if =26.1.2 || =26.3 {
             case ITEM -> {
                 switches.add(new AutoSwitch("autoInput", this.cyaniteReprocessorState.autoInput, "auto_input"));
             }
             case FLUID -> {
                 switches.add(new AutoSwitch("autoInputFluid",this.cyaniteReprocessorState.autoInputFluid,"auto_input_fluid"));
             }
+//?} else if =1.21.1 {
+/*            case ITEM -> {
+                switches.add(new AutoSwitch("autoInput", this.industrialProcessorState.autoInput, "auto_input"));
+            }
+            case FLUID -> {
+                switches.add(new AutoSwitch("autoInputFluid",this.industrialProcessorState.autoInputFluid,"auto_input_fluid"));
+            }
+*/
+//?}
             case ENERGY -> {
             }
         }
         return switches;
     }
 
+//? if =26.1.2 || =26.3 {
     @Override
     public void extractBackground(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTicks) {
         super.extractBackground(graphics, mouseX, mouseY, partialTicks);
@@ -315,7 +480,19 @@ public class IndustrialProcessorScreen extends ModScreen<IndustrialProcessorCont
         GuiArt.tabButton(graphics, this.sideTabX(), this.sideTabY(), false, this.onSideTab(mouseX, mouseY), this.sideWindowOpen, this.frame());
         GuiArt.tabIcon(graphics, this.sideTabX(), this.sideTabY(), false, 16, 16, () -> graphics.item(this.machineIcon, 0, 0));
     }
+//?} else if =1.21.1 {
+/*    @Override
+    protected void renderBg(@Nonnull GuiGraphics graphics, float partialTicks, int mouseX, int mouseY) {
+        super.renderBg(graphics, partialTicks, mouseX, mouseY);
+        // Tab that opens the side configuration, with the machine itself as its icon.
+        this.frame().ear(graphics, this.sideTabX(), this.sideTabY(), TAB_SIZE, false);
+        GuiArt.tabButton(graphics, this.sideTabX(), this.sideTabY(), false, this.onSideTab(mouseX, mouseY), this.sideWindowOpen, this.frame());
+        GuiArt.tabIcon(graphics, this.sideTabX(), this.sideTabY(), false, 16, 16, () -> graphics.renderItem(this.machineIcon, 0, 0));
+    }
+*/
+//?}
 
+//? if =26.1.2 || =26.3 {
     @Override
     public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTicks) {
         super.extractRenderState(graphics, mouseX, mouseY, partialTicks);
@@ -324,7 +501,24 @@ public class IndustrialProcessorScreen extends ModScreen<IndustrialProcessorCont
             graphics.nextStratum();
             this.renderSideWindow(graphics, mouseX, mouseY);
         }
+//?} else if =1.21.1 {
+/*    @Override
+    public void render(@Nonnull GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
+        super.render(graphics, mouseX, mouseY, partialTicks);
+        if (this.sideWindowOpen) {
+            this.syncSides();
+            graphics.pose().pushPose();
+            // Item counts render above item models (z=400); the whole window must cover both.
+            graphics.flush();
+            graphics.pose().translate(0, 0, 500);
+            this.renderSideWindow(graphics, mouseX, mouseY);
+            graphics.flush();
+            graphics.pose().popPose();
+        }
+*/
+//?}
         List<Component> tooltip = this.sideTooltip(mouseX, mouseY);
+//? if =26.1.2 || =26.3 {
         if (!tooltip.isEmpty()) {
             graphics.setComponentTooltipForNextFrame(this.getFont(), tooltip, mouseX, mouseY);
         }
@@ -332,6 +526,25 @@ public class IndustrialProcessorScreen extends ModScreen<IndustrialProcessorCont
 
     private void renderSideWindow(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
         final int left = this.windowX();
+//?} else if =1.21.1 {
+/*        if (!tooltip.isEmpty()) {
+            graphics.pose().pushPose();
+            graphics.pose().translate(0, 0, 500);
+            graphics.renderComponentTooltip(this.getFont(), tooltip, mouseX, mouseY);
+            graphics.flush();
+            graphics.pose().popPose();
+        }
+        if (this.sideWindowOpen) {
+            // Overlays drawn after the screen (recipe viewer tooltips) must stay above the window.
+            graphics.flush();
+            com.mojang.blaze3d.systems.RenderSystem.clear(com.mojang.blaze3d.platform.GlConst.GL_DEPTH_BUFFER_BIT, Minecraft.ON_OSX);
+        }
+    }
+
+    private void renderSideWindow(GuiGraphics graphics, int mouseX, int mouseY) {
+        final int left = this.windowX();
+*/
+//?}
         final int top = this.windowY();
 
         GuiArt.panel(graphics, left, top, WINDOW_WIDTH, WINDOW_HEIGHT, this.frame());
@@ -344,9 +557,16 @@ public class IndustrialProcessorScreen extends ModScreen<IndustrialProcessorCont
             boolean hovered = this.onWindowTab(mouseX, mouseY, transmission);
             int y = this.windowTabY(transmission.ordinal());
             GuiArt.tabButton(graphics, earX, y, true, hovered, selected, this.frame());
+//? if =26.1.2 || =26.3 {
             switch (transmission) {
                 case ITEM -> GuiArt.tabIcon(graphics, earX, y, true, 16, 16, () -> graphics.item(this.cyaniteIcon, 0, 0));
                 case FLUID -> GuiArt.tabIcon(graphics, earX, y, true, 16, 16, () -> GuiArt.fluidSymbol(graphics, 0, 0,
+//?} else if =1.21.1 {
+/*            switch (transmission) {
+                case ITEM -> GuiArt.tabIcon(graphics, earX, y, true, 16, 16, () -> graphics.renderItem(this.cyaniteIcon, 0, 0));
+                case FLUID -> GuiArt.tabIcon(graphics, earX, y, true, 16, 16, () -> GuiArt.fluidSymbol(graphics, 0, 0,
+*/
+//?}
                         Fluids.WATER.getSource(), GuiIcon.WATER_DROP_MASK, GuiIcon.WATER_DROP, GuiArt.buttonFill(selected, false, this.frame()), false));
                 case ENERGY -> GuiArt.tabIcon(graphics, earX, y, true, GuiIcon.BATTERY.width(), GuiIcon.BATTERY.height(),
                         () -> GuiIcon.BATTERY.draw(graphics, 0, 0));
@@ -369,12 +589,22 @@ public class IndustrialProcessorScreen extends ModScreen<IndustrialProcessorCont
                     toggle.active(), false, GuiIcon.AUTO_INPUT, this.frame());
         }
         GuiArt.button(graphics, this.closeX(), top + TOP_BAR_Y, CLOSE_WIDTH, CLOSE_HEIGHT,
+//? if =26.1.2 || =26.3 {
                 inside(mouseX, mouseY, this.closeX(), top + TOP_BAR_Y, CLOSE_WIDTH, CLOSE_HEIGHT), GuiIcon.CLOSE, this.frame());
 
         // Faces: the block's own textures, with the route color around them.
         final TextureAtlasSprite front = biggerreactorsrework.client.FluidSprites.blockSprite(FRONT_SPRITE);
         final TextureAtlasSprite casing = biggerreactorsrework.client.FluidSprites.blockSprite(CASING_SPRITE);
         for (int[] cell : CROSS) {
+//?} else if =1.21.1 {
+/*                inside(mouseX, mouseY, this.closeX(), top + TOP_BAR_Y, CLOSE_WIDTH, CLOSE_HEIGHT), GuiIcon.CLOSE, this.frame());
+
+        // Faces: the block's own textures, with the route color around them.
+        final TextureAtlasSprite front = Minecraft.getInstance().getTextureAtlas(InventoryMenu.BLOCK_ATLAS).apply(FRONT_SPRITE);
+        final TextureAtlasSprite casing = Minecraft.getInstance().getTextureAtlas(InventoryMenu.BLOCK_ATLAS).apply(CASING_SPRITE);
+        for (int[] cell : CROSS) {
+*/
+//?}
             RelativeFace face = RelativeFace.VALUES[cell[0]];
             int x = left + COLUMNS[cell[1]];
             int y = top + ROWS[cell[2]];
@@ -382,9 +612,16 @@ public class IndustrialProcessorScreen extends ModScreen<IndustrialProcessorCont
             SideRoute route = this.sides.get(face, this.tab);
             if (route != SideRoute.NONE) {
                 graphics.fill(x + 1, y + 1, x + SLOT_SIZE - 1, y + SLOT_SIZE - 1, route.color());
+//? if =26.1.2 || =26.3 {
             }
             graphics.blitSprite(net.minecraft.client.renderer.RenderPipelines.GUI_TEXTURED, face == RelativeFace.FRONT ? front : casing, x + 3, y + 3, 16, 16);
             if (face != RelativeFace.FRONT && inside(mouseX, mouseY, x, y, SLOT_SIZE, SLOT_SIZE)) {
+//?} else if =1.21.1 {
+/*            }
+            graphics.blit(x + 3, y + 3, 0, 16, 16, face == RelativeFace.FRONT ? front : casing);
+            if (face != RelativeFace.FRONT && inside(mouseX, mouseY, x, y, SLOT_SIZE, SLOT_SIZE)) {
+*/
+//?}
                 graphics.fill(x + 3, y + 3, x + 19, y + 19, 0x50FFFFFF);
             }
         }
@@ -455,22 +692,44 @@ public class IndustrialProcessorScreen extends ModScreen<IndustrialProcessorCont
     }
 
     @Override
+//? if =26.1.2 || =26.3 {
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
         if (button == com.mojang.blaze3d.platform.InputConstants.MOUSE_BUTTON_LEFT || button == com.mojang.blaze3d.platform.InputConstants.MOUSE_BUTTON_RIGHT) {
             if (this.sideClicked(mouseX, mouseY, button == com.mojang.blaze3d.platform.InputConstants.MOUSE_BUTTON_LEFT)) {
                 Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
+//?} else if =1.21.1 {
+/*    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        if (button == 0 || button == 1) {
+            if (this.sideClicked(mouseX, mouseY, button == 0)) {
+                Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
+*/
+//?}
                 return true;
             }
         }
         // The window covers the slots under it.
+//? if =26.1.2 || =26.3 {
         if (this.insideWindow(mouseX, mouseY)) {
             if (button == com.mojang.blaze3d.platform.InputConstants.MOUSE_BUTTON_LEFT && this.sideWindowOpen) {
                 this.startDrag(mouseX, mouseY);
+//?} else if =1.21.1 {
+/*        if (this.insideWindow(mouseX, mouseY)) {
+            if (button == 0 && this.sideWindowOpen) {
+                this.startDrag(mouseX, mouseY);
+*/
+//?}
             }
             return true;
+//? if =26.1.2 || =26.3 {
         }
         if (button == com.mojang.blaze3d.platform.InputConstants.MOUSE_BUTTON_LEFT && this.progressBar != null && this.progressBar.isMouseOver(mouseX, mouseY) && RecipeViewers.available()) {
             Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
+//?} else if =1.21.1 {
+/*        }
+        if (button == 0 && this.progressBar != null && this.progressBar.isMouseOver(mouseX, mouseY) && RecipeViewers.available()) {
+            Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
+*/
+//?}
             RecipeViewers.show(RecipeViewers.INDUSTRIAL_PROCESSING);
             return true;
         }
@@ -507,9 +766,16 @@ public class IndustrialProcessorScreen extends ModScreen<IndustrialProcessorCont
                 return true;
             }
         }
+//? if =26.1.2 || =26.3 {
         if (inside(mouseX, mouseY, this.resetX(), this.resetY(), BUTTON_SIZE, BUTTON_SIZE)) {
             if (net.minecraft.client.Minecraft.getInstance().hasShiftDown()) {
                 this.getMenu().executeRequest("sideClearAll", 0);
+//?} else if =1.21.1 {
+/*        if (inside(mouseX, mouseY, this.resetX(), this.resetY(), BUTTON_SIZE, BUTTON_SIZE)) {
+            if (Screen.hasShiftDown()) {
+                this.getMenu().executeRequest("sideClearAll", 0);
+*/
+//?}
             } else {
                 this.getMenu().executeRequest("sideBatch", this.tab.ordinal() * 2 + (forward ? 0 : 1));
             }
@@ -552,19 +818,34 @@ public class IndustrialProcessorScreen extends ModScreen<IndustrialProcessorCont
     }
 
     @Override
+//? if =26.1.2 || =26.3 {
     public boolean mouseReleased(double mouseX, double mouseY, int button) {
         if (this.draggingWindow && button == com.mojang.blaze3d.platform.InputConstants.MOUSE_BUTTON_LEFT) {
             this.draggingWindow = false;
+//?} else if =1.21.1 {
+/*    public boolean mouseReleased(double mouseX, double mouseY, int button) {
+        if (this.draggingWindow && button == 0) {
+            this.draggingWindow = false;
+*/
+//?}
             return true;
         }
         return super.mouseReleased(mouseX, mouseY, button);
     }
 
     @Override
+//? if =26.1.2 || =26.3 {
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
         // Escape closes the side window before the screen.
         if (this.sideWindowOpen && keyCode == com.mojang.blaze3d.platform.InputConstants.KEY_ESCAPE) {
             this.sideWindowOpen = false;
+//?} else if =1.21.1 {
+/*    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+        // Escape closes the side window before the screen.
+        if (this.sideWindowOpen && keyCode == GLFW.GLFW_KEY_ESCAPE) {
+            this.sideWindowOpen = false;
+*/
+//?}
             return true;
         }
         return super.keyPressed(keyCode, scanCode, modifiers);
@@ -576,19 +857,34 @@ public class IndustrialProcessorScreen extends ModScreen<IndustrialProcessorCont
         return !this.insideWindow(mouseX, mouseY) && super.isHovering(x, y, width, height, mouseX, mouseY);
     }
 
+//? if =26.1.2 || =26.3 {
     @Override
     protected boolean hasClickedOutside(double mouseX, double mouseY, int guiLeft, int guiTop) {
         return super.hasClickedOutside(mouseX, mouseY, guiLeft, guiTop)
                 && !this.onSideTab(mouseX, mouseY)
+//?} else if =1.21.1 {
+/*    @Override
+    protected boolean hasClickedOutside(double mouseX, double mouseY, int guiLeft, int guiTop, int button) {
+        return super.hasClickedOutside(mouseX, mouseY, guiLeft, guiTop, button)
+                && !this.onSideTab(mouseX, mouseY)
+*/
+//?}
                 && !this.insideWindow(mouseX, mouseY);
     }
 
     /**
      * Draw the panel and its fixed details.
      */
+//? if =26.1.2 || =26.3 {
     @Override
     protected void drawBackground(@Nonnull GuiGraphicsExtractor graphics, int x, int y) {
         GuiArt.panel(graphics, x, y, 176, 190, this.frame());
+//?} else if =1.21.1 {
+/*    @Override
+    protected void drawBackground(@Nonnull GuiGraphics graphics, int x, int y) {
+        GuiArt.panel(graphics, x, y, 176, 190, this.frame());
+*/
+//?}
         GuiIcon.BATTERY.draw(graphics, x + 11, y + 21);
         GuiArt.ring(graphics, x + 53, y + 53, 22, 0xFF3DAAFF);
         GuiArt.slot(graphics, x + 55, y + 55, 18);

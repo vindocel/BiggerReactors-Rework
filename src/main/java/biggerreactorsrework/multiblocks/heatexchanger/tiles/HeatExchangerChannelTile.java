@@ -1,11 +1,20 @@
+//? if =26.1.2 || =26.3 {
 package biggerreactorsrework.multiblocks.heatexchanger.tiles;
 
 import net.minecraft.core.BlockPos;
+//?} else if =1.21.1 {
+/*package biggerreactorsrework.multiblocks.heatexchanger.tiles;
+
+import net.minecraft.MethodsReturnNonnullByDefault;
+import net.minecraft.core.BlockPos;
+*/
+//?}
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import biggerreactorsrework.multiblocks.heatexchanger.blocks.HeatExchangerCondenserChannelBlock;
 import biggerreactorsrework.core.registry.RegisterTile;
 
+//? if =26.1.2 || =26.3 {
 import javax.annotation.ParametersAreNonnullByDefault;
 
 /**
@@ -13,6 +22,17 @@ import javax.annotation.ParametersAreNonnullByDefault;
  * see {@code HeatExchangerChannelModels}.
  */
 @ParametersAreNonnullByDefault
+//?} else if =1.21.1 {
+/*import javax.annotation.ParametersAreNonnullByDefault;
+
+/^*
+ * The channel model is chosen from the block state and baked into the chunk mesh,
+ * see {@code HeatExchangerChannelModels}.
+ ^/
+@MethodsReturnNonnullByDefault
+@ParametersAreNonnullByDefault
+*/
+//?}
 public class HeatExchangerChannelTile extends HeatExchangerBaseTile {
 
     public final boolean CONDENSER;
@@ -28,9 +48,16 @@ public class HeatExchangerChannelTile extends HeatExchangerBaseTile {
     }
     public int coolantPathIndex,coolantPathLength;
     public net.minecraft.core.Direction coolantEntry=net.minecraft.core.Direction.DOWN,coolantExit=net.minecraft.core.Direction.UP;
+//? if =26.1.2 || =26.3 {
     @Override protected net.minecraft.nbt.CompoundTag writeNBT(){var tag=super.writeNBT();if(coolantAnchor!=null)tag.putLong("coolantAnchor",coolantAnchor.asLong());tag.putInt("pathIndex",coolantPathIndex);tag.putInt("pathLength",coolantPathLength);tag.putInt("pathEntry",coolantEntry.ordinal());tag.putInt("pathExit",coolantExit.ordinal());return tag;}
     @Override protected void readNBT(net.minecraft.nbt.CompoundTag tag){super.readNBT(tag);coolantAnchor=tag.contains("coolantAnchor")?BlockPos.of(tag.getLongOr("coolantAnchor", 0L)):null;coolantPathIndex=Math.max(0,tag.getIntOr("pathIndex", 0));coolantPathLength=Math.max(0,tag.getIntOr("pathLength", 0));coolantEntry=net.minecraft.core.Direction.from3DDataValue(tag.getIntOr("pathEntry", 0));coolantExit=net.minecraft.core.Direction.from3DDataValue(tag.getIntOr("pathExit", 0));}
     @Override protected net.minecraft.nbt.CompoundTag getUpdateNBT(){return writeNBT();}
+//?} else if =1.21.1 {
+/*    @Override protected net.minecraft.nbt.CompoundTag writeNBT(){var tag=super.writeNBT();if(coolantAnchor!=null)tag.putLong("coolantAnchor",coolantAnchor.asLong());tag.putInt("pathIndex",coolantPathIndex);tag.putInt("pathLength",coolantPathLength);tag.putInt("pathEntry",coolantEntry.ordinal());tag.putInt("pathExit",coolantExit.ordinal());return tag;}
+    @Override protected void readNBT(net.minecraft.nbt.CompoundTag tag){super.readNBT(tag);coolantAnchor=tag.contains("coolantAnchor")?BlockPos.of(tag.getLong("coolantAnchor")):null;coolantPathIndex=Math.max(0,tag.getInt("pathIndex"));coolantPathLength=Math.max(0,tag.getInt("pathLength"));coolantEntry=net.minecraft.core.Direction.from3DDataValue(tag.getInt("pathEntry"));coolantExit=net.minecraft.core.Direction.from3DDataValue(tag.getInt("pathExit"));}
+    @Override protected net.minecraft.nbt.CompoundTag getUpdateNBT(){return writeNBT();}
+*/
+//?}
     @Override protected void handleUpdateNBT(net.minecraft.nbt.CompoundTag tag){readNBT(tag);}
 
     @RegisterTile("heat_exchanger_channel")

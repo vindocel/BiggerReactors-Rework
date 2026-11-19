@@ -25,9 +25,18 @@ import net.minecraft.world.level.block.Blocks;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.common.util.FakePlayerFactory;
 import net.neoforged.neoforge.gametest.*;
+//? if =26.1.2 || =26.3 {
 import java.util.List;
 
 public final class StabilizationGameTests {
+//?} else if =1.21.1 {
+/*import java.util.List;
+
+@GameTestHolder(BiggerReactors.modid)
+@PrefixGameTestTemplate(false)
+public final class StabilizationGameTests {
+*/
+//?}
     @GameTest(template = "empty_7x7x7")
     public static void markingMachineDataDirtyDoesNotLoadRemoteChunks(GameTestHelper h) {
         var pos=h.absolutePos(BlockPos.ZERO).offset(32768,0,32768);
@@ -50,6 +59,7 @@ public final class StabilizationGameTests {
         var portPos = new BlockPos(3, 2, 2);
         h.setBlock(portPos, ReactorAccessPort.INSTANCE);
         h.setBlock(portPos.east(), Blocks.CHEST);
+//? if =26.1.2 || =26.3 {
         h.startSequence().thenWaitUntil(() -> {
             var port = (ReactorAccessPortTile) GameTestSupport.be(h, portPos);
             h.assertTrue(port.nullableController() != null && port.controller().simulation() != null, "reactor not assembled");
@@ -60,13 +70,37 @@ public final class StabilizationGameTests {
             long ingot = biggerreactorsrework.Config.CONFIG.Reactor.FuelMBPerIngot;
             tank.restoreStored(2 * ingot, 2 * ingot);
             port.controller().tick();
+//?} else if =1.21.1 {
+/*        h.startSequence().thenWaitUntil(() -> {
+            var port = (ReactorAccessPortTile) h.getBlockEntity(portPos);
+            h.assertTrue(port.nullableController() != null && port.controller().simulation() != null, "reactor not assembled");
+        }).thenExecute(() -> {
+            var port = (ReactorAccessPortTile) h.getBlockEntity(portPos);
+            var chest = (net.minecraft.world.level.block.entity.ChestBlockEntity) h.getBlockEntity(portPos.east());
+            var tank = port.controller().simulation().fuelTank();
+            long ingot = biggerreactorsrework.Config.CONFIG.Reactor.FuelMBPerIngot;
+            tank.insertFuel(2 * ingot, false);
+            tank.insertWaste(2 * ingot, false);
+            port.controller().tick();
+*/
+//?}
             h.assertTrue(chest.isEmpty(), "inlet ejected stock");
+//? if =26.1.2 || =26.3 {
             var saved = port.saveWithFullMetadata(h.getLevel().registryAccess());
             var legacy = saved.getCompoundOrEmpty("local");
             legacy.putString("direction", "OUTLET");
             legacy.putBoolean("fuelMode", true);
             GameTestSupport.load(port, saved, h);
             h.assertTrue(port.isInlet() && port.getState().recoverFuel, "legacy fuel outlet did not migrate to a recovering inlet");
+//?} else if =1.21.1 {
+/*            var saved = port.saveWithFullMetadata(h.getLevel().registryAccess());
+            var legacy = saved.getCompound("local");
+            legacy.putString("direction", "OUTLET");
+            legacy.putBoolean("fuelMode", true);
+            port.loadWithComponents(saved, h.getLevel().registryAccess());
+            h.assertTrue(port.isInlet() && port.getState().recoverFuel, "legacy fuel outlet did not migrate to a recovering inlet");
+*/
+//?}
             h.assertTrue(port.insertItem(ReactorAccessPortTile.FUEL_INSERT_SLOT, new net.minecraft.world.item.ItemStack(biggerreactorsrework.items.ingots.UraniumIngot.INSTANCE), false).getCount() == 1,
                     "recovering inlet accepted fuel");
             port.controller().ejectWaste();
@@ -91,9 +125,16 @@ public final class StabilizationGameTests {
         h.setBlock(2,3,2,ReactorControlRod.INSTANCE);
         h.setBlock(1,2,2,ReactorTerminal.INSTANCE);
         h.setBlock(3,2,2,ReactorAccessPort.INSTANCE);
+//? if =26.1.2 || =26.3 {
         h.startSequence().thenWaitUntil(() -> {
             var tile=(ReactorAccessPortTile)GameTestSupport.be(h,new BlockPos(3,2,2));
             h.assertTrue(tile.nullableController()!=null && tile.controller().simulation()!=null,"reactor not assembled");
+//?} else if =1.21.1 {
+/*        h.startSequence().thenWaitUntil(() -> {
+            var tile=(ReactorAccessPortTile)h.getBlockEntity(new BlockPos(3,2,2));
+            h.assertTrue(tile.nullableController()!=null && tile.controller().simulation()!=null,"reactor not assembled");
+*/
+//?}
         }).thenExecute(() -> {
             var pos=h.absolutePos(new BlockPos(3,2,2));
             var tile=(ReactorAccessPortTile)h.getLevel().getBlockEntity(pos);
@@ -129,11 +170,20 @@ public final class StabilizationGameTests {
 
     @GameTest(template = "empty_7x7x7")
     public static void idleProcessorChargingMarksChunkAndRoundTripsCurrentState(GameTestHelper h) {
+//? if =26.1.2 || =26.3 {
         var pos=new BlockPos(2,2,2);h.setBlock(pos,IndustrialProcessor.INSTANCE);
         var tile=(IndustrialProcessorTile)GameTestSupport.be(h,pos);tile.tick();
         var chunk=h.getLevel().getChunkAt(h.absolutePos(pos));
         chunk.tryMarkSaved();
         var energy=tile.energyFor(null);
+//?} else if =1.21.1 {
+/*        var pos=new BlockPos(2,2,2);h.setBlock(pos,IndustrialProcessor.INSTANCE);
+        var tile=(IndustrialProcessorTile)h.getBlockEntity(pos);tile.tick();
+        var chunk=h.getLevel().getChunkAt(h.absolutePos(pos));
+        chunk.setUnsaved(false);
+        var energy=tile.energyFor(null);
+*/
+//?}
         int offered=Math.min(500,energy.getMaxEnergyStored());
         int accepted=energy.receiveEnergy(offered,true);
         h.assertTrue(accepted>0 && !chunk.isUnsaved(),"simulated charge dirtied the chunk");
@@ -141,20 +191,36 @@ public final class StabilizationGameTests {
         energy.receiveEnergy(offered,false);tile.tick();
         h.assertTrue(chunk.isUnsaved(),"idle processor charge was not marked for disk saving");
         var saved=tile.saveWithFullMetadata(h.getLevel().registryAccess());
+//? if =26.1.2 || =26.3 {
         var restored=IndustrialProcessorTile.SUPPLIER.create(tile.getBlockPos(),tile.getBlockState());
         restored.setLevel(h.getLevel());GameTestSupport.load(restored,saved,h);
         h.assertTrue(restored.energyFor(null).getEnergyStored()==accepted,"current processor charge was lost");
+//?} else if =1.21.1 {
+/*        var restored=IndustrialProcessorTile.SUPPLIER.create(tile.getBlockPos(),tile.getBlockState());
+        restored.setLevel(h.getLevel());restored.loadWithComponents(saved,h.getLevel().registryAccess());
+        h.assertTrue(restored.energyFor(null).getEnergyStored()==accepted,"current processor charge was lost");
+*/
+//?}
         h.succeed();
     }
 
     @GameTest(template = "empty_7x7x7")
     public static void cachedNeighborTracksSideChangesWithoutBlockReplacement(GameTestHelper h) {
         var ownerPos=new BlockPos(2,2,2);var neighborPos=ownerPos.east();
+//? if =26.1.2 || =26.3 {
         h.setBlock(ownerPos,IndustrialProcessor.INSTANCE);h.setBlock(neighborPos,IndustrialProcessor.INSTANCE);
         var owner=(IndustrialProcessorTile)GameTestSupport.be(h,ownerPos);
         var neighbor=(IndustrialProcessorTile)GameTestSupport.be(h,neighborPos);
         var cache=NeighborCapability.fluids(owner);
         neighbor.runRequest("sideClearAll",null);
+//?} else if =1.21.1 {
+/*        h.setBlock(ownerPos,IndustrialProcessor.INSTANCE);h.setBlock(neighborPos,IndustrialProcessor.INSTANCE);
+        var owner=(IndustrialProcessorTile)h.getBlockEntity(ownerPos);
+        var neighbor=(IndustrialProcessorTile)h.getBlockEntity(neighborPos);
+        var cache=new NeighborCapability<>(owner,Capabilities.FluidHandler.BLOCK);
+        neighbor.runRequest("sideClearAll",null);
+*/
+//?}
         h.assertTrue(cache.get(Direction.EAST)==null,"disabled neighbor exposed fluid capability");
         neighbor.runRequest("sideBatch",Transmission.FLUID.ordinal()*2);
         h.assertTrue(cache.get(Direction.EAST)!=null,"absent capability remained cached after enabling input");
@@ -193,20 +259,40 @@ public final class StabilizationGameTests {
         tag.put("fuel",-10L);tag.put("waste",25L);tag.put("partialUsed",Double.NaN);fuel.load(tag);
         h.assertTrue(fuel.fuel()==0 && fuel.waste()==25,"invalid fuel state was not isolated");
         var bad=new CompoundTag();bad.putLong("inAmount",125);bad.putString("inFluid","INVALID FLUID!");
+//? if =26.1.2 || =26.3 {
         var tank=new FluidTransitionTank(false);tank.deserializeNBT(bad);
         h.assertTrue(tank.hasUnresolvedProfile() && tank.serializeNBT().getLongOr("inAmount", 0L)==125,"malformed fluid identifier lost stored stock");
         var turbine=new ModernTurbineSimulation();bad=new CompoundTag();bad.putInt("ventState",999);bad.putDouble("rotorEnergy",Double.NaN);
         turbine.deserializeNBT(bad);
         h.assertTrue(turbine.serializeNBT().getDoubleOr("rotorEnergy", 0D)==0,"nonfinite rotor state was retained");
         h.setBlock(1,1,1,ReactorCoolantPort.INSTANCE);
+//?} else if =1.21.1 {
+/*        var tank=new FluidTransitionTank(false);tank.deserializeNBT(bad);
+        h.assertTrue(tank.hasUnresolvedProfile() && tank.serializeNBT().getLong("inAmount")==125,"malformed fluid identifier lost stored stock");
+        var turbine=new ModernTurbineSimulation();bad=new CompoundTag();bad.putInt("ventState",999);bad.putDouble("rpm",Double.NaN);
+        turbine.deserializeNBT(bad);
+        h.assertTrue(turbine.serializeNBT().getDouble("rpm")==0,"nonfinite rotor state was retained");
+        h.setBlock(1,1,1,ReactorCoolantPort.INSTANCE);
+*/
+//?}
         h.setBlock(2,1,1,biggerreactorsrework.multiblocks.turbine.blocks.TurbineFluidPort.INSTANCE);
         h.setBlock(3,1,1,biggerreactorsrework.multiblocks.heatexchanger.blocks.HeatExchangerFluidPortBlock.INSTANCE);
+//? if =26.1.2 || =26.3 {
         h.setBlock(4,1,1,biggerreactorsrework.multiblocks.battery.blocks.BatteryEnergyPort.INSTANCE);
         var coolant=(ReactorCoolantPortTile)GameTestSupport.be(h,new BlockPos(1,1,1));
         var turbinePort=(biggerreactorsrework.multiblocks.turbine.tiles.TurbineFluidPortTile)GameTestSupport.be(h,new BlockPos(2,1,1));
         var exchangerPort=(biggerreactorsrework.multiblocks.heatexchanger.tiles.HeatExchangerFluidPortTile)GameTestSupport.be(h,new BlockPos(3,1,1));
         var batteryPort=(biggerreactorsrework.multiblocks.battery.tiles.BatteryEnergyPortTile)GameTestSupport.be(h,new BlockPos(4,1,1));
         for(Object invalid:new Object[]{"wrong type",1L,-1,2}) {
+//?} else if =1.21.1 {
+/*        h.setBlock(4,1,1,biggerreactorsrework.multiblocks.battery.blocks.BatteryEnergyPort.INSTANCE);
+        var coolant=(ReactorCoolantPortTile)h.getBlockEntity(new BlockPos(1,1,1));
+        var turbinePort=(biggerreactorsrework.multiblocks.turbine.tiles.TurbineFluidPortTile)h.getBlockEntity(new BlockPos(2,1,1));
+        var exchangerPort=(biggerreactorsrework.multiblocks.heatexchanger.tiles.HeatExchangerFluidPortTile)h.getBlockEntity(new BlockPos(3,1,1));
+        var batteryPort=(biggerreactorsrework.multiblocks.battery.tiles.BatteryEnergyPortTile)h.getBlockEntity(new BlockPos(4,1,1));
+        for(Object invalid:new Object[]{"wrong type",1L,-1,2}) {
+*/
+//?}
             coolant.runRequest("setDirection",invalid);turbinePort.runRequest("setDirection",invalid);
             exchangerPort.runRequest("setDirection",invalid);batteryPort.runRequest("setDirection",invalid);
         }

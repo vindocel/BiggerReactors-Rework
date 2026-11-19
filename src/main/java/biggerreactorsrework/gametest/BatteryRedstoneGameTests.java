@@ -18,16 +18,35 @@ import net.minecraft.world.level.block.Blocks;
 import net.neoforged.neoforge.gametest.*;
 
 import java.util.List;
+//? if =26.1.2 || =26.3 {
 import java.util.Map;
 
 /** Added 2026-10-30: charge boundaries, independent ports, persistence and actual turbine automation. */
 public final class BatteryRedstoneGameTests {
+//?} else if =1.21.1 {
+/*import java.util.Map;
+
+/^* Added 2026-10-30: charge boundaries, independent ports, persistence and actual turbine automation. ^/
+@GameTestHolder(BiggerReactors.modid)
+@PrefixGameTestTemplate(false)
+public final class BatteryRedstoneGameTests {
+*/
+//?}
     private static void charge(GameTestHelper h, double fraction) {
+//? if =26.1.2 || =26.3 {
         for (int x = 1; x <= 3; x++) for (int y = 1; y <= 3; y++) for (int z = 1; z <= 3; z++)
             ((BatteryCellTile) GameTestSupport.be(h,new BlockPos(x, y, z))).loadEnergyFromItem(Math.round(Config.CONFIG.Battery.CellCapacity * fraction));
     }
     private static BatteryRedstonePortTile tile(GameTestHelper h, BlockPos pos) { return (BatteryRedstonePortTile) GameTestSupport.be(h,pos); }
     private static void ready(GameTestHelper h, BlockPos pos) {
+//?} else if =1.21.1 {
+/*        for (int x = 1; x <= 3; x++) for (int y = 1; y <= 3; y++) for (int z = 1; z <= 3; z++)
+            ((BatteryCellTile) h.getBlockEntity(new BlockPos(x, y, z))).loadEnergyFromItem(Math.round(Config.CONFIG.Battery.CellCapacity * fraction));
+    }
+    private static BatteryRedstonePortTile tile(GameTestHelper h, BlockPos pos) { return (BatteryRedstonePortTile) h.getBlockEntity(pos); }
+    private static void ready(GameTestHelper h, BlockPos pos) {
+*/
+//?}
         h.assertTrue(h.getBlockState(pos).getValue(IAssemblyStateBlock.ASSEMBLED), "machine not ready");
     }
     private static void config(GameTestHelper h, BatteryRedstonePortTile tile, Mode mode, double threshold) {
@@ -53,11 +72,20 @@ public final class BatteryRedstoneGameTests {
         for (var item : List.of(casing, net.minecraft.world.item.Items.REDSTONE, casing,
                 net.minecraft.world.item.Items.REDSTONE, net.minecraft.world.item.Items.GOLD_INGOT, net.minecraft.world.item.Items.REDSTONE,
                 casing, net.minecraft.world.item.Items.REDSTONE, casing)) items.add(new net.minecraft.world.item.ItemStack(item));
+//? if =26.1.2 || =26.3 {
         var input = net.minecraft.world.item.crafting.CraftingInput.of(3, 3, items);
         var recipe = h.getLevel().getServer().getRecipeManager().getRecipeFor(net.minecraft.world.item.crafting.RecipeType.CRAFTING, input, h.getLevel());
         h.assertTrue(recipe.isPresent(), "sensor craft did not match its 3x3 ingredients");
         var result = recipe.orElseThrow().value().assemble(input);
         h.assertTrue(result.is(BatteryRedstonePort.INSTANCE.asItem()) && result.getCount() == 1, "craft returned the wrong block or count");
+//?} else if =1.21.1 {
+/*        var input = net.minecraft.world.item.crafting.CraftingInput.of(3, 3, items);
+        var recipe = h.getLevel().getRecipeManager().getRecipeFor(net.minecraft.world.item.crafting.RecipeType.CRAFTING, input, h.getLevel());
+        h.assertTrue(recipe.isPresent(), "sensor craft did not match its 3x3 ingredients");
+        var result = recipe.orElseThrow().value().assemble(input, h.getLevel().registryAccess());
+        h.assertTrue(result.is(BatteryRedstonePort.INSTANCE.asItem()) && result.getCount() == 1, "craft returned the wrong block or count");
+*/
+//?}
         h.assertTrue(BatteryRedstonePort.INSTANCE.defaultBlockState().is(net.minecraft.tags.BlockTags.MINEABLE_WITH_PICKAXE), "sensor missing pickaxe tag");
         h.assertTrue(BatteryRedstonePort.INSTANCE.defaultBlockState().is(net.minecraft.tags.BlockTags.NEEDS_IRON_TOOL), "sensor missing tool tier tag");
         h.setBlock(new BlockPos(2,2,2), BatteryRedstonePort.INSTANCE);
@@ -98,6 +126,7 @@ public final class BatteryRedstoneGameTests {
         h.setBlock(sensorPos, BatteryRedstonePort.INSTANCE);
         h.setBlock(commandPos, TurbineRedstonePort.INSTANCE);
         h.startSequence().thenWaitUntil(() -> { ready(h, sensorPos); ready(h, commandPos); }).thenExecute(() -> {
+//? if =26.1.2 || =26.3 {
             config(h, tile(h, sensorPos), Mode.BELOW, 90);
             var input = (TurbineRedstonePortTile) GameTestSupport.be(h,commandPos);
             h.assertTrue(input.configure(Map.of("mode", 1, "behavior", 0, "low", 0d, "high", 0d)), "turbine command rejected");
@@ -110,6 +139,21 @@ public final class BatteryRedstoneGameTests {
         }).thenIdle(4).thenExecute(() -> {
             h.assertTrue(((TurbineRedstonePortTile) GameTestSupport.be(h,commandPos)).controller().simulation().active(), "falling battery did not restart turbine");
         }).thenSucceed();
+//?} else if =1.21.1 {
+/*            config(h, tile(h, sensorPos), Mode.BELOW, 90);
+            var input = (TurbineRedstonePortTile) h.getBlockEntity(commandPos);
+            h.assertTrue(input.configure(Map.of("mode", 1, "behavior", 0, "low", 0d, "high", 0d)), "turbine command rejected");
+        }).thenIdle(4).thenExecute(() -> {
+            h.assertTrue(((TurbineRedstonePortTile) h.getBlockEntity(commandPos)).controller().simulation().active(), "low battery did not start turbine");
+            charge(h, .95);
+        }).thenIdle(4).thenExecute(() -> {
+            h.assertFalse(((TurbineRedstonePortTile) h.getBlockEntity(commandPos)).controller().simulation().active(), "high battery did not stop turbine");
+            charge(h, .85);
+        }).thenIdle(4).thenExecute(() -> {
+            h.assertTrue(((TurbineRedstonePortTile) h.getBlockEntity(commandPos)).controller().simulation().active(), "falling battery did not restart turbine");
+        }).thenSucceed();
+*/
+//?}
     }
 
     @GameTest(template = "empty_7x7x7", timeoutTicks = 160)
@@ -126,9 +170,16 @@ public final class BatteryRedstoneGameTests {
                 h.assertFalse(sensor.configure(bad), "malformed request accepted");
             h.assertTrue(sensor.mode() == Mode.ABOVE && sensor.threshold() == 42.5, "invalid packet mutated configuration");
             var saved = sensor.saveWithFullMetadata(h.getLevel().registryAccess());
+//? if =26.1.2 || =26.3 {
             var restored = BatteryRedstonePortTile.SUPPLIER.create(sensor.getBlockPos(), sensor.getBlockState());
             GameTestSupport.load(restored,saved,h);
             h.assertTrue(restored.mode() == Mode.ABOVE && restored.threshold() == 42.5, "configuration lost on save/load");
+//?} else if =1.21.1 {
+/*            var restored = BatteryRedstonePortTile.SUPPLIER.create(sensor.getBlockPos(), sensor.getBlockState());
+            restored.loadWithComponents(saved, h.getLevel().registryAccess());
+            h.assertTrue(restored.mode() == Mode.ABOVE && restored.threshold() == 42.5, "configuration lost on save/load");
+*/
+//?}
             restored.read(sensor.write());
             h.assertTrue(restored.settingsReady && restored.mode() == Mode.ABOVE && restored.threshold() == 42.5, "menu snapshot lost configuration");
             var player = net.neoforged.neoforge.common.util.FakePlayerFactory.getMinecraft(h.getLevel());

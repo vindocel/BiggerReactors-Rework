@@ -1,0 +1,20 @@
+{
+    "type": "mekanism:crushing",
+    "neoforge:conditions": [
+        {
+            "type": "neoforge:never"
+        },
+        {
+            "modid": "mekanism",
+            "type": "neoforge:mod_loaded"
+        }
+    ],
+    "input": {
+        "count": 1,
+        "item": "biggerreactorsrework:blutonium_ingot"
+    },
+    "output": {
+        "id": "biggerreactorsrework:blutonium_dust",
+        "count": 1
+    }
+}

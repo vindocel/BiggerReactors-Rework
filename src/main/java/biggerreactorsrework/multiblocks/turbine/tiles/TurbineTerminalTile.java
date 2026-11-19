@@ -1,6 +1,14 @@
+//? if =26.1.2 || =26.3 {
 package biggerreactorsrework.multiblocks.turbine.tiles;
 
 import net.minecraft.core.BlockPos;
+//?} else if =1.21.1 {
+/*package biggerreactorsrework.multiblocks.turbine.tiles;
+
+import net.minecraft.MethodsReturnNonnullByDefault;
+import net.minecraft.core.BlockPos;
+*/
+//?}
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Inventory;
@@ -17,36 +25,43 @@ import biggerreactorsrework.core.registry.RegisterTile;
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 
+//? if =26.1.2 || =26.3 {
 @ParametersAreNonnullByDefault
 public class TurbineTerminalTile extends TurbineBaseTile implements MenuProvider, IHasUpdatableState<TurbineState> {
-    
+//?} else if =1.21.1 {
+/*@ParametersAreNonnullByDefault
+@MethodsReturnNonnullByDefault
+public class TurbineTerminalTile extends TurbineBaseTile implements MenuProvider, IHasUpdatableState<TurbineState> {
+*/
+//?}
+
     @RegisterTile("turbine_terminal")
     public static final BlockEntityType.BlockEntitySupplier<TurbineTerminalTile> SUPPLIER = new RegisterTile.Producer<>(TurbineTerminalTile::new);
-    
+
     public TurbineTerminalTile(BlockEntityType<?> TYPE, BlockPos pos, BlockState state) {
         super(TYPE, pos, state);
     }
-    
+
     public final TurbineState turbineState = new TurbineState(this);
-    
+
     @Override
     public TurbineState getState() {
         this.updateState();
         return new TurbineState(this);
     }
-    
+
     @Override
     public void updateState() {
         if (nullableController() != null) {
             controller().updateDataPacket(turbineState);
         }
     }
-    
+
     @Override
     public Component getDisplayName() {
         return Component.translatable(TurbineTerminal.INSTANCE.getDescriptionId());
     }
-    
+
     @Nullable
     @Override
     public AbstractContainerMenu createMenu(int windowId, Inventory playerInventory, Player player) {

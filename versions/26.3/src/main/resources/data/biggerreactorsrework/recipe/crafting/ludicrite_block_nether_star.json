@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "BPB",
+    "ENE",
+    "BPB"
+  ],
+  "key": {
+    "B": "biggerreactorsrework:blutonium_ingot",
+    "P": "minecraft:ender_pearl",
+    "E": "minecraft:emerald_block",
+    "N": "minecraft:nether_star"
+  },
+  "result": {
+    "id": "biggerreactorsrework:ludicrite_block"
+  }
+}

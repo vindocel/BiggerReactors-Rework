@@ -4,13 +4,31 @@ import biggerreactorsrework.BiggerReactors;
 import biggerreactorsrework.calculator.design.TurbineDesign;
 import biggerreactorsrework.multiblocks.turbine.simulation.modern.ModernTurbineSimulation;
 import biggerreactorsrework.registries.FluidTransitionRegistry;
+//? if =26.1.2 || =26.3 {
 import biggerreactorsrework.registries.TurbineCoilRegistry;
 import net.minecraft.gametest.framework.GameTestHelper;
+//?} else if =1.21.1 {
+/*import biggerreactorsrework.registries.TurbineCoilRegistry;
+import net.minecraft.gametest.framework.GameTest;
+import net.minecraft.gametest.framework.GameTestHelper;
+*/
+//?}
 import net.minecraft.world.level.block.Blocks;
+//? if =26.1.2 || =26.3 {
 import net.minecraft.world.level.material.Fluids;
 
 // Added 2026-11-03: turbine output is the handled steam times the coil material's FE per mB.
 public final class TurbineGenerationRuleGameTests {
+//?} else if =1.21.1 {
+/*import net.minecraft.world.level.material.Fluids;
+import net.neoforged.neoforge.gametest.GameTestHolder;
+import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
+
+// Turbine output is the handled steam times the coil material's FE per mB and the speed efficiency.
+@GameTestHolder(BiggerReactors.modid) @PrefixGameTestTemplate(false)
+public final class TurbineGenerationRuleGameTests {
+*/
+//?}
     private static long run(ModernTurbineSimulation sim, int ticks) {
         var steam = FluidTransitionRegistry.liquidTransition(Fluids.WATER);
         long last = 0;
@@ -51,10 +69,18 @@ public final class TurbineGenerationRuleGameTests {
         sim.setNominalFlowRate(sim.flowRateLimit());
         long overspeed = run(sim, 1000);
         h.assertTrue(sim.RPM() == 2200 && overspeed > 0 && overspeed < 2750,
+//? if =26.1.2 || =26.3 {
                 "rotor must overspeed with lower generation and stop at the governor");
 
         // Modified 2026-11-03: excess supply stays in the inlet at the governor, and reduced supply lowers speed.
         var steam = FluidTransitionRegistry.liquidTransition(Fluids.WATER);
+//?} else if =1.21.1 {
+/*                "rotor must overspeed with lower generation and stop at the governor");
+
+        // Excess supply stays in the inlet at the governor, and reduced supply lowers speed.
+        var steam = FluidTransitionRegistry.liquidTransition(Fluids.WATER);
+*/
+//?}
         long intakeLimit = sim.flowRateLimit();
         sim.fluidTank().dumpVapor();
         sim.fluidTank().dumpLiquid();

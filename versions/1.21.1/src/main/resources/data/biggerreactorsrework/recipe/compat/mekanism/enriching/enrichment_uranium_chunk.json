@@ -1,0 +1,17 @@
+{
+    "type": "mekanism:enriching",
+    "neoforge:conditions": [
+        {
+            "modid": "mekanism",
+            "type": "neoforge:mod_loaded"
+        }
+    ],
+    "input": {
+        "count": 1,
+        "item": "biggerreactorsrework:uranium_chunk"
+    },
+    "output": {
+        "id": "biggerreactorsrework:uranium_dust",
+        "count": 2
+    }
+}

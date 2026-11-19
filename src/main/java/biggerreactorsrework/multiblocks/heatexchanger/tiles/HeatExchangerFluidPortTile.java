@@ -1,7 +1,14 @@
 package biggerreactorsrework.multiblocks.heatexchanger.tiles;
 
+//? if =26.1.2 || =26.3 {
 import net.minecraft.core.component.DataComponentPatch;
 import net.minecraft.core.BlockPos;
+//?} else if =1.21.1 {
+/*import net.minecraft.core.component.DataComponentPatch;
+import net.minecraft.MethodsReturnNonnullByDefault;
+import net.minecraft.core.BlockPos;
+*/
+//?}
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -14,9 +21,16 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
+//? if =26.1.2 || =26.3 {
 import net.neoforged.neoforge.capabilities.Capabilities;
 import biggerreactorsrework.core.transfer.SimpleTank;
 import biggerreactorsrework.multiblocks.heatexchanger.blocks.HeatExchangerFluidPortBlock;
+//?} else if =1.21.1 {
+/*import net.neoforged.neoforge.capabilities.Capabilities;
+import net.neoforged.neoforge.fluids.capability.templates.FluidTank;
+import biggerreactorsrework.multiblocks.heatexchanger.blocks.HeatExchangerFluidPortBlock;
+*/
+//?}
 import biggerreactorsrework.multiblocks.heatexchanger.containers.HeatExchangerFluidPortContainer;
 import biggerreactorsrework.multiblocks.heatexchanger.state.HeatExchangerFluidPortState;
 import biggerreactorsrework.core.client.gui.api.IHasUpdatableState;
@@ -33,6 +47,7 @@ import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 
 import static biggerreactorsrework.multiblocks.heatexchanger.blocks.HeatExchangerFluidPortBlock.CONDENSER;
+//? if =26.1.2 || =26.3 {
 import static biggerreactorsrework.core.util.BlockStates.PORT_DIRECTION;
 
 
@@ -41,30 +56,52 @@ public class HeatExchangerFluidPortTile extends HeatExchangerBaseTile implements
     // Modified 2026-10-30: refresh output handlers after neighbor capability changes.
     private final biggerreactorsrework.core.capability.NeighborCapability<biggerreactorsrework.core.transfer.FluidTanks, ?> outputCapability =
             biggerreactorsrework.core.capability.NeighborCapability.fluids(this);
-    
+
     public long lastCheckedTick;
-    
+//?} else if =1.21.1 {
+/*import static biggerreactorsrework.core.util.BlockStates.PORT_DIRECTION;
+
+
+@MethodsReturnNonnullByDefault
+@ParametersAreNonnullByDefault
+public class HeatExchangerFluidPortTile extends HeatExchangerBaseTile implements IFluidTankHandler, IEventMultiblock.AssemblyStateTransition.OnAssembly, IEventMultiblock.AssemblyStateTransition.OnDisassembly, MenuProvider, IHasUpdatableState<HeatExchangerFluidPortState> {
+    // Modified 2026-10-30: refresh output handlers after neighbor capability changes.
+    private final biggerreactorsrework.core.capability.NeighborCapability<net.neoforged.neoforge.fluids.capability.IFluidHandler> outputCapability =
+            new biggerreactorsrework.core.capability.NeighborCapability<>(this, Capabilities.FluidHandler.BLOCK);
+
+    public long lastCheckedTick;
+*/
+//?}
+
     @RegisterTile("heat_exchanger_fluid_port")
     public static final BlockEntityType.BlockEntitySupplier<HeatExchangerFluidPortTile> SUPPLIER = new RegisterTile.Producer<>(HeatExchangerFluidPortTile::new);
-    
+
+//? if =26.1.2 || =26.3 {
     @RegisterCapability
     private static final CapabilityRegistration FLUID_HANDLER_CAP_REGISTRATION = CapabilityRegistration.tileFluids(HeatExchangerFluidPortTile.class);
-    
+
     public HeatExchangerFluidPortTile(BlockEntityType<?> tileEntityTypeIn, BlockPos pos, BlockState state) {
+//?} else if =1.21.1 {
+/*    @RegisterCapability
+    private static final CapabilityRegistration FLUID_HANDLER_CAP_REGISTRATION = CapabilityRegistration.tileCap(Capabilities.FluidHandler.BLOCK, HeatExchangerFluidPortTile.class);
+
+    public HeatExchangerFluidPortTile(BlockEntityType<?> tileEntityTypeIn, BlockPos pos, BlockState state) {
+*/
+//?}
         super(tileEntityTypeIn, pos, state);
     }
-    
-    
-    
+
+
+
     private biggerreactorsrework.util.FluidTransitionTank HETank;
-    
+
     public void setHETank(biggerreactorsrework.util.FluidTransitionTank HETank) {
         this.HETank = HETank;
     }
-    
+
     private boolean inlet = true;
     private boolean condenser = true;
-    
+
     public void setInlet(boolean inlet) {
         assert level != null;
         if (this.inlet != inlet) maintenanceCold = false;
@@ -72,25 +109,26 @@ public class HeatExchangerFluidPortTile extends HeatExchangerBaseTile implements
         level.setBlock(this.getBlockPos(), this.getBlockState().setValue(PORT_DIRECTION, inlet), 3);
         setChanged();
     }
-    
+
     public void setInletOtherOutlet(boolean inlet) {
         controller().setInletPort(this, inlet);
     }
-    
+
     public boolean isInlet() {
         return inlet;
     }
-    
+
     public void setCondenser(boolean condenser) {
         this.condenser = condenser;
         assert level != null;
         level.setBlock(this.getBlockPos(), this.getBlockState().setValue(CONDENSER, condenser), 3);
     }
-    
+
     public boolean isCondenser() {
         return condenser;
+//? if =26.1.2 || =26.3 {
     }
-    
+
     @Override
     public Object transferSnapshot() {
         return HETank == null ? null : HETank.transferSnapshot();
@@ -104,13 +142,19 @@ public class HeatExchangerFluidPortTile extends HeatExchangerBaseTile implements
     }
 
     @Override
+//?} else if =1.21.1 {
+/*    }
+
+    @Override
+*/
+//?}
     public int tankCount() {
         if (HETank == null) {
             return 0;
         }
         return HETank.tankCount();
     }
-    
+
     @Override
     public long tankCapacity(int tank) {
         if (HETank == null) {
@@ -118,8 +162,8 @@ public class HeatExchangerFluidPortTile extends HeatExchangerBaseTile implements
         }
         return HETank.tankCapacity(tank);
     }
-    
-    
+
+
     @Override
     public Fluid fluidTypeInTank(int tank) {
         if (HETank == null) {
@@ -127,7 +171,7 @@ public class HeatExchangerFluidPortTile extends HeatExchangerBaseTile implements
         }
         return HETank.maintenanceFluid(tank);
     }
-    
+
     @Nullable
     @Override
     public DataComponentPatch fluidComponentsInTank(int tank) {
@@ -136,7 +180,7 @@ public class HeatExchangerFluidPortTile extends HeatExchangerBaseTile implements
         }
         return HETank.maintenanceComponents(tank);
     }
-    
+
     @Override
     public long fluidAmountInTank(int tank) {
         if (HETank == null) {
@@ -144,7 +188,7 @@ public class HeatExchangerFluidPortTile extends HeatExchangerBaseTile implements
         }
         return HETank.fluidAmountInTank(tank);
     }
-    
+
     @Override
     public boolean fluidValidForTank(int tank, Fluid fluid) {
         if (HETank == null) {
@@ -153,7 +197,7 @@ public class HeatExchangerFluidPortTile extends HeatExchangerBaseTile implements
         return HETank.fluidValidForTank(tank, fluid);
     }
     @Override public boolean fluidValidForTank(int tank,Fluid fluid,DataComponentPatch components){return HETank!=null && HETank.fluidValidForTank(tank,fluid,components);}
-    
+
     @Override
     public long fill(Fluid fluid, DataComponentPatch components, long amount, boolean simulate) {
         if (HETank == null || !inlet || isRecoveringInput()) {
@@ -161,7 +205,7 @@ public class HeatExchangerFluidPortTile extends HeatExchangerBaseTile implements
         }
         return HETank.fill(fluid, components, amount, simulate);
     }
-    
+
     @Override
     public long drain(Fluid fluid, DataComponentPatch components, long amount, boolean simulate) {
         if (HETank == null || !canDrain()) {
@@ -169,8 +213,8 @@ public class HeatExchangerFluidPortTile extends HeatExchangerBaseTile implements
         }
         return HETank.maintenanceDrain(outputTank(),fluid, components, amount, simulate);
     }
-    
-    
+
+
     // Modified 2026-11-02: controller drains only the sum actually accepted by balanced destinations.
     public long offerFluid(long maximum) {
         neighborChanged();
@@ -211,13 +255,21 @@ public class HeatExchangerFluidPortTile extends HeatExchangerBaseTile implements
         }
         return 0;
     }
-    
+
     private boolean connected = false;
     Direction outputDirection = null;
+//? if =26.1.2 || =26.3 {
     IFluidTankHandler handler = null;
     SimpleTank EMPTY_TANK = new SimpleTank(0);
-    
+
     @SuppressWarnings("DuplicatedCode")
+//?} else if =1.21.1 {
+/*    IFluidTankHandler handler = null;
+    FluidTank EMPTY_TANK = new FluidTank(0);
+
+    @SuppressWarnings("DuplicatedCode")
+*/
+//?}
     public void neighborChanged() {
         handler = null;
         if (outputDirection == null) {
@@ -232,15 +284,24 @@ public class HeatExchangerFluidPortTile extends HeatExchangerBaseTile implements
             handler = FluidHandlerWrapper.wrap(outputCap);
         }
     }
-    
+
     @Override
+//? if =26.1.2 || =26.3 {
     protected void readNBT(CompoundTag compound) {
         maintenanceCold=compound.getBooleanOr("recoverInput", false);
         super.readNBT(compound);
         inlet = compound.getBooleanOr("inlet", false);
     }
-    
-    
+//?} else if =1.21.1 {
+/*    protected void readNBT(CompoundTag compound) {
+        maintenanceCold=compound.getBoolean("recoverInput");
+        super.readNBT(compound);
+        inlet = compound.getBoolean("inlet");
+    }
+*/
+//?}
+
+
     @Override
     protected CompoundTag writeNBT() {
         CompoundTag nbt = super.writeNBT();
@@ -248,45 +309,45 @@ public class HeatExchangerFluidPortTile extends HeatExchangerBaseTile implements
         nbt.putBoolean("recoverInput", isRecoveringInput());
         return nbt;
     }
-    
+
     @Override
     public void onAssemblyStateTransition(IValidatedMultiblock.AssemblyState oldState, IValidatedMultiblock.AssemblyState newState) {
         OnAssembly.super.onAssemblyStateTransition(oldState, newState);
         OnDisassembly.super.onAssemblyStateTransition(oldState, newState);
     }
-    
+
     @Override
     public void onAssembly() {
         outputDirection = getBlockState().getValue(BlockStates.FACING);
         neighborChanged();
     }
-    
+
     @Override
     public void onDisassembly() {
         outputDirection = null;
         HETank = null;
         neighborChanged();
     }
-    
+
     private final HeatExchangerFluidPortState state = new HeatExchangerFluidPortState(this);
-    
+
     @Override
     public HeatExchangerFluidPortState getState() {
         return state;
     }
-    
+
     @Override
     public void updateState() {
         state.direction = isInlet();
         state.maintenanceCold=isRecoveringInput();
         state.condenser = isCondenser();
     }
-    
+
     @Override
     public Component getDisplayName() {
         return Component.translatable(HeatExchangerFluidPortBlock.INSTANCE.getDescriptionId());
     }
-    
+
     @Nullable
     @Override
     public AbstractContainerMenu createMenu(int windowId, Inventory playerInventory, Player player) {

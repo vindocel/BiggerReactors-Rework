@@ -4,13 +4,27 @@ package biggerreactorsrework.client;
 
 import biggerreactorsrework.core.client.gui.GuiSync;
 import biggerreactorsrework.core.client.gui.screens.ModScreen;
+//? if =26.1.2 || =26.3 {
 import biggerreactorsrework.registries.CoolantComponents;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.core.registries.BuiltInRegistries;
+//?} else if =1.21.1 {
+/*import biggerreactorsrework.registries.CoolantComponents;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.core.registries.BuiltInRegistries;
+*/
+//?}
 import net.minecraft.core.component.DataComponentPatch;
+//? if =26.1.2 || =26.3 {
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
+//?} else if =1.21.1 {
+/*import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Mth;
+*/
+//?}
 import net.neoforged.neoforge.fluids.FluidStack;
 
 /** Local, read-only, scrollable machine statistics. Modified 2026-10-26: grouped by section. */
@@ -33,19 +47,35 @@ public final class GuiStatisticsWindow {
     private boolean onTab(double mx,double my){return screen.hasStatistics() && mx>=screen.settingsTabX() && mx<screen.settingsTabX()+GuiFrame.TAB_SIZE && my>=tabY()+GuiFrame.TAB_BUTTON_TOP-1 && my<tabY()+GuiFrame.TAB_SIZE;}
     public boolean contains(double mx,double my){return onTab(mx,my) || covers(mx,my);}
     /** Whether the open window is under the point. */
+//? if =26.1.2 || =26.3 {
     public boolean covers(double mx,double my){return open() && area().contains((int)Math.floor(mx),(int)Math.floor(my));}
     public void renderTab(GuiGraphicsExtractor g,int mx,int my){
         if(!screen.hasStatistics())return;
+//?} else if =1.21.1 {
+/*    public boolean covers(double mx,double my){return open() && area().contains((int)Math.floor(mx),(int)Math.floor(my));}
+    public void renderTab(GuiGraphics g,int mx,int my){
+        if(!screen.hasStatistics())return;
+*/
+//?}
         int x=screen.settingsTabX(),y=tabY();
         GuiArt.tabButton(g,x,y,true,onTab(mx,my),open(),screen.getFrame());
         GuiIcon.STATISTICS.draw(g,GuiFrame.tabButtonX(x,true)+(GuiFrame.TAB_BUTTON-GuiIcon.STATISTICS.width())/2,
-                y+GuiFrame.TAB_BUTTON_TOP+(GuiFrame.TAB_BUTTON-GuiIcon.STATISTICS.height())/2);
+                y+GuiFrame.TAB_BUTTON_TOP+(GuiFrame.TAB_BUTTON-GuiIcon.STATISTICS.height())/2+1);
     }
+//? if =26.1.2 || =26.3 {
     private static Component fluid(String id,String origin){
         var key=Identifier.tryParse(id);
         if(key==null || !BuiltInRegistries.FLUID.containsKey(key))return Component.translatable("screen.biggerreactorsrework.statistics.status.awaiting_fluid");
         var stack=new FluidStack(BuiltInRegistries.FLUID.getValue(key),1);
         if(!origin.isEmpty()) stack.applyComponents(DataComponentPatch.builder().set(CoolantComponents.ORIGIN.get(),origin).build());
+//?} else if =1.21.1 {
+/*    private static Component fluid(String id,String origin){
+        var key=ResourceLocation.tryParse(id);
+        if(key==null || !BuiltInRegistries.FLUID.containsKey(key))return Component.translatable("screen.biggerreactorsrework.statistics.status.awaiting_fluid");
+        var stack=new FluidStack(BuiltInRegistries.FLUID.get(key),1);
+        if(!origin.isEmpty()) stack.applyComponents(DataComponentPatch.builder().set(CoolantComponents.ORIGIN.get(),origin).build());
+*/
+//?}
         return stack.getHoverName();
     }
     public static Component value(String value){
@@ -60,11 +90,20 @@ public final class GuiStatisticsWindow {
     private static final int ROW=11,HEADING=15,BAR_ROW=15;
     private static final java.util.Map<String,String> SECTIONS=new java.util.HashMap<>();
     private static final java.util.List<String> SECTION_ORDER=java.util.List.of("structure","fuel","fluids","performance","energy");
+//? if =26.1.2 || =26.3 {
     static {
         for(var key:java.util.List.of("battery_charge","battery_cells","battery_stored","battery_capacity","battery_input","battery_output","battery_max_input","battery_max_output"))SECTIONS.put(key,"energy");
         for(var key:java.util.List.of("dimensions","fuel_rods","rotor_shafts","condenser_channels","evaporator_channels","contacts","heat_path"))SECTIONS.put(key,"structure");
         for(var key:java.util.List.of("fuel_capacity","fuel_stored","waste","fuel_temperature"))SECTIONS.put(key,"fuel");
         for(var key:java.util.List.of("pair","cold_capacity","primary_capacity","water_capacity","cold_stored","hot_stored","water_stored","steam_stored",
+//?} else if =1.21.1 {
+/*    static {
+        for(var key:java.util.List.of("dimensions","fuel_rods","rotor_shafts","condenser_channels","evaporator_channels","contacts","heat_path"))SECTIONS.put(key,"structure");
+        for(var key:java.util.List.of("fuel_capacity","fuel_stored","waste","fuel_temperature"))SECTIONS.put(key,"fuel");
+        for(var key:java.util.List.of("battery_charge","battery_cells","battery_stored","battery_capacity","battery_input","battery_output","battery_max_input","battery_max_output"))SECTIONS.put(key,"energy");
+        for(var key:java.util.List.of("pair","cold_capacity","primary_capacity","water_capacity","cold_stored","hot_stored","water_stored","steam_stored",
+*/
+//?}
                 "input_current","output_current","water_discarded","vent","primary_temperature","secondary_temperature","thermal_storage_change"))SECTIONS.put(key,"fluids");
         for(var key:java.util.List.of("burn_current","burn_potential","manual_limit","conversion_current","conversion_potential","steam_current","steam_potential",
                 "water_potential","power_current","power_gross","power_potential","rpm","efficiency","flow_selected","flow_structural","flow_efficient",
@@ -137,6 +176,7 @@ public final class GuiStatisticsWindow {
             }
         }
         return lines;
+//? if =26.1.2 || =26.3 {
     }
 
     public void render(GuiGraphicsExtractor g,int mx,int my){
@@ -146,10 +186,29 @@ public final class GuiStatisticsWindow {
         try{
             if(!open()){if(onTab(mx,my))g.setTooltipForNextFrame(screen.getFont(), Component.translatable("screen.biggerreactorsrework.statistics.title"),mx,my);return;}
             var font=screen.getFont();
+//?} else if =1.21.1 {
+/*    }
+
+    public void render(GuiGraphics g,int mx,int my){
+        if(!screen.hasStatistics())return;
+        rendering=true;
+        g.pose().pushPose();g.flush();g.pose().translate(0,0,850);
+        try{
+            if(!open()){if(onTab(mx,my))g.renderTooltip(screen.getFont(),Component.translatable("screen.biggerreactorsrework.statistics.title"),mx,my);return;}
+            var font=screen.getFont();
+*/
+//?}
             int x=x(),y=y(),w=width(),h=height(),text=GuiTheme.textColor();
+//? if =26.1.2 || =26.3 {
             GuiArt.panel(g,x,y,w,h,screen.getFrame());
-            g.text(font,Component.translatable("screen.biggerreactorsrework.statistics.title"),x+24,y+8,text,false);
-            GuiArt.button(g,x+6,y+5,12,12,onClose(mx,my),GuiIcon.CLOSE,screen.getFrame());
+            g.text(font,Component.translatable("screen.biggerreactorsrework.statistics.title"),x+22,y+8,text,false);
+            GuiArt.button(g,x+6,y+6,GuiArt.CLOSE_SIZE,GuiArt.CLOSE_SIZE,onClose(mx,my),GuiIcon.CLOSE,screen.getFrame());
+//?} else if =1.21.1 {
+/*            GuiArt.panel(g,x,y,w,h,screen.getFrame());
+            g.drawString(font,Component.translatable("screen.biggerreactorsrework.statistics.title"),x+22,y+8,text,false);
+            GuiArt.button(g,x+6,y+6,GuiArt.CLOSE_SIZE,GuiArt.CLOSE_SIZE,onClose(mx,my),GuiIcon.CLOSE,screen.getFrame());
+*/
+//?}
             var rows=GuiSync.statistics((GuiSync.IGUIPacketProvider)screen.getMenu());
             String status=null,reference=null;
             for(var row:rows){
@@ -168,9 +227,16 @@ public final class GuiStatisticsWindow {
                 g.fill(left,top,right,top+cardHeight,GuiTheme.dark()?0x22FFFFFF:0x22000000);
                 g.fill(left,top,left+2,top+cardHeight,color);
                 g.fill(left+6,top+4,left+11,top+9,color);
+//? if =26.1.2 || =26.3 {
                 GuiArt.scrollingText(g,font,statusText,left+14,top+3,right-left-18,color);
                 for(int i=0;i<referenceLines.size();i++)g.text(font,referenceLines.get(i),left+6,top+14+i*10,mutedColor(),false);
                 listTop+=cardHeight+4;
+//?} else if =1.21.1 {
+/*                GuiArt.scrollingText(g,font,statusText,left+14,top+3,right-left-18,color);
+                for(int i=0;i<referenceLines.size();i++)g.drawString(font,referenceLines.get(i),left+6,top+14+i*10,mutedColor(),false);
+                listTop+=cardHeight+4;
+*/
+//?}
             }
             var lines=lines(rows);
             int total=0;for(var line:lines)total+=line.height();
@@ -181,9 +247,16 @@ public final class GuiStatisticsWindow {
             for(var line:lines){
                 int lh=line.height();
                 if(ly+lh>=listTop && ly<=listBottom){
+//? if =26.1.2 || =26.3 {
                     if(line.heading()){
                         g.text(font,line.label(),left+1,ly+4,accentColor(),false);
                         g.fill(left,ly+13,rowRight,ly+14,(accentColor()&0x00FFFFFF)|0x80000000);
+//?} else if =1.21.1 {
+/*                    if(line.heading()){
+                        g.drawString(font,line.label(),left+1,ly+4,accentColor(),false);
+                        g.fill(left,ly+13,rowRight,ly+14,(accentColor()&0x00FFFFFF)|0x80000000);
+*/
+//?}
                     }else{
                         if(stripe%2==1)g.fill(left,ly,rowRight,ly+lh,GuiTheme.dark()?0x14FFFFFF:0x14000000);
                         int valueWidth=Math.min(font.width(line.value()),(rowRight-left)/2);
@@ -209,15 +282,29 @@ public final class GuiStatisticsWindow {
                 int thumbTop=listTop+(span-thumb)*scroll/maxScroll;
                 g.fill(x+w-8,listTop,x+w-6,listBottom,GuiTheme.dark()?0x30FFFFFF:0x30000000);
                 g.fill(x+w-8,thumbTop,x+w-6,thumbTop+thumb,text);
+//? if =26.1.2 || =26.3 {
             }
         }finally{g.pose().popMatrix();rendering=false;}
     }
+//?} else if =1.21.1 {
+/*            }
+        }finally{g.flush();g.pose().popPose();rendering=false;}
+    }
+*/
+//?}
     public boolean mousePressed(double mx,double my,int button){
         if(!contains(mx,my))return false;
+//? if =26.1.2 || =26.3 {
         consumeRelease=true;
         if(button==com.mojang.blaze3d.platform.InputConstants.MOUSE_BUTTON_LEFT){
             // Modified 2026-11-01: opening and closing statistics use the same native button sound as settings.
             if(onTab(mx,my)){open=!open;dragging=false;clickSound();}
+//?} else if =1.21.1 {
+/*        consumeRelease=true;
+        if(button==0){
+            if(onTab(mx,my)){open=!open;dragging=false;clickSound();}
+*/
+//?}
             else if(onClose(mx,my)){open=false;clickSound();}
             else if(mx>=x() && mx<x()+width() && my>=y() && my<y()+20){dragging=true;dragX=mx-x();dragY=my-y();}
         }
@@ -228,7 +315,7 @@ public final class GuiStatisticsWindow {
                 net.minecraft.sounds.SoundEvents.UI_BUTTON_CLICK,1.0F));
     }
     private boolean onClose(double mx, double my) {
-        return mx >= x() + 6 && mx < x() + 18 && my >= y() + 5 && my < y() + 17;
+        return mx >= x() + 6 && mx < x() + 6 + GuiArt.CLOSE_SIZE && my >= y() + 6 && my < y() + 6 + GuiArt.CLOSE_SIZE;
     }
 
     public boolean release(){boolean consumed=consumeRelease;consumeRelease=false;dragging=false;return consumed;}

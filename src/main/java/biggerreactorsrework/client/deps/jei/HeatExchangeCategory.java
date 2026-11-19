@@ -12,9 +12,16 @@ import mezz.jei.api.helpers.IGuiHelper;
 import mezz.jei.api.recipe.IFocusGroup;
 import mezz.jei.api.recipe.RecipeIngredientRole;
 import mezz.jei.api.recipe.RecipeType;
+//? if =26.1.2 || =26.3 {
 import mezz.jei.api.recipe.category.IRecipeCategory;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.network.chat.Component;
+//?} else if =1.21.1 {
+/*import mezz.jei.api.recipe.category.IRecipeCategory;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.network.chat.Component;
+*/
+//?}
 import net.minecraft.world.item.ItemStack;
 
 /** Added 2026-10-26: discoverable fluid conversions in the exchanger, not reactor recipes. */
@@ -55,15 +62,31 @@ public final class HeatExchangeCategory implements IRecipeCategory<RecipeViewerD
     @Override
     public void setRecipe(IRecipeLayoutBuilder builder, RecipeViewerData.HeatExchange recipe, IFocusGroup focus) {
         var card = recipe.card();
+//? if =26.1.2 || =26.3 {
         builder.addSlot(RecipeIngredientRole.INPUT, 1, FluidCard.inputY() + 1)
                 .addFluidStack(recipe.input().getFluid(), 1000, recipe.input().getComponentsPatch()).setCustomRenderer(mezz.jei.api.neoforge.NeoForgeTypes.FLUID_STACK, biggerreactorsrework.client.deps.jei.CoolantIngredientRenderer.INSTANCE);
         builder.addSlot(RecipeIngredientRole.OUTPUT, 1, card.outputY() + 1)
                 .addFluidStack(recipe.output().getFluid(), 1000, recipe.output().getComponentsPatch()).setCustomRenderer(mezz.jei.api.neoforge.NeoForgeTypes.FLUID_STACK, biggerreactorsrework.client.deps.jei.CoolantIngredientRenderer.INSTANCE);
     }
+//?} else if =1.21.1 {
+/*        builder.addSlot(RecipeIngredientRole.INPUT, 1, FluidCard.inputY() + 1)
+                .addFluidStack(recipe.input().getFluid(), 1000, recipe.input().getComponentsPatch()).setFluidRenderer(1000, false, 16, 16);
+        builder.addSlot(RecipeIngredientRole.OUTPUT, 1, card.outputY() + 1)
+                .addFluidStack(recipe.output().getFluid(), 1000, recipe.output().getComponentsPatch()).setFluidRenderer(1000, false, 16, 16);
+    }
+*/
+//?}
 
+//? if =26.1.2 || =26.3 {
     @Override
     public void draw(RecipeViewerData.HeatExchange recipe, IRecipeSlotsView slots, GuiGraphicsExtractor g, double mouseX, double mouseY) {
         recipe.card().draw(g);
+//?} else if =1.21.1 {
+/*    @Override
+    public void draw(RecipeViewerData.HeatExchange recipe, IRecipeSlotsView slots, GuiGraphics g, double mouseX, double mouseY) {
+        recipe.card().draw(g);
+*/
+//?}
     }
 
     @Override

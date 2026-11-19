@@ -1,0 +1,13 @@
+{
+  "type": "biggerreactorsrework:industrial_processing",
+  "ingredient": {
+    "item": "minecraft:blue_ice"
+  },
+  "input_count": 1,
+  "fluid": "biggerreactorsrework:liquid_obsidian",
+  "fluid_result": {
+    "id": "biggerreactorsrework:frozen_obsidian",
+    "amount": 100
+  },
+  "fluid_per_operation": 200
+}

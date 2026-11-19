@@ -1,3 +1,4 @@
+//? if =26.1.2 || =26.3 {
 package biggerreactorsrework.client.guide;
 
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -7,13 +8,35 @@ import net.minecraft.client.gui.GuiGraphicsExtractor;
  * mouse position is outside the page ({@code -1}) whenever the pointer is not over its visible area.
  */
 interface GuideElement {
+//?} else if =1.21.1 {
+/*package biggerreactorsrework.client.guide;
+
+import net.minecraft.client.gui.GuiGraphics;
+
+/^*
+ * One block of a guide chapter, laid out top to bottom in the scrolling page. Coordinates are absolute; the
+ * mouse position is outside the page ({@code -1}) whenever the pointer is not over its visible area.
+ ^/
+interface GuideElement {
+*/
+//?}
     /** Height for the given page width. */
+//? if =26.1.2 || =26.3 {
     int height(GuideScreen screen, int width);
 
     void render(GuideScreen screen, GuiGraphicsExtractor g, int x, int y, int width, int mouseX, int mouseY);
 
     /** Before any page of the frame is drawn (x, y: its top-left corner), for hover state shared between pages. */
     default void prepare(GuideScreen screen, int x, int y, int width, int mouseX, int mouseY) {
+//?} else if =1.21.1 {
+/*    int height(GuideScreen screen, int width);
+
+    void render(GuideScreen screen, GuiGraphics g, int x, int y, int width, int mouseX, int mouseY);
+
+    /^* Before any page of the frame is drawn (x, y: its top-left corner), for hover state shared between pages. ^/
+    default void prepare(GuideScreen screen, int x, int y, int width, int mouseX, int mouseY) {
+*/
+//?}
     }
 
     /** A click on the element (x, y: its top-left corner); true when handled. */

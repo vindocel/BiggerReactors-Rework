@@ -1,0 +1,19 @@
+{
+    "type": "ae2:inscriber",
+    "neoforge:conditions": [
+        {
+            "modid": "ae2",
+            "type": "neoforge:mod_loaded"
+        }
+    ],
+    "ingredients": {
+        "middle": {
+            "item": "biggerreactorsrework:uranium_ore"
+        }
+    },
+    "mode": "inscribe",
+    "result": {
+        "count": 2,
+        "id": "biggerreactorsrework:uranium_dust"
+    }
+}

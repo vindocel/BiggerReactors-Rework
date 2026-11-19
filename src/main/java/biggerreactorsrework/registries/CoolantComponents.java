@@ -6,9 +6,16 @@ import net.minecraft.core.component.DataComponentPatch;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.codec.ByteBufCodecs;
+//? if =26.1.2 || =26.3 {
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.neoforged.bus.api.IEventBus;
+//?} else if =1.21.1 {
+/*import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import net.neoforged.bus.api.IEventBus;
+*/
+//?}
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import java.util.function.Supplier;
@@ -18,18 +25,33 @@ public final class CoolantComponents {
     private static final DeferredRegister.DataComponents TYPES = DeferredRegister.createDataComponents(Registries.DATA_COMPONENT_TYPE,BiggerReactors.modid);
     public static final Supplier<DataComponentType<String>> ORIGIN = TYPES.registerComponentType("coolant_origin",
             b -> b.persistent(Codec.STRING).networkSynchronized(ByteBufCodecs.STRING_UTF8));
+//? if =26.1.2 || =26.3 {
     public static void register(IEventBus bus) { TYPES.register(bus); }
     public static String origin(DataComponentPatch components){var value=java.util.Optional.ofNullable(components.get(net.minecraft.core.component.DataComponentMap.EMPTY,ORIGIN.get()));return value==null || value.isEmpty()?"":value.get();}
     @javax.annotation.Nullable
+//?} else if =1.21.1 {
+/*    public static void register(IEventBus bus) { TYPES.register(bus); }
+    public static String origin(DataComponentPatch components){var value=components.get(ORIGIN.get());return value==null || value.isEmpty()?"":value.get();}
+    @javax.annotation.Nullable
+*/
+//?}
     public static net.minecraft.world.level.material.Fluid sourceFluid(FluidStack stack) {
         return sourceFluid(stack.get(ORIGIN.get()));
     }
     @javax.annotation.Nullable
     public static net.minecraft.world.level.material.Fluid sourceFluid(@javax.annotation.Nullable String token) {
+//? if =26.1.2 || =26.3 {
         if(token==null || token.indexOf('@')<=0)return null;
         var key=Identifier.tryParse(token.substring(0,token.indexOf('@')));
         return key!=null && net.minecraft.core.registries.BuiltInRegistries.FLUID.containsKey(key)?net.minecraft.core.registries.BuiltInRegistries.FLUID.getValue(key):null;
     }
+//?} else if =1.21.1 {
+/*        if(token==null || token.indexOf('@')<=0)return null;
+        var key=ResourceLocation.tryParse(token.substring(0,token.indexOf('@')));
+        return key!=null && net.minecraft.core.registries.BuiltInRegistries.FLUID.containsKey(key)?net.minecraft.core.registries.BuiltInRegistries.FLUID.get(key):null;
+    }
+*/
+//?}
     public static DataComponentPatch heated(FluidTransitionRegistry.FluidTransition transition) {
         return DataComponentPatch.builder().set(ORIGIN.get(), fingerprint(transition)).build();
     }
@@ -56,24 +78,47 @@ public final class CoolantComponents {
         if(separator>0 && hot.equals(expected.substring(0,separator)) && stored.equals(cold+expected.substring(separator)))return true;
         return cold.equals("mekanism:sodium") && hot.equals("mekanism:superheated_sodium") && stored.equals(cold+"@"+Integer.toHexString(java.util.Objects.hash(40d,473.15,4d,4d,.95)));
     }
+//? if =26.1.2 || =26.3 {
     public static FluidTransitionRegistry.FluidTransition resolve(DataComponentPatch patch) {
         var origin = java.util.Optional.ofNullable(patch.get(net.minecraft.core.component.DataComponentMap.EMPTY,ORIGIN.get()));
         if (origin == null || origin.isEmpty() || origin.get().isEmpty()) return null;
+//?} else if =1.21.1 {
+/*    public static FluidTransitionRegistry.FluidTransition resolve(DataComponentPatch patch) {
+        var origin = patch.get(ORIGIN.get());
+        if (origin == null || origin.isEmpty() || origin.get().isEmpty()) return null;
+*/
+//?}
         String id = origin.get();
         int split=id.indexOf('@');
+//? if =26.1.2 || =26.3 {
         if(split<=0) return null;
         var key=Identifier.tryParse(id.substring(0,split));
         if(key==null || !net.minecraft.core.registries.BuiltInRegistries.FLUID.containsKey(key)) return null;
         var t=FluidTransitionRegistry.liquidTransition(net.minecraft.core.registries.BuiltInRegistries.FLUID.getValue(key));
         return t!=null && t.genericHot() && matchesStoredProfile(id,t) ? t : null;
+//?} else if =1.21.1 {
+/*        if(split<=0) return null;
+        var key=ResourceLocation.tryParse(id.substring(0,split));
+        if(key==null || !net.minecraft.core.registries.BuiltInRegistries.FLUID.containsKey(key)) return null;
+        var t=FluidTransitionRegistry.liquidTransition(net.minecraft.core.registries.BuiltInRegistries.FLUID.get(key));
+        return t!=null && t.genericHot() && matchesStoredProfile(id,t) ? t : null;
+*/
+//?}
     }
     public static Component name(FluidStack stack) {
         var t=resolve(stack.getComponentsPatch());
         if(t==null){
             String origin=stack.get(ORIGIN.get());
+//? if =26.1.2 || =26.3 {
             if(origin!=null && origin.contains("@")) {
                 var key=Identifier.tryParse(origin.substring(0,origin.indexOf('@')));
                 if(key!=null)t=CoolantSync.find(key);
+//?} else if =1.21.1 {
+/*            if(origin!=null && origin.contains("@")) {
+                var key=ResourceLocation.tryParse(origin.substring(0,origin.indexOf('@')));
+                if(key!=null)t=CoolantSync.find(key);
+*/
+//?}
             }
         }
         return t==null ? Component.translatable("fluid.biggerreactorsrework.heated_coolant") :

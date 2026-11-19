@@ -17,9 +17,16 @@ public class HeatedCoolant extends ModFluid {
                             net.minecraft.world.level.material.FluidState target) {
         super.spreadTo(level, pos, state, direction, target);
         if (level instanceof net.minecraft.server.level.ServerLevel server && isSame(server.getFluidState(pos).getType())) {
+//? if =26.1.2 || =26.3 {
             var from = pos.relative(direction.getOpposite());
             var origin = PlacedCoolantOrigins.get(server.getChunkAt(from), from);
             PlacedCoolantOrigins.put(server, pos, origin);
         }
+//?} else if =1.21.1 {
+/*            var from = pos.relative(direction.getOpposite());
+            PlacedCoolantOrigins.put(server, pos, PlacedCoolantOrigins.get(server.getChunkAt(from), from));
+        }
+*/
+//?}
     }
 }

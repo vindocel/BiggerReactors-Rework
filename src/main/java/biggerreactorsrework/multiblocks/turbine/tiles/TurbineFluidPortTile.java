@@ -1,7 +1,14 @@
 package biggerreactorsrework.multiblocks.turbine.tiles;
 
+//? if =26.1.2 || =26.3 {
 import net.minecraft.core.component.DataComponentPatch;
 import net.minecraft.core.BlockPos;
+//?} else if =1.21.1 {
+/*import net.minecraft.core.component.DataComponentPatch;
+import net.minecraft.MethodsReturnNonnullByDefault;
+import net.minecraft.core.BlockPos;
+*/
+//?}
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -34,25 +41,46 @@ import javax.annotation.ParametersAreNonnullByDefault;
 
 import static biggerreactorsrework.multiblocks.turbine.blocks.TurbineFluidPort.PortDirection.*;
 
+//? if =26.1.2 || =26.3 {
 @ParametersAreNonnullByDefault
 public class TurbineFluidPortTile extends TurbineBaseTile implements IFluidTankHandler, MenuProvider, IHasUpdatableState<TurbineFluidPortState>, IEventMultiblock.AssemblyStateTransition.OnAssembly, IEventMultiblock.AssemblyStateTransition.OnDisassembly {
     // Modified 2026-10-30: refresh output handlers after neighbor capability changes.
     private final biggerreactorsrework.core.capability.NeighborCapability<biggerreactorsrework.core.transfer.FluidTanks, ?> outputCapability =
             biggerreactorsrework.core.capability.NeighborCapability.fluids(this);
-    
+
     @RegisterTile("turbine_fluid_port")
+//?} else if =1.21.1 {
+/*@ParametersAreNonnullByDefault
+@MethodsReturnNonnullByDefault
+public class TurbineFluidPortTile extends TurbineBaseTile implements IFluidTankHandler, MenuProvider, IHasUpdatableState<TurbineFluidPortState>, IEventMultiblock.AssemblyStateTransition.OnAssembly, IEventMultiblock.AssemblyStateTransition.OnDisassembly {
+    // Modified 2026-10-30: refresh output handlers after neighbor capability changes.
+    private final biggerreactorsrework.core.capability.NeighborCapability<net.neoforged.neoforge.fluids.capability.IFluidHandler> outputCapability =
+            new biggerreactorsrework.core.capability.NeighborCapability<>(this, Capabilities.FluidHandler.BLOCK);
+
+    @RegisterTile("turbine_fluid_port")
+*/
+//?}
     public static final BlockEntityType.BlockEntitySupplier<TurbineFluidPortTile> SUPPLIER = new RegisterTile.Producer<>(TurbineFluidPortTile::new);
-    
+
+//? if =26.1.2 || =26.3 {
     @RegisterCapability
     private static final CapabilityRegistration FLUID_HANDLER_CAP_REGISTRATION = CapabilityRegistration.tileFluids(TurbineFluidPortTile.class);
-    
+
     public TurbineFluidPortTile(BlockEntityType<?> TYPE, BlockPos pos, BlockState state) {
+//?} else if =1.21.1 {
+/*    @RegisterCapability
+    private static final CapabilityRegistration FLUID_HANDLER_CAP_REGISTRATION = CapabilityRegistration.tileCap(Capabilities.FluidHandler.BLOCK, TurbineFluidPortTile.class);
+
+    public TurbineFluidPortTile(BlockEntityType<?> TYPE, BlockPos pos, BlockState state) {
+*/
+//?}
         super(TYPE, pos, state);
     }
 
-    
+
+//? if =26.1.2 || =26.3 {
     private ITurbineFluidTank transitionTank;
-    
+
     @Override
     public Object transferSnapshot() {
         return transitionTank == null ? null : transitionTank.transferSnapshot();
@@ -66,13 +94,19 @@ public class TurbineFluidPortTile extends TurbineBaseTile implements IFluidTankH
     }
 
     @Override
+//?} else if =1.21.1 {
+/*    private ITurbineFluidTank transitionTank;
+
+    @Override
+*/
+//?}
     public int tankCount() {
         if (transitionTank == null) {
             return 0;
         }
         return transitionTank.tankCount();
     }
-    
+
     @Override
     public long tankCapacity(int tank) {
         if (transitionTank == null) {
@@ -80,7 +114,7 @@ public class TurbineFluidPortTile extends TurbineBaseTile implements IFluidTankH
         }
         return transitionTank.tankCapacity(tank);
     }
-    
+
     @Override
     public Fluid fluidTypeInTank(int tank) {
         if (transitionTank == null) {
@@ -88,7 +122,7 @@ public class TurbineFluidPortTile extends TurbineBaseTile implements IFluidTankH
         }
         return transitionTank.fluidTypeInTank(tank);
     }
-    
+
     @Nullable
     @Override
     public DataComponentPatch fluidComponentsInTank(int tank) {
@@ -97,7 +131,7 @@ public class TurbineFluidPortTile extends TurbineBaseTile implements IFluidTankH
         }
         return transitionTank.fluidComponentsInTank(tank);
     }
-    
+
     @Override
     public long fluidAmountInTank(int tank) {
         if (transitionTank == null) {
@@ -105,7 +139,7 @@ public class TurbineFluidPortTile extends TurbineBaseTile implements IFluidTankH
         }
         return transitionTank.fluidAmountInTank(tank);
     }
-    
+
     @Override
     public boolean fluidValidForTank(int tank, Fluid fluid) {
         if (transitionTank == null) {
@@ -113,7 +147,7 @@ public class TurbineFluidPortTile extends TurbineBaseTile implements IFluidTankH
         }
         return transitionTank.fluidValidForTank(tank, fluid);
     }
-    
+
     @Override
     public long fill(Fluid fluid, DataComponentPatch components, long amount, boolean simulate) {
         if (transitionTank == null || direction != INLET) {
@@ -121,7 +155,7 @@ public class TurbineFluidPortTile extends TurbineBaseTile implements IFluidTankH
         }
         return transitionTank.fill(fluid, DataComponentPatch.EMPTY, amount, simulate);
     }
-    
+
     @Override
     public long drain(Fluid fluid, DataComponentPatch components, long amount, boolean simulate) {
         if (transitionTank == null || direction == INLET) {
@@ -129,7 +163,7 @@ public class TurbineFluidPortTile extends TurbineBaseTile implements IFluidTankH
         }
         return transitionTank.drain(fluid, DataComponentPatch.EMPTY, amount, simulate);
     }
-    
+
     // Added 2026-11-02: controller drains only the sum actually accepted by balanced destinations.
     public long offerFluid(long maximum) {
         neighborChanged();
@@ -156,14 +190,14 @@ public class TurbineFluidPortTile extends TurbineBaseTile implements IFluidTankH
         }
         return 0;
     }
-    
+
     private boolean connected = false;
     Direction waterOutputDirection = null;
-    
+
     IFluidTankHandler handler = null;
     private TurbineFluidPort.PortDirection direction = INLET;
     public final TurbineFluidPortState fluidPortState = new TurbineFluidPortState(this);
-    
+
     @SuppressWarnings("DuplicatedCode")
     public void neighborChanged() {
         handler = null;
@@ -183,26 +217,33 @@ public class TurbineFluidPortTile extends TurbineBaseTile implements IFluidTankH
             handler = FluidHandlerWrapper.wrap(outputCap);
         }
     }
-    
+
     public void setDirection(TurbineFluidPort.PortDirection direction) {
         this.direction = direction;
         this.setChanged();
     }
-    
+
     @Override
     protected void readNBT(CompoundTag compound) {
+//? if =26.1.2 || =26.3 {
         if (compound.contains("direction")) {
             direction = biggerreactorsrework.core.util.SavedValues.enumValue(TurbineFluidPort.PortDirection.class, compound.getStringOr("direction", ""), TurbineFluidPort.PortDirection.INLET);
         }
+//?} else if =1.21.1 {
+/*        if (compound.contains("direction")) {
+            direction = biggerreactorsrework.core.util.SavedValues.enumValue(TurbineFluidPort.PortDirection.class, compound.getString("direction"), TurbineFluidPort.PortDirection.INLET);
+        }
+*/
+//?}
     }
-    
+
     @Override
     protected CompoundTag writeNBT() {
         CompoundTag NBT = new CompoundTag();
         NBT.putString("direction", String.valueOf(direction));
         return NBT;
     }
-    
+
     @SuppressWarnings("unchecked")
     @Override
     public void runRequest(String requestName, Object requestData) {
@@ -215,37 +256,37 @@ public class TurbineFluidPortTile extends TurbineBaseTile implements IFluidTankH
         }
         super.runRequest(requestName, requestData);
     }
-    
+
     @Override
     public Component getDisplayName() {
         return Component.translatable(TurbineFluidPort.INSTANCE.getDescriptionId());
     }
-    
+
     @Nullable
     @Override
     public AbstractContainerMenu createMenu(int windowId, Inventory playerInventory, Player player) {
         return new TurbineFluidPortContainer(windowId, this.worldPosition, player);
     }
-    
+
     @Nullable
     @Override
     public TurbineFluidPortState getState() {
         this.updateState();
         return this.fluidPortState;
     }
-    
+
     @Override
     public void updateState() {
         fluidPortState.direction = (this.direction == INLET);
     }
-    
-    
+
+
     @Override
     public void onAssemblyStateTransition(IValidatedMultiblock.AssemblyState oldState, IValidatedMultiblock.AssemblyState newState) {
         OnAssembly.super.onAssemblyStateTransition(oldState, newState);
         OnDisassembly.super.onAssemblyStateTransition(oldState, newState);
     }
-    
+
     @Override
     public void onAssembly() {
         this.transitionTank = controller().simulation().fluidTank();
@@ -253,7 +294,7 @@ public class TurbineFluidPortTile extends TurbineBaseTile implements IFluidTankH
         level.setBlockAndUpdate(worldPosition, level.getBlockState(worldPosition).setValue(PORT_DIRECTION_ENUM_PROPERTY, direction));
         neighborChanged();
     }
-    
+
     @Override
     public void onDisassembly() {
         waterOutputDirection = null;

@@ -4,9 +4,16 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
+//? if =26.1.2 || =26.3 {
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
+//?} else if =1.21.1 {
+/*import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.TagKey;
+*/
+//?}
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
@@ -16,9 +23,16 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
+//? if =26.1.2 || =26.3 {
 import net.neoforged.neoforge.capabilities.Capabilities;
 import biggerreactorsrework.core.transfer.ItemSlots;
 import biggerreactorsrework.Config;
+//?} else if =1.21.1 {
+/*import net.neoforged.neoforge.capabilities.Capabilities;
+import net.neoforged.neoforge.items.IItemHandler;
+import biggerreactorsrework.Config;
+*/
+//?}
 import biggerreactorsrework.blocks.materials.MaterialBlock;
 import biggerreactorsrework.items.ingots.BlutoniumIngot;
 import biggerreactorsrework.items.ingots.CyaniteIngot;
@@ -41,55 +55,94 @@ import javax.annotation.Nullable;
 
 import static biggerreactorsrework.multiblocks.reactor.blocks.ReactorAccessPort.PortDirection.*;
 
+//? if =26.1.2 || =26.3 {
 @NonnullDefault
 public class ReactorAccessPortTile extends ReactorBaseTile implements ItemSlots, biggerreactorsrework.core.transfer.TransferSnapshots, MenuProvider, IHasUpdatableState<ReactorAccessPortState>, IEventMultiblock.AssemblyStateTransition {
     // Modified 2026-10-30: refresh cached neighbors when their capability is invalidated.
     private final biggerreactorsrework.core.capability.NeighborCapability<ItemSlots, ?> outputCapability =
             biggerreactorsrework.core.capability.NeighborCapability.items(this);
-    
+
     @RegisterTile("reactor_access_port")
+//?} else if =1.21.1 {
+/*@NonnullDefault
+public class ReactorAccessPortTile extends ReactorBaseTile implements IItemHandler, MenuProvider, IHasUpdatableState<ReactorAccessPortState>, IEventMultiblock.AssemblyStateTransition {
+    // Modified 2026-10-30: refresh cached neighbors when their capability is invalidated.
+    private final biggerreactorsrework.core.capability.NeighborCapability<IItemHandler> outputCapability =
+            new biggerreactorsrework.core.capability.NeighborCapability<>(this, Capabilities.ItemHandler.BLOCK);
+
+    @RegisterTile("reactor_access_port")
+*/
+//?}
     public static final BlockEntityType.BlockEntitySupplier<ReactorAccessPortTile> SUPPLIER = new RegisterTile.Producer<>(ReactorAccessPortTile::new);
-    
+
+//? if =26.1.2 || =26.3 {
     @RegisterCapability
     private static final CapabilityRegistration ITEM_HANDLER_CAP_REGISTRATION = CapabilityRegistration.tileItems(ReactorAccessPortTile.class);
-    
+
     private static final TagKey<Item> uraniumIngotTag = TagKey.create(BuiltInRegistries.ITEM.key(), Identifier.parse("c:ingots/uranium"));
     private static final TagKey<Item> uraniumBlockTag = TagKey.create(BuiltInRegistries.ITEM.key(), Identifier.parse("c:storage_blocks/uranium"));
-    
+
     public static final int FUEL_SLOT = 0;
+//?} else if =1.21.1 {
+/*    @RegisterCapability
+    private static final CapabilityRegistration ITEM_HANDLER_CAP_REGISTRATION = CapabilityRegistration.tileCap(Capabilities.ItemHandler.BLOCK, ReactorAccessPortTile.class);
+
+    private static final TagKey<Item> uraniumIngotTag = TagKey.create(BuiltInRegistries.ITEM.key(), ResourceLocation.parse("c:ingots/uranium"));
+    private static final TagKey<Item> uraniumBlockTag = TagKey.create(BuiltInRegistries.ITEM.key(), ResourceLocation.parse("c:storage_blocks/uranium"));
+
+    public static final int FUEL_SLOT = 0;
+*/
+//?}
     public static final int WASTE_SLOT = 1;
     public static final int FUEL_INSERT_SLOT = 2;
-    
+
     public ReactorAccessPortTile(BlockEntityType<?> tileEntityTypeIn, BlockPos pos, BlockState state) {
         super(tileEntityTypeIn, pos, state);
     }
-    
+
     private ReactorAccessPort.PortDirection direction = INLET;
     private boolean recoverFuel = false;
-    
+
     public boolean isInlet() {
         return direction == INLET;
     }
-    
+
     public void setDirection(ReactorAccessPort.PortDirection direction) {
         if (this.direction != direction) recoverFuel = false;
         this.direction = direction;
         this.setChanged();
     }
-    
+
     @Override
     protected void readNBT(CompoundTag compound) {
+//? if =26.1.2 || =26.3 {
         if (compound.contains("direction")) {
             direction = biggerreactorsrework.core.util.SavedValues.enumValue(ReactorAccessPort.PortDirection.class, compound.getStringOr("direction", ""), ReactorAccessPort.PortDirection.INLET);
         }
         if (!isInlet() && compound.getBooleanOr("fuelMode", false)) {
             direction = INLET;
+//?} else if =1.21.1 {
+/*        if (compound.contains("direction")) {
+            direction = biggerreactorsrework.core.util.SavedValues.enumValue(ReactorAccessPort.PortDirection.class, compound.getString("direction"), ReactorAccessPort.PortDirection.INLET);
+        }
+        // Modified 2026-11-04: fuel recovery moved to the inlet; saved fuel outlets become recovering inlets.
+        if (!isInlet() && compound.getBoolean("fuelMode")) {
+            direction = INLET;
+*/
+//?}
             recoverFuel = true;
+//? if =26.1.2 || =26.3 {
         } else {
             recoverFuel = isInlet() && compound.getBooleanOr("recoverFuel", false);
         }
+//?} else if =1.21.1 {
+/*        } else {
+            recoverFuel = isInlet() && compound.getBoolean("recoverFuel");
+        }
+*/
+//?}
     }
-    
+
     @Override
     protected CompoundTag writeNBT() {
         CompoundTag NBT = new CompoundTag();
@@ -97,13 +150,13 @@ public class ReactorAccessPortTile extends ReactorBaseTile implements ItemSlots,
         NBT.putBoolean("recoverFuel", recoverFuel);
         return NBT;
     }
-    
+
     @Nonnull
     @Override
     public DebugInfo getDebugInfo() {
         return super.getDebugInfo().add("PortDirection: " + direction);
     }
-    
+
     @Override
     public void onAssemblyStateTransition(IValidatedMultiblock.AssemblyState oldState, IValidatedMultiblock.AssemblyState newState) {
         if (newState != IValidatedMultiblock.AssemblyState.DISASSEMBLED) {
@@ -114,8 +167,9 @@ public class ReactorAccessPortTile extends ReactorBaseTile implements ItemSlots,
             itemOutputDirection = null;
         }
         neighborChanged();
+//? if =26.1.2 || =26.3 {
     }
-    
+
     @Override
     public Object transferSnapshot() {
         var reactorSim = nullableController() == null ? null : controller().simulation();
@@ -131,10 +185,16 @@ public class ReactorAccessPortTile extends ReactorBaseTile implements ItemSlots,
     }
 
     @Override
+//?} else if =1.21.1 {
+/*    }
+
+    @Override
+*/
+//?}
     public int getSlots() {
         return 3;
     }
-    
+
     @Nonnull
     @Override
     public ItemStack getStackInSlot(int slot) {
@@ -155,7 +215,7 @@ public class ReactorAccessPortTile extends ReactorBaseTile implements ItemSlots,
             return ItemStack.EMPTY;
         }
     }
-    
+
     @Nonnull
     @Override
     public ItemStack insertItem(int slot, ItemStack stack, boolean simulate) {
@@ -175,31 +235,31 @@ public class ReactorAccessPortTile extends ReactorBaseTile implements ItemSlots,
         }
         return stack;
     }
-    
+
     @Nonnull
     @Override
     public ItemStack extractItem(int slot, int amount, boolean simulate) {
         if (nullableController() == null) {
             return ItemStack.EMPTY;
         }
-        
+
         if (slot == WASTE_SLOT && !isInlet()) {
             long maxExtractable = controller().extractWaste(amount * Config.CONFIG.Reactor.FuelMBPerIngot, true);
             long toExtracted = maxExtractable - (maxExtractable % Config.CONFIG.Reactor.FuelMBPerIngot);
             long extracted = controller().extractWaste(toExtracted, simulate);
-            
+
             return new ItemStack(CyaniteIngot.INSTANCE, (int) Math.min(amount, extracted / Config.CONFIG.Reactor.FuelMBPerIngot));
         } else if (slot == FUEL_SLOT && isInlet() && recoverFuel) {
             long maxExtractable = controller().extractFuel(amount * Config.CONFIG.Reactor.FuelMBPerIngot, true);
             long toExtracted = maxExtractable - (maxExtractable % Config.CONFIG.Reactor.FuelMBPerIngot);
             long extracted = controller().extractFuel(toExtracted, simulate);
-            
+
             return new ItemStack(UraniumIngot.INSTANCE, (int) Math.min(amount, extracted / Config.CONFIG.Reactor.FuelMBPerIngot));
         }
-        
+
         return ItemStack.EMPTY;
     }
-    
+
     @Override
     public int getSlotLimit(int slot) {
         if (nullableController() == null) {
@@ -211,7 +271,7 @@ public class ReactorAccessPortTile extends ReactorBaseTile implements ItemSlots,
         }
         return (int) (reactorSim.fuelTank().capacity() / Config.CONFIG.Reactor.FuelMBPerIngot);
     }
-    
+
     @Override
     public boolean isItemValid(int slot, ItemStack stack) {
         if (slot == FUEL_INSERT_SLOT) {
@@ -221,9 +281,17 @@ public class ReactorAccessPortTile extends ReactorBaseTile implements ItemSlots,
         } else {
             return stack.getItem() == CyaniteIngot.INSTANCE;
         }
+//? if =26.1.2 || =26.3 {
     }
-    
+
     public void ejectSelected() {
+//?} else if =1.21.1 {
+/*    }
+
+    // Modified 2026-11-04: outlets always send cyanite; a recovering inlet sends its stored fuel.
+    public void ejectSelected() {
+*/
+//?}
         if (!isInlet()) ejectWaste();
         else if (recoverFuel) ejectItems(FUEL_SLOT);
     }
@@ -237,19 +305,34 @@ public class ReactorAccessPortTile extends ReactorBaseTile implements ItemSlots,
         if (itemOutput == null || nullableController() == null) return;
 
         ItemStack available = extractItem(slot, 64, true);
+//? if =26.1.2 || =26.3 {
         if (available.isEmpty()) return;
 
         int accepted = available.getCount() - ItemSlots.insert(itemOutput, available, false).getCount();
         if (accepted > 0) extractItem(slot, accepted, false);
+//?} else if =1.21.1 {
+/*        if (available.isEmpty()) return;
+
+        int accepted = available.getCount() - net.neoforged.neoforge.items.ItemHandlerHelper.insertItem(itemOutput, available, false).getCount();
+        if (accepted > 0) extractItem(slot, accepted, false);
+*/
+//?}
     }
 
     @Nullable
     Direction itemOutputDirection;
     boolean connected;
+//? if =26.1.2 || =26.3 {
     @Nullable
     ItemSlots itemOutput = null;
     public final ReactorAccessPortState reactorAccessPortState = new ReactorAccessPortState(this);
-    
+//?} else if =1.21.1 {
+/*    @Nullable
+    IItemHandler itemOutput = null;
+    public final ReactorAccessPortState reactorAccessPortState = new ReactorAccessPortState(this);
+*/
+//?}
+
     @SuppressWarnings("DuplicatedCode")
     public void neighborChanged() {
         if (itemOutputDirection == null) {
@@ -261,13 +344,13 @@ public class ReactorAccessPortTile extends ReactorBaseTile implements ItemSlots,
         itemOutput = outputCapability.get(itemOutputDirection);
         connected = itemOutput != null;
     }
-    
+
     @Override
     public void runRequest(String requestName, Object requestData) {
         if (nullableController() == null) {
             return;
         }
-        
+
         // Change IO direction.
         if (requestName.equals("setDirection")) {
             // Modified 2026-10-30: reject invalid command types and domains before mutation.
@@ -276,41 +359,49 @@ public class ReactorAccessPortTile extends ReactorBaseTile implements ItemSlots,
             assert level != null;
             level.setBlockAndUpdate(this.worldPosition, this.getBlockState().setValue(PORT_DIRECTION_ENUM_PROPERTY, direction));
             return;
+//? if =26.1.2 || =26.3 {
         }
-        
+
         if (requestName.equals("recoverFuel")) {
+//?} else if =1.21.1 {
+/*        }
+
+        // Change fuel/waste ejection.
+        if (requestName.equals("recoverFuel")) {
+*/
+//?}
             if (isInlet() && requestData instanceof Boolean value) {
                 recoverFuel = value;
                 setChanged();
             }
             return;
         }
-        
+
         if (requestName.equals("ejectWaste")) {
             ejectSelected();
             return;
         }
-        
+
         super.runRequest(requestName, requestData);
     }
-    
+
     @Override
     public Component getDisplayName() {
         return Component.translatable(ReactorAccessPort.INSTANCE.getDescriptionId());
     }
-    
+
     @Nullable
     @Override
     public AbstractContainerMenu createMenu(int windowId, Inventory playerInventory, Player player) {
         return new ReactorAccessPortContainer(windowId, this.worldPosition, player);
     }
-    
+
     @Override
     public ReactorAccessPortState getState() {
         this.updateState();
         return this.reactorAccessPortState;
     }
-    
+
     @Override
     public void updateState() {
         reactorAccessPortState.direction = (this.direction == INLET);

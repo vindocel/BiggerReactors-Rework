@@ -9,6 +9,7 @@ import biggerreactorsrework.core.client.gui.RenderHelper;
 import biggerreactorsrework.registries.FluidTransitionRegistry;
 import biggerreactorsrework.registries.ReactorModeratorRegistry;
 import biggerreactorsrework.registries.TurbineCoilRegistry;
+//? if =26.1.2 || =26.3 {
 import net.minecraft.ChatFormatting;
 import net.minecraft.util.Util;
 import net.minecraft.client.Minecraft;
@@ -19,6 +20,19 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.ARGB;
 import net.minecraft.util.Mth;
+//?} else if =1.21.1 {
+/*import net.minecraft.ChatFormatting;
+import net.minecraft.Util;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.resources.language.I18n;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.FastColor;
+import net.minecraft.util.Mth;
+*/
+//?}
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.AirBlock;
 import net.minecraft.world.level.block.LiquidBlock;
@@ -97,9 +111,16 @@ public final class RecipeViewerData {
         for(var coolant:coolants)if(coolant.temperature()>water.get().temperature())
             result.add(new HeatExchange(coolant.output().copy(),coolant.input().copy(),coolant.temperature(),false,coolant.profile()));
         return List.copyOf(result);
+//? if =26.1.2 || =26.3 {
     }
     public static Identifier heatExchangeId(HeatExchange recipe) {
         return net.minecraft.core.registries.BuiltInRegistries.FLUID.getKey((recipe.evaporation()?recipe.input():recipe.output()).getFluid());
+//?} else if =1.21.1 {
+/*    }
+    public static ResourceLocation heatExchangeId(HeatExchange recipe) {
+        return net.minecraft.core.registries.BuiltInRegistries.FLUID.getKey((recipe.evaporation()?recipe.input():recipe.output()).getFluid());
+*/
+//?}
     }
 
     /**
@@ -123,10 +144,18 @@ public final class RecipeViewerData {
 
         public int outputY() {
             return height() - 18;
+//? if =26.1.2 || =26.3 {
         }
 
         public void draw(GuiGraphicsExtractor g) {
             Font font = Minecraft.getInstance().font;
+//?} else if =1.21.1 {
+/*        }
+
+        public void draw(GuiGraphics g) {
+            Font font = Minecraft.getInstance().font;
+*/
+//?}
             GuiArt.slot(g, 0, inputY(), 18);
             GuiArt.slot(g, 0, outputY(), 18);
             int top = inputY() + 20, bottom = outputY() - 2;
@@ -252,23 +281,47 @@ public final class RecipeViewerData {
         /** The slot frame for the block or fluid, centered on the left. */
         public static int slotY(List<Stat> stats) {
             return (height(stats) - 18) / 2;
+//? if =26.1.2 || =26.3 {
         }
 
         public static void draw(GuiGraphicsExtractor g, List<Stat> stats) {
             GuiArt.slot(g, 0, slotY(stats), 18);
+//?} else if =1.21.1 {
+/*        }
+
+        public static void draw(GuiGraphics g, List<Stat> stats) {
+            GuiArt.slot(g, 0, slotY(stats), 18);
+*/
+//?}
             drawRows(g, stats, 0, WIDTH);
+//? if =26.1.2 || =26.3 {
         }
 
         /** The rows only, from {@code top}, with the values ending at {@code width}. */
         public static void drawRows(GuiGraphicsExtractor g, List<Stat> stats, int top, int width) {
             Font font = Minecraft.getInstance().font;
+//?} else if =1.21.1 {
+/*        }
+
+        /^* The rows only, from {@code top}, with the values ending at {@code width}. ^/
+        public static void drawRows(GuiGraphics g, List<Stat> stats, int top, int width) {
+            Font font = Minecraft.getInstance().font;
+*/
+//?}
             int text = GuiTheme.textColor();
             for (int i = 0; i < stats.size(); i++) {
                 Stat stat = stats.get(i);
                 int y = top + i * ROW + 2;
+//? if =26.1.2 || =26.3 {
                 GuiArt.scrollingText(g, font, Component.translatable(KEY + stat.name()).getString(), LABEL_X, y, MARK_X - LABEL_X - 2, text);
                 g.text(font, mark(stat), MARK_X, y, color(stat), false);
                 int barY = y + 1;
+//?} else if =1.21.1 {
+/*                GuiArt.scrollingText(g, font, Component.translatable(KEY + stat.name()).getString(), LABEL_X, y, MARK_X - LABEL_X - 2, text);
+                g.drawString(font, mark(stat), MARK_X, y, color(stat), false);
+                int barY = y + 1;
+*/
+//?}
                 // Modified 2026-10-27: neutral property-bar chrome follows the active drawing theme.
                 g.fill(BAR_X - 1, barY - 1, BAR_X + BAR_WIDTH + 1, barY + BAR_HEIGHT + 1, GuiTheme.chromeColor(BAR_FRAME));
                 g.fill(BAR_X, barY, BAR_X + BAR_WIDTH, barY + BAR_HEIGHT, GuiTheme.chromeColor(BAR_TRACK));
@@ -276,11 +329,19 @@ public final class RecipeViewerData {
                 if (stat.value() > 0) {
                     fill = Math.max(1, fill);
                 }
+//? if =26.1.2 || =26.3 {
                 g.fill(BAR_X, barY, BAR_X + fill, barY + BAR_HEIGHT, color(stat));
                 g.fill(BAR_X, barY, BAR_X + fill, barY + 1, ARGB.srgbLerp(0.35f, color(stat), GuiArt.WHITE));
                 String value = display(stat);
                 // Modified 2026-11-03: keep the readout inside its column, even when the value scrolls.
                 int valueLeft = BAR_X + BAR_WIDTH + 3;
+//?} else if =1.21.1 {
+/*                g.fill(BAR_X, barY, BAR_X + fill, barY + BAR_HEIGHT, color(stat));
+                g.fill(BAR_X, barY, BAR_X + fill, barY + 1, FastColor.ARGB32.lerp(0.35f, color(stat), GuiArt.WHITE));
+                String value = display(stat);
+                int valueLeft = BAR_X + BAR_WIDTH + 3;
+*/
+//?}
                 int valueWidth = width - valueLeft;
                 if (valueWidth > 0) {
                     int x = Math.max(valueLeft, width - font.width(value));
@@ -324,6 +385,7 @@ public final class RecipeViewerData {
                 } else {
                     lines.add(Component.translatable(KEY + "average").withStyle(ChatFormatting.YELLOW));
                 }
+//? if =26.1.2 || =1.21.1 {
             }
             if (I18n.exists(key + ".pro")) {
                 lines.add(Component.translatable(key + ".pro").withStyle(ChatFormatting.GREEN));
@@ -333,6 +395,18 @@ public final class RecipeViewerData {
             }
             if (I18n.exists(key + ".note")) {
                 lines.add(Component.translatable(key + ".note").withStyle(ChatFormatting.GOLD));
+//?} else if =26.3 {
+/*            }
+            if (net.minecraft.locale.Language.getInstance().has(key + ".pro")) {
+                lines.add(Component.translatable(key + ".pro").withStyle(ChatFormatting.GREEN));
+            }
+            if (net.minecraft.locale.Language.getInstance().has(key + ".con")) {
+                lines.add(Component.translatable(key + ".con").withStyle(ChatFormatting.RED));
+            }
+            if (net.minecraft.locale.Language.getInstance().has(key + ".note")) {
+                lines.add(Component.translatable(key + ".note").withStyle(ChatFormatting.GOLD));
+*/
+//?}
             }
             return lines;
         }
@@ -348,9 +422,16 @@ public final class RecipeViewerData {
             if (stat.tradeOff()) {
                 return TRADE_OFF;
             }
+//? if =26.1.2 || =26.3 {
             double rank = stat.rank();
             return rank < 0.5 ? ARGB.srgbLerp((float) (rank * 2), LOW, MIDDLE) : ARGB.srgbLerp((float) (rank * 2 - 1), MIDDLE, HIGH);
         }
+//?} else if =1.21.1 {
+/*            double rank = stat.rank();
+            return rank < 0.5 ? FastColor.ARGB32.lerp((float) (rank * 2), LOW, MIDDLE) : FastColor.ARGB32.lerp((float) (rank * 2 - 1), MIDDLE, HIGH);
+        }
+*/
+//?}
 
         private static String display(Stat stat) {
             return switch (stat.name()) {
@@ -401,12 +482,22 @@ public final class RecipeViewerData {
 
         public static long water() {
             return (long) Config.CONFIG.IndustrialProcessor.WaterConsumptionPerTick * ticks();
+//? if =26.1.2 || =26.3 {
         }
 
         public static void draw(GuiGraphicsExtractor g) { draw(g, null); }
 
         public static void draw(GuiGraphicsExtractor g, biggerreactorsrework.machine.recipe.ReprocessingRecipe recipe) {
             long energy = recipe == null ? energy() : (long)recipe.energy()*recipe.duration();
+//?} else if =1.21.1 {
+/*        }
+
+        public static void draw(GuiGraphics g) { draw(g, null); }
+
+        public static void draw(GuiGraphics g, biggerreactorsrework.machine.recipe.ReprocessingRecipe recipe) {
+            long energy = recipe == null ? energy() : (long)recipe.energy()*recipe.duration();
+*/
+//?}
             long water = recipe == null ? water() : recipe.totalFluid();
             int ticks = recipe == null ? ticks() : recipe.duration();
             EnergyBar.draw(g, ENERGY_X, 0, GaugeBar.WIDTH, HEIGHT,

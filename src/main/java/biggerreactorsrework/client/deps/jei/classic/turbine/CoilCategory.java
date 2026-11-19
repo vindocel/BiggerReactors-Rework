@@ -13,16 +13,32 @@ import mezz.jei.api.helpers.IGuiHelper;
 import mezz.jei.api.recipe.IFocusGroup;
 import mezz.jei.api.recipe.RecipeIngredientRole;
 import mezz.jei.api.recipe.RecipeType;
+//? if =26.1.2 || =26.3 {
 import mezz.jei.api.recipe.category.IRecipeCategory;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
+//?} else if =1.21.1 {
+/*import mezz.jei.api.recipe.category.IRecipeCategory;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.ItemStack;
+*/
+//?}
 
 public class CoilCategory implements IRecipeCategory<CoilCategory.Recipe> {
+//? if =26.1.2 || =26.3 {
     private final IDrawable icon;
     public static final Identifier UID = Identifier.fromNamespaceAndPath(BiggerReactors.modid, "classic/turbine_coil");
     public static final RecipeType<Recipe> RECIPE_TYPE = new RecipeType<>(UID, Recipe.class);
+//?} else if =1.21.1 {
+/*    private final IDrawable icon;
+    public static final ResourceLocation UID = ResourceLocation.fromNamespaceAndPath(BiggerReactors.modid, "classic/turbine_coil");
+    public static final RecipeType<Recipe> RECIPE_TYPE = new RecipeType<>(UID, Recipe.class);
+*/
+//?}
 
     public CoilCategory(IGuiHelper guiHelper) {
         icon = guiHelper.createDrawableItemStack(new ItemStack(TurbineTerminal.INSTANCE));
@@ -58,9 +74,16 @@ public class CoilCategory implements IRecipeCategory<CoilCategory.Recipe> {
         builder.addSlot(RecipeIngredientRole.INPUT, 1, Stats.slotY(recipe.stats()) + 1).addItemStack(recipe.getInput());
     }
 
+//? if =26.1.2 || =26.3 {
     @Override
     public void draw(Recipe recipe, IRecipeSlotsView recipeSlotsView, GuiGraphicsExtractor guiGraphics, double mouseX, double mouseY) {
         Stats.draw(guiGraphics, recipe.stats());
+//?} else if =1.21.1 {
+/*    @Override
+    public void draw(Recipe recipe, IRecipeSlotsView recipeSlotsView, GuiGraphics guiGraphics, double mouseX, double mouseY) {
+        Stats.draw(guiGraphics, recipe.stats());
+*/
+//?}
     }
 
     @Override

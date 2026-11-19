@@ -10,21 +10,21 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 public class Battery extends HeatBody implements IReactorSimulation.IBattery, ISerializable {
-    
+
     private final SimulationConfiguration configuration;
     private final long capacity;
     private long stored;
     private long generatedLastTick;
-    
+
     {
         setInfinite(true);
     }
-    
+
     public Battery(long capacity, SimulationConfiguration configuration) {
         this.configuration = configuration;
         this.capacity = capacity;
     }
-    
+
     // Modified 2026-11-02: accept a paid thermal budget without reusing legacy heat transfer.
     public long generate(long potential) {
         generatedLastTick=Math.max(0,potential);
@@ -37,28 +37,29 @@ public class Battery extends HeatBody implements IReactorSimulation.IBattery, IS
         double newTemp = other.temperature() - temperature();
         newTemp *= Math.exp(-rfkt / other.rfPerKelvin());
         newTemp += temperature();
-        
+
         double rfTransferred = (newTemp - other.temperature()) * other.rfPerKelvin();
-        
+
         generatedLastTick = (long) (-rfTransferred * configuration.outputMultiplier() * configuration.passiveOutputMultiplier());
         generatedLastTick = Math.max(0, generatedLastTick);
         stored += Math.min(generatedLastTick, Math.max(0, capacity - stored));
         if (stored > capacity) {
             stored = capacity;
         }
-        
+
         other.setTemperature(newTemp);
-        
+
         return rfTransferred;
     }
-    
+
     @Override
     public long extract(long toExtract) {
         long extracted = Math.max(0, Math.min(stored, toExtract));
         stored -= extracted;
         return extracted;
     }
-    
+
+//? if =26.1.2 || =26.3 {
     @Override
     public void restoreStored(long stored) {
         this.stored = stored;
@@ -66,19 +67,24 @@ public class Battery extends HeatBody implements IReactorSimulation.IBattery, IS
 
     @Override
     public long stored() {
+//?} else if =1.21.1 {
+/*    @Override
+    public long stored() {
+*/
+//?}
         return stored;
     }
-    
+
     @Override
     public long capacity() {
         return capacity;
     }
-    
+
     @Override
     public long generatedLastTick() {
         return generatedLastTick;
     }
-    
+
     @Nullable
     @Override
     public DataCompound save() {
@@ -86,7 +92,7 @@ public class Battery extends HeatBody implements IReactorSimulation.IBattery, IS
         compound.put("storedPower", stored);
         return compound;
     }
-    
+
     @Override
     public void load(@Nonnull DataCompound compound) {
         stored = Math.max(0, compound.getLong("storedPower"));

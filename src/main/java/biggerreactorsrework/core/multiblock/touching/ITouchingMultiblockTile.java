@@ -26,26 +26,26 @@ public interface ITouchingMultiblockTile<
         BlockType extends Block & IRectangularMultiblockBlock,
         ControllerType extends MultiblockController<TileType, BlockType, ControllerType> & ITouchingMultiblock<TileType, BlockType, ControllerType> & IRectangularMultiblock<TileType, BlockType, ControllerType> & IPersistentMultiblock<TileType, BlockType, ControllerType>
         > extends IMultiblockTile<TileType, BlockType, ControllerType> {
-    
+
     final class Module<
             TileType extends BlockEntity & ITouchingMultiblockTile<TileType, BlockType, ControllerType> & IRectangularMultiblockTile<TileType, BlockType, ControllerType> & IPersistentMultiblockTile<TileType, BlockType, ControllerType>,
             BlockType extends Block & IRectangularMultiblockBlock,
             ControllerType extends MultiblockController<TileType, BlockType, ControllerType> & ITouchingMultiblock<TileType, BlockType, ControllerType> & IRectangularMultiblock<TileType, BlockType, ControllerType> & IPersistentMultiblock<TileType, BlockType, ControllerType>
             > extends TileModule<TileType> implements ICoreMultiblockTileModule<TileType, BlockType, ControllerType> {
-        
+
         boolean assembled = false;
         final Vector3i min = new Vector3i();
         final Vector3i max = new Vector3i();
-        
+
         @OnModLoad
         public static void register() {
             ModuleRegistry.registerTileModule(ITouchingMultiblockTile.class, Module::new);
         }
-        
+
         public Module(IModularTile iface) {
             super(iface);
         }
-        
+
         @Override
         public boolean shouldConnectTo(TileType tile, Direction direction) {
             if (!assembled) {
@@ -53,19 +53,28 @@ public interface ITouchingMultiblockTile<
             }
             return VectorUtil.lequal(min, tile.getBlockPos()) && VectorUtil.grequal(max, tile.getBlockPos());
         }
-    
+
         @Override
         public String saveKey() {
             return "touching_multiblock";
         }
-    
+
         @Override
+//? if =26.1.2 || =26.3 {
         public void readNBT(CompoundTag nbt) {
             assembled = nbt.getBooleanOr("assembled", false);
             min.set(nbt.getIntOr("minx", 0), nbt.getIntOr("miny", 0), nbt.getIntOr("minz", 0));
             max.set(nbt.getIntOr("maxx", 0), nbt.getIntOr("maxy", 0), nbt.getIntOr("maxz", 0));
         }
-        
+//?} else if =1.21.1 {
+/*        public void readNBT(CompoundTag nbt) {
+            assembled = nbt.getBoolean("assembled");
+            min.set(nbt.getInt("minx"), nbt.getInt("miny"), nbt.getInt("minz"));
+            max.set(nbt.getInt("maxx"), nbt.getInt("maxy"), nbt.getInt("maxz"));
+        }
+*/
+//?}
+
         @Override
         public CompoundTag writeNBT() {
             final var tag = new CompoundTag();

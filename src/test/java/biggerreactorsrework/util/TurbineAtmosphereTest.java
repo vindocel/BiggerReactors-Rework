@@ -50,9 +50,16 @@ class TurbineAtmosphereTest {
         assertEquals(32, TurbineAtmosphere.opacity(2));
         assertEquals(0, TurbineAtmosphere.opacity(Float.NaN));
         assertEquals(0, TurbineAtmosphere.opacity(Float.POSITIVE_INFINITY));
+//? if =26.1.2 || =26.3 {
     }
     @Test void exposedNonRotorUndersidesCanDripInAnyOrientation() {
         assertTrue(TurbineAtmosphere.condensationSurface(true, false, true));
+//?} else if =1.21.1 {
+/*    }
+    @Test void OnlyExposedUpperCeilingAndCoilUndersidesCanDrip() {
+        assertTrue(TurbineAtmosphere.condensationSurface(true, false, true));
+*/
+//?}
         assertFalse(TurbineAtmosphere.condensationSurface(true, false, false));
         assertFalse(TurbineAtmosphere.condensationSurface(false, false, true));
         assertFalse(TurbineAtmosphere.condensationSurface(true, true, true));
@@ -60,6 +67,7 @@ class TurbineAtmosphereTest {
         assertEquals(0.4F, TurbineAtmosphere.fade(0F, 1F, 1F), 1E-6F);
         assertEquals(0.6F, TurbineAtmosphere.fade(1F, 0F, 1F), 1E-6F);
         assertEquals(0F, TurbineAtmosphere.fade(0F, 0F, 0.05F));
+//? if =26.1.2 || =26.3 {
     }
     @Test void shaderOpacityKeepsFaintestTextureTexelsAboveCutoutAndEmptyClear() {
         assertEquals(0, TurbineAtmosphere.shaderOpacity(0));
@@ -73,3 +81,8 @@ class TurbineAtmosphereTest {
         assertEquals(32, TurbineAtmosphere.opacity(1));
     }
 }
+//?} else if =1.21.1 {
+/*    }
+}
+*/
+//?}

@@ -14,18 +14,35 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.*;
 import net.neoforged.neoforge.gametest.*;
 
+//? if =26.1.2 || =26.3 {
 import java.util.List;
 
 /** Added 2026-10-30: terminal and sensor snapshots share appearance, without moving menu/network origins. */
 public final class SensorAppearanceGameTests {
+//?} else if =1.21.1 {
+/*import java.util.List;
+
+/^* Added 2026-10-30: terminal and sensor snapshots share appearance, without moving menu/network origins. ^/
+@GameTestHolder(BiggerReactors.modid)
+@PrefixGameTestTemplate(false)
+public final class SensorAppearanceGameTests {
+*/
+//?}
     private static final BlockPos FIRST = new BlockPos(0,1,2), SECOND = new BlockPos(4,2,2);
     private static final BlockPos SENSOR = new BlockPos(0,2,1), OTHER_SENSOR = new BlockPos(0,2,3);
 
     private static void check(GameTestHelper h, BlockPos expected, List<BlockPos> positions) {
         var player = net.neoforged.neoforge.common.util.FakePlayerFactory.getMinecraft(h.getLevel());
+//? if =26.1.2 || =26.3 {
         for (var relative : positions) {
             var tile = GameTestSupport.be(h,relative);
             var pos = tile.getBlockPos();
+//?} else if =1.21.1 {
+/*        for (var relative : positions) {
+            var tile = h.getBlockEntity(relative);
+            var pos = tile.getBlockPos();
+*/
+//?}
             GuiSync.IGUIPacketProvider menu;
             if (tile instanceof ReactorTerminalTile) menu = new ReactorTerminalContainer(42, pos, player);
             else if (tile instanceof ReactorRedstonePortTile) menu = new ReactorRedstonePortContainer(42, pos, player);

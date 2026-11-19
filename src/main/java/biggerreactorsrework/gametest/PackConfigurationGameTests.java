@@ -10,14 +10,34 @@ import biggerreactorsrework.multiblocks.battery.tiles.BatteryCellTile;
 import biggerreactorsrework.registries.ReactorFuelRegistry;
 import com.google.gson.JsonParser;
 import com.mojang.serialization.JsonOps;
+//? if =26.1.2 || =26.3 {
 import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.world.item.ItemStack;
+//?} else if =1.21.1 {
+/*import net.minecraft.core.BlockPos;
+import net.minecraft.gametest.framework.GameTest;
+import net.minecraft.gametest.framework.GameTestHelper;
+import net.neoforged.neoforge.gametest.GameTestHolder;
+import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
+import net.minecraft.world.item.ItemStack;
+*/
+//?}
 import net.minecraft.world.item.Items;
+//? if =26.1.2 || =26.3 {
 import net.minecraft.world.level.levelgen.placement.PlacementModifier;
 
 /** Added 2026-11-01: real ore-filter decoding, fuel transfer, saved battery energy and optional script dispatch. */
 public final class PackConfigurationGameTests {
+//?} else if =1.21.1 {
+/*import net.minecraft.world.level.levelgen.placement.PlacementModifier;
+
+/^* Added 2026-11-01: real ore-filter decoding, fuel transfer, saved battery energy and optional script dispatch. ^/
+@GameTestHolder(biggerreactorsrework.BiggerReactors.modid)
+@PrefixGameTestTemplate(false)
+public final class PackConfigurationGameTests {
+*/
+//?}
     private static PackConfiguration.Option option(String key) { return PackConfiguration.serverOptions().get(key); }
     @GameTest(template="empty_7x7x7")
     public static void editorRejectsDedicatedServerWritesAndPreservesLongPrecision(GameTestHelper h) {
@@ -56,12 +76,22 @@ public final class PackConfigurationGameTests {
         var filter = PlacementModifier.CODEC.parse(JsonOps.INSTANCE, JsonParser.parseString("{\"type\":\"biggerreactorsrework:uranium_generation\"}")).getOrThrow();
         var outputs = new java.util.ArrayList<BlockPos>(); var pos = h.absolutePos(new BlockPos(2,2,2));
         h.setBlock(2,2,2,biggerreactorsrework.blocks.materials.UraniumOre.INSTANCE);
+//? if =26.1.2 || =1.21.1 {
         try {
             option.node().writeFromString("false"); filter.getPositions(null, h.getLevel().getRandom(), pos).forEach(outputs::add);
             h.assertTrue(outputs.isEmpty(), "disabled ore generation emitted a position");
             h.assertTrue(h.getBlockState(new BlockPos(2,2,2)).is(biggerreactorsrework.blocks.materials.UraniumOre.INSTANCE), "switch deleted existing ore");
             option.node().writeFromString("true"); filter.getPositions(null, h.getLevel().getRandom(), pos).forEach(outputs::add);
             h.assertTrue(outputs.equals(java.util.List.of(pos)), "enabled generation did not preserve placement origin");
+//?} else if =26.3 {
+/*        try {
+            option.node().writeFromString("false"); filter.modify(null, h.getLevel().getRandom(), pos, outputs::add);
+            h.assertTrue(outputs.isEmpty(), "disabled ore generation emitted a position");
+            h.assertTrue(h.getBlockState(new BlockPos(2,2,2)).is(biggerreactorsrework.blocks.materials.UraniumOre.INSTANCE), "switch deleted existing ore");
+            option.node().writeFromString("true"); filter.modify(null, h.getLevel().getRandom(), pos, outputs::add);
+            h.assertTrue(outputs.equals(java.util.List.of(pos)), "enabled generation did not preserve placement origin");
+*/
+//?}
         } finally { option.node().writeFromString(before); }
         h.succeed();
     }
@@ -81,9 +111,16 @@ public final class PackConfigurationGameTests {
         h.setBlock(2,2,2,ReactorFuelRod.INSTANCE); h.setBlock(2,3,2,ReactorControlRod.INSTANCE);
         h.setBlock(1,2,2,ReactorTerminal.INSTANCE); h.setBlock(2,2,1,ReactorAccessPort.INSTANCE);
         h.startSequence().thenWaitUntil(()->h.assertTrue(h.getBlockState(new BlockPos(1,2,2)).getValue(biggerreactorsrework.core.multiblock.IAssemblyStateBlock.ASSEMBLED),"reactor not assembled"))
+//? if =26.1.2 || =26.3 {
                 .thenExecute(()->{
                     var port=(ReactorAccessPortTile)GameTestSupport.be(h,new BlockPos(2,2,1));
                     var option=option("Reactor.CustomFuelEntries"); String before=option.current();
+//?} else if =1.21.1 {
+/*                .thenExecute(()->{
+                    var port=(ReactorAccessPortTile)h.getBlockEntity(new BlockPos(2,2,1));
+                    var option=option("Reactor.CustomFuelEntries"); String before=option.current();
+*/
+//?}
                     try {
                         option.node().writeFromString("minecraft:apple=1500;#minecraft:logs=2000");
                         var apples=new ItemStack(Items.APPLE,3);
@@ -119,11 +156,20 @@ public final class PackConfigurationGameTests {
     @GameTest(template="empty_7x7x7",timeoutTicks=120)
     public static void lowerBatteryCapacityPreservesSavedEnergyAndBlocksInput(GameTestHelper h) {
         for(int x=1;x<=3;x++)for(int y=1;y<=3;y++)for(int z=1;z<=3;z++)h.setBlock(x,y,z,x==2&&y==2&&z==2?BatteryCell.INSTANCE:BatteryCasing.INSTANCE);
+//? if =26.1.2 || =26.3 {
         h.setBlock(1,2,2,BatteryTerminal.INSTANCE); h.setBlock(2,2,1,BatteryEnergyPort.INSTANCE); h.setBlock(2,2,3,BatteryEnergyPort.INSTANCE);
         h.startSequence().thenWaitUntil(()->h.assertTrue(((BatteryTerminalTile)GameTestSupport.be(h,new BlockPos(1,2,2))).isBatteryAssembled(),"battery not assembled"))
                 .thenExecute(()->{
                     var c=((BatteryTerminalTile)GameTestSupport.be(h,new BlockPos(1,2,2))).controller();
                     h.assertTrue(c.insert(10000,false)==10000,"initial charge failed"); c.syncCells();
+//?} else if =1.21.1 {
+/*        h.setBlock(1,2,2,BatteryTerminal.INSTANCE); h.setBlock(2,2,1,BatteryEnergyPort.INSTANCE); h.setBlock(2,2,3,BatteryEnergyPort.INSTANCE);
+        h.startSequence().thenWaitUntil(()->h.assertTrue(((BatteryTerminalTile)h.getBlockEntity(new BlockPos(1,2,2))).isBatteryAssembled(),"battery not assembled"))
+                .thenExecute(()->{
+                    var c=((BatteryTerminalTile)h.getBlockEntity(new BlockPos(1,2,2))).controller();
+                    h.assertTrue(c.insert(10000,false)==10000,"initial charge failed"); c.syncCells();
+*/
+//?}
                     var option=option("Battery.CellCapacity"); String before=option.current();
                     try {
                         option.node().writeFromString("1000");
@@ -131,17 +177,32 @@ public final class PackConfigurationGameTests {
                     } catch(ReflectiveOperationException error) { throw new AssertionError(error); }
                     finally { option.node().writeFromString(before); }
                     c.tick(); h.assertTrue(c.capacity()==1000&&c.stored()==10000,"capacity change destroyed saved energy");
+//? if =26.1.2 || =26.3 {
                     h.assertTrue(c.insert(1,false)==0&&c.extract(1000,false)==1000,"overfull battery transfer invalid");
                     c.syncCells(); var cell=(BatteryCellTile)GameTestSupport.be(h,new BlockPos(2,2,2));
                     h.assertTrue(cell.energy()==9000&&cell.saveWithoutMetadata(h.getLevel().registryAccess()).getCompoundOrEmpty("local").getLongOr("energy",0)==9000,"overfull energy not persisted on cell");
                 }).thenSucceed();
+//?} else if =1.21.1 {
+/*                    h.assertTrue(c.insert(1,false)==0&&c.extract(1000,false)==1000,"overfull battery transfer invalid");
+                    c.syncCells(); var cell=(BatteryCellTile)h.getBlockEntity(new BlockPos(2,2,2));
+                    h.assertTrue(cell.energy()==9000&&cell.saveWithoutMetadata(h.getLevel().registryAccess()).getCompound("local").getLong("energy")==9000,"overfull energy not persisted on cell");
+                }).thenSucceed();
+*/
+//?}
     }
     @GameTest(template="empty_7x7x7")
     public static void actualKubeJSScriptsConfigureRulesAndNativeDataMaps(GameTestHelper h) {
         if(!Boolean.getBoolean("biggerreactorsrework.testScripting")){h.succeed();return;}
+//? if =26.1.2 || =26.3 {
         h.assertTrue(net.neoforged.fml.ModList.get().isLoaded("kubejs"),"scripting runtime absent");
         h.assertTrue(!Config.CONFIG.Worldgen.GenerateUranium&&Config.CONFIG.Battery.CellCapacity==3200001234L&&Config.CONFIG.Battery.CellTransferRate==300123,"configuration event did not apply");
         h.assertTrue(ReactorFuelRegistry.amount(new ItemStack(Items.APPLE))==2500,"script fuel event failed");
+//?} else if =1.21.1 {
+/*        h.assertTrue(net.neoforged.fml.ModList.get().isLoaded("kubejs"),"scripting runtime absent");
+        h.assertTrue(!Config.CONFIG.Worldgen.GenerateUranium&&Config.CONFIG.Battery.CellCapacity==3200001000L&&Config.CONFIG.Battery.CellTransferRate==300123,"configuration event did not apply");
+        h.assertTrue(ReactorFuelRegistry.amount(new ItemStack(Items.APPLE))==2500,"script fuel event failed");
+*/
+//?}
         h.assertTrue(ReactorFuelRegistry.amount(new ItemStack(Items.BEETROOT))==1234,"script fuel data map failed");
         var coil=biggerreactorsrework.registries.TurbineCoilRegistry.getCoilData(net.minecraft.world.level.block.Blocks.HONEY_BLOCK);
         h.assertTrue(coil!=null&&coil.efficiency==1.25&&coil.extractionRate==1.1,"script coil data map failed");
@@ -163,9 +224,16 @@ public final class PackConfigurationGameTests {
             h.assertTrue(future.get()!=null&&future.get().isDone(),"resource reload incomplete");
             future.get().join();
             h.assertTrue(PackConfiguration.overrides().equals(before),"reload changed live simulation rules");
+//? if =26.1.2 || =26.3 {
             h.assertTrue(ReactorFuelRegistry.amount(new ItemStack(Items.BEETROOT))==1234,"reload lost native fuel overlay");
             h.assertTrue(Config.CONFIG.Battery.CellCapacity==3200001234L,"reload lost scripted capacity");
         }).thenExecute(()->biggerreactorsrework.BiggerReactors.LOGGER.info("PACK_SCRIPT_RELOAD_PASS: unchanged config overrides and native material data maps survive actual resource reload"))
+//?} else if =1.21.1 {
+/*            h.assertTrue(ReactorFuelRegistry.amount(new ItemStack(Items.BEETROOT))==1234,"reload lost native fuel overlay");
+            h.assertTrue(Config.CONFIG.Battery.CellCapacity==3200001000L,"reload lost scripted capacity");
+        }).thenExecute(()->biggerreactorsrework.BiggerReactors.LOGGER.info("PACK_SCRIPT_RELOAD_PASS: unchanged config overrides and native material data maps survive actual resource reload"))
+*/
+//?}
                 .thenSucceed();
     }
 }

@@ -1,8 +1,18 @@
+//? if =26.1.2 || =26.3 {
 package biggerreactorsrework.registries;
 
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
+//?} else if =1.21.1 {
+/*package biggerreactorsrework.registries;
+
+import net.minecraft.MethodsReturnNonnullByDefault;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.TagKey;
+*/
+//?}
 import net.minecraft.world.level.material.Fluid;
 import biggerreactorsrework.BiggerReactors;
 import biggerreactorsrework.core.config.ConfigValue;
@@ -11,22 +21,30 @@ import biggerreactorsrework.core.robn.ROBNObject;
 
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
+//? if =26.1.2 || =26.3 {
 import java.util.*;
 
 @ParametersAreNonnullByDefault
+//?} else if =1.21.1 {
+/*import java.util.*;
+
+@MethodsReturnNonnullByDefault
+@ParametersAreNonnullByDefault
+*/
+//?}
 public class FluidTransitionRegistry {
-    
+
     public interface ITransitionProperties extends ROBNObject {
         double latentHeat();
-        
+
         double boilingPoint();
-        
+
         double liquidRFMKT();
-        
+
         double gasRFMKT();
-        
+
         double turbineMultiplier();
-    
+
         @Override
         default Map<String, Object> toROBNMap() {
             final Map<String, Object> map = new HashMap<>();
@@ -37,16 +55,16 @@ public class FluidTransitionRegistry {
             map.put("turbineMultiplier", turbineMultiplier());
             return map;
         }
-    
+
         @Override
         default void fromROBNMap(Map<String, Object> map) {
             throw new IllegalArgumentException("");
         }
     }
-    
-    
+
+
     public record TransitionProperties(double latentHeat, double boilingPoint, double liquidRFMKT, double gasRFMKT, double turbineMultiplier) implements ITransitionProperties {
-        
+
         public TransitionProperties(Map<String, Object> map) {
             this(
                     ((Number) map.get("latentHeat")).doubleValue(),
@@ -57,7 +75,7 @@ public class FluidTransitionRegistry {
             );
         }
     }
-    
+
     public static class FluidTransition implements ITransitionProperties {
         public double recovery = 1;
         // Modified 2026-11-02: steam mB per ten hot mB; separate from turbine latentHeat.
@@ -70,7 +88,7 @@ public class FluidTransitionRegistry {
         public final double liquidRFMKT;
         public final double gasRFMKT;
         public final double turbineMultiplier;
-        
+
         public FluidTransition(List<Fluid> liquids, List<Fluid> gases, double latentHeat, double boilingPoint, double liquidRFMKT, double gasRFMKT, double turbineMultiplier) {
             this.liquids = Collections.unmodifiableList(liquids);
             this.gases = Collections.unmodifiableList(gases);
@@ -80,41 +98,41 @@ public class FluidTransitionRegistry {
             this.gasRFMKT = gasRFMKT;
             this.turbineMultiplier = turbineMultiplier;
         }
-    
+
         @Override
         public double latentHeat() {
             return latentHeat;
         }
-    
+
         @Override
         public double boilingPoint() {
             return boilingPoint;
         }
-    
+
         @Override
         public double liquidRFMKT() {
             return liquidRFMKT;
         }
-    
+
         @Override
         public double gasRFMKT() {
             return gasRFMKT;
         }
-    
+
         @Override
         public double turbineMultiplier() {
             return turbineMultiplier;
         }
     }
-    
+
     private static final Map<Fluid, FluidTransition> liquidTransitions = new HashMap<>();
     private static final Map<Fluid, FluidTransition> gasTransitions = new HashMap<>();
-    
+
     @Nullable
     public static FluidTransition liquidTransition(Fluid liquid) {
         return liquidTransitions.get(liquid);
     }
-    
+
     @Nullable
     public static FluidTransition gasTransition(Fluid gas) {
         return gasTransitions.get(gas);
@@ -126,120 +144,172 @@ public class FluidTransitionRegistry {
     }
 
     public static Collection<FluidTransition> transitions() { return List.copyOf(new HashSet<>(liquidTransitions.values())); }
-    
+
     // TODO: unify these names across all registries
     private enum RegistryType {
         tag,
         registry,
     }
-    
+
     private static class FluidTransitionJsonData {
         @ConfigValue
         public RegistryType liquidType = RegistryType.tag;
+//? if =26.1.2 || =26.3 {
         @ConfigValue
         public Identifier liquid = Identifier.parse("dirt");
-        
+
         @ConfigValue
+//?} else if =1.21.1 {
+/*        @ConfigValue
+        public ResourceLocation liquid = ResourceLocation.parse("dirt");
+
+        @ConfigValue
+*/
+//?}
         public RegistryType gasType = RegistryType.tag;
+//? if =26.1.2 || =26.3 {
         @ConfigValue
         public Identifier gas = Identifier.parse("dirt");
-    
+
         @ConfigValue(range = "(0,)")
+//?} else if =1.21.1 {
+/*        @ConfigValue
+        public ResourceLocation gas = ResourceLocation.parse("dirt");
+
+        @ConfigValue(range = "(0,)")
+*/
+//?}
         public double latentHeat;
-    
+
         @ConfigValue(range = "(0,)")
         public double boilingPoint;
-    
+
         @ConfigValue(range = "(0,)")
         public double liquidThermalConductivity;
-    
+
         @ConfigValue(range = "(0,)")
         public double gasThermalConductivity;
-    
+
         @ConfigValue(range = "[0,)")
         public double turbineMultiplier;
         @ConfigValue(range = "(0,1]") public double recovery = 1;
         @ConfigValue(range = "[1,50]") public int steamPerBatch = 10;
     }
-    
+
     private static final DatapackLoader<FluidTransitionJsonData> loader = new DatapackLoader<>(FluidTransitionJsonData::new);
-    
+
     public static void loadRegistry() {
         BiggerReactors.LOGGER.info("Loading fluid transitions");
         liquidTransitions.clear();
+//? if =26.1.2 || =26.3 {
         gasTransitions.clear();
-        
+
         final List<FluidTransitionJsonData> data = loader.loadAll(Identifier.parse("biggerreactorsrework:transitions"));
         BiggerReactors.LOGGER.info("Loaded " + data.size() + " transitions data entries");
-        
+//?} else if =1.21.1 {
+/*        gasTransitions.clear();
+
+        final List<FluidTransitionJsonData> data = loader.loadAll(ResourceLocation.parse("biggerreactorsrework:transitions"));
+        BiggerReactors.LOGGER.info("Loaded " + data.size() + " transitions data entries");
+*/
+//?}
+
         for (FluidTransitionJsonData transitionData : data) {
             final List<Fluid> liquids = new ArrayList<>();
-            
+
+//? if =26.1.2 || =26.3 {
             if (transitionData.liquidType == RegistryType.tag) {
                 var fluidTagOptional = BuiltInRegistries.FLUID.get(TagKey.create(BuiltInRegistries.FLUID.key(), transitionData.liquid));
                 fluidTagOptional.ifPresent(holders -> holders.forEach(fluidHolder -> {
+//?} else if =1.21.1 {
+/*            if (transitionData.liquidType == RegistryType.tag) {
+                var fluidTagOptional = BuiltInRegistries.FLUID.getTag(TagKey.create(BuiltInRegistries.FLUID.key(), transitionData.liquid));
+                fluidTagOptional.ifPresent(holders -> holders.forEach(fluidHolder -> {
+*/
+//?}
                     var fluid = fluidHolder.value();
                     if (fluid.isSource(fluid.defaultFluidState())) {
                         liquids.add(fluid);
                     }
                 }));
             } else {
+//? if =26.1.2 || =26.3 {
                 if (BuiltInRegistries.FLUID.containsKey(transitionData.liquid)) {
                     Fluid fluid = BuiltInRegistries.FLUID.getValue(transitionData.liquid);
                     liquids.add(fluid);
+//?} else if =1.21.1 {
+/*                if (BuiltInRegistries.FLUID.containsKey(transitionData.liquid)) {
+                    Fluid fluid = BuiltInRegistries.FLUID.get(transitionData.liquid);
+                    liquids.add(fluid);
+*/
+//?}
                 }
-                
+
             }
-            
+
             if (liquids.isEmpty()) {
                 continue;
             }
-            
+
             final List<Fluid> gases = new ArrayList<>();
-            
+
+//? if =26.1.2 || =26.3 {
             if (transitionData.gasType == RegistryType.tag) {
                 var fluidTagOptional = BuiltInRegistries.FLUID.get(TagKey.create(BuiltInRegistries.FLUID.key(), transitionData.gas));
                 fluidTagOptional.ifPresent(holders -> holders.forEach(fluidHolder -> {
+//?} else if =1.21.1 {
+/*            if (transitionData.gasType == RegistryType.tag) {
+                var fluidTagOptional = BuiltInRegistries.FLUID.getTag(TagKey.create(BuiltInRegistries.FLUID.key(), transitionData.gas));
+                fluidTagOptional.ifPresent(holders -> holders.forEach(fluidHolder -> {
+*/
+//?}
                     var fluid = fluidHolder.value();
                     if (fluid.isSource(fluid.defaultFluidState())) {
                         gases.add(fluid);
                     }
                 }));
             } else {
+//? if =26.1.2 || =26.3 {
                 if (BuiltInRegistries.FLUID.containsKey(transitionData.gas)) {
                     Fluid fluid = BuiltInRegistries.FLUID.getValue(transitionData.gas);
                     gases.add(fluid);
+//?} else if =1.21.1 {
+/*                if (BuiltInRegistries.FLUID.containsKey(transitionData.gas)) {
+                    Fluid fluid = BuiltInRegistries.FLUID.get(transitionData.gas);
+                    gases.add(fluid);
+*/
+//?}
                 }
-                
+
             }
-            
+
             if (gases.isEmpty()) {
                 continue;
             }
-            
+
             FluidTransition transition = new FluidTransition(liquids, gases, transitionData.latentHeat, transitionData.boilingPoint, transitionData.liquidThermalConductivity, transitionData.gasThermalConductivity, transitionData.turbineMultiplier);
             transition.recovery = transitionData.recovery;
             transition.steamPerBatch = transitionData.steamPerBatch;
-            
+
             for (Fluid liquid : transition.liquids) {
                 if (liquidTransitions.put(liquid, transition) != null) {
-                    
+
                     BiggerReactors.LOGGER.error("Duplicate transitions given for liquid fluid " + BuiltInRegistries.FLUID.getKey(liquid).toString());
                 }
             }
-            
+
             for (Fluid gas : transition.gases) {
                 if (gas == biggerreactorsrework.fluids.HeatedCoolant.INSTANCE) continue;
                 if (gasTransitions.put(gas, transition) != null) {
                     BiggerReactors.LOGGER.error("Duplicate transitions given for gas fluid " + BuiltInRegistries.FLUID.getKey(gas).toString());
                 }
             }
-            
+
         }
-        
+
         MaterialDataMaps.transitions(liquidTransitions, gasTransitions);
         BiggerReactors.LOGGER.info("Loaded " + liquidTransitions.size() + " liquid transition entries");
         BiggerReactors.LOGGER.info("Loaded " + gasTransitions.size() + " gas transition entries");
     }
-    
+
 }

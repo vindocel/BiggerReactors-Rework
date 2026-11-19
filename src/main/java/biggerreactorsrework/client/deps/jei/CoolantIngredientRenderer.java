@@ -1,3 +1,4 @@
+//? if =26.1.2 || =26.3 {
 package biggerreactorsrework.client.deps.jei;
 
 import biggerreactorsrework.client.FluidSprites;
@@ -26,3 +27,5 @@ public final class CoolantIngredientRenderer implements IIngredientRenderer<Flui
         return List.of(stack.getHoverName());
     }
 }
+//?} else if =1.21.1 {
+//?}

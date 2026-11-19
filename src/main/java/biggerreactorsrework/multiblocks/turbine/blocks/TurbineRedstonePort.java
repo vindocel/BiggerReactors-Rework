@@ -14,9 +14,16 @@ import net.minecraft.world.level.block.state.BlockState;
 public final class TurbineRedstonePort extends TurbineBaseBlock implements IAssemblyStateBlock, IFaceDirectionBlock {
     public static final net.minecraft.world.level.block.state.properties.BooleanProperty IS_LIT =
             net.minecraft.world.level.block.state.properties.BooleanProperty.create("is_lit");
+//? if =26.1.2 || =26.3 {
     @RegisterBlock(name="turbine_redstone_port",tileEntityClass=TurbineRedstonePortTile.class)
     public static final TurbineRedstonePort INSTANCE=biggerreactorsrework.core.registry.RegistryIds.named("turbine_redstone_port", () -> new TurbineRedstonePort());
     public TurbineRedstonePort() {
+//?} else if =1.21.1 {
+/*    @RegisterBlock(name="turbine_redstone_port",tileEntityClass=TurbineRedstonePortTile.class)
+    public static final TurbineRedstonePort INSTANCE=new TurbineRedstonePort();
+    public TurbineRedstonePort() {
+*/
+//?}
         registerDefaultState(defaultBlockState().setValue(IS_LIT, false));
     }
     @Override protected void buildStateDefinition(net.minecraft.world.level.block.state.StateDefinition.Builder<net.minecraft.world.level.block.Block, BlockState> builder) {

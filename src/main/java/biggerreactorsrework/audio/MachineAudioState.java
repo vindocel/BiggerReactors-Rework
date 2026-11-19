@@ -19,6 +19,7 @@ public record MachineAudioState(int kind, BlockPos min, BlockPos max, boolean ru
     }
 
     public static MachineAudioState load(CompoundTag tag) {
+//? if =26.1.2 || =26.3 {
         if (!tag.contains("kind") || !tag.contains("min") || !tag.contains("max")) return EMPTY;
         int kind = tag.getIntOr("kind", 0);
         double rpm = tag.getDoubleOr("rpm", 0D);
@@ -28,4 +29,16 @@ public record MachineAudioState(int kind, BlockPos min, BlockPos max, boolean ru
                 || min.getX() > max.getX() || min.getY() > max.getY() || min.getZ() > max.getZ()) return EMPTY;
         return new MachineAudioState(kind, min, max, tag.getBooleanOr("running", false), rpm);
     }
+//?} else if =1.21.1 {
+/*        if (!tag.contains("kind") || !tag.contains("min") || !tag.contains("max")) return EMPTY;
+        int kind = tag.getInt("kind");
+        double rpm = tag.getDouble("rpm");
+        var min = BlockPos.of(tag.getLong("min"));
+        var max = BlockPos.of(tag.getLong("max"));
+        if (kind < REACTOR || kind > TURBINE || !Double.isFinite(rpm) || rpm < 0
+                || min.getX() > max.getX() || min.getY() > max.getY() || min.getZ() > max.getZ()) return EMPTY;
+        return new MachineAudioState(kind, min, max, tag.getBoolean("running"), rpm);
+    }
+*/
+//?}
 }

@@ -98,12 +98,22 @@ public final class CalculatorClient {
         catalogRequestedAt = 0;
     }
 
+//? if =26.1.2 || =26.3 {
     public static void receive(CompoundTag tag) {
         switch (tag.getStringOr("type", "")) {
             case CalculatorNetwork.CATALOG -> {
                 catalog = CalculatorCatalog.fromClientTag(tag.getCompoundOrEmpty("catalog"));
                 catalogRefreshPending = false;
+//?} else if =1.21.1 {
+/*    public static void receive(CompoundTag tag) {
+        switch (tag.getString("type")) {
+            case CalculatorNetwork.CATALOG -> {
+                catalog = CalculatorCatalog.fromClientTag(tag.getCompound("catalog"));
+                catalogRefreshPending = false;
+*/
+//?}
             }
+//? if =26.1.2 || =26.3 {
             case CalculatorNetwork.PROGRESS -> {
                 if (!tag.getStringOr("session", "").equals(session) || !running()) return;
                 try {
@@ -117,10 +127,33 @@ public final class CalculatorClient {
                 if (!tag.getStringOr("session", "").equals(session) || !running()) return;
                 var body = tag.getCompoundOrEmpty("result");
                 phase = Phase.DONE;
+//?} else if =1.21.1 {
+/*            case CalculatorNetwork.PROGRESS -> {
+                if (!tag.getString("session").equals(session) || !running()) return;
+                try {
+                    phase = Phase.valueOf(tag.getString("phase"));
+                } catch (IllegalArgumentException ignored) {
+                }
+                done = Math.max(0, tag.getInt("done"));
+                total = Math.max(0, tag.getInt("total"));
+            }
+            case CalculatorNetwork.RESULT -> {
+                if (!tag.getString("session").equals(session) || !running()) return;
+                var body = tag.getCompound("result");
+                phase = Phase.DONE;
+*/
+//?}
                 if (body.contains("failure")) {
+//? if =26.1.2 || =26.3 {
                     try {
                         failure = CalculationStatus.valueOf(body.getStringOr("failure", ""));
                     } catch (IllegalArgumentException e) {
+//?} else if =1.21.1 {
+/*                    try {
+                        failure = CalculationStatus.valueOf(body.getString("failure"));
+                    } catch (IllegalArgumentException e) {
+*/
+//?}
                         failure = CalculationStatus.FAILED;
                     }
                     if (failure == CalculationStatus.STALE_CATALOG) refreshCatalog();

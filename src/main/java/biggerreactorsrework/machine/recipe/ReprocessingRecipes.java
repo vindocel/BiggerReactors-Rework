@@ -12,6 +12,7 @@ import java.util.List;
 
 public final class ReprocessingRecipes {
     private static final DeferredRegister<RecipeType<?>> TYPES = DeferredRegister.create(Registries.RECIPE_TYPE, BiggerReactors.modid);
+//? if =26.1.2 || =26.3 {
     private static final DeferredRegister<RecipeSerializer<?>> SERIALIZERS = DeferredRegister.create(Registries.RECIPE_SERIALIZER, BiggerReactors.modid);
     public static final DeferredHolder<RecipeType<?>, RecipeType<ReprocessingRecipe>> TYPE = TYPES.register("industrial_processing", () -> new RecipeType<>() { public String toString() { return BiggerReactors.modid + ":industrial_processing"; } });
     public static final DeferredHolder<RecipeSerializer<?>, RecipeSerializer<ReprocessingRecipe>> SERIALIZER = SERIALIZERS.register("industrial_processing", () -> new RecipeSerializer<>(ReprocessingRecipe.CODEC, ReprocessingRecipe.STREAM_CODEC));
@@ -25,5 +26,21 @@ public final class ReprocessingRecipes {
         var sorted=source.byType(TYPE.get()).stream().sorted(Comparator.comparing(r -> r.id().identifier().toString())).toList();
         cache=new Snapshot(source,sorted);return sorted;
     }
+//?} else if =1.21.1 {
+/*    private static final DeferredRegister<RecipeSerializer<?>> SERIALIZERS = DeferredRegister.create(Registries.RECIPE_SERIALIZER, BiggerReactors.modid);
+    public static final DeferredHolder<RecipeType<?>, RecipeType<ReprocessingRecipe>> TYPE = TYPES.register("industrial_processing", () -> new RecipeType<>() { public String toString() { return BiggerReactors.modid + ":cyanite_reprocessing"; } });
+    public static final DeferredHolder<RecipeSerializer<?>, ReprocessingRecipe.Serializer> SERIALIZER = SERIALIZERS.register("industrial_processing", ReprocessingRecipe.Serializer::new);
+    public static void register(IEventBus bus) { TYPES.register(bus); SERIALIZERS.register(bus); }
+    private record Snapshot(java.util.Collection<RecipeHolder<?>> source,List<RecipeHolder<ReprocessingRecipe>> sorted) { }
+    private static final java.util.Map<RecipeManager,Snapshot> CACHE = new java.util.WeakHashMap<>();
+    public static synchronized List<RecipeHolder<ReprocessingRecipe>> all(Level level) {
+        if (level == null) return List.of();
+        var manager=level.getRecipeManager();var source=manager.getRecipes();var cached=CACHE.get(manager);
+        if(cached!=null&&cached.source()==source)return cached.sorted();
+        var sorted=manager.getAllRecipesFor(TYPE.get()).stream().sorted(Comparator.comparing(r -> r.id().toString())).toList();
+        CACHE.put(manager,new Snapshot(source,sorted));return sorted;
+    }
+*/
+//?}
     private ReprocessingRecipes() { }
 }

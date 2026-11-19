@@ -1,4 +1,6 @@
-# 26.1.2-0.1.7 (BiggerReactors-Rework)
+# 0.1.7 (BiggerReactors-Rework)
+
+Applies to Minecraft 1.21.1, 26.1.2 and 26.3.
 
 ## Changed
 
@@ -7,12 +9,24 @@
 - Clarified that CC:Tweaked is optional in the automation guide.
 - Machine settings use a switch for shared appearance. Reactor, turbine and heat exchanger terminals use a compact volume bar.
 - Machine popups now have their close button on the left.
+- Refreshed screen icons without shadows; redstone port symbols and the guide warning sign are now image files.
+- Window close buttons share one square size with the icon centered.
+- The machine volume bar uses the colors of each machine, with lighter tones in dark mode.
+- Moderator and coil tooltips show a short approximate efficiency compared with the best available block, such as "65% reactor efficiency" and "55% turbine efficiency".
+
+## Added
+
+- Configuration options with a visible effect show an example image in their description.
+- Added a crafting recipe for the Reactor Wrench, shown in the guide.
 
 ## Fixed
 
 - Fixed duplicate Jade energy bars on the Industrial Processor and multiblock energy ports when another provider queries energy without a side.
 - Removed the volume control from the silent battery terminal.
 - Fixed a server crash when a reactor's fuel tank held more than its capacity (for example after lowering the fuel rod capacity in the config or rebuilding a reactor with fewer rods); the fuel rods now render as full.
+- Fixed the mod icon and banner in the mod list.
+- The configuration screen's Done button uses the standard Minecraft button style.
+- Fixed dark spots on heat exchanger channels with smooth lighting and no shader.
 
 # 26.1.2-0.1.6 (BiggerReactors-Rework, unreleased)
 
@@ -364,7 +378,7 @@ worlds and machines from the original mod are not migrated.
  - channels rendered with quartz, reduces hitches when placing/removing blocks in renderchunks containing lots of them
 
 ## Misc
- - JEI integration is back, and works in multiplayer too 
+ - JEI integration is back, and works in multiplayer too
 
 # 1.19.2-0.6.0-beta.6.1
 
@@ -503,7 +517,7 @@ worlds and machines from the original mod are not migrated.
 
 # 1.18.1-0.6.0-alpha.9
 1.18.1
- 
+
 ## Misc
  - Phos update
 
@@ -580,7 +594,7 @@ Not your grandpa's reactors anymore
  - Move config to new object based system
 
 # 1.17.1-0.6.0-alpha.4
-I'm a strong independent mod that doesn't need any other repository to build me 
+I'm a strong independent mod that doesn't need any other repository to build me
 
 ## Misc
  - Built directly from BiggerReactors repo, w/ Phosphophyllite submodule
@@ -628,13 +642,13 @@ ComputerCraft
 ## Heat Exchanger
  - Re-enable computer port
  - Fix stack overflow with coolant port
- 
+
 # 1.17.1-0.6.0-alpha.1
 Modular multi-blocks
 
 ## Turbine
  - Fix stack overflow with rotor bearing
- - Fix maybe rendering 
+ - Fix maybe rendering
 
 ## Misc
  - update to Phos 0.6.0-alpha.1, and its multiblock changes
@@ -769,7 +783,7 @@ The steam is lava, the steam is lava
 
 ## Turbine
  - uses transition registry for fluids
- - simulation decoupled from multiblock controller 
+ - simulation decoupled from multiblock controller
  - fix rotor renderer
 
 ## Misc
@@ -805,7 +819,7 @@ I tip my hat to you, one legend to another
  - Fix NPE with access port
 
 ## Turbine
- - power port reports power 
+ - power port reports power
 
 # 1.16.4-0.4.2
 I rate this bug, 0/0
@@ -872,7 +886,7 @@ you spin me right round baby
  - extranious blockstates reduced
  - tag yellorite ore
  - reprocessor also has a new GUI
- - fix reprocessor voiding blutonium when output slot is full 
+ - fix reprocessor voiding blutonium when output slot is full
  - LGPL v2.1 now
  - 1.16.4
 
@@ -888,7 +902,7 @@ Redstone port bugs
 ## Reactor
  - fix active reactor overheating when output multiplier was > 1, and it had coolant
  - allow power to be extracted from the power tap, not just pushed out
- - fuel can now be extracted from a reactor 
+ - fuel can now be extracted from a reactor
  - add unscaled methods to CC peripheral
  - fix redstone port energy percent reporting incorrectly
  - fix redstone port not recommitting values after a world reload
@@ -904,7 +918,7 @@ Blocks and bugs
  - renders fuel, shows to accuracy of 1/16th of a block
  - Dynamic battery size, default 10k RF per external block
  - Steam tank size limit removed
- 
+
 ## Turbine
  - Dynamic flow rate/tank size, based on blade count
  - Dynamic battery size default 30k * (coil block count + 1)
@@ -920,7 +934,7 @@ Connecting, textures
 
 ## Reactor
  - Connecting, textures, for the glass
- 
+
 ## Turbine
  - Connecting, textures, for the glass
  - fix dangling coil bug
@@ -939,7 +953,7 @@ And compat
 
 ## Turbine
  - Fix a new turbine not assembling
- 
+
 ## Misc
  - Compatibility with ER2, tagging for items/blocks and recipes where applicable
 
@@ -964,13 +978,13 @@ Redstone Port
  - Computer Port drop added
  - Change transparent blocks sound type to glass, mostly for the glass
  - Fix overproduction bug with a production multiplier in wrong place, added more config options to allow tuning of both passive and active output separately
- 
+
 ## Turbine
  - Increase default maximum size to 64x64x96
  - Increase config maximum size limit to 192x192x256
  - Computer Port drop added
  - Input/Exhaust GUI icons corrected
- 
+
 ## Misc
  - Bucket added for irradiated steam
  - Yellorium fluid shows up in JEI now, it was transparent
@@ -988,7 +1002,7 @@ ComputerCraft API
  - Added ability to get the maximum amount of fluid that *could* have been produced this tick
  - Added ability to query battery size, as it is now configurable
  - Ported ability to query active reactor tank size, missed in first round
- 
+
 ## Turbine
  - Added ability to query batter size, as it is now configurable
 
@@ -1083,7 +1097,7 @@ computer ports and rotor rotation
 ## Turbine
  - Computer port implemented
  - Rotor will now rotate to the correct axis
- 
+
 ## Misc
  - Added config option to disable oregen
 
@@ -1120,10 +1134,2198 @@ initial version, changes from BR 0.4.3A
  - You can't over speed turbines anymore, there is a soft limit to the speed, so long as you were under 2000 rpm it's the same
      - Small sub-note there, i did modify the efficiency function in the 450-500 RPM range to have a better transition, shouldn't really matter though
  - You now need to rotor bearings, one at each end, orientation of rotor doesn't matter
- 
+
 ## Misc
  - There is a pile of stuff in the config now, sooo many internal values that were magic before
- 
 
- 
+
+
+#### Beginning of time?
+
+# 1.21.1-0.1.6 (BiggerReactors-Rework, unreleased)
+
+## Added
+
+- Fill reactor, turbine and heat-exchanger fluid inlets with buckets or compatible containers, and collect supported outlet fluids. Creative buckets are retained; refused transfers keep their contents without spilling. Heated coolant fills a Heated Coolant Bucket that remembers which coolant it came from, in tanks, ports and when placed in the world.
+- Diamond blocks are now turbine coils (7.25 FE per steam mB, 1,250 mB/t), and can be mixed with other coil materials in the same turbine.
+- Blue Ice is now a solid reactor moderator with the same default properties as diamond blocks, listed in the guide's moderator table.
+- Added a customization guide for modpack creators and server administrators.
+- Added optional CC:Tweaked support for reactor, turbine and heat-exchanger computer ports, with live telemetry, controls and wired-modem discovery. It works alongside the existing OpenComputers support on the same port blocks, and the ports can be crafted when either mod is installed.
+- Native progression advancements for the guide, reactors, liquid cooling, heat exchangers, turbines, batteries and cyanite reprocessing, plus a hidden discovery. These advancements grant no rewards.
+- Added a searchable in-game configuration editor under Mods, a uranium-generation switch, configurable fuel yields for items and tags, and optional KubeJS configuration/material events for modpacks. Existing battery cell capacity and transfer settings are now editable through the same screen.
+- Add real turbine blades by right-clicking the shaft, an existing blade or a bearing. Fill rings and levels automatically, once the base outline, aligned bearings and continuous shaft are in place, even before closing the walls or roof. Remove blades by sneaking with an empty hand, and collect attached blades when breaking a shaft with the correct tool.
+
+## Changed
+
+- Reworked reactor production around heat paid by actual fuel consumption, with a smooth size-dependent burn curve and proportional usable-fuel filling and control rods. Missing coolant, full hot outputs and full passive batteries discard unused production without reducing fuel burn.
+- Liquid reactor efficiency now follows local manifold coverage and useful structural occupancy. Incomplete layouts retain a percentage loss at every power; only directly adjacent manifolds add liquid capacity.
+- Solid moderators use four explicit passive cooling/output classes. Reactor and exchanger screens show thermal budgets and losses instead of variable reactor temperatures; computer integrations provide a thermal snapshot while old temperature/fertility readings remain neutral.
+- Heat exchangers process fixed atomic coolant/water batches. Straight channel links through up to three air blocks determine speed; recipe yield stays fixed. Multiple nonbranching paths and independently configured ports share logical circuit buffers.
+- Added Frozen Obsidian, a glowing coolant made in the Industrial Processor from 200 mB of Liquid Obsidian and 1 blue ice (100 mB). It boils 40 steam mB per ten hot mB, turns red when heated and makes reactor manifolds glow brighter than fuel. Placed in the world, it freezes players and mobs inside it like powder snow.
+- Heated coolants from reactors (Heated Liquid Obsidian, Heated Frozen Obsidian, heated Cryo Fuel and other generic heated coolants) burn players and mobs like lava when placed in the world.
+- Steam can no longer be collected or placed with buckets; move it through tanks and pipes. Its texture is now a translucent, animated white gas.
+- The Industrial Processor now uses `industrial_processor` and `industrial_processing` identifiers throughout.
+- Heat is measured in kJ: one mB of fuel gives 12,500 kJ, and with water each kJ makes one steam mB.
+- Coil material sets the base FE per steam mB (for example iron 2.75, gold 5.25, diamond 7.25, ludicrite 9.25), limited by blade and coil capacity. Turbine speed follows steam flow up to 2,200 RPM. Efficiency is 100% from 900 to 1,000 RPM and from 1,800 to 1,900 RPM, ramps up just before each band, returns to 50% after 1,000 RPM and falls gradually above 1,900 RPM. Intake stops at the flow that holds the rotor at 2,200 RPM, and the extra steam stays in the inlet. The calculator, guide, recipe viewers and statistics use the same rule.
+- Each passive moderator now cools by its own conductivity (conductivity ÷ 5, up to 100%) and every kJ removed gives 8.9 RF, so a Ludicrite-cooled reactor makes about 42% less than the same reactor on water with a Ludicrite-coil turbine, while the rarest materials beat it by about 15%, so materials no longer share four fixed classes. Air cools 5% in solid reactors, so even a 3×3×3 reactor makes a little power. The guide and recipe viewers show each material's cooling and RF per fuel mB.
+- Each directly touching heat-exchanger channel pair processes 2,000 hot mB/t, four times as much as before, and water/steam channels hold four times as much as coolant channels.
+- Added persistent optional balanced outputs for reactors, heat exchangers and turbine water. Thermal migration preserves fuel fractions, cold/hot stock, overfill, controls and stored FE; known legacy coolant signatures adopt the new recipes, while unknown stock remains recoverable.
+
+- Industrial Processor recipes in the guide now show inputs side by side, a single output slot and labelled fluid, energy and time.
+- Rotor shafts and blades now have slimmer targeting outlines, so it is easier to aim at the parts around and behind them. Their collision is unchanged.
+- Spinning turbine blades now hurt players within their swept area, with damage increasing with rotor speed. Coasting rotors remain dangerous; armor and normal immunities still apply.
+- Assembled resource ports now show their connection face on the outside and inside, with closed chassis sides matching their machine. Loose ports retain their original appearance.
+- Turbine windows now show a gently moving white steam film. It follows stored steam even while switched off and actual steam throughput while operating, so fully consumed input remains visible. The film fades in and out smoothly and is compatible with shader packs. Occasional condensation drips from any block with free space below after a few seconds of continuous rotating operation, in standing and lying turbines.
+- Assembled battery cells show steady blue bars when empty and animated bars when charged.
+- Fluid outlets automatically push into compatible adjacent pipes or tanks. The Industrial Processor always pushes from configured fluid output faces.
+- Coolant recovery moved to the reactor's cold inlet and both heat exchanger inlets (hot coolant and water). Recovering pauses filling and offers the inlet stock; product outlets always send the processed fluid.
+- Reactor item outlets automatically send cyanite, and fuel inlets can recover stored fuel. The reactor terminal's waste ejection switch and the access port's manual eject were removed. The Industrial Processor automatically sends finished items through configured item output faces.
+- Direction selectors and labels show the current port mode in color: cyan and red for fluid and energy, green and blue for fuel and cyanite.
+- The battery terminal has a compact Statistics tab with a charge bar and can recover energy from charged battery cells in its lower slot.
+- Moved Balanced Outputs below the reactor activity control and shortened the terminal panel.
+- Reduced repeated rotor and fluid-mesh rendering work without removing rotor, coolant or connected-glass detail.
+
+## Fixed
+
+- Turbine coil distances now use exact integer coordinates in every shaft orientation, including structures far from the world origin.
+- The first rotor shaft placed beside a bearing now faces the right way on all six sides, and its end caps no longer disappear next to the bearing.
+- Placed Liquid Obsidian can now be replaced by ordinary blocks, like vanilla liquids.
+- Opening and closing reactor, turbine and heat-exchanger statistics now plays the normal button click.
+- Machines, ores and material blocks now declare map colors, so map mods show them in colors close to their textures instead of black.
+- Reducing configured battery cell capacity no longer deletes stored energy. Overfull batteries stop accepting energy until their charge falls below the new limit.
+- Heated coolant keeps its source appearance in tanks, recipe cards and placed flows. Unknown sources use a red heated texture.
+- Placed Liquid Obsidian, Frozen Obsidian and heated coolant now cancel fall damage like water, matching its movement and currents.
+- Liquid Obsidian and Frozen Obsidian color their splashes and bubbles to match the fluid.
+- Removed the brown stripe that repeated where battery cells joined vertically.
+- Long numeric values in recipe viewers scroll within their own column, and Industrial Processor recipes name the fluid they use.
+- Turbine rotors now stop accelerating at 2,200 RPM, including with disengaged coils or excess steam, so generation no longer falls to zero from overspeed. Existing overspeed saves recover on the next simulation tick.
+
+# 1.21.1-0.1.5 (BiggerReactors-Rework, unreleased)
+
+## Added
+
+- Added the Battery Redstone Sensor, with separate settings for each sensor: at or above a charge threshold, at or below it, completely full, completely empty, or disabled.
+- Added the sensor's configuration screen, crafting recipe, recipe-book unlock and guide instructions. Its lit texture follows the signal, and it stops emitting when the battery disassembles.
+- Battery charge can now control a connected turbine through its existing Activity / Level redstone input.
+- Added optional OpenComputers support through native cable-connected components for reactor, turbine and heat-exchanger computer ports, replacing the ComputerCraft integration. Component addresses persist across reloads.
+
+## Improved
+
+- Replaced the tiny close glyph used for Disabled with a dedicated crossed-circle icon. Battery threshold arrows are larger and easier to read.
+- Apply, restore and confirm icons now have a consistent compact size and more padding inside the redstone-screen buttons.
+
+## Fixed
+
+- Reactor, turbine and battery redstone sensors now follow their machine's light/dark theme, including machines with multiple terminals.
+- Item, fluid and energy port screens now follow the selected theme of their reactor, turbine, heat exchanger or battery instead of using a separate port appearance.
+- Industrial Processors now mark externally received energy for saving even while idle.
+- Machine ports reject malformed interface commands without changing their settings.
+- Computer operations run on the server thread, and computers attached after assembly can immediately access existing control rods.
+- The guide and processing costs now follow the server's synchronized configuration in multiplayer.
+- Energy output distributes small integer remainders across connected consumers instead of leaving them stranded.
+- Fluid and item output ports refresh their connections when a neighbor changes its available capabilities.
+- Invalid saved controls and fluid identifiers no longer prevent otherwise recoverable machine state from loading.
+
+# 1.21.1-0.1.4 (BiggerReactors-Rework)
+
+## Fixed
+
+- Carry On can no longer pick up blocks from assembled reactors, turbines, heat exchangers or batteries. Loose and disassembled parts remain carryable, and placing carried blocks still works.
+- The battery terminal and body now use the same appearance preference.
+- Heat-exchanger fluids now fill the channel opening up to the inner red and blue borders, with a small clearance to avoid overlapping surfaces. Fluid amounts and heat transfer are unchanged.
+
+# 1.21.1-0.1.3 (BiggerReactors-Rework)
+
+## Machine audio and rod seams (2026-10-28)
+ - shorten volume tooltips and fit the focus outline to the full rectangular −/+ buttons
+ - add original reactor, boiler and RPM-dependent turbine operating sounds
+ - add local per-multiblock volume/mute controls in Settings, independent of shared appearance
+ - synchronize operating audio without opening the GUI; deduplicate terminals and release unloaded sources
+ - use the same 25-block sound range from the structure surface for reactors, boilers and turbines
+ - bring reactor manifold coolant against the outer grille using shared world/guide geometry and a minimal surface clearance; preserve fluid quantities and cold/hot slices
+ - close full fuel/waste segment micro-gaps and omit internal rod caps while retaining exposed and partial surfaces
+
+## Machine lighting (2026-10-27)
+ - add level 7 light to operating multiblock terminals and visible reactor fuel
+ - add level 6 light to processing Industrial Processors and the visible hot-fluid segments of exchanger condenser paths; exclude steam and cold returns
+ - update lighting on state/stock changes and disassembly, including batched fuel and assembly updates
+
+## REI theme compatibility (2026-10-27)
+ - follow REI's active light/dark theme across all native categories, with readable property labels and values
+ - reuse the machine theme for slots, gauge frames, progress arrows and neutral property-bar chrome, including separately rendered industrial fluid gauges
+ - update on each draw without changing machine appearance preferences or tinting ingredients and fluids
+
+## Login resource loading and REI alignment (2026-10-27)
+ - prepare heated Liquid Obsidian sprites during the initial atlas load, avoiding a full resource reload when the default coolant profiles arrive on world login
+ - center REI items and fluid icons inside the shared 18 px slot frames, including industrial inputs/outputs, moderator blocks, coils and fluid conversions
+
+## Roughly Enough Items integration (2026-10-27)
+ - add native optional REI categories for both Industrial Processor recipes, solid moderators, reactor coolants, turbine coils and heat-exchanger conversions
+ - share property rankings, percentages, explanatory tooltips and decorated fluid gauges with the existing viewer data
+ - open REI from machine recipe shortcuts and register terminals, channels and ports as category workstations
+ - preserve fluid origin components and ingredient lookups; exclude machine tabs and movable popups from the ingredient overlay
+ - retain EMI priority and skip JEI compatibility categories when a native REI plugin is active
+
+## Industrial viewer visuals (2026-10-27)
+ - use the machine's decorated animated fluid gauges in JEI and EMI, preserving ingredient interactions
+ - remove the empty dark tooltip over the Industrial Processor operating-condition label
+
+
+## Correct hot-volume yield and recipe-viewer layout (2026-10-27)
+ - correct obsidian's yield target to steam per equal volume of hot coolant, not nuclear fuel: 1000 mB hot obsidian gives 9000 mB ideal steam versus 7500 mB for hot Cryo
+ - cap fractional phase-change heat at the available batch volume
+ - show both Industrial Processor recipes in JEI/EMI with input water beside FE and liquid product in the output tank, preserving searchable ingredients
+
+
+## Industrial processing and obsidian coolant revision (2026-10-27)
+ - expand the existing Cyanite Reprocessor into the Industrial Processor while preserving its registry IDs, crafting recipe and cyanite processing
+ - add obsidian and water processing into Liquid Obsidian, a separate product tank, fluid output routes, automatic ejection and the revised water/energy layout
+ - replace the lava coolant pair with identified heated Liquid Obsidian; legacy pairs stop as invalid until manually emptied
+ - give hot obsidian 20% more heat per mB than unchanged hot Cryo Fuel, verified with equal-volume exchanger batches; leave other coolant and turbine coefficients unchanged
+ - update recipes, JEI/EMI, the guide, translations and synchronization for the new processing options
+
+
+## Battery terminal and Unicode fixes (2026-10-27)
+
+- Move the item-charging slot to the top (+) and the item-discharging slot to the bottom (-), preserving persisted slot IDs and energy direction.
+- Charge equipped armor and offhand FE items only while a valid battery terminal is open on the server; share the output budget with item slots, ports and other viewers.
+- Deduplicate equipment charging within each server tick and synchronize modified item components through the menu.
+- Correct corrupted dimension/conversion separators and serialize new ROBN strings as length-prefixed UTF-8 with an explicit type tag. Retain legacy string decoding and bounds checks; reject malformed UTF-8.
+- Bump internal network protocol to 3 so incompatible clients cannot decode the new string representation.
+
+## Contained-fluid rendering and reactor repair (2026-10-27)
+ - render only exterior fluid surfaces, omitting shared phase, segment and bend caps; use consistent UVs, outward normals, face culling, native tint alpha and fluid emission light
+ - use vanilla cutout rendering for opaque contained fluids and the culled translucent layer for translucent tints, avoiding forced transparency behind machine glass without depending on Iris
+ - preserve coolant profile/origin alongside simulation volumes when disassembling or rebuilding a reactor; fixes stored coolant becoming unidentified and rejecting refill after casing repair
+ - show unidentified coolant instead of Air for orphaned stored amounts; require an explicit coolant-port manual dump before refilling an already unidentified tank, without silently changing its contents
+
+## Turbine reload regression (2026-10-26)
+ - resolve queued controller aliases before checking emptiness or removing controllers from the registry; prevents loaded turbine parts and rotor bearings from remaining split between controllers
+ - use deterministic inventory/size/creation-order merge selection while preserving the independent-inventory protection
+
+## Stability and data fixes (2026-10-26)
+ - validate binary lengths/nesting before collection allocation, reject nontext compound keys and bind GUI packets to their menu and position (internal protocol 2)
+ - validate rod commands and numeric configuration bounds, including open endpoints and nonfinite numbers
+ - replace removed persistence delegates; preserve machine origin across parts and refuse merging independently stocked machines, including inventories awaiting NBT load
+ - respect liquid output protection when settling pending asynchronous radiation
+ - reprocessor automatic input uses recipe fluids and selects matching fluid alternatives; machine recipes stay out of the vanilla crafting book
+ - add recovery to transition data maps, distinguish empty client snapshots from missing sync and clear coolant cache on disconnect
+ - derive only eligible heated sprites, repair Cryo Fuel texture fallback and label turbine generation as gross without changing turbine mechanics
+ - remove five unused textures and 64 duplicate JSON keys; synchronize locale keys, keeping English fallback where Chinese translations are unavailable
+ - exclude GameTests and their empty template from the distribution jar; keep generated numerical studies local
+
+## Liquid cooling
+ - active reactors now reduce burn and coolant conversion linearly with persistent hot output stock; exchangers limit both conversions from retained steam only, preserving turbine behavior and solid-mode generation
+ - output monitoring ignores normal transfer batches cleared within one second, stops immediately at full capacity and recovers by up to five percentage points per tick; saved monitoring state survives reloads
+ - added output occupancy, retained occupancy and operating-limit statistics with localized bottleneck/recovery reasons, plus guide explanations in English and Portuguese
+ - reactor thermal protection now accounts for the output conversion limit when estimating sustainable heat removal
+ - reactor manifolds and exchanger channels now fill their whole visual path using the relative cold/hot proportions, including abrupt stock changes and tiny nonempty amounts; actual inventory gauges and conversion remain unchanged
+ - corrected sodium's heat-exchange temperature so the same reactor and exchanger produce more steam with sodium than Cryo Fuel or Liquid Obsidian; added a finite closed-loop comparison of all coolant tiers using identical geometry and control rods
+ - preserved existing sodium inventories across this specific temperature correction without accepting unrelated coolant profile changes
+ - JEI and EMI coolant entries show heat-exchange temperature and the correct destination of the hot output instead of labeling coolant heat capacity as FE/mB
+ - empty coolant tank pairs now clear their selected fluid, origin and fractional heat so another coolant can enter; fixes both manual emptying and loading previously empty saves, while keeping nonempty fluids separated
+ - fixed a client crash when rendering exchanger fluids: channels resolve assembly through their terminal instead of reading an ASSEMBLED property they do not have
+ - assembled turbines now send rotor geometry even at zero RPM and accept geometry arriving before the assembled block state
+ - repaired 119 malformed English color codes that displayed stray characters in machine screens and tooltips
+ - both heat exchanger circuits now display their input/output fluids inside straight channels and elbows, sharing tube space according to synchronized tank proportions; only aggregate views are synchronized during operation
+ - manifold fluids now span continuous vertical columns, with hot coolant rising from below and cold coolant descending from above in shared space
+ - heat exchangers retain operating temperatures on load/reassembly; statistics identify warmup, partial supply and indirect heat transfer, and show channel temperatures
+ - the guide and both channel item tooltips explain face contact, indirect transfer across a gap and the full-inlet steady-state assumptions behind potential conversion
+ - heated coolant texture generation now isolates external fluids without client texture properties, preventing an atlas reload failure and subsequent duplicate mod setup registrations
+
+## Battery
+ - recipes are more expensive: the casing uses blutonium ingots instead of iron, the energy port uses redstone blocks, and the terminal and cell use ludicrite ingots
+ - fixed a crash when saving and closing a world with a battery, caused by cells updating their neighbors while their chunks were unloading
+
+## JEI and EMI
+ - added the Heat Exchanger category with indexed hot-to-cold coolant conversions and water-to-steam evaporation; terminal, both channel types and fluid port expose it, and optional hot fluid origins remain intact
+ - moderator blocks, moderator fluids and turbine coils now show each property as a colored bar, scaled to the best value available and colored by how it ranks against the other options
+ - hovering a property explains it and lists its benefits and drawbacks
+ - reactor coolant and heat exchange pages now follow the moderator page layout and width: cold and hot fluids stacked with an arrow, names on top, ranked bars for heat per mB, temperature, conductivity and recovery, and notes for the destination or circuit
+ - statistics side tab sits under the appearance tab on the same ear instead of overlapping it on reactor, turbine and heat exchanger terminals
+ - statistics window grouped into Structure, Fuel, Fluids and Performance sections, with the operating condition pinned on top, terminal-style units and a bar comparing current and potential rates
+ - guide coolant tables keep names at normal size, sliding inside their column, and show the fluid on hover; the heat exchanger chapter lists the fluids it exchanges
+ - guide models no longer list or draw empty interior spaces as air, and reactor manifolds are drawn closed with coolant inside instead of showing only their outer faces
+ - statistics window can be dragged by its title and uses its own icon on the side tab
+ - side tabs, ears and open popups are reported to the recipe viewer, which moves its ingredient list out of the way instead of covering the screen
+ - recipe viewer tooltips are drawn above the reprocessor's face configuration window
+ - appearance, statistics and face configuration popups can stay open together and close in any order; the last one clicked comes to the front, and each popup only blocks the area it covers
+
+# 1.21.1-0.1.0 (BiggerReactors-Rework)
+
+Independent fork and rework of BiggerReactors. Mod id `biggerreactorsrework`, meant for new worlds:
+worlds and machines from the original mod are not migrated.
+
+## Port
+ - main machine screens (reprocessor and reactor/turbine/heat exchanger terminals) have a Settings side tab with a draggable Light/Dark popup and persistent per-machine or shared appearance; darkening covers slots, buttons and neutral gauge artwork, preserving casing frames, icons, items, fluids and colored fills
+ - optional Dark Mode Everywhere integration excludes this mod's drawing code from its shader and text recoloring
+ - ingot sprites redesigned with a compact Minecraft-style silhouette and each material's color; ingots now use the standard generated item model, and the wrench sprite depicts a steel open-end wrench
+ - lowered both redstone screens' side tabs to match the face configuration window's top inset, keeping icons, tooltips and click areas aligned
+ - turbine redstone configuration now uses the reactor's metal panel, icon tabs, selectors and apply/revert glyphs, with contextual explanations, correct units and validation for thresholds and flow percentages
+ - added the Jade energy-bar option's missing English and Portuguese translation, preventing its development-time assertion from interrupting the initial resource reload
+ - guide cover's raised center seal removed to reveal the updated cover art; page headings, muted labels, highlights and material table headers now use coordinated green inks
+ - reactor, turbine and heat exchanger connected glass now closes inward hazard-stripe corners around terminals, ports and other gaps, using native chunk models and the existing border textures
+ - guide material pages now follow ore smelting, graphite smelting, reactor waste, cyanite reprocessing and ludicrite acquisition instead of storage unpacking; recipe arrows and quantity symbols corrected
+ - guide consolidated into five chapters: Getting started, Materials, Reactor, Turbine and Heat exchanger; cyanite reprocessing stays in Materials, and energy/vapor modes share the Reactor chapter
+ - material property tables group identical air/material variants, resolve readable names, show separate property columns with explanatory hover tooltips and filter unavailable entries; synchronized client material caches are cleared before replacement
+ - material names scroll at their normal font size inside table cells; hover shows the material icon and readable name, and rows sort by increasing efficiency (E) with deterministic ties
+ - multiblock size limits shown in text using current configuration; maximum-size 3D preview removed, keeping small assembly examples, zoom, facing material lists and yellow casing/glass hover outlines
+ - blutonium acquisition explicitly identifies the Cyanite Reprocessor, with its crafting recipe, processing recipe and operating instructions together in Materials
+ - turbine redstone port uses its own lit and unlit textures, with the lit state following command input or sensor output
+ - port to Minecraft 1.21.1 and NeoForge 21.1 (ModDevGradle, Java 21)
+ - mod id, registry namespace, resources and Java package moved to `biggerreactorsrework`
+ - creative tab named BiggerReactors-Rework
+ - datapack files moved to the 1.21 layout and formats (recipes, loot tables, tags, biome modifiers); common tags use the `c` namespace
+ - no external library mods required: the multiblock, registration, config, data loading, networking and screen code the mod used is now part of the mod
+ - the Phosphophyllite and Quartz submodules were removed from the repository
+ - turbine rotor drawn by a block entity renderer and heat exchanger channels baked into the chunk mesh, keeping the previous models and transforms
+ - OpenCL/Vulkan reactor simulation removed, along with its shaders and the `allowAcceleratedSimulation` config option; the reactor uses the CPU simulation
+ - the unregistered `reactor2` prototype is left out of the build for now
+
+## Battery
+ - new battery multiblock: casing, connected glass, terminal, energy ports and cells, from 3x3x3 up to 32x32x32 (configurable)
+ - each cell stores 3.2 GFE and adds 300 kFE/t to the input limit and 300 kFE/t to the output limit; capacity and limits grow linearly with the cell count
+ - an assembled battery needs a terminal, at least two energy ports and at least one cell; if every port points the same way on assembly, one is switched
+ - energy ports switch between input and output with a wrench or from their screen
+ - right-clicking any battery block other than a port opens the terminal: charge gauge, last tick's input and output, transfer limit, discharge and charge item slots, player inventory and an armor/offhand tab
+ - every cell keeps its share of the stored energy: a broken cell keeps it as an item (shown in its tooltip) and brings it into the next battery it joins
+ - connected, animated cell textures; cells light up when the battery is assembled and animate while it holds energy
+ - Jade shows the battery's total energy with the mod's energy bar on any block of an assembled battery
+ - new guide chapter with the battery's blocks, recipes, size limits and a 3D example
+
+## Cyanite Reprocessor
+ - restored (it was disabled in the original 1.20.4 code): 2 cyanite ingots + water + energy make 1 blutonium ingot, with the original config values
+ - water in the tank is kept when the world reloads (it was saved and read under different names)
+ - accepts energy from other blocks but does not give it back
+ - side configuration window, opened from a tab on the right of the screen, with Items, Water and Energy tabs: each face (except the front) can be set as cyanite input, blutonium output, both, water input or energy input; all faces accept energy by default
+ - optional auto input (pulls cyanite and water from neighbors) and auto eject (pushes blutonium to neighbors), per tab
+ - its recipe shows in JEI and EMI, drawn like the machine's screen; clicking the progress arrow opens it
+ - Jade shows the Cyanite Reprocessor's energy with the mod's own energy bar instead of Jade's default one; the reactor and turbine power taps show their battery the same way
+
+## Screens
+ - gauge bars (fuel mix, heat, turbine speed, fluid tanks, control rod and coolant flow) have their own textures under `textures/gui/<bar>/`, separate from the screen backgrounds, with the same look as before
+ - new fuel, waste, heat and turbine speed bars, with an animated fill like the energy bar
+ - new fluid tank and control rod bars: fluids keep their own animated texture and color at 80% opacity, with a transparent reflection moving over them
+ - screens are drawn in code instead of background images (panel, slots, buttons, side tabs, selectors, text boxes, the coolant flow tank), looking the same as before; each icon is its own file under `textures/gui/icons/`
+ - side configuration window drawn the same way, with smaller automation and close buttons and their own small glyphs
+ - new toggle design: on/off switches and lit-cell selectors with a dark frame that turns cyan on hover; the turbine vent selector reads no exhaust, overflow only, all exhaust from left to right
+ - every button (eject, arrows, apply, revert, enter, side configuration) in the same style: slate fill with a light border, cyan outline on hover, teal fill when an automation switch is on
+ - status, gauge, heat exchanger and fluid symbol icons redrawn by hand, same sizes and places
+
+## Blocks
+ - reactor, turbine and heat exchanger terminals: once the multiblock is assembled, only the face pointing out of the structure shows the terminal screen and the other faces show the disassembled casing texture; disassembled terminals look the same as before
+
+## Recipe viewers
+ - EMI support, with the same categories as JEI: cyanite reprocessing, reactor moderator blocks and fluids, turbine coils; the JEI plugin steps aside when EMI is installed
+
+## Fixes
+ - liquid uranium, liquid obsidian and steam show their names again instead of the `fluid_type` translation key
+ - menu state sync runs on the server thread instead of a separate thread reading the world
+ - menu and data sync packets are actually serialized, so they work on dedicated servers
+ - client requests are only accepted for the menu the player has open
+ - the disabled cyanite reprocessor no longer breaks the `minecraft:mineable/pickaxe` and `minecraft:needs_iron_tools` tags
+# 1.20.1-0.6.0-beta.10.2
+
+## Reactor
+ - fix coolant port not accepting coolant
+ - add Vulkan backed experimental simulation
+ - simulation fully able to be loaded without Neo, backing web accessible simulator
+
+# Misc
+ - migrate to Neo
+
+# 1.20.1-0.6.0-beta.10.1
+
+## Reactor
+ - fix power tap capability crash bug (#84)
+
+## Turbine
+ - fix power tap capability crash bug (#84)
+
+## Misc
+ - fix uranium ore generation (#86)
+ - add new material blocks
+ - update material and ore block textures
+
+# 1.20.1-0.6.0-beta.10
+
+## Reactor
+ - ported to new multiblock system
+ - power tap energy handling updated
+ - fix manifolds being ignored in a passive reactor
+
+## Turbine
+ - ported to new multiblock system
+ - power tap energy handling updated
+ - fix coil/blade validation bug
+
+## Heat Exchanger
+ - ported to new multiblock system
+ - channels rendered with quartz, reduces hitches when placing/removing blocks in renderchunks containing lots of them
+
+## Misc
+ - JEI integration is back, and works in multiplayer too
+
+# 1.19.2-0.6.0-beta.6.1
+
+## Reactor
+ - fix bug with active reactor output multiplier
+ - fix issue where fluid may not be pushed into reactor properly
+ - fix NPE with restone port
+
+## Misc
+ - Update phos, breaking changes, contains multiblock bug fixes
+
+# 1.19.2-0.6.0-beta.6
+
+## Reactor
+ - add thermal fluids as moderators
+ - fix lava moderator json
+ - work around a weird blockstate issue, actual problem not fixed but it shouldn't crash anymore
+
+## Misc
+ - update Phos, breaking changes
+
+# 1.19.2-0.6.0-beta.5.1
+
+## Reactor
+ - scale radiation absorbed with amount of fuel, oversight from 1.5.2 BR, likely needs adjusting
+   - use advanced config option Reactor.fuelRadScalingMultiplier to adjust
+
+# 1.19.2-0.6.0-beta.5
+ - 1.19.2
+
+# 1.18.2-0.6.0-beta.1.3
+
+## Reactor
+ - added GUI button to dump coolant
+ - added CC function to dump coolant
+ - Fix mekanism gas pushing
+
+## Heat Exchanger
+ - added GUI button to dump fluid
+ - added CC function to dump fluid
+ - Fix mekanism gas pushing
+
+## Turbine
+ - increased default flow rate adjustement amounts by factor of 10x
+   - also configurable now
+ - Fix mekanism gas pushing
+
+# 1.18.2-0.6.0-beta.1.2
+ mekanism, its a thing again
+
+## Reactor
+ - new simulation implementation, no mechanic changes
+   - time sliced (default)
+   - full pass
+     - single thread
+       - faster than previous implementation
+     - multi thread
+       - faster than previous implementation
+     - OpenCL Accelerated
+       - requires addition of LWJGL binaries and a compatible OpenCL runtime, tested against and optimized for a Instint MI25 running under ROCm on Ubuntu 20.04
+       - POCL is known incompatible
+
+## Misc
+ - re-enable mekanism gas integration
+
+# 1.18.2-0.6.0-beta.1.1
+ hot not-a-fix
+
+## Misc
+ - handle a CME better to give better debug info
+
+# 1.18.2-0.6.0-beta.1
+ - 1.18.2
+
+## Reactor
+ - handle re-validation
+
+## Turbine
+ - handle re-validation
+ - coolant port renamed to fluid port
+
+## Heat Exchanger
+ - handle re-validation
+ - coolant port renamed to fluid port
+
+## Misc
+ - lower default uranium generation amount
+ - better reload handling
+
+# 1.18.1-0.6.0-beta.0.3
+
+## Reactor
+ - Ensure reactors dont reset themselves to inactive when reloading
+ - Fix waste ejection state saving
+ - Add out of fuel simulation bypass
+
+## Misc
+ - Tool requirements and block break times, they exist again
+ - Dont register tag for deleted fluid
+
+# 1.18.1-0.6.0-beta.0.2
+
+## Reactor
+ - Fix crash when placing computerport when computercraft is not installed
+
+# 1.18.1-0.6.0-beta.0.1
+
+## Reactor
+ - Fix coolant tank saving
+ - Switch simulations to using Fibonacci sphere for ray generation
+
+# 1.18.1-0.6.0-beta
+
+## Reactor
+ - Fix sim issue where the ray origin was offset
+ - Fix manifolds crashing passive reactors
+ - Don't save fuel tank capacity
+ - Distribute fuel/waste residual instead of voiding it
+ - Add RF checks to ensure buffers dont go negative
+
+## Turbine
+ - Ensure rotor direction is consistent
+ - Add RF checks to ensure buffers dont go negative
+
+## Misc
+ - Cyanite reprocessor saving fixed
+ - Quartz mod dependency, previously part of Phosphophyllite
+
+# 1.18.1-0.6.0-alpha.9.1
+
+## Reactor
+ - dont constantly update full fuel rendering level
+
+## Misc
+ - Fix locale issue
+
+# 1.18.1-0.6.0-alpha.9
+1.18.1
+
+## Misc
+ - Phos update
+
+# 1.18-0.6.0-alpha.8.1
+ComputerCraft, again
+
+## Reactor
+ - Re-enable computer port
+
+## Turbine
+ - Re-enable computer port
+
+## Heat Exchanger
+ - Re-enable computer port
+
+## Misc
+- Fix config
+   - Don't inline initialize the variables, JVM will inline those
+
+# 1.18-0.6.0-alpha.8
+Now **THAT** is a cave
+
+## Turbine
+ - dont double drain water from internal tank
+
+## Heat exchanger
+ - Mark dirty for saving
+
+## Misc
+ - 1.18
+ - updated some ids
+
+# 1.17.1-0.6.0-alpha.7
+Its a bird, its a plane, its a, rock?
+
+## Turbine
+ - Rotor is rendered using Quartz render system
+ - Fix validation
+
+## Misc
+ - Fix recipes that use copper
+
+# 1.17.1-0.6.0-alpha.6
+
+## Reactor
+ - Fix NPEs caused by new simulation interface
+ - Implement simulation description serialization
+ - Add version to CC API
+ - Temperatures are in Kelvin now
+ - Remove range limit for max size
+
+## Turbine
+ - Add version to CC API
+ - Remove range limit for max size
+
+## Heat Exchanger
+ - Add version to CC API
+ - Add config options for max size
+
+# 1.17.1-0.6.0-alpha.5
+Not your grandpa's reactors anymore
+
+## Reactor
+ - Remove classic simulation
+ - correctly write to rfTransferredLastTick
+ - switch to new internal simulation interface
+   - allows simulation to be loaded independent of Forge/Minecraft
+ - ensure EMTPY_MODERATOR isn't going to cause divide by zero errors
+
+## Turbine
+ - Remove classic simulation
+
+## Misc
+ - Move config to new object based system
+
+# 1.17.1-0.6.0-alpha.4
+I'm a strong independent mod that doesn't need any other repository to build me
+
+## Misc
+ - Built directly from BiggerReactors repo, w/ Phosphophyllite submodule
+ - Oregen fixed (mostly in Phos)
+ - Config format changed to TOML by default, will still read/use json5 for existing configs
+
+# 1.17.1-0.6.0-alpha.3.1
+update forge to 37.0.53
+
+## Reactor
+ - improve chunk unload time
+
+# 1.17.1-0.6.0-alpha.3
+*I AM, **S P E E D***
+
+~~except on unload, that needs work~~
+
+## Reactor
+ - Assembly tick optimizations, 50% magic
+ - Delegate to correct capability super method
+
+## Turbine
+ - Assembly tick optimizations
+ - Delegate to correct capability super method
+ - Query for ASSEMBLED blocks state existence before value
+
+## Heat Exchanger
+ - Delegate to correct capability super method
+ - Query for ASSEMBLED blocks state existence before value
+
+## Misc
+ - Switch to parchment mappings
+
+# 1.17.1-0.6.0-alpha.2
+ComputerCraft
+
+## Reactor
+ - Re-enable computer port
+ - fix possible deadlock state and race condition
+
+## Turbine
+ - Re-enable computer port
+ - fix possible deadlock state and race condition
+
+## Heat Exchanger
+ - Re-enable computer port
+ - Fix stack overflow with coolant port
+
+# 1.17.1-0.6.0-alpha.1
+Modular multi-blocks
+
+## Turbine
+ - Fix stack overflow with rotor bearing
+ - Fix maybe rendering
+
+## Misc
+ - update to Phos 0.6.0-alpha.1, and its multiblock changes
+
+
+# 1.17.1-0.6.0-alpha
+1.17.1
+
+# 1.16.5-0.5.0
+That's all folks!
+
+Next stop, 1.17!
+
+## Reactor
+ - Add experimental reactor simulation
+   - cripples servers on all cores, not recommended for normal use
+ - GUI displays fuel heat instead of casing heat
+ - Sync CC functions properly
+ - Increase internal battery size
+
+## Misc
+ - Animated terminal textures (thx Ridanisaurus)
+ - All parts of a tooltip will give their denomination
+ - Reduce tile update size, avoids chunkbaning when building large reactors/etc
+
+# 1.16.5-0.5.0-beta.3
+
+## Reactor
+ - fix manifold recipe
+ - Add allthemodium/vibranium/unobtainium fluid/vapor moderator support
+ - Add moderator values for superheated sodium, lava, and liquid obsidian
+ - Add fluid support to moderator registry
+ - Have manifold only consider cold side for dynamic moderator properties
+
+## Heat Exchanger
+ - Use correct tank sizes in GUI
+
+## Misc
+ - Add allthemodium/vibranium/unobtainium fluid/vapor transitions
+
+# 1.16.5-0.5.0-beta.2
+
+## Reactor
+ - Fix negative power bug
+ - Keep CC modem connected on reload
+ - fix controlRodCount CC function
+
+## Turbine
+ - Fix negative power bug
+ - fix CC battery function
+ - fix CC vent controls
+ - fix CC coil controls
+
+# 1.16.5-0.5.0-beta.1
+99 little bugs in the code, 99 little bugs. \
+Take one down, patch it around, 127 little bugs in the code...
+
+## Reactor
+ - Fix CC battery function
+ - Remove extra underscore from CC peripheral name
+ - Add manifold crafting recipe
+
+## Turbine
+ - Fixed NPE crash
+ - Fixed displaying NaN efficiency in some cases
+ - Remove extra underscore from CC peripheral name
+
+## Heat Exchanger
+ - Updated the GUI to better reflect internal workings
+ - Remove extra underscore from CC peripheral name
+
+## Misc
+ - Correct itemgroup key in lang file
+
+# 1.16.5-0.5.0-beta
+Still april fools, right? no? That was last week? *well fuck.*
+
+## Reactor
+ - FissionEventsPerFuelUnit increased by 10x for modern simulation
+ - Tank size increased by 100x for modern simulation
+ - Mekanism gas handling re-dded, handles all gases with valid fluid, not just steam
+ - Manifold model/texture added, modified/corrected assembly behavior
+ - GUIs switch on the fly, no longer requiring re-opening to switch type
+ - New OOP CC API to match new simulation, works for old one as well (subject to race conditions)
+
+## Heat Exchanger
+ - Increase tank size
+ - Increase internal surface area
+ - Increase conductivities
+ - Increase channel heat capacity
+ - Terminal added (GUI still needs work)
+ - Computer port added, CC API that matches new OOP based ones for reactor/turbine
+ - Manifolds add to tank capacity
+ - Allow power to be pulled from power taps
+ - New fuel rendering textures (thx Ridanisaurus)
+ - Errors in lang file
+
+## Turbine
+ - New modern simulation
+    - Drag is squared, not linear/fixed
+    - Rotor speed responds quicker
+    - Rotor speed not coupled to blade area directly
+    - Rotor fluid capacity tied to rotor RPM, faster rotor more capacity
+ - Increase steam capacity per blade by 10x for modern simulation
+   - Also increase coil drag and rotor mass by 10x, so, turbines are 10x denser now
+ - Support for multiple coil layers (exact behavior may change)
+ - New OOP CC API to match new simulation, works for old one as well (subject to race conditions)
+ - Selective transition selection, so only steam, other stuff in the heat exchanger
+ - State saves
+ - Allow power to be pulled from power taps
+ - GUI displays correct fluid being used
+
+## Misc
+ - GUIs retextured (thx Ridanisaurus)
+ - Bucket textures added (#2) (thx Ridanisaurus)
+ - Textures rearranged, texture packs may need to update
+ - Yellorium renamed to Uranium, lang file only, ID kept the same
+ - Uranium bucket no longer registered
+ - Add superheated_sodium fluid for mekanism sodium compatibility
+
+# 1.16.5-0.5.0-alpha.1
+The steam is lava, the steam is lava
+
+## Reactor
+ - GUI displays correct fluid
+ - manifolds added (no model/texture yet)
+ - config option to switch between simulations added
+ - modern simulation active cooling mode fixed
+ - modern simulation saves its data
+ - power extraction draws from internal energy correctly
+ - fix fuel level rendering
+
+## Turbine
+ - uses transition registry for fluids
+ - simulation decoupled from multiblock controller
+ - fix rotor renderer
+
+## Misc
+ - correct handling of transitions with multiple inlet fluids
+
+# 1.16.5-0.5.0-alpha.0
+Boldly go where no reactor has gone before
+
+## Reactor
+ - capability to boil fluids other than water
+ - new simulation with radiation moving in all directions, identical mechanics
+ - new simulation corrects heat transfer rates
+
+## Heat Exchanger
+ - added
+
+## Misc
+ - new textures all around (thx Ridanisaurus)
+ - added fluid obsidian (mostly for testing, may end up staying)
+
+# 1.16.4-0.4.3
+
+## Turbine
+ - correct tank size and flow rate calculations
+
+## misc
+ - move JEI integration to remove hard dependency
+
+# 1.16.4-0.4.3-beta
+I tip my hat to you, one legend to another
+
+## Reactor
+ - Fix NPE with access port
+
+## Turbine
+ - power port reports power
+
+# 1.16.4-0.4.2
+I rate this bug, 0/0
+
+## Reactor
+ - Fix CC Nan issue, #50
+
+# 1.16.4-0.4.1
+
+## Turbine
+ - fix GUIs
+
+# 1.16.4-0.4.0
+hotter, bigger, faster, stronger, *wait, that doesn't sound quite right*
+
+## Reactor
+ - default size limit increased to 128x128x192
+ - fixed bug with control rod heat transfer
+ - corrected fuel heat display
+ - added moderator registry JEI integration (thx MutantGumdrop)
+ - fix rare NPE with coolant port
+ - correct enderium registration
+ - send blockupdate in front of the redstone port to signal torches
+ - access port manual ejection works
+ - missing CC API functions added
+ - moderators added, check the list
+
+## Turbine
+ - added coi registry JEI integration (thx MutantGumdrop)
+ - missing CC API functions added
+ - flow rate/tank size now scales with physical turbine size, not blade count
+
+# Cyanite Reprocessor
+ - fix voiding issues
+
+## Misc
+ - config options flagged as advanced
+ - fixed GUI update bug
+ - CSV and wikimedia moderator/coil exports added to github actions (thx MutantGumdrop)
+
+# 1.16.4-0.3.0
+you spin me right round baby
+
+## Reactor
+ - new GUIs
+ - control rods can be named now
+ - give correct y level for fuel rod gaps
+ - some more moderators
+ - yellorium tag accepted for fuel
+ - errors with both coolant port and power tap
+ - moderator registry moved to datapack
+ - fix some redstone port state saving bugs
+ - minimize fuel rod updates at assembly
+ - correct getEnergyStoredUnscaled CC API name
+
+## Turbine
+ - new GUIs
+ - rotor animation, it exists now
+ - coil registry moved to datapack
+ - fix near edge rotors confusing casing/glass as coil
+ - add rotor_bearing_count error to lang file
+
+## Misc
+ - extranious blockstates reduced
+ - tag yellorite ore
+ - reprocessor also has a new GUI
+ - fix reprocessor voiding blutonium when output slot is full
+ - LGPL v2.1 now
+ - 1.16.4
+
+# 1.16.3-0.2.6
+1/0 bugs
+
+## Reactor
+ - fix divide by zero bug with fuel rendering
+
+# 1.16.3-0.2.5
+Redstone port bugs
+
+## Reactor
+ - fix active reactor overheating when output multiplier was > 1, and it had coolant
+ - allow power to be extracted from the power tap, not just pushed out
+ - fuel can now be extracted from a reactor
+ - add unscaled methods to CC peripheral
+ - fix redstone port energy percent reporting incorrectly
+ - fix redstone port not recommitting values after a world reload
+ - added mode switch button for control rod insertion
+ - fix redstone port powering themselves through the reactor
+ - optimize fuel rendering updates
+
+# 1.16.3-0.2.4
+Blocks and bugs
+
+## Reactor
+ - accepts uranium and blutonium blocks as fuel
+ - renders fuel, shows to accuracy of 1/16th of a block
+ - Dynamic battery size, default 10k RF per external block
+ - Steam tank size limit removed
+
+## Turbine
+ - Dynamic flow rate/tank size, based on blade count
+ - Dynamic battery size default 30k * (coil block count + 1)
+ - increased default max turbine length to 192
+ - Allthemodium, Vibranium, and Unobtanium added to possible coils
+
+## Misc
+ - storage block items are tagged now, should work with other recipes and mods correctly
+ - Fix CC API backwards compatibility with new battery sizes, scales it to the old sizes
+
+# 1.16.3-0.2.3
+Connecting, textures
+
+## Reactor
+ - Connecting, textures, for the glass
+
+## Turbine
+ - Connecting, textures, for the glass
+ - fix dangling coil bug
+ - add errors to lang file
+
+## Misc
+ - More ER2 compatibility
+ - tag yellorite ore item as uranium
+
+# 1.16.3-0.2.2
+Bug fixes! *again*
+And compat
+
+## Reactor
+ - Fix redstone port recipe
+
+## Turbine
+ - Fix a new turbine not assembling
+
+## Misc
+ - Compatibility with ER2, tagging for items/blocks and recipes where applicable
+
+# 1.16.3-0.2.1
+Bug fixing
+
+## Reactor
+ - Fix NPE with Mekanism gas handler
+ - Allow access ports to be crafted with any wooden chest
+
+## Turbine
+ - Fix NPE with Mekanism gas handler
+
+# 1.16.3-0.2.0
+Redstone Port
+
+## Reactor
+ - Added redstone port
+ - Added air types to default moderator list
+ - Increase default maximum size to 64x64x96
+ - Increase config maximum size limit to 192x192x256
+ - Computer Port drop added
+ - Change transparent blocks sound type to glass, mostly for the glass
+ - Fix overproduction bug with a production multiplier in wrong place, added more config options to allow tuning of both passive and active output separately
+
+## Turbine
+ - Increase default maximum size to 64x64x96
+ - Increase config maximum size limit to 192x192x256
+ - Computer Port drop added
+ - Input/Exhaust GUI icons corrected
+
+## Misc
+ - Bucket added for irradiated steam
+ - Yellorium fluid shows up in JEI now, it was transparent
+
+# 1.16.3-0.1.9
+CC Bug fix
+
+## Reactor
+ - Clamp control rod insertion with CC API
+
+# 1.16.3-0.1.8
+ComputerCraft API
+
+## Reactor
+ - Added ability to get the maximum amount of fluid that *could* have been produced this tick
+ - Added ability to query battery size, as it is now configurable
+ - Ported ability to query active reactor tank size, missed in first round
+
+## Turbine
+ - Added ability to query batter size, as it is now configurable
+
+## Misc
+ - update to zh_cn translation
+
+# 1.16.3-0.1.7
+more bug fixes
+
+## Reactor
+ - Fix loading issue due to mekanism steam compatability
+ - Fix crash when using gui to toggle directions
+ - Fix dupe glitch with mekanism pipes, also causes log spawm
+
+## Misc
+ - Uranium to cyanite actually fixed now
+
+# 1.16.3-0.1.6
+bug fixes
+
+## Reactor
+ - GUIs added for ports, only allow toggle
+ - OutputMultiplier fixed for active reactors
+ - Control rod levels apply after reload
+
+## Turbine
+ - GUIs added for coolant port, only allows toggle
+ - Default turbine max flow rate changed to 5,000mB/t, and tank size to 10,000mB
+ - Internal battery size adjusted by 2.5x to match above change
+
+## Misc
+ - fixed cyanite reprocessor voiding items
+ - corrected the uranium to cyanite recipe
+
+# 1.16.3-0.1.5
+more tagging, fix for ATM6 dust smelting
+
+## Misc
+ - add ingots to forge:ingots
+ - add dusts to forge:dusts
+ - add yellorium_dust to forge:dusts/uranium_dust
+
+# 1.16.3-0.1.4
+tagging
+
+## Reactor
+ - Reactor accepts any forge:ingots/uranium
+ - Glass reports errors correctly
+ - Reactor will save generated power through reload
+ - Added more moderators
+
+## Turbine
+ - Inductor drag config option fixed
+ - Computerport will properly set vent all
+ - Added inductors
+
+## Misc
+ - Cyanite reprocessor works with pipes properly
+ - Yellorite is tagged as forge:ores/uranium, and forge:ores
+ - AE2 grindstone recipes added
+ - zh_cn translation added (thanks qsefthuopq)
+
+# 1.16.3-0.1.3
+Mekanism compatibility
+
+## Reactor
+ - Reactor can now produce Mekanism gas steam, just connect a Mekanism gas pipe to the coolant port
+
+## Turbine
+ - Turbine can now accept Mekanism gas steam, just connect a Mekanism gas pipe to the coolant port.
+ - Computer Craft API bug fixed. Steam and water were being reported as each other.
+
+## Misc
+ - Mekanism Enrichment Chamber and Crusher compatibility added. Pretty much the same as the Pulverizer.
+ - Computer ports have names in the lang file now.
+
+# 1.16.3-0.1.2
+wrench compat
+
+## Reactor
+ - Fixed wrench compat with mekanism
+ - Control rods save their insertion
+
+## Turbine
+ - Fixed wrench compat with mekanism
+
+# 1.16.3-0.1.1
+computer ports and rotor rotation
+
+## Reactor
+ - Computer port implemented
+## Turbine
+ - Computer port implemented
+ - Rotor will now rotate to the correct axis
+
+## Misc
+ - Added config option to disable oregen
+
+# 1.16.3-0.1.0
+fist 1.16 release, minor changes
+
+## Reactor
+ - Control rod has a GUI now
+## Turbine
+ - Flow rate change buttons work properly (bug discovered because of control rod)
+## Misc
+ - Yellorium bucket named fixed
+ - Phosphophyllite separated into different jar, required for BiR (see Phosphophyllite changelog for details)
+
+# 1.15.2-0.0.1
+bug fix
+
+## Reactor
+ - blocks registered with tags not added to registry correct (thermal blocks)
+
+# 1.15.2-0.0.0
+initial version, changes from BR 0.4.3A
+
+## Reactor
+ - Access port must be pushed into, and does not have a gui nor internal buffer
+ - Terminal GUI works a bit different, but not majorly, also called terminal now, not controller
+ - Control rod does not have a GUI (yet)
+ - Computer port does not exist (yet)
+
+## Turbine
+ - Terminal GUI works a bit different, but not majorly, also called terminal now, not controller
+ - Turbine requires two bearings, one on each end
+ - Computer port does not exist (yet)
+ - You can't over speed turbines anymore, there is a soft limit to the speed, so long as you were under 2000 rpm it's the same
+     - Small sub-note there, i did modify the efficiency function in the 450-500 RPM range to have a better transition, shouldn't really matter though
+ - You now need to rotor bearings, one at each end, orientation of rotor doesn't matter
+
+## Misc
+ - There is a pile of stuff in the config now, sooo many internal values that were magic before
+
+
+
+#### Beginning of time?
+
+# 26.3-0.1.6 (BiggerReactors-Rework, unreleased)
+
+## Changed
+
+- Fluid outlets automatically push into compatible adjacent pipes or tanks. The Industrial Processor now always pushes from configured fluid output faces.
+- Coolant recovery moved to the reactor's cold inlet and both heat exchanger inlets (hot coolant and water). Product outlets always send the processed fluid.
+- Reactor item outlets automatically send cyanite. Fuel inlets can recover stored fuel. Direction selectors and labels show the current port mode in color. The Industrial Processor automatically sends finished items through configured item output faces.
+- Reactor heat follows fuel actually consumed. Manifold contact and useful occupancy set a permanent efficiency percentage. The terminal shows heat in kJ and the reasons for losses.
+- Heat exchangers use fixed batches and accept multiple paths per circuit. A direct channel link processes 2,000 hot mB/t, and blue channels hold four times as much fluid as red channels.
+- Turbine speed follows steam flow up to 2,200 RPM. Efficiency is 100% from 900 to 1,000 RPM and from 1,800 to 1,900 RPM, ramps up just before each band, returns to 50% after 1,000 RPM and falls gradually above 1,900 RPM. Coil material sets the base FE per steam mB (for example iron 2.75, gold 5.25, diamond 7.25, ludicrite 9.25). Reactors, exchangers and turbine water outlets can optionally balance their output.
+- Passive moderators have individual cooling and fuel yields. Air provides 5% cooling in passive reactors.
+- The Industrial Processor uses the `industrial_processor` block ID and `industrial_processing` recipe type. It recycles cyanite, makes Liquid Obsidian, and converts 1 Blue Ice and 200 mB of Liquid Obsidian into 100 mB of Frozen Obsidian.
+- Frozen Obsidian glows and freezes entities when placed. Heated coolant burns entities and keeps its origin in a filled bucket. Steam uses tanks and pipes and has a translucent white animation.
+- The guide shows finished machines with a choice of casing or glass walls. Inspecting a single layer shows each block separately.
+- The battery terminal has a compact Statistics tab with a charge bar and can recover energy from charged battery cells in its lower slot.
+- Moved Balanced Outputs below the reactor activity control and shortened the terminal panel.
+
+- Industrial Processor guide recipes now group item and fluid inputs together, use a single output slot, and label fluid, energy and time requirements.
+- Turbine shafts and blades now use slimmer targeting outlines so players can aim past their corners, while retaining full-block collision.
+
+- Spinning turbine blades now hurt players within their swept area, with damage increasing with rotor speed. Coasting rotors remain dangerous; armor and normal immunities still apply.
+- Assembled resource ports now show their connection face on the outside and inside, with closed chassis sides matching their machine. Loose ports retain their original appearance.
+- Turbine steam haze now moves gently behind the glass, with slightly stronger whiteness. It follows stored steam even while switched off and actual steam throughput while operating, so fully consumed input remains visible. Condensation starts only after a few seconds of continuous rotating operation.
+- Reduced repeated rotor and fluid-mesh rendering work without removing rotor, coolant or connected-glass detail.
+- Increased turbine steam-film opacity further while retaining the stored-steam and actual-flow response.
+- Updated the mod to Minecraft 26.3 and NeoForge 26.3.0.99. Java 25 is now required.
+- The machine item, fluid and energy connections now use the NeoForge transfer system, so cancelled transfers leave the machines untouched.
+- Machine and guide screens, fluids, rotors, connected glass, fuel columns and heat-exchanger channels were rebuilt on the new rendering system without changing their appearance or behaviour.
+
+## Fixed
+
+- Heated coolant keeps its source appearance in tanks, recipe cards and placed flows. Unknown sources use a red heated texture.
+- Placed Liquid Obsidian, Frozen Obsidian and heated coolant allow water-like movement and currents.
+- Liquid Obsidian and Frozen Obsidian color their splashes and bubbles to match the fluid.
+- Assembled battery cells show steady blue bars when empty and animated bars when charged.
+- Removed the brown stripe that repeated where battery cells joined vertically.
+- Prevent a missing overlay texture from crashing shader rendering when a broken block drops an item in development runs.
+- Long numeric values in recipe viewers scroll within their own column.
+
+- The first turbine shaft now aligns with its bearing immediately, with correctly culled end faces.
+- Placed Liquid Obsidian can now be replaced by ordinary blocks, like vanilla liquids.
+- Opening and closing reactor, turbine and heat-exchanger statistics now plays the normal button click.
+
+- Solid mod blocks now declare texture-appropriate map colors instead of appearing black or empty in map renderers.
+
+- Clarified advancement descriptions, including completed machine assembly, direct reactor energy generation and the automatically unlocked progression root.
+- Reducing configured battery cell capacity no longer deletes stored energy. Overfull batteries stop accepting energy until their charge falls below the new limit.
+- Assisted turbine blade placement now works with the base outline, aligned bearings and continuous shaft in place, before closing the walls or roof.
+- Fixed shader activation crashes with Iris 1.11.7 on 26.3 caused by incompatible composite-pass declarations and omitted vertex bindings.
+- Turbine steam now uses a continuous unlit film with shader-aware opacity and depth handling, fades gradually, and stays out of shadow passes. Condensation droplets remain visible with shader packs and work in either rotor orientation.
+- Replaced visible intersecting steam sheets with a continuous animated film behind turbine windows, keeping solid ports and casing clear.
+- Fixed indexed fluid extraction from output chambers, allowing Pipez to move heated coolant from reactors to heat exchangers while retaining its coolant identity.
+- Cancelled coolant transfers now restore the reactor's internal tank as well as its fluid profile, preventing automated filling from leaving unidentified fluid that blocks later coolant insertion.
+- Fixed gauge fills and fluid masks using the old blit signature, which caused missing RPM bars and animated graphical artifacts on 26.3.
+- Turbine rotors now stop accelerating at 2,200 RPM, including with disengaged coils or excess steam. Existing overspeed saves recover on the next simulation tick.
+
+## Added
+
+- Heated Coolant Buckets preserve the coolant origin in ports, tanks and placed sources.
+
+- Diamond blocks are now turbine coils (7.25 FE per steam mB, 1,250 mB/t), and can be mixed with other coil materials in the same turbine.
+- Blue Ice is now a solid reactor moderator with the same default properties as diamond blocks, listed in the guide's moderator table.
+- Added a customization guide for modpack creators and server administrators.
+- Fill reactor, turbine and heat-exchanger fluid inlets with buckets or compatible containers, and collect supported outlet fluids. Creative buckets are retained; refused transfers keep their contents without spilling. Ordinary buckets cannot collect heated coolant whose identity requires fluid components.
+
+- Native progression advancements for the guide, reactors, liquid cooling, heat exchangers, turbines, batteries and cyanite reprocessing, plus a hidden discovery. These advancements grant no rewards.
+- Added a searchable in-game configuration editor under Mods, a uranium-generation switch, configurable fuel yields for items and tags, and optional KubeJS configuration/material events for modpacks. Existing battery cell capacity and transfer settings are now editable through the same screen.
+- Add real turbine blades by right-clicking the shaft, an existing blade or a bearing. Fill rings and levels automatically, remove blades by sneaking with an empty hand, and collect attached blades when breaking a shaft with the correct tool.
+- Restored optional CC:Tweaked integration for reactor, turbine and heat-exchanger computer ports, with live telemetry, controls and native wired-modem discovery. The existing ports can be crafted when CC:Tweaked or OpenComputers is installed. OpenComputers support remains retained separately.
+
+## Removed for this version
+
+- EMI, Roughly Enough Items and OpenComputers support is not available on Minecraft 26.3 because those mods have no build for it. JEI and Jade remain supported. These integrations stay available on the 1.21.1 line.
+
+# 1.21.1-0.1.5 (BiggerReactors-Rework, unreleased)
+
+## Added
+
+- Added the Battery Redstone Sensor, with separate settings for each sensor: at or above a charge threshold, at or below it, completely full, completely empty, or disabled.
+- Added the sensor's configuration screen, crafting recipe, recipe-book unlock and guide instructions. Its lit texture follows the signal, and it stops emitting when the battery disassembles.
+- Battery charge can now control a connected turbine through its existing Activity / Level redstone input.
+- Added optional OpenComputers support through native cable-connected components for reactor, turbine and heat-exchanger computer ports, replacing the ComputerCraft integration. Component addresses persist across reloads.
+
+## Improved
+
+- Replaced the tiny close glyph used for Disabled with a dedicated crossed-circle icon. Battery threshold arrows are larger and easier to read.
+- Apply, restore and confirm icons now have a consistent compact size and more padding inside the redstone-screen buttons.
+
+## Fixed
+
+- Reactor, turbine and battery redstone sensors now follow their machine's light/dark theme, including machines with multiple terminals.
+- Item, fluid and energy port screens now follow the selected theme of their reactor, turbine, heat exchanger or battery instead of using a separate port appearance.
+- Industrial Processors now mark externally received energy for saving even while idle.
+- Machine ports reject malformed interface commands without changing their settings.
+- Computer operations run on the server thread, and computers attached after assembly can immediately access existing control rods.
+- The guide and processing costs now follow the server's synchronized configuration in multiplayer.
+- Energy output distributes small integer remainders across connected consumers instead of leaving them stranded.
+- Fluid and item output ports refresh their connections when a neighbor changes its available capabilities.
+- Invalid saved controls and fluid identifiers no longer prevent otherwise recoverable machine state from loading.
+
+# 1.21.1-0.1.4 (BiggerReactors-Rework)
+
+## Fixed
+
+- Carry On can no longer pick up blocks from assembled reactors, turbines, heat exchangers or batteries. Loose and disassembled parts remain carryable, and placing carried blocks still works.
+- The battery terminal and body now use the same appearance preference.
+- Heat-exchanger fluids now fill the channel opening up to the inner red and blue borders, with a small clearance to avoid overlapping surfaces. Fluid amounts and heat transfer are unchanged.
+
+# 1.21.1-0.1.3 (BiggerReactors-Rework)
+
+## Machine audio and rod seams (2026-10-28)
+ - shorten volume tooltips and fit the focus outline to the full rectangular −/+ buttons
+ - add original reactor, boiler and RPM-dependent turbine operating sounds
+ - add local per-multiblock volume/mute controls in Settings, independent of shared appearance
+ - synchronize operating audio without opening the GUI; deduplicate terminals and release unloaded sources
+ - use the same 25-block sound range from the structure surface for reactors, boilers and turbines
+ - bring reactor manifold coolant against the outer grille using shared world/guide geometry and a minimal surface clearance; preserve fluid quantities and cold/hot slices
+ - close full fuel/waste segment micro-gaps and omit internal rod caps while retaining exposed and partial surfaces
+
+## Machine lighting (2026-10-27)
+ - add level 7 light to operating multiblock terminals and visible reactor fuel
+ - add level 6 light to processing Industrial Processors and the visible hot-fluid segments of exchanger condenser paths; exclude steam and cold returns
+ - update lighting on state/stock changes and disassembly, including batched fuel and assembly updates
+
+## REI theme compatibility (2026-10-27)
+ - follow REI's active light/dark theme across all native categories, with readable property labels and values
+ - reuse the machine theme for slots, gauge frames, progress arrows and neutral property-bar chrome, including separately rendered industrial fluid gauges
+ - update on each draw without changing machine appearance preferences or tinting ingredients and fluids
+
+## Login resource loading and REI alignment (2026-10-27)
+ - prepare heated Liquid Obsidian sprites during the initial atlas load, avoiding a full resource reload when the default coolant profiles arrive on world login
+ - center REI items and fluid icons inside the shared 18 px slot frames, including industrial inputs/outputs, moderator blocks, coils and fluid conversions
+
+## Roughly Enough Items integration (2026-10-27)
+ - add native optional REI categories for both Industrial Processor recipes, solid moderators, reactor coolants, turbine coils and heat-exchanger conversions
+ - share property rankings, percentages, explanatory tooltips and decorated fluid gauges with the existing viewer data
+ - open REI from machine recipe shortcuts and register terminals, channels and ports as category workstations
+ - preserve fluid origin components and ingredient lookups; exclude machine tabs and movable popups from the ingredient overlay
+ - retain EMI priority and skip JEI compatibility categories when a native REI plugin is active
+
+## Industrial viewer visuals (2026-10-27)
+ - use the machine's decorated animated fluid gauges in JEI and EMI, preserving ingredient interactions
+ - remove the empty dark tooltip over the Industrial Processor operating-condition label
+
+
+## Correct hot-volume yield and recipe-viewer layout (2026-10-27)
+ - correct obsidian's yield target to steam per equal volume of hot coolant, not nuclear fuel: 1000 mB hot obsidian gives 9000 mB ideal steam versus 7500 mB for hot Cryo
+ - cap fractional phase-change heat at the available batch volume
+ - show both Industrial Processor recipes in JEI/EMI with input water beside FE and liquid product in the output tank, preserving searchable ingredients
+
+
+## Industrial processing and obsidian coolant revision (2026-10-27)
+ - expand the existing Cyanite Reprocessor into the Industrial Processor while preserving its registry IDs, crafting recipe and cyanite processing
+ - add obsidian and water processing into Liquid Obsidian, a separate product tank, fluid output routes, automatic ejection and the revised water/energy layout
+ - replace the lava coolant pair with identified heated Liquid Obsidian; legacy pairs stop as invalid until manually emptied
+ - give hot obsidian 20% more heat per mB than unchanged hot Cryo Fuel, verified with equal-volume exchanger batches; leave other coolant and turbine coefficients unchanged
+ - update recipes, JEI/EMI, the guide, translations and synchronization for the new processing options
+
+
+## Battery terminal and Unicode fixes (2026-10-27)
+
+- Move the item-charging slot to the top (+) and the item-discharging slot to the bottom (-), preserving persisted slot IDs and energy direction.
+- Charge equipped armor and offhand FE items only while a valid battery terminal is open on the server; share the output budget with item slots, ports and other viewers.
+- Deduplicate equipment charging within each server tick and synchronize modified item components through the menu.
+- Correct corrupted dimension/conversion separators and serialize new ROBN strings as length-prefixed UTF-8 with an explicit type tag. Retain legacy string decoding and bounds checks; reject malformed UTF-8.
+- Bump internal network protocol to 3 so incompatible clients cannot decode the new string representation.
+
+## Contained-fluid rendering and reactor repair (2026-10-27)
+ - render only exterior fluid surfaces, omitting shared phase, segment and bend caps; use consistent UVs, outward normals, face culling, native tint alpha and fluid emission light
+ - use vanilla cutout rendering for opaque contained fluids and the culled translucent layer for translucent tints, avoiding forced transparency behind machine glass without depending on Iris
+ - preserve coolant profile/origin alongside simulation volumes when disassembling or rebuilding a reactor; fixes stored coolant becoming unidentified and rejecting refill after casing repair
+ - show unidentified coolant instead of Air for orphaned stored amounts; require an explicit coolant-port manual dump before refilling an already unidentified tank, without silently changing its contents
+
+## Turbine reload regression (2026-10-26)
+ - resolve queued controller aliases before checking emptiness or removing controllers from the registry; prevents loaded turbine parts and rotor bearings from remaining split between controllers
+ - use deterministic inventory/size/creation-order merge selection while preserving the independent-inventory protection
+
+## Stability and data fixes (2026-10-26)
+ - validate binary lengths/nesting before collection allocation, reject nontext compound keys and bind GUI packets to their menu and position (internal protocol 2)
+ - validate rod commands and numeric configuration bounds, including open endpoints and nonfinite numbers
+ - replace removed persistence delegates; preserve machine origin across parts and refuse merging independently stocked machines, including inventories awaiting NBT load
+ - respect liquid output protection when settling pending asynchronous radiation
+ - reprocessor automatic input uses recipe fluids and selects matching fluid alternatives; machine recipes stay out of the vanilla crafting book
+ - add recovery to transition data maps, distinguish empty client snapshots from missing sync and clear coolant cache on disconnect
+ - derive only eligible heated sprites, repair Cryo Fuel texture fallback and label turbine generation as gross without changing turbine mechanics
+ - remove five unused textures and 64 duplicate JSON keys; synchronize locale keys, keeping English fallback where Chinese translations are unavailable
+ - exclude GameTests and their empty template from the distribution jar; keep generated numerical studies local
+
+## Liquid cooling
+ - active reactors now reduce burn and coolant conversion linearly with persistent hot output stock; exchangers limit both conversions from retained steam only, preserving turbine behavior and solid-mode generation
+ - output monitoring ignores normal transfer batches cleared within one second, stops immediately at full capacity and recovers by up to five percentage points per tick; saved monitoring state survives reloads
+ - added output occupancy, retained occupancy and operating-limit statistics with localized bottleneck/recovery reasons, plus guide explanations in English and Portuguese
+ - reactor thermal protection now accounts for the output conversion limit when estimating sustainable heat removal
+ - reactor manifolds and exchanger channels now fill their whole visual path using the relative cold/hot proportions, including abrupt stock changes and tiny nonempty amounts; actual inventory gauges and conversion remain unchanged
+ - corrected sodium's heat-exchange temperature so the same reactor and exchanger produce more steam with sodium than Cryo Fuel or Liquid Obsidian; added a finite closed-loop comparison of all coolant tiers using identical geometry and control rods
+ - preserved existing sodium inventories across this specific temperature correction without accepting unrelated coolant profile changes
+ - JEI and EMI coolant entries show heat-exchange temperature and the correct destination of the hot output instead of labeling coolant heat capacity as FE/mB
+ - empty coolant tank pairs now clear their selected fluid, origin and fractional heat so another coolant can enter; fixes both manual emptying and loading previously empty saves, while keeping nonempty fluids separated
+ - fixed a client crash when rendering exchanger fluids: channels resolve assembly through their terminal instead of reading an ASSEMBLED property they do not have
+ - assembled turbines now send rotor geometry even at zero RPM and accept geometry arriving before the assembled block state
+ - repaired 119 malformed English color codes that displayed stray characters in machine screens and tooltips
+ - both heat exchanger circuits now display their input/output fluids inside straight channels and elbows, sharing tube space according to synchronized tank proportions; only aggregate views are synchronized during operation
+ - manifold fluids now span continuous vertical columns, with hot coolant rising from below and cold coolant descending from above in shared space
+ - heat exchangers retain operating temperatures on load/reassembly; statistics identify warmup, partial supply and indirect heat transfer, and show channel temperatures
+ - the guide and both channel item tooltips explain face contact, indirect transfer across a gap and the full-inlet steady-state assumptions behind potential conversion
+ - heated coolant texture generation now isolates external fluids without client texture properties, preventing an atlas reload failure and subsequent duplicate mod setup registrations
+
+## Battery
+ - recipes are more expensive: the casing uses blutonium ingots instead of iron, the energy port uses redstone blocks, and the terminal and cell use ludicrite ingots
+ - fixed a crash when saving and closing a world with a battery, caused by cells updating their neighbors while their chunks were unloading
+
+## JEI and EMI
+ - added the Heat Exchanger category with indexed hot-to-cold coolant conversions and water-to-steam evaporation; terminal, both channel types and fluid port expose it, and optional hot fluid origins remain intact
+ - moderator blocks, moderator fluids and turbine coils now show each property as a colored bar, scaled to the best value available and colored by how it ranks against the other options
+ - hovering a property explains it and lists its benefits and drawbacks
+ - reactor coolant and heat exchange pages now follow the moderator page layout and width: cold and hot fluids stacked with an arrow, names on top, ranked bars for heat per mB, temperature, conductivity and recovery, and notes for the destination or circuit
+ - statistics side tab sits under the appearance tab on the same ear instead of overlapping it on reactor, turbine and heat exchanger terminals
+ - statistics window grouped into Structure, Fuel, Fluids and Performance sections, with the operating condition pinned on top, terminal-style units and a bar comparing current and potential rates
+ - guide coolant tables keep names at normal size, sliding inside their column, and show the fluid on hover; the heat exchanger chapter lists the fluids it exchanges
+ - guide models no longer list or draw empty interior spaces as air, and reactor manifolds are drawn closed with coolant inside instead of showing only their outer faces
+ - statistics window can be dragged by its title and uses its own icon on the side tab
+ - side tabs, ears and open popups are reported to the recipe viewer, which moves its ingredient list out of the way instead of covering the screen
+ - recipe viewer tooltips are drawn above the reprocessor's face configuration window
+ - appearance, statistics and face configuration popups can stay open together and close in any order; the last one clicked comes to the front, and each popup only blocks the area it covers
+
+# 1.21.1-0.1.0 (BiggerReactors-Rework)
+
+Independent fork and rework of BiggerReactors. Mod id `biggerreactorsrework`, meant for new worlds:
+worlds and machines from the original mod are not migrated.
+
+## Port
+ - main machine screens (reprocessor and reactor/turbine/heat exchanger terminals) have a Settings side tab with a draggable Light/Dark popup and persistent per-machine or shared appearance; darkening covers slots, buttons and neutral gauge artwork, preserving casing frames, icons, items, fluids and colored fills
+ - optional Dark Mode Everywhere integration excludes this mod's drawing code from its shader and text recoloring
+ - ingot sprites redesigned with a compact Minecraft-style silhouette and each material's color; ingots now use the standard generated item model, and the wrench sprite depicts a steel open-end wrench
+ - lowered both redstone screens' side tabs to match the face configuration window's top inset, keeping icons, tooltips and click areas aligned
+ - turbine redstone configuration now uses the reactor's metal panel, icon tabs, selectors and apply/revert glyphs, with contextual explanations, correct units and validation for thresholds and flow percentages
+ - added the Jade energy-bar option's missing English and Portuguese translation, preventing its development-time assertion from interrupting the initial resource reload
+ - guide cover's raised center seal removed to reveal the updated cover art; page headings, muted labels, highlights and material table headers now use coordinated green inks
+ - reactor, turbine and heat exchanger connected glass now closes inward hazard-stripe corners around terminals, ports and other gaps, using native chunk models and the existing border textures
+ - guide material pages now follow ore smelting, graphite smelting, reactor waste, cyanite reprocessing and ludicrite acquisition instead of storage unpacking; recipe arrows and quantity symbols corrected
+ - guide consolidated into five chapters: Getting started, Materials, Reactor, Turbine and Heat exchanger; cyanite reprocessing stays in Materials, and energy/vapor modes share the Reactor chapter
+ - material property tables group identical air/material variants, resolve readable names, show separate property columns with explanatory hover tooltips and filter unavailable entries; synchronized client material caches are cleared before replacement
+ - material names scroll at their normal font size inside table cells; hover shows the material icon and readable name, and rows sort by increasing efficiency (E) with deterministic ties
+ - multiblock size limits shown in text using current configuration; maximum-size 3D preview removed, keeping small assembly examples, zoom, facing material lists and yellow casing/glass hover outlines
+ - blutonium acquisition explicitly identifies the Cyanite Reprocessor, with its crafting recipe, processing recipe and operating instructions together in Materials
+ - turbine redstone port uses its own lit and unlit textures, with the lit state following command input or sensor output
+ - port to Minecraft 1.21.1 and NeoForge 21.1 (ModDevGradle, Java 21)
+ - mod id, registry namespace, resources and Java package moved to `biggerreactorsrework`
+ - creative tab named BiggerReactors-Rework
+ - datapack files moved to the 1.21 layout and formats (recipes, loot tables, tags, biome modifiers); common tags use the `c` namespace
+ - no external library mods required: the multiblock, registration, config, data loading, networking and screen code the mod used is now part of the mod
+ - the Phosphophyllite and Quartz submodules were removed from the repository
+ - turbine rotor drawn by a block entity renderer and heat exchanger channels baked into the chunk mesh, keeping the previous models and transforms
+ - OpenCL/Vulkan reactor simulation removed, along with its shaders and the `allowAcceleratedSimulation` config option; the reactor uses the CPU simulation
+ - the unregistered `reactor2` prototype is left out of the build for now
+
+## Battery
+ - new battery multiblock: casing, connected glass, terminal, energy ports and cells, from 3x3x3 up to 32x32x32 (configurable)
+ - each cell stores 3.2 GFE and adds 300 kFE/t to the input limit and 300 kFE/t to the output limit; capacity and limits grow linearly with the cell count
+ - an assembled battery needs a terminal, at least two energy ports and at least one cell; if every port points the same way on assembly, one is switched
+ - energy ports switch between input and output with a wrench or from their screen
+ - right-clicking any battery block other than a port opens the terminal: charge gauge, last tick's input and output, transfer limit, discharge and charge item slots, player inventory and an armor/offhand tab
+ - every cell keeps its share of the stored energy: a broken cell keeps it as an item (shown in its tooltip) and brings it into the next battery it joins
+ - connected, animated cell textures; cells light up when the battery is assembled and animate while it holds energy
+ - Jade shows the battery's total energy with the mod's energy bar on any block of an assembled battery
+ - new guide chapter with the battery's blocks, recipes, size limits and a 3D example
+
+## Cyanite Reprocessor
+ - restored (it was disabled in the original 1.20.4 code): 2 cyanite ingots + water + energy make 1 blutonium ingot, with the original config values
+ - water in the tank is kept when the world reloads (it was saved and read under different names)
+ - accepts energy from other blocks but does not give it back
+ - side configuration window, opened from a tab on the right of the screen, with Items, Water and Energy tabs: each face (except the front) can be set as cyanite input, blutonium output, both, water input or energy input; all faces accept energy by default
+ - optional auto input (pulls cyanite and water from neighbors) and auto eject (pushes blutonium to neighbors), per tab
+ - its recipe shows in JEI and EMI, drawn like the machine's screen; clicking the progress arrow opens it
+ - Jade shows the Cyanite Reprocessor's energy with the mod's own energy bar instead of Jade's default one; the reactor and turbine power taps show their battery the same way
+
+## Screens
+ - gauge bars (fuel mix, heat, turbine speed, fluid tanks, control rod and coolant flow) have their own textures under `textures/gui/<bar>/`, separate from the screen backgrounds, with the same look as before
+ - new fuel, waste, heat and turbine speed bars, with an animated fill like the energy bar
+ - new fluid tank and control rod bars: fluids keep their own animated texture and color at 80% opacity, with a transparent reflection moving over them
+ - screens are drawn in code instead of background images (panel, slots, buttons, side tabs, selectors, text boxes, the coolant flow tank), looking the same as before; each icon is its own file under `textures/gui/icons/`
+ - side configuration window drawn the same way, with smaller automation and close buttons and their own small glyphs
+ - new toggle design: on/off switches and lit-cell selectors with a dark frame that turns cyan on hover; the turbine vent selector reads no exhaust, overflow only, all exhaust from left to right
+ - every button (eject, arrows, apply, revert, enter, side configuration) in the same style: slate fill with a light border, cyan outline on hover, teal fill when an automation switch is on
+ - status, gauge, heat exchanger and fluid symbol icons redrawn by hand, same sizes and places
+
+## Blocks
+ - reactor, turbine and heat exchanger terminals: once the multiblock is assembled, only the face pointing out of the structure shows the terminal screen and the other faces show the disassembled casing texture; disassembled terminals look the same as before
+
+## Recipe viewers
+ - EMI support, with the same categories as JEI: cyanite reprocessing, reactor moderator blocks and fluids, turbine coils; the JEI plugin steps aside when EMI is installed
+
+## Fixes
+ - liquid uranium, liquid obsidian and steam show their names again instead of the `fluid_type` translation key
+ - menu state sync runs on the server thread instead of a separate thread reading the world
+ - menu and data sync packets are actually serialized, so they work on dedicated servers
+ - client requests are only accepted for the menu the player has open
+ - the disabled cyanite reprocessor no longer breaks the `minecraft:mineable/pickaxe` and `minecraft:needs_iron_tools` tags
+# 1.20.1-0.6.0-beta.10.2
+
+## Reactor
+ - fix coolant port not accepting coolant
+ - add Vulkan backed experimental simulation
+ - simulation fully able to be loaded without Neo, backing web accessible simulator
+
+# Misc
+ - migrate to Neo
+
+# 1.20.1-0.6.0-beta.10.1
+
+## Reactor
+ - fix power tap capability crash bug (#84)
+
+## Turbine
+ - fix power tap capability crash bug (#84)
+
+## Misc
+ - fix uranium ore generation (#86)
+ - add new material blocks
+ - update material and ore block textures
+
+# 1.20.1-0.6.0-beta.10
+
+## Reactor
+ - ported to new multiblock system
+ - power tap energy handling updated
+ - fix manifolds being ignored in a passive reactor
+
+## Turbine
+ - ported to new multiblock system
+ - power tap energy handling updated
+ - fix coil/blade validation bug
+
+## Heat Exchanger
+ - ported to new multiblock system
+ - channels rendered with quartz, reduces hitches when placing/removing blocks in renderchunks containing lots of them
+
+## Misc
+ - JEI integration is back, and works in multiplayer too
+
+# 1.19.2-0.6.0-beta.6.1
+
+## Reactor
+ - fix bug with active reactor output multiplier
+ - fix issue where fluid may not be pushed into reactor properly
+ - fix NPE with restone port
+
+## Misc
+ - Update phos, breaking changes, contains multiblock bug fixes
+
+# 1.19.2-0.6.0-beta.6
+
+## Reactor
+ - add thermal fluids as moderators
+ - fix lava moderator json
+ - work around a weird blockstate issue, actual problem not fixed but it shouldn't crash anymore
+
+## Misc
+ - update Phos, breaking changes
+
+# 1.19.2-0.6.0-beta.5.1
+
+## Reactor
+ - scale radiation absorbed with amount of fuel, oversight from 1.5.2 BR, likely needs adjusting
+   - use advanced config option Reactor.fuelRadScalingMultiplier to adjust
+
+# 1.19.2-0.6.0-beta.5
+ - 1.19.2
+
+# 1.18.2-0.6.0-beta.1.3
+
+## Reactor
+ - added GUI button to dump coolant
+ - added CC function to dump coolant
+ - Fix mekanism gas pushing
+
+## Heat Exchanger
+ - added GUI button to dump fluid
+ - added CC function to dump fluid
+ - Fix mekanism gas pushing
+
+## Turbine
+ - increased default flow rate adjustement amounts by factor of 10x
+   - also configurable now
+ - Fix mekanism gas pushing
+
+# 1.18.2-0.6.0-beta.1.2
+ mekanism, its a thing again
+
+## Reactor
+ - new simulation implementation, no mechanic changes
+   - time sliced (default)
+   - full pass
+     - single thread
+       - faster than previous implementation
+     - multi thread
+       - faster than previous implementation
+     - OpenCL Accelerated
+       - requires addition of LWJGL binaries and a compatible OpenCL runtime, tested against and optimized for a Instint MI25 running under ROCm on Ubuntu 20.04
+       - POCL is known incompatible
+
+## Misc
+ - re-enable mekanism gas integration
+
+# 1.18.2-0.6.0-beta.1.1
+ hot not-a-fix
+
+## Misc
+ - handle a CME better to give better debug info
+
+# 1.18.2-0.6.0-beta.1
+ - 1.18.2
+
+## Reactor
+ - handle re-validation
+
+## Turbine
+ - handle re-validation
+ - coolant port renamed to fluid port
+
+## Heat Exchanger
+ - handle re-validation
+ - coolant port renamed to fluid port
+
+## Misc
+ - lower default uranium generation amount
+ - better reload handling
+
+# 1.18.1-0.6.0-beta.0.3
+
+## Reactor
+ - Ensure reactors dont reset themselves to inactive when reloading
+ - Fix waste ejection state saving
+ - Add out of fuel simulation bypass
+
+## Misc
+ - Tool requirements and block break times, they exist again
+ - Dont register tag for deleted fluid
+
+# 1.18.1-0.6.0-beta.0.2
+
+## Reactor
+ - Fix crash when placing computerport when computercraft is not installed
+
+# 1.18.1-0.6.0-beta.0.1
+
+## Reactor
+ - Fix coolant tank saving
+ - Switch simulations to using Fibonacci sphere for ray generation
+
+# 1.18.1-0.6.0-beta
+
+## Reactor
+ - Fix sim issue where the ray origin was offset
+ - Fix manifolds crashing passive reactors
+ - Don't save fuel tank capacity
+ - Distribute fuel/waste residual instead of voiding it
+ - Add RF checks to ensure buffers dont go negative
+
+## Turbine
+ - Ensure rotor direction is consistent
+ - Add RF checks to ensure buffers dont go negative
+
+## Misc
+ - Cyanite reprocessor saving fixed
+ - Quartz mod dependency, previously part of Phosphophyllite
+
+# 1.18.1-0.6.0-alpha.9.1
+
+## Reactor
+ - dont constantly update full fuel rendering level
+
+## Misc
+ - Fix locale issue
+
+# 1.18.1-0.6.0-alpha.9
+1.18.1
+
+## Misc
+ - Phos update
+
+# 1.18-0.6.0-alpha.8.1
+ComputerCraft, again
+
+## Reactor
+ - Re-enable computer port
+
+## Turbine
+ - Re-enable computer port
+
+## Heat Exchanger
+ - Re-enable computer port
+
+## Misc
+- Fix config
+   - Don't inline initialize the variables, JVM will inline those
+
+# 1.18-0.6.0-alpha.8
+Now **THAT** is a cave
+
+## Turbine
+ - dont double drain water from internal tank
+
+## Heat exchanger
+ - Mark dirty for saving
+
+## Misc
+ - 1.18
+ - updated some ids
+
+# 1.17.1-0.6.0-alpha.7
+Its a bird, its a plane, its a, rock?
+
+## Turbine
+ - Rotor is rendered using Quartz render system
+ - Fix validation
+
+## Misc
+ - Fix recipes that use copper
+
+# 1.17.1-0.6.0-alpha.6
+
+## Reactor
+ - Fix NPEs caused by new simulation interface
+ - Implement simulation description serialization
+ - Add version to CC API
+ - Temperatures are in Kelvin now
+ - Remove range limit for max size
+
+## Turbine
+ - Add version to CC API
+ - Remove range limit for max size
+
+## Heat Exchanger
+ - Add version to CC API
+ - Add config options for max size
+
+# 1.17.1-0.6.0-alpha.5
+Not your grandpa's reactors anymore
+
+## Reactor
+ - Remove classic simulation
+ - correctly write to rfTransferredLastTick
+ - switch to new internal simulation interface
+   - allows simulation to be loaded independent of Forge/Minecraft
+ - ensure EMTPY_MODERATOR isn't going to cause divide by zero errors
+
+## Turbine
+ - Remove classic simulation
+
+## Misc
+ - Move config to new object based system
+
+# 1.17.1-0.6.0-alpha.4
+I'm a strong independent mod that doesn't need any other repository to build me
+
+## Misc
+ - Built directly from BiggerReactors repo, w/ Phosphophyllite submodule
+ - Oregen fixed (mostly in Phos)
+ - Config format changed to TOML by default, will still read/use json5 for existing configs
+
+# 1.17.1-0.6.0-alpha.3.1
+update forge to 37.0.53
+
+## Reactor
+ - improve chunk unload time
+
+# 1.17.1-0.6.0-alpha.3
+*I AM, **S P E E D***
+
+~~except on unload, that needs work~~
+
+## Reactor
+ - Assembly tick optimizations, 50% magic
+ - Delegate to correct capability super method
+
+## Turbine
+ - Assembly tick optimizations
+ - Delegate to correct capability super method
+ - Query for ASSEMBLED blocks state existence before value
+
+## Heat Exchanger
+ - Delegate to correct capability super method
+ - Query for ASSEMBLED blocks state existence before value
+
+## Misc
+ - Switch to parchment mappings
+
+# 1.17.1-0.6.0-alpha.2
+ComputerCraft
+
+## Reactor
+ - Re-enable computer port
+ - fix possible deadlock state and race condition
+
+## Turbine
+ - Re-enable computer port
+ - fix possible deadlock state and race condition
+
+## Heat Exchanger
+ - Re-enable computer port
+ - Fix stack overflow with coolant port
+
+# 1.17.1-0.6.0-alpha.1
+Modular multi-blocks
+
+## Turbine
+ - Fix stack overflow with rotor bearing
+ - Fix maybe rendering
+
+## Misc
+ - update to Phos 0.6.0-alpha.1, and its multiblock changes
+
+
+# 1.17.1-0.6.0-alpha
+1.17.1
+
+# 1.16.5-0.5.0
+That's all folks!
+
+Next stop, 1.17!
+
+## Reactor
+ - Add experimental reactor simulation
+   - cripples servers on all cores, not recommended for normal use
+ - GUI displays fuel heat instead of casing heat
+ - Sync CC functions properly
+ - Increase internal battery size
+
+## Misc
+ - Animated terminal textures (thx Ridanisaurus)
+ - All parts of a tooltip will give their denomination
+ - Reduce tile update size, avoids chunkbaning when building large reactors/etc
+
+# 1.16.5-0.5.0-beta.3
+
+## Reactor
+ - fix manifold recipe
+ - Add allthemodium/vibranium/unobtainium fluid/vapor moderator support
+ - Add moderator values for superheated sodium, lava, and liquid obsidian
+ - Add fluid support to moderator registry
+ - Have manifold only consider cold side for dynamic moderator properties
+
+## Heat Exchanger
+ - Use correct tank sizes in GUI
+
+## Misc
+ - Add allthemodium/vibranium/unobtainium fluid/vapor transitions
+
+# 1.16.5-0.5.0-beta.2
+
+## Reactor
+ - Fix negative power bug
+ - Keep CC modem connected on reload
+ - fix controlRodCount CC function
+
+## Turbine
+ - Fix negative power bug
+ - fix CC battery function
+ - fix CC vent controls
+ - fix CC coil controls
+
+# 1.16.5-0.5.0-beta.1
+99 little bugs in the code, 99 little bugs. \
+Take one down, patch it around, 127 little bugs in the code...
+
+## Reactor
+ - Fix CC battery function
+ - Remove extra underscore from CC peripheral name
+ - Add manifold crafting recipe
+
+## Turbine
+ - Fixed NPE crash
+ - Fixed displaying NaN efficiency in some cases
+ - Remove extra underscore from CC peripheral name
+
+## Heat Exchanger
+ - Updated the GUI to better reflect internal workings
+ - Remove extra underscore from CC peripheral name
+
+## Misc
+ - Correct itemgroup key in lang file
+
+# 1.16.5-0.5.0-beta
+Still april fools, right? no? That was last week? *well fuck.*
+
+## Reactor
+ - FissionEventsPerFuelUnit increased by 10x for modern simulation
+ - Tank size increased by 100x for modern simulation
+ - Mekanism gas handling re-dded, handles all gases with valid fluid, not just steam
+ - Manifold model/texture added, modified/corrected assembly behavior
+ - GUIs switch on the fly, no longer requiring re-opening to switch type
+ - New OOP CC API to match new simulation, works for old one as well (subject to race conditions)
+
+## Heat Exchanger
+ - Increase tank size
+ - Increase internal surface area
+ - Increase conductivities
+ - Increase channel heat capacity
+ - Terminal added (GUI still needs work)
+ - Computer port added, CC API that matches new OOP based ones for reactor/turbine
+ - Manifolds add to tank capacity
+ - Allow power to be pulled from power taps
+ - New fuel rendering textures (thx Ridanisaurus)
+ - Errors in lang file
+
+## Turbine
+ - New modern simulation
+    - Drag is squared, not linear/fixed
+    - Rotor speed responds quicker
+    - Rotor speed not coupled to blade area directly
+    - Rotor fluid capacity tied to rotor RPM, faster rotor more capacity
+ - Increase steam capacity per blade by 10x for modern simulation
+   - Also increase coil drag and rotor mass by 10x, so, turbines are 10x denser now
+ - Support for multiple coil layers (exact behavior may change)
+ - New OOP CC API to match new simulation, works for old one as well (subject to race conditions)
+ - Selective transition selection, so only steam, other stuff in the heat exchanger
+ - State saves
+ - Allow power to be pulled from power taps
+ - GUI displays correct fluid being used
+
+## Misc
+ - GUIs retextured (thx Ridanisaurus)
+ - Bucket textures added (#2) (thx Ridanisaurus)
+ - Textures rearranged, texture packs may need to update
+ - Yellorium renamed to Uranium, lang file only, ID kept the same
+ - Uranium bucket no longer registered
+ - Add superheated_sodium fluid for mekanism sodium compatibility
+
+# 1.16.5-0.5.0-alpha.1
+The steam is lava, the steam is lava
+
+## Reactor
+ - GUI displays correct fluid
+ - manifolds added (no model/texture yet)
+ - config option to switch between simulations added
+ - modern simulation active cooling mode fixed
+ - modern simulation saves its data
+ - power extraction draws from internal energy correctly
+ - fix fuel level rendering
+
+## Turbine
+ - uses transition registry for fluids
+ - simulation decoupled from multiblock controller
+ - fix rotor renderer
+
+## Misc
+ - correct handling of transitions with multiple inlet fluids
+
+# 1.16.5-0.5.0-alpha.0
+Boldly go where no reactor has gone before
+
+## Reactor
+ - capability to boil fluids other than water
+ - new simulation with radiation moving in all directions, identical mechanics
+ - new simulation corrects heat transfer rates
+
+## Heat Exchanger
+ - added
+
+## Misc
+ - new textures all around (thx Ridanisaurus)
+ - added fluid obsidian (mostly for testing, may end up staying)
+
+# 1.16.4-0.4.3
+
+## Turbine
+ - correct tank size and flow rate calculations
+
+## misc
+ - move JEI integration to remove hard dependency
+
+# 1.16.4-0.4.3-beta
+I tip my hat to you, one legend to another
+
+## Reactor
+ - Fix NPE with access port
+
+## Turbine
+ - power port reports power
+
+# 1.16.4-0.4.2
+I rate this bug, 0/0
+
+## Reactor
+ - Fix CC Nan issue, #50
+
+# 1.16.4-0.4.1
+
+## Turbine
+ - fix GUIs
+
+# 1.16.4-0.4.0
+hotter, bigger, faster, stronger, *wait, that doesn't sound quite right*
+
+## Reactor
+ - default size limit increased to 128x128x192
+ - fixed bug with control rod heat transfer
+ - corrected fuel heat display
+ - added moderator registry JEI integration (thx MutantGumdrop)
+ - fix rare NPE with coolant port
+ - correct enderium registration
+ - send blockupdate in front of the redstone port to signal torches
+ - access port manual ejection works
+ - missing CC API functions added
+ - moderators added, check the list
+
+## Turbine
+ - added coi registry JEI integration (thx MutantGumdrop)
+ - missing CC API functions added
+ - flow rate/tank size now scales with physical turbine size, not blade count
+
+# Cyanite Reprocessor
+ - fix voiding issues
+
+## Misc
+ - config options flagged as advanced
+ - fixed GUI update bug
+ - CSV and wikimedia moderator/coil exports added to github actions (thx MutantGumdrop)
+
+# 1.16.4-0.3.0
+you spin me right round baby
+
+## Reactor
+ - new GUIs
+ - control rods can be named now
+ - give correct y level for fuel rod gaps
+ - some more moderators
+ - yellorium tag accepted for fuel
+ - errors with both coolant port and power tap
+ - moderator registry moved to datapack
+ - fix some redstone port state saving bugs
+ - minimize fuel rod updates at assembly
+ - correct getEnergyStoredUnscaled CC API name
+
+## Turbine
+ - new GUIs
+ - rotor animation, it exists now
+ - coil registry moved to datapack
+ - fix near edge rotors confusing casing/glass as coil
+ - add rotor_bearing_count error to lang file
+
+## Misc
+ - extranious blockstates reduced
+ - tag yellorite ore
+ - reprocessor also has a new GUI
+ - fix reprocessor voiding blutonium when output slot is full
+ - LGPL v2.1 now
+ - 1.16.4
+
+# 1.16.3-0.2.6
+1/0 bugs
+
+## Reactor
+ - fix divide by zero bug with fuel rendering
+
+# 1.16.3-0.2.5
+Redstone port bugs
+
+## Reactor
+ - fix active reactor overheating when output multiplier was > 1, and it had coolant
+ - allow power to be extracted from the power tap, not just pushed out
+ - fuel can now be extracted from a reactor
+ - add unscaled methods to CC peripheral
+ - fix redstone port energy percent reporting incorrectly
+ - fix redstone port not recommitting values after a world reload
+ - added mode switch button for control rod insertion
+ - fix redstone port powering themselves through the reactor
+ - optimize fuel rendering updates
+
+# 1.16.3-0.2.4
+Blocks and bugs
+
+## Reactor
+ - accepts uranium and blutonium blocks as fuel
+ - renders fuel, shows to accuracy of 1/16th of a block
+ - Dynamic battery size, default 10k RF per external block
+ - Steam tank size limit removed
+
+## Turbine
+ - Dynamic flow rate/tank size, based on blade count
+ - Dynamic battery size default 30k * (coil block count + 1)
+ - increased default max turbine length to 192
+ - Allthemodium, Vibranium, and Unobtanium added to possible coils
+
+## Misc
+ - storage block items are tagged now, should work with other recipes and mods correctly
+ - Fix CC API backwards compatibility with new battery sizes, scales it to the old sizes
+
+# 1.16.3-0.2.3
+Connecting, textures
+
+## Reactor
+ - Connecting, textures, for the glass
+
+## Turbine
+ - Connecting, textures, for the glass
+ - fix dangling coil bug
+ - add errors to lang file
+
+## Misc
+ - More ER2 compatibility
+ - tag yellorite ore item as uranium
+
+# 1.16.3-0.2.2
+Bug fixes! *again*
+And compat
+
+## Reactor
+ - Fix redstone port recipe
+
+## Turbine
+ - Fix a new turbine not assembling
+
+## Misc
+ - Compatibility with ER2, tagging for items/blocks and recipes where applicable
+
+# 1.16.3-0.2.1
+Bug fixing
+
+## Reactor
+ - Fix NPE with Mekanism gas handler
+ - Allow access ports to be crafted with any wooden chest
+
+## Turbine
+ - Fix NPE with Mekanism gas handler
+
+# 1.16.3-0.2.0
+Redstone Port
+
+## Reactor
+ - Added redstone port
+ - Added air types to default moderator list
+ - Increase default maximum size to 64x64x96
+ - Increase config maximum size limit to 192x192x256
+ - Computer Port drop added
+ - Change transparent blocks sound type to glass, mostly for the glass
+ - Fix overproduction bug with a production multiplier in wrong place, added more config options to allow tuning of both passive and active output separately
+
+## Turbine
+ - Increase default maximum size to 64x64x96
+ - Increase config maximum size limit to 192x192x256
+ - Computer Port drop added
+ - Input/Exhaust GUI icons corrected
+
+## Misc
+ - Bucket added for irradiated steam
+ - Yellorium fluid shows up in JEI now, it was transparent
+
+# 1.16.3-0.1.9
+CC Bug fix
+
+## Reactor
+ - Clamp control rod insertion with CC API
+
+# 1.16.3-0.1.8
+ComputerCraft API
+
+## Reactor
+ - Added ability to get the maximum amount of fluid that *could* have been produced this tick
+ - Added ability to query battery size, as it is now configurable
+ - Ported ability to query active reactor tank size, missed in first round
+
+## Turbine
+ - Added ability to query batter size, as it is now configurable
+
+## Misc
+ - update to zh_cn translation
+
+# 1.16.3-0.1.7
+more bug fixes
+
+## Reactor
+ - Fix loading issue due to mekanism steam compatability
+ - Fix crash when using gui to toggle directions
+ - Fix dupe glitch with mekanism pipes, also causes log spawm
+
+## Misc
+ - Uranium to cyanite actually fixed now
+
+# 1.16.3-0.1.6
+bug fixes
+
+## Reactor
+ - GUIs added for ports, only allow toggle
+ - OutputMultiplier fixed for active reactors
+ - Control rod levels apply after reload
+
+## Turbine
+ - GUIs added for coolant port, only allows toggle
+ - Default turbine max flow rate changed to 5,000mB/t, and tank size to 10,000mB
+ - Internal battery size adjusted by 2.5x to match above change
+
+## Misc
+ - fixed cyanite reprocessor voiding items
+ - corrected the uranium to cyanite recipe
+
+# 1.16.3-0.1.5
+more tagging, fix for ATM6 dust smelting
+
+## Misc
+ - add ingots to forge:ingots
+ - add dusts to forge:dusts
+ - add yellorium_dust to forge:dusts/uranium_dust
+
+# 1.16.3-0.1.4
+tagging
+
+## Reactor
+ - Reactor accepts any forge:ingots/uranium
+ - Glass reports errors correctly
+ - Reactor will save generated power through reload
+ - Added more moderators
+
+## Turbine
+ - Inductor drag config option fixed
+ - Computerport will properly set vent all
+ - Added inductors
+
+## Misc
+ - Cyanite reprocessor works with pipes properly
+ - Yellorite is tagged as forge:ores/uranium, and forge:ores
+ - AE2 grindstone recipes added
+ - zh_cn translation added (thanks qsefthuopq)
+
+# 1.16.3-0.1.3
+Mekanism compatibility
+
+## Reactor
+ - Reactor can now produce Mekanism gas steam, just connect a Mekanism gas pipe to the coolant port
+
+## Turbine
+ - Turbine can now accept Mekanism gas steam, just connect a Mekanism gas pipe to the coolant port.
+ - Computer Craft API bug fixed. Steam and water were being reported as each other.
+
+## Misc
+ - Mekanism Enrichment Chamber and Crusher compatibility added. Pretty much the same as the Pulverizer.
+ - Computer ports have names in the lang file now.
+
+# 1.16.3-0.1.2
+wrench compat
+
+## Reactor
+ - Fixed wrench compat with mekanism
+ - Control rods save their insertion
+
+## Turbine
+ - Fixed wrench compat with mekanism
+
+# 1.16.3-0.1.1
+computer ports and rotor rotation
+
+## Reactor
+ - Computer port implemented
+## Turbine
+ - Computer port implemented
+ - Rotor will now rotate to the correct axis
+
+## Misc
+ - Added config option to disable oregen
+
+# 1.16.3-0.1.0
+fist 1.16 release, minor changes
+
+## Reactor
+ - Control rod has a GUI now
+## Turbine
+ - Flow rate change buttons work properly (bug discovered because of control rod)
+## Misc
+ - Yellorium bucket named fixed
+ - Phosphophyllite separated into different jar, required for BiR (see Phosphophyllite changelog for details)
+
+# 1.15.2-0.0.1
+bug fix
+
+## Reactor
+ - blocks registered with tags not added to registry correct (thermal blocks)
+
+# 1.15.2-0.0.0
+initial version, changes from BR 0.4.3A
+
+## Reactor
+ - Access port must be pushed into, and does not have a gui nor internal buffer
+ - Terminal GUI works a bit different, but not majorly, also called terminal now, not controller
+ - Control rod does not have a GUI (yet)
+ - Computer port does not exist (yet)
+
+## Turbine
+ - Terminal GUI works a bit different, but not majorly, also called terminal now, not controller
+ - Turbine requires two bearings, one on each end
+ - Computer port does not exist (yet)
+ - You can't over speed turbines anymore, there is a soft limit to the speed, so long as you were under 2000 rpm it's the same
+     - Small sub-note there, i did modify the efficiency function in the 450-500 RPM range to have a better transition, shouldn't really matter though
+ - You now need to rotor bearings, one at each end, orientation of rotor doesn't matter
+
+## Misc
+ - There is a pile of stuff in the config now, sooo many internal values that were magic before
+
+
+
 #### Beginning of time?

@@ -8,7 +8,7 @@
 
 Design your own reactor, turn its heat into steam, drive a turbine and store the power in a multiblock battery.
 
-**BiggerReactors-Rework** brings the BiggerReactors foundation to **Minecraft 26.1.2 on NeoForge**, with **rebuilt liquid cooling, redesigned interfaces, original machine sounds and a new battery multiblock**.
+**BiggerReactors-Rework** brings the BiggerReactors foundation to **Minecraft 1.21.1, 26.1.2 and 26.3 on NeoForge**, with **rebuilt liquid cooling, redesigned interfaces, original machine sounds and a new battery multiblock**.
 
 > 🧬 An independent fork of **BiggerReactors**, carrying forward the legacy of **Big Reactors**. Original authors and contributors are credited below.
 
@@ -115,7 +115,7 @@ Eject cyanite from your reactor and recycle it into blutonium, or supply obsidia
 - 🟣 **1 obsidian block + 100 mB water + FE → 100 mB Liquid Obsidian**.
 - 🧊 **1 blue ice + 200 mB Liquid Obsidian + FE → 100 mB Frozen Obsidian**.
 - 📦 Blutonium leaves through the item output; coolants leave through the fluid output. Only the output needed by the active recipe can block that process.
-- 📚 **JEI and REI** show every recipe, including the input fluid, energy, time and correct item or fluid result. The in-game guide lists them in production order.
+- 📚 **Supported recipe viewers** show every recipe, including the input fluid, energy, time and correct item or fluid result. The in-game guide lists them in production order.
 
 With the default configuration, the obsidian recipe takes **200 ticks (10 seconds at 20 TPS)** and uses **200 FE**. The coolant is manufactured cold; the reactor supplies the heat.
 
@@ -271,8 +271,8 @@ Learn the plant inside the game:
 
 | Integration | What it adds |
 | --- | --- |
-| 📚 JEI and REI | All Industrial Processor recipes, moderators, turbine coils and current heat-exchanger fluid conversions. |
-| 💻 OpenComputers | The adapter is inactive on Minecraft 26.1.2. |
+| 📚 JEI (all targets), REI (1.21.1/26.1.2), EMI (1.21.1) | All Industrial Processor recipes, moderators, turbine coils and current heat-exchanger fluid conversions. |
+| 💻 OpenComputers | Available on Minecraft 1.21.1; retained but inactive on 26.x. |
 | 💻 CC:Tweaked | Native computer ports for reactor, turbine and heat-exchanger telemetry and controls, with direct or wired-modem access. |
 | 🔎 Jade | Supported machine information in the inspection overlay. |
 | 🧪 Mekanism | The liquid sodium coolant option. |
@@ -287,22 +287,22 @@ Learn the plant inside the game:
 
 | Requirement | Version |
 | --- | --- |
-| 🎮 Minecraft | **26.1.2** |
-| 🛠️ Loader | **NeoForge 26.1.2.126+** for Minecraft 26.1.2 |
-| ☕ Java | **25** |
+| 🎮 Minecraft | **1.21.1, 26.1.2 or 26.3** |
+| 🛠️ Loader | **NeoForge**: 21.1.264+ (1.21.1), 26.1.2.126+ (26.1.2), 26.3.0.99+ (26.3) |
+| ☕ Java | **21** for 1.21.1; **25** for 26.x |
 | 📦 Additional required mods | **None** |
 
 ---
 
 ## ❓ FAQ
 
-**Can I import my original BiggerReactors machines?**  
+**Can I import my original BiggerReactors machines?**
 This fork is designed for new worlds. It does not migrate worlds or machines from the original BiggerReactors.
 
-**Do I need Mekanism or Ad Astra?**  
+**Do I need Mekanism or Ad Astra?**
 No. They add optional coolant choices. Water and Liquid Obsidian are included.
 
-**How do I make Liquid Obsidian now?**  
+**How do I make Liquid Obsidian now?**
 Use the Industrial Processor: **1 obsidian block + 100 mB water + FE → 100 mB Liquid Obsidian**. The reactor heats that coolant; the exchanger cools it back. Lava is not part of this loop.
 
 **How do I make Frozen Obsidian?**
@@ -311,16 +311,16 @@ Use the Industrial Processor: **1 blue ice + 200 mB Liquid Obsidian + FE → 100
 **How much FE will my plant make?**
 Fuel mB/t × 12,500 × structure % gives the steam (or hot coolant) per tick; the exchanger multiplies hot coolant by its recipe; the turbine multiplies handled steam by the coils’ base FE per mB and the efficiency at the current RPM. The in-game guide and statistics show every number.
 
-**Will my old lava and obsidian coolant loop keep working?**  
+**Will my old lava and obsidian coolant loop keep working?**
 Affected reactors and heat exchangers report an invalid fluid and stop. Empty both affected tanks, then refill with a supported coolant. Stored lava is not automatically converted into Heated Liquid Obsidian.
 
-**Can I put heated coolant into the turbine?**  
+**Can I put heated coolant into the turbine?**
 Use steam in the turbine. Send heated coolant to the heat exchanger to generate that steam.
 
-**Can coolant choice replace good circulation?**  
+**Can coolant choice replace good circulation?**
 No. Water supply, tank availability, channel layout and extraction still matter.
 
-**Why is actual production below potential?**  
+**Why is actual production below potential?**
 Check the operating message and the assumptions shown in the statistics panel. Potential assumes ideal conditions for that machine.
 
 ---
@@ -356,5 +356,5 @@ This rework is not affiliated with or endorsed by the original authors. Applicab
 
 ---
 
-🐛 **Found a problem?** Visit the **[issue tracker](https://github.com/vindocel/BiggerReactors-Rework/issues)**.  
+🐛 **Found a problem?** Visit the **[issue tracker](https://github.com/vindocel/BiggerReactors-Rework/issues)**.
 💻 **Want to explore the code?** Browse the **[source repository](https://github.com/vindocel/BiggerReactors-Rework)**.

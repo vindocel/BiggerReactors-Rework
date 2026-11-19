@@ -9,6 +9,7 @@ import biggerreactorsrework.fluids.Steam;
 import biggerreactorsrework.multiblocks.MachineLighting;
 import biggerreactorsrework.multiblocks.reactor.blocks.ReactorManifold;
 import biggerreactorsrework.registries.CoolantComponents;
+//? if =26.1.2 {
 import biggerreactorsrework.registries.FluidTransitionRegistry;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.core.BlockPos;
@@ -24,6 +25,39 @@ import net.neoforged.neoforge.fluids.FluidStack;
 
 // Added 2026-11-03: the Frozen Obsidian coolant, its recipe, yield and glow; steam has no bucket.
 public final class FrozenObsidianGameTests {
+//?} else if =1.21.1 {
+/*import biggerreactorsrework.registries.FluidTransitionRegistry;
+import net.minecraft.gametest.framework.GameTest;
+import net.minecraft.gametest.framework.GameTestHelper;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.neoforged.neoforge.fluids.FluidStack;
+import net.neoforged.neoforge.gametest.GameTestHolder;
+import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
+
+// Added 2026-11-03: the Frozen Obsidian coolant, its recipe, yield and glow; steam has no bucket.
+@GameTestHolder(BiggerReactors.modid) @PrefixGameTestTemplate(false)
+public final class FrozenObsidianGameTests {
+*/
+//?} else if =26.3 {
+/*import biggerreactorsrework.registries.FluidTransitionRegistry;
+import net.minecraft.gametest.framework.GameTestHelper;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.entity.EntityTypes;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.material.FlowingFluid;
+import net.minecraft.world.level.material.Fluids;
+import net.minecraft.world.phys.Vec3;
+import net.neoforged.neoforge.fluids.FluidStack;
+
+// Added 2026-11-03: the Frozen Obsidian coolant, its recipe, yield and glow; steam has no bucket.
+public final class FrozenObsidianGameTests {
+*/
+//?}
     @GameTest(template="empty_7x7x7")
     public static void frozenObsidianRecipeYieldAndGlow(GameTestHelper h) {
         h.assertTrue(FrozenObsidian.INSTANCE.getBucket() != Items.AIR, "Frozen Obsidian has no bucket");
@@ -54,6 +88,7 @@ public final class FrozenObsidianGameTests {
         h.assertTrue(r.fluid() == LiquidObsidian.INSTANCE && r.totalFluid() == 200, "recipe does not take 200 mB of Liquid Obsidian");
         h.assertTrue(r.fluidResult().getAmount() == 100, "recipe does not make 100 mB");
         h.succeed();
+//? if =26.1.2 || =26.3 {
     }
 
     @GameTest(template="empty_7x7x7", timeoutTicks=100)
@@ -62,10 +97,29 @@ public final class FrozenObsidianGameTests {
         h.assertTrue(water.x > 0 && Math.abs(water.y) > 0.0001, "water baseline did not push or allow travel");
         for (var coolant : new FlowingFluid[]{LiquidObsidian.INSTANCE, FrozenObsidian.INSTANCE, HeatedCoolant.INSTANCE}) {
             var movement = measureTravel(h, coolant);
+//?} else if =1.21.1 {
+/*    }
+
+    @GameTest(template="empty_7x7x7")
+    public static void placedCoolantsMatchWaterTravelAndCurrent(GameTestHelper h) {
+        var water = measureTravel(h, (net.minecraft.world.level.material.FlowingFluid) net.minecraft.world.level.material.Fluids.WATER);
+        h.assertTrue(water.x > 0 && Math.abs(water.y) > 0.0001, "water baseline did not push or allow travel");
+        for (var coolant : new net.minecraft.world.level.material.FlowingFluid[]{LiquidObsidian.INSTANCE, FrozenObsidian.INSTANCE, HeatedCoolant.INSTANCE}) {
+            var movement = measureTravel(h, coolant);
+*/
+//?}
             h.assertTrue(Math.abs(movement.x - water.x) < 0.000001 && Math.abs(movement.y - water.y) < 0.000001,
+//? if =26.1.2 || =26.3 {
                     "coolant current or travel differs from water: " + coolant + " " + movement + ", water " + water);
         }
+//?} else if =1.21.1 {
+/*                    "coolant current or travel differs from water: " + coolant + " " + movement + ", water " + water);
+            h.assertTrue(coolant.getFluidType().getFallDistanceModifier(null) == 0, "coolant keeps fall damage: " + coolant);
+        }
+*/
+//?}
         h.succeed();
+//? if =26.1.2 {
     }
 
     private static Vec3 measureTravel(GameTestHelper h, FlowingFluid fluid) {
@@ -84,18 +138,89 @@ public final class FrozenObsidianGameTests {
         pig.discard();
         return new Vec3(current, travel, 0);
     }
+//?} else if =1.21.1 {
+/*    }
+
+    private static net.minecraft.world.phys.Vec3 measureTravel(GameTestHelper h, net.minecraft.world.level.material.FlowingFluid fluid) {
+        var pos = new net.minecraft.core.BlockPos(3, 2, 3);
+        h.setBlock(pos.below(), net.minecraft.world.level.block.Blocks.STONE);
+        h.setBlock(pos.west(), fluid.defaultFluidState().createLegacyBlock());
+        h.setBlock(pos, fluid.getFlowing(7, false).createLegacyBlock());
+        var pig = h.spawn(net.minecraft.world.entity.EntityType.PIG, pos);
+        pig.setYRot(0);
+        pig.baseTick();
+        h.assertTrue(pig.isInFluidType(fluid.getFluidType()), "entity did not enter fluid movement in " + fluid);
+        double current = pig.getDeltaMovement().x;
+        double startX = pig.getX();
+        pig.travel(new net.minecraft.world.phys.Vec3(-1, 0, 0));
+        double travel = pig.getX() - startX;
+        pig.discard();
+        return new net.minecraft.world.phys.Vec3(current, travel, 0);
+    }
+
+    @GameTest(template="empty_7x7x7")
+    public static void heatedCoolantFlowKeepsOrigin(GameTestHelper h) {
+        var profile = FluidTransitionRegistry.liquidTransition(FrozenObsidian.INSTANCE);
+        var hot = new FluidStack(HeatedCoolant.INSTANCE, 1000);
+        hot.applyComponents(CoolantComponents.heated(profile));
+        var bucket = HeatedCoolantBucket.filled(hot);
+        var placer = (HeatedCoolantBucket.BucketWithOrigin) bucket.getItem();
+        var source = h.absolutePos(new net.minecraft.core.BlockPos(3, 4, 3));
+        var flow = source.below();
+        h.assertTrue(placer.emptyContents(null, h.getLevel(), source, null, bucket), "heated coolant was not placed");
+        h.startSequence().thenWaitUntil(() -> {
+            h.assertTrue(HeatedCoolant.INSTANCE.isSame(h.getLevel().getFluidState(flow).getType()), "heated coolant has not flowed");
+        }).thenExecute(() -> {
+            var chunk = h.getLevel().getChunkAt(flow);
+            h.assertTrue(HeatedCoolantBucket.origin(bucket).equals(biggerreactorsrework.fluids.PlacedCoolantOrigins.get(chunk, flow)),
+                    "flow lost its source's coolant origin");
+            h.getLevel().setBlock(flow, net.minecraft.world.level.block.Blocks.STONE.defaultBlockState(), 3);
+            h.assertTrue(biggerreactorsrework.fluids.PlacedCoolantOrigins.get(chunk, flow) == null,
+                    "replaced fluid left a stale origin");
+        }).thenSucceed();
+    }
+*/
+//?} else if =26.3 {
+/*    }
+
+    private static Vec3 measureTravel(GameTestHelper h, FlowingFluid fluid) {
+        var pos = new BlockPos(3, 2, 3);
+        h.setBlock(pos.below(), Blocks.STONE);
+        h.setBlock(pos.west(), fluid.defaultFluidState().createLegacyBlock());
+        h.setBlock(pos, fluid.getFlowing(7, false).createLegacyBlock());
+        var pig = h.spawn(EntityTypes.PIG, pos);
+        pig.setYRot(0);
+        pig.baseTick();
+        h.assertTrue(pig.isInWater(), "entity did not enter water movement in " + fluid);
+        double current = pig.getDeltaMovement().x;
+        double startX = pig.getX();
+        pig.travel(new Vec3(-1, 0, 0));
+        double travel = pig.getX() - startX;
+        pig.discard();
+        return new Vec3(current, travel, 0);
+    }
+*/
+//?}
 
     @GameTest(template="empty_7x7x7", timeoutTicks=100)
     public static void placedFrozenObsidianFreezesEntitiesLikePowderSnow(GameTestHelper h) {
         var pos = new net.minecraft.core.BlockPos(3, 2, 3);
+//? if =26.1.2 || =1.21.1 {
         h.setBlock(pos, FrozenObsidian.INSTANCE.defaultFluidState().createLegacyBlock());
         var pig = h.spawn(net.minecraft.world.entity.EntityType.PIG, pos);
         h.succeedWhen(() -> h.assertTrue(pig.getTicksFrozen() > 20, "entity inside Frozen Obsidian is not freezing"));
+//?} else if =26.3 {
+/*        h.setBlock(pos, FrozenObsidian.INSTANCE.defaultFluidState().createLegacyBlock());
+        var pig = h.spawn(EntityTypes.PIG, pos);
+        h.succeedWhen(() -> h.assertTrue(pig.getTicksFrozen() > 20, "entity inside Frozen Obsidian is not freezing"));
+*/
+//?}
     }
 
     @GameTest(template="empty_7x7x7", timeoutTicks=100)
     public static void placedHeatedCoolantBurnsLikeLava(GameTestHelper h) {
         var pos = new net.minecraft.core.BlockPos(3, 2, 3);
+//? if =26.1.2 {
         h.setBlock(pos, HeatedCoolant.INSTANCE.defaultFluidState().createLegacyBlock());
         var pig = h.spawn(net.minecraft.world.entity.EntityType.PIG, pos);
         float health = pig.getHealth();
@@ -123,11 +248,49 @@ public final class FrozenObsidianGameTests {
                     "replaced fluid left a stale origin");
         }).thenSucceed();
     }
+//?} else if =1.21.1 {
+/*        h.setBlock(pos, HeatedCoolant.INSTANCE.defaultFluidState().createLegacyBlock());
+        var pig = h.spawn(net.minecraft.world.entity.EntityType.PIG, pos);
+        float health = pig.getHealth();
+        h.succeedWhen(() -> h.assertTrue(pig.isOnFire() && pig.getHealth() < health, "entity inside heated coolant is not burning"));
+    }
+*/
+//?} else if =26.3 {
+/*        h.setBlock(pos, HeatedCoolant.INSTANCE.defaultFluidState().createLegacyBlock());
+        var pig = h.spawn(EntityTypes.PIG, pos);
+        float health = pig.getHealth();
+        h.succeedWhen(() -> h.assertTrue(pig.isOnFire() && pig.getHealth() < health, "entity inside heated coolant is not burning"));
+    }
+
+    @GameTest(template="empty_7x7x7")
+    public static void heatedCoolantFlowKeepsOrigin(GameTestHelper h) {
+        var profile = FluidTransitionRegistry.liquidTransition(FrozenObsidian.INSTANCE);
+        var hot = new FluidStack(HeatedCoolant.INSTANCE, 1000);
+        hot.applyComponents(CoolantComponents.heated(profile));
+        var bucket = HeatedCoolantBucket.filled(hot);
+        var placer = (HeatedCoolantBucket.BucketWithOrigin) bucket.getItem();
+        var source = h.absolutePos(new BlockPos(3, 4, 3));
+        var flow = source.below();
+        h.assertTrue(placer.emptyContents(null, h.getLevel(), source, null, bucket), "heated coolant was not placed");
+        h.startSequence().thenWaitUntil(() -> {
+            h.assertTrue(HeatedCoolant.INSTANCE.isSame(h.getLevel().getFluidState(flow).getType()), "heated coolant has not flowed");
+        }).thenExecute(() -> {
+            var chunk = h.getLevel().getChunkAt(flow);
+            h.assertTrue(HeatedCoolantBucket.origin(bucket).equals(biggerreactorsrework.fluids.PlacedCoolantOrigins.get(chunk, flow)),
+                    "flow lost its source's coolant origin");
+            h.getLevel().setBlock(flow, Blocks.STONE.defaultBlockState(), 3);
+            h.assertTrue(biggerreactorsrework.fluids.PlacedCoolantOrigins.get(chunk, flow) == null,
+                    "replaced fluid left a stale origin");
+        }).thenSucceed();
+    }
+*/
+//?}
 
     @GameTest(template="empty_7x7x7")
     public static void heatedCoolantBucketKeepsItsOriginInTanksAndInTheWorld(GameTestHelper h) {
         var profile = FluidTransitionRegistry.liquidTransition(FrozenObsidian.INSTANCE);
         var hot = new FluidStack(HeatedCoolant.INSTANCE, 1000);
+//? if =26.1.2 || =1.21.1 {
         hot.applyComponents(CoolantComponents.heated(profile));
         var bucket = net.neoforged.neoforge.fluids.FluidUtil.getFilledBucket(hot);
         h.assertTrue(bucket.is(HeatedCoolant.INSTANCE.getBucket()), "heated coolant has no bucket");
@@ -135,6 +298,16 @@ public final class FrozenObsidianGameTests {
         h.assertTrue(FluidStack.isSameFluidSameComponents(handler.getFluidInTank(0), hot), "bucket lost the coolant origin");
 
         var pos = new net.minecraft.core.BlockPos(3, 2, 3);
+//?} else if =26.3 {
+/*        hot.applyComponents(CoolantComponents.heated(profile));
+        var bucket = hot.getFluidType().getBucket(hot);
+        h.assertTrue(bucket.is(HeatedCoolant.INSTANCE.getBucket()), "heated coolant has no bucket");
+        var handler = net.neoforged.neoforge.transfer.access.ItemAccess.forStack(bucket).getCapability(net.neoforged.neoforge.capabilities.Capabilities.Fluid.ITEM);
+        h.assertTrue(FluidStack.isSameFluidSameComponents(net.neoforged.neoforge.transfer.fluid.FluidUtil.getStack(handler, 0), hot), "bucket lost the coolant origin");
+
+        var pos = new net.minecraft.core.BlockPos(3, 2, 3);
+*/
+//?}
         var placer = (biggerreactorsrework.fluids.HeatedCoolantBucket.BucketWithOrigin) bucket.getItem();
         h.assertTrue(placer.emptyContents(null, h.getLevel(), h.absolutePos(pos), null, bucket), "bucket did not place heated coolant");
         var state = h.getBlockState(pos);

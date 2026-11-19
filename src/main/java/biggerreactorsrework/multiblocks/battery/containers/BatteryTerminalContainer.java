@@ -5,9 +5,16 @@ import biggerreactorsrework.core.registry.ContainerSupplier;
 import biggerreactorsrework.core.registry.RegisterContainer;
 import biggerreactorsrework.multiblocks.battery.BatteryItemHandler;
 import biggerreactorsrework.multiblocks.battery.tiles.BatteryBaseTile;
+//? if =26.1.2 || =26.3 {
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.EquipmentSlot;
+//?} else if =1.21.1 {
+/*import net.minecraft.core.BlockPos;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.EquipmentSlot;
+*/
+//?}
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.enchantment.EnchantmentEffectComponents;
@@ -16,11 +23,20 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.inventory.Slot;
+//? if =26.1.2 || =26.3 {
 import net.minecraft.world.item.ItemStack;
 import biggerreactorsrework.core.transfer.ItemSlots;
 import biggerreactorsrework.core.transfer.SlotsSlot;
 
 import javax.annotation.Nonnull;
+//?} else if =1.21.1 {
+/*import net.minecraft.world.item.ItemStack;
+import net.neoforged.neoforge.items.IItemHandler;
+import net.neoforged.neoforge.items.SlotItemHandler;
+
+import javax.annotation.Nonnull;
+*/
+//?}
 import java.util.List;
 import java.util.Map;
 
@@ -53,9 +69,16 @@ public class BatteryTerminalContainer extends AbstractContainerMenu implements G
     private static final int PLAYER_SLOTS = 36;
     private static final int ARMOR_SLOTS = 4;
 
+//? if =26.1.2 || =26.3 {
     private static final EquipmentSlot[] ARMOR_ORDER = {EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET};
     private static final Identifier[] ARMOR_ICONS = {InventoryMenu.EMPTY_ARMOR_SLOT_HELMET, InventoryMenu.EMPTY_ARMOR_SLOT_CHESTPLATE,
             InventoryMenu.EMPTY_ARMOR_SLOT_LEGGINGS, InventoryMenu.EMPTY_ARMOR_SLOT_BOOTS};
+//?} else if =1.21.1 {
+/*    private static final EquipmentSlot[] ARMOR_ORDER = {EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET};
+    private static final ResourceLocation[] ARMOR_ICONS = {InventoryMenu.EMPTY_ARMOR_SLOT_HELMET, InventoryMenu.EMPTY_ARMOR_SLOT_CHESTPLATE,
+            InventoryMenu.EMPTY_ARMOR_SLOT_LEGGINGS, InventoryMenu.EMPTY_ARMOR_SLOT_BOOTS};
+*/
+//?}
 
     private final BatteryBaseTile tileEntity;
     private final Player owner;
@@ -65,6 +88,7 @@ public class BatteryTerminalContainer extends AbstractContainerMenu implements G
         super(INSTANCE, windowId);
         this.owner = player;
         this.tileEntity = (BatteryBaseTile) player.level().getBlockEntity(blockPos);
+//? if =26.1.2 || =26.3 {
         this.getGuiPacket();
 
         // The client only needs the placement rules; the menu sync fills its slots.
@@ -75,6 +99,19 @@ public class BatteryTerminalContainer extends AbstractContainerMenu implements G
         this.addSlot(new SlotsSlot(items, BatteryItemHandler.CHARGE_SLOT, CHARGE_X, CHARGE_Y));
 
         Inventory inventory = player.getInventory();
+//?} else if =1.21.1 {
+/*        this.getGuiPacket();
+
+        // The client only needs the placement rules; the menu sync fills its slots.
+        IItemHandler items = !player.level().isClientSide() && tileEntity.nullableController() != null
+                ? tileEntity.controller().items : new BatteryItemHandler(() -> {
+        });
+        this.addSlot(new SlotItemHandler(items, BatteryItemHandler.DISCHARGE_SLOT, DISCHARGE_X, DISCHARGE_Y));
+        this.addSlot(new SlotItemHandler(items, BatteryItemHandler.CHARGE_SLOT, CHARGE_X, CHARGE_Y));
+
+        Inventory inventory = player.getInventory();
+*/
+//?}
         for (int row = 0; row < 3; row++) {
             for (int column = 0; column < 9; column++) {
                 this.addSlot(new Slot(inventory, column + row * 9 + 9, INVENTORY_X + column * 18, INVENTORY_Y + row * 18));
@@ -86,17 +123,31 @@ public class BatteryTerminalContainer extends AbstractContainerMenu implements G
 
         for (int i = 0; i < ARMOR_ORDER.length; i++) {
             EquipmentSlot slot = ARMOR_ORDER[i];
+//? if =26.1.2 || =26.3 {
             this.addSlot(new ArmorSlot(inventory, player, slot, 36 + slot.getIndex(), ARMOR_X, ARMOR_Y + i * 18)
                     .setBackground(ARMOR_ICONS[i]));
         }
+//?} else if =1.21.1 {
+/*            this.addSlot(new ArmorSlot(inventory, player, slot, 36 + slot.getIndex(), ARMOR_X, ARMOR_Y + i * 18)
+                    .setBackground(InventoryMenu.BLOCK_ATLAS, ARMOR_ICONS[i]));
+        }
+*/
+//?}
         this.addSlot(new Slot(inventory, 40, ARMOR_X, OFFHAND_Y) {
             @Override
             public void setByPlayer(@Nonnull ItemStack newStack, @Nonnull ItemStack oldStack) {
                 player.onEquipItem(EquipmentSlot.OFFHAND, oldStack, newStack);
                 super.setByPlayer(newStack, oldStack);
+//? if =26.1.2 || =26.3 {
             }
         }.setBackground(InventoryMenu.EMPTY_ARMOR_SLOT_SHIELD));
     }
+//?} else if =1.21.1 {
+/*            }
+        }.setBackground(InventoryMenu.BLOCK_ATLAS, InventoryMenu.EMPTY_ARMOR_SLOT_SHIELD));
+    }
+*/
+//?}
 
     /**
      * Worn armor slot with the player inventory's rules; vanilla's armor slot is not public.
@@ -104,29 +155,29 @@ public class BatteryTerminalContainer extends AbstractContainerMenu implements G
     private static final class ArmorSlot extends Slot {
         private final Player owner;
         private final EquipmentSlot equipmentSlot;
-        
+
         ArmorSlot(Inventory inventory, Player owner, EquipmentSlot equipmentSlot, int index, int x, int y) {
             super(inventory, index, x, y);
             this.owner = owner;
             this.equipmentSlot = equipmentSlot;
         }
-        
+
         @Override
         public void setByPlayer(@Nonnull ItemStack newStack, @Nonnull ItemStack oldStack) {
             owner.onEquipItem(equipmentSlot, oldStack, newStack);
             super.setByPlayer(newStack, oldStack);
         }
-        
+
         @Override
         public int getMaxStackSize() {
             return 1;
         }
-        
+
         @Override
         public boolean mayPlace(@Nonnull ItemStack stack) {
             return stack.canEquip(equipmentSlot, owner);
         }
-        
+
         @Override
         public boolean mayPickup(@Nonnull Player player) {
             ItemStack stack = this.getItem();
@@ -134,7 +185,7 @@ public class BatteryTerminalContainer extends AbstractContainerMenu implements G
                     || !EnchantmentHelper.has(stack, EnchantmentEffectComponents.PREVENT_ARMOR_CHANGE)) && super.mayPickup(player);
         }
     }
-    
+
     /**
      * @return The current state of the machine.
      */
@@ -152,9 +203,16 @@ public class BatteryTerminalContainer extends AbstractContainerMenu implements G
     /** Modified 2026-10-27: charge only the equipment displayed by this open, valid server menu. */
     @Override
     public void broadcastChanges() {
+//? if =26.1.2 || =26.3 {
         long tick = biggerreactorsrework.core.CoreEvents.tickNumber();
         if (!owner.level().isClientSide() && owner.containerMenu == this && stillValid(owner) && chargedAtTick != tick) {
             chargedAtTick = tick;
+//?} else if =1.21.1 {
+/*        long tick = biggerreactorsrework.core.CoreEvents.tickNumber();
+        if (!owner.level().isClientSide && owner.containerMenu == this && stillValid(owner) && chargedAtTick != tick) {
+            chargedAtTick = tick;
+*/
+//?}
             var controller = tileEntity.nullableController();
             if (controller != null) {
                 long charged = 0;
@@ -168,15 +226,29 @@ public class BatteryTerminalContainer extends AbstractContainerMenu implements G
 
     @Override
     public boolean stillValid(@Nonnull Player player) {
+//? if =26.1.2 || =26.3 {
         return !tileEntity.isRemoved() && tileEntity.isBatteryAssembled()
                 && player.distanceToSqr(net.minecraft.world.phys.Vec3.atCenterOf(tileEntity.getBlockPos())) <= 64.0;
     }
+//?} else if =1.21.1 {
+/*        return !tileEntity.isRemoved() && tileEntity.isBatteryAssembled()
+                && player.distanceToSqr(tileEntity.getBlockPos().getCenter()) <= 64.0;
+    }
+*/
+//?}
 
     @Override
     public void executeRequest(String requestName, Object requestData) {
+//? if =26.1.2 || =26.3 {
         assert tileEntity.getLevel() != null;
         if (tileEntity.getLevel().isClientSide()) {
             runRequest(requestName, requestData);
+//?} else if =1.21.1 {
+/*        assert tileEntity.getLevel() != null;
+        if (tileEntity.getLevel().isClientSide) {
+            runRequest(requestName, requestData);
+*/
+//?}
             return;
         }
         tileEntity.runRequest(requestName, requestData);

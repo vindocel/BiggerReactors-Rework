@@ -1,3 +1,4 @@
+//? if =26.1.2 || =26.3 {
 package biggerreactorsrework.client;
 
 import biggerreactorsrework.fluids.HeatedCoolant;
@@ -35,3 +36,5 @@ public final class FluidSprites {
         return model.fluidTintSource() != null ? model.fluidTintSource().colorAsStack(stack) : 0xFFFFFFFF;
     }
 }
+//?} else if =1.21.1 {
+//?}

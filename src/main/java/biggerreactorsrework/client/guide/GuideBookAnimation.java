@@ -1,3 +1,4 @@
+//? if =26.1.2 {
 package biggerreactorsrework.client.guide;
 
 // Modified 2026-11-01: native Minecraft 26.1.2 API.
@@ -5,6 +6,23 @@ package biggerreactorsrework.client.guide;
 
 import net.minecraft.util.Util;
 import net.minecraft.client.Minecraft;
+//?} else if =1.21.1 {
+/*package biggerreactorsrework.client.guide;
+
+
+
+import net.minecraft.Util;
+import net.minecraft.client.Minecraft;
+*/
+//?} else if =26.3 {
+/*package biggerreactorsrework.client.guide;
+
+
+
+import net.minecraft.util.Util;
+import net.minecraft.client.Minecraft;
+*/
+//?}
 import net.minecraft.client.player.LocalPlayer;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
 
@@ -38,9 +56,16 @@ public final class GuideBookAnimation {
             // A book still closing starts opening from where it is.
             phaseStart = Util.getMillis() - (phase == Phase.CLOSING ? (long) ((1 - progress()) * DURATION_MS) : 0);
             phase = Phase.OPENING;
+//? if =26.1.2 || =1.21.1 {
         }
         Minecraft.getInstance().setScreen(new GuideScreen());
     }
+//?} else if =26.3 {
+/*        }
+        Minecraft.getInstance().gui.setScreen(new GuideScreen());
+    }
+*/
+//?}
 
     /** The guide screen turned a page: a leaf of the book in the hand turns too, as if the player were reading it. */
     public static void pageTurned(boolean forward) {

@@ -12,9 +12,16 @@ import biggerreactorsrework.calculator.simulation.PlantSpec;
 import biggerreactorsrework.registries.FluidTransitionRegistry;
 import biggerreactorsrework.registries.ReactorModeratorRegistry;
 import biggerreactorsrework.registries.TurbineCoilRegistry;
+//? if =26.1.2 || =26.3 {
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.block.Block;
+//?} else if =1.21.1 {
+/*import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.block.Block;
+*/
+//?}
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -627,9 +634,18 @@ public final class PlantSearch {
     }
 
     @Nullable
+//? if =26.1.2 || =26.3 {
     private static Block block(String id) {
         var key = Identifier.tryParse(id);
         if (key == null || !BuiltInRegistries.BLOCK.containsKey(key)) return null;
         return BuiltInRegistries.BLOCK.getValue(key);
     }
+//?} else if =1.21.1 {
+/*    private static Block block(String id) {
+        var key = ResourceLocation.tryParse(id);
+        if (key == null || !BuiltInRegistries.BLOCK.containsKey(key)) return null;
+        return BuiltInRegistries.BLOCK.get(key);
+    }
+*/
+//?}
 }

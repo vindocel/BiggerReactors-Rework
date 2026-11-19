@@ -1,3 +1,4 @@
+//? if =26.1.2 || =26.3 {
 package biggerreactorsrework.core.transfer;
 
 import java.lang.ref.WeakReference;
@@ -457,3 +458,5 @@ public final class Transfer {
         };
     }
 }
+//?} else if =1.21.1 {
+//?}

@@ -1,3 +1,4 @@
+//? if =26.1.2 || =26.3 {
 package biggerreactorsrework.core.transfer;
 
 import net.minecraft.world.item.ItemStack;
@@ -63,3 +64,5 @@ public interface ItemSlots {
         return stack;
     }
 }
+//?} else if =1.21.1 {
+//?}

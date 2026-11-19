@@ -1,7 +1,14 @@
 package biggerreactorsrework.multiblocks.reactor.tiles;
 
+//? if =26.1.2 || =26.3 {
 import net.minecraft.core.component.DataComponentPatch;
 import net.minecraft.core.BlockPos;
+//?} else if =1.21.1 {
+/*import net.minecraft.core.component.DataComponentPatch;
+import net.minecraft.MethodsReturnNonnullByDefault;
+import net.minecraft.core.BlockPos;
+*/
+//?}
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -32,6 +39,7 @@ import biggerreactorsrework.core.util.BlockStates;
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 
+//? if =26.1.2 || =26.3 {
 import static biggerreactorsrework.multiblocks.reactor.blocks.ReactorAccessPort.PortDirection.*;
 
 @ParametersAreNonnullByDefault
@@ -39,21 +47,43 @@ public class ReactorCoolantPortTile extends ReactorBaseTile implements IFluidTan
     // Modified 2026-10-30: refresh output handlers on capability invalidation, including absent neighbors.
     private final biggerreactorsrework.core.capability.NeighborCapability<biggerreactorsrework.core.transfer.FluidTanks, ?> outputCapability =
             biggerreactorsrework.core.capability.NeighborCapability.fluids(this);
-    
+
     @RegisterTile("reactor_coolant_port")
+//?} else if =1.21.1 {
+/*import static biggerreactorsrework.multiblocks.reactor.blocks.ReactorAccessPort.PortDirection.*;
+
+@MethodsReturnNonnullByDefault
+@ParametersAreNonnullByDefault
+public class ReactorCoolantPortTile extends ReactorBaseTile implements IFluidTankHandler, MenuProvider, IHasUpdatableState<ReactorCoolantPortState>, IEventMultiblock.AssemblyStateTransition {
+    // Modified 2026-10-30: refresh output handlers on capability invalidation, including absent neighbors.
+    private final biggerreactorsrework.core.capability.NeighborCapability<net.neoforged.neoforge.fluids.capability.IFluidHandler> outputCapability =
+            new biggerreactorsrework.core.capability.NeighborCapability<>(this, Capabilities.FluidHandler.BLOCK);
+
+    @RegisterTile("reactor_coolant_port")
+*/
+//?}
     public static final BlockEntityType.BlockEntitySupplier<ReactorCoolantPortTile> SUPPLIER = new RegisterTile.Producer<>(ReactorCoolantPortTile::new);
-    
+
+//? if =26.1.2 || =26.3 {
     @RegisterCapability
     private static final CapabilityRegistration FLUID_HANDLER_CAP_REGISTRATION = CapabilityRegistration.tileFluids(ReactorCoolantPortTile.class);
-    
+
     public ReactorCoolantPortTile(BlockEntityType<?> TYPE, BlockPos pos, BlockState state) {
+//?} else if =1.21.1 {
+/*    @RegisterCapability
+    private static final CapabilityRegistration FLUID_HANDLER_CAP_REGISTRATION = CapabilityRegistration.tileCap(Capabilities.FluidHandler.BLOCK, ReactorCoolantPortTile.class);
+
+    public ReactorCoolantPortTile(BlockEntityType<?> TYPE, BlockPos pos, BlockState state) {
+*/
+//?}
         super(TYPE, pos, state);
     }
 
-    
+
     @Nullable
+//? if =26.1.2 || =26.3 {
     private ReactorTransitionTank transitionTank;
-    
+
     @Override
     public Object transferSnapshot() {
         return transitionTank == null ? null : transitionTank.transferSnapshot();
@@ -67,13 +97,19 @@ public class ReactorCoolantPortTile extends ReactorBaseTile implements IFluidTan
     }
 
     @Override
+//?} else if =1.21.1 {
+/*    private ReactorTransitionTank transitionTank;
+
+    @Override
+*/
+//?}
     public int tankCount() {
         if (transitionTank == null) {
             return 0;
         }
         return transitionTank.tankCount();
     }
-    
+
     @Override
     public long tankCapacity(int tank) {
         if (transitionTank == null) {
@@ -81,7 +117,7 @@ public class ReactorCoolantPortTile extends ReactorBaseTile implements IFluidTan
         }
         return transitionTank.tankCapacity(tank);
     }
-    
+
     @Override
     public Fluid fluidTypeInTank(int tank) {
         if (transitionTank == null) {
@@ -89,7 +125,7 @@ public class ReactorCoolantPortTile extends ReactorBaseTile implements IFluidTan
         }
         return transitionTank.maintenanceFluid(tank);
     }
-    
+
     @Nullable
     @Override
     public DataComponentPatch fluidComponentsInTank(int tank) {
@@ -98,7 +134,7 @@ public class ReactorCoolantPortTile extends ReactorBaseTile implements IFluidTan
         }
         return transitionTank.maintenanceComponents(tank);
     }
-    
+
     @Override
     public long fluidAmountInTank(int tank) {
         if (transitionTank == null) {
@@ -106,7 +142,7 @@ public class ReactorCoolantPortTile extends ReactorBaseTile implements IFluidTan
         }
         return transitionTank.fluidAmountInTank(tank);
     }
-    
+
     @Override
     public boolean fluidValidForTank(int tank, Fluid fluid) {
         if (transitionTank == null) {
@@ -115,7 +151,7 @@ public class ReactorCoolantPortTile extends ReactorBaseTile implements IFluidTan
         return transitionTank.fluidValidForTank(tank, fluid);
     }
     @Override public boolean fluidValidForTank(int tank,Fluid fluid,DataComponentPatch components){return transitionTank!=null && transitionTank.fluidValidForTank(tank,fluid,components);}
-    
+
     @Override
     public long fill(Fluid fluid, DataComponentPatch components, long amount, boolean simulate) {
         if (transitionTank == null || direction != INLET || isRecoveringInput()) {
@@ -123,7 +159,7 @@ public class ReactorCoolantPortTile extends ReactorBaseTile implements IFluidTan
         }
         return transitionTank.fill(fluid, components, amount, simulate);
     }
-    
+
     @Override
     public long drain(Fluid fluid, DataComponentPatch components, long amount, boolean simulate) {
         if (transitionTank == null || !canDrain()) {
@@ -131,7 +167,7 @@ public class ReactorCoolantPortTile extends ReactorBaseTile implements IFluidTan
         }
         return transitionTank.maintenanceDrain(outputTank(),fluid, components, amount, simulate);
     }
-    
+
     // Modified 2026-11-02: controller drains only the sum actually accepted by balanced destinations.
     public long offerFluid(long maximum) {
         neighborChanged();
@@ -172,14 +208,14 @@ public class ReactorCoolantPortTile extends ReactorBaseTile implements IFluidTan
         }
         return 0;
     }
-    
+
     private boolean connected = false;
     Direction steamOutputDirection = null;
-    
+
     IFluidTankHandler handler = null;
     private ReactorAccessPort.PortDirection direction = INLET;
     public final ReactorCoolantPortState reactorCoolantPortState = new ReactorCoolantPortState(this);
-    
+
     @SuppressWarnings("DuplicatedCode")
     public void neighborChanged() {
         handler = null;
@@ -195,30 +231,39 @@ public class ReactorCoolantPortTile extends ReactorBaseTile implements IFluidTan
             handler = FluidHandlerWrapper.wrap(capHandler);
         }
     }
-    
+
     public void setDirection(ReactorAccessPort.PortDirection direction) {
         if (this.direction != direction) maintenanceCold = false;
         this.direction = direction;
         this.setChanged();
     }
-    
+
     @Override
+//? if =26.1.2 || =26.3 {
     protected void readNBT(CompoundTag compound) {
         maintenanceCold=compound.getBooleanOr("recoverInput", false);
         if (compound.contains("direction")) {
             direction = biggerreactorsrework.core.util.SavedValues.enumValue(ReactorAccessPort.PortDirection.class, compound.getStringOr("direction", ""), ReactorAccessPort.PortDirection.INLET);
         }
+//?} else if =1.21.1 {
+/*    protected void readNBT(CompoundTag compound) {
+        maintenanceCold=compound.getBoolean("recoverInput");
+        if (compound.contains("direction")) {
+            direction = biggerreactorsrework.core.util.SavedValues.enumValue(ReactorAccessPort.PortDirection.class, compound.getString("direction"), ReactorAccessPort.PortDirection.INLET);
+        }
+*/
+//?}
     }
-    
+
     @Override
-    
+
     protected CompoundTag writeNBT() {
         CompoundTag NBT = new CompoundTag();
         NBT.putString("direction", String.valueOf(direction));
         NBT.putBoolean("recoverInput", isRecoveringInput());
         return NBT;
     }
-    
+
     @Override
     public void runRequest(String requestName, Object requestData) {
         if (requestName.equals("recoverInput")) {
@@ -236,34 +281,34 @@ public class ReactorCoolantPortTile extends ReactorBaseTile implements IFluidTan
             assert level != null;
             level.setBlock(this.worldPosition, this.getBlockState().setValue(PORT_DIRECTION_ENUM_PROPERTY, direction), 3);
         }
-        
+
         super.runRequest(requestName, requestData);
     }
-    
+
     @Override
     public Component getDisplayName() {
         return Component.translatable(ReactorCoolantPort.INSTANCE.getDescriptionId());
     }
-    
+
     @Nullable
     @Override
     public AbstractContainerMenu createMenu(int windowId, Inventory playerInventory, Player player) {
         return new ReactorCoolantPortContainer(windowId, this.worldPosition, player);
     }
-    
+
     @Override
-    
+
     public ReactorCoolantPortState getState() {
         this.updateState();
         return this.reactorCoolantPortState;
     }
-    
+
     @Override
     public void updateState() {
         reactorCoolantPortState.maintenanceCold=isRecoveringInput();
         reactorCoolantPortState.direction = (this.direction == INLET);
     }
-    
+
     @Override
     public void onAssemblyStateTransition(IValidatedMultiblock.AssemblyState oldState, IValidatedMultiblock.AssemblyState newState) {
         assert level != null;

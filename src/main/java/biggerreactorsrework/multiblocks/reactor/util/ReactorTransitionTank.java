@@ -18,7 +18,8 @@ import javax.annotation.ParametersAreNonnullByDefault;
 @ParametersAreNonnullByDefault
 @NonnullDefault
 public class ReactorTransitionTank extends FluidTransitionTank {
-    
+
+//? if =26.1.2 || =26.3 {
     private final IReactorSimulation.ICoolantTank internalTank;
 
     private record TransferState(Object fluids, Object simulation) {}
@@ -36,27 +37,33 @@ public class ReactorTransitionTank extends FluidTransitionTank {
         super.restoreTransferSnapshot(state.fluids);
         internalTank.restoreTransferSnapshot(state.simulation);
     }
-    
+
     @Override
+//?} else if =1.21.1 {
+/*    private final IReactorSimulation.ICoolantTank internalTank;
+
+    @Override
+*/
+//?}
     public long transitionedLastTick() {
         return internalTank.transitionedLastTick();
     }
-    
+
     @Override
     public long maxTransitionedLastTick() {
         return internalTank.maxTransitionedLastTick();
     }
-    
+
     @Override
     public double transferWith(HeatBody body, double rfkt) {
         throw new IllegalArgumentException("");
     }
-    
+
     @Override
     public double absorbRF(double rf) {
         throw new IllegalArgumentException("");
     }
-    
+
     public ReactorTransitionTank(IReactorSimulation.ICoolantTank internalTank) {
         super(false);
         this.internalTank = internalTank;
@@ -64,52 +71,52 @@ public class ReactorTransitionTank extends FluidTransitionTank {
         inAmount = internalTank.liquidAmount();
         outAmount = internalTank.vaporAmount();
     }
-    
+
     public long perSideCapacity() {
         return getTankCapacity(0);
     }
-    
+
     public long liquidAmount() {
         return fluidAmountInTank(0);
     }
-    
+
     public Fluid liquidType() {
         return fluidTypeInTank(0);
     }
-    
+
     public long vaporAmount() {
         return fluidAmountInTank(1);
     }
-    
+
     public Fluid vaporType() {
         return fluidTypeInTank(1);
     }
-    
+
     public void dumpLiquid() {
         dumpTank(IN_TANK);
     }
-    
+
     public void dumpVapor() {
         dumpTank(OUT_TANK);
     }
-    
+
     @Override
     public void dumpTank(int tank) {
         if(tank==IN_TANK)internalTank.dumpLiquid();else internalTank.dumpVapor();
         pullUpdate();
         super.dumpTank(tank);
     }
-    
+
     private void pushUpdate() {
         internalTank.insertLiquid(inAmount - internalTank.liquidAmount());
         internalTank.insertVapor(outAmount - internalTank.vaporAmount());
     }
-    
+
     private void pullUpdate() {
         inAmount = internalTank.liquidAmount();
         outAmount = internalTank.vaporAmount();
     }
-    
+
     @Override
     public long fill(@Nonnull Fluid fluid, DataComponentPatch components, long amount, boolean simulate) {
         pullUpdate();
@@ -123,7 +130,7 @@ public class ReactorTransitionTank extends FluidTransitionTank {
     @Override public boolean hasStoredContents() { pullUpdate(); return super.hasStoredContents(); }
     @Override public long fluidAmountInTank(int tank) { pullUpdate(); return super.fluidAmountInTank(tank); }
     @Override public CompoundTag serializeNBT(){pullUpdate();return super.serializeNBT();}
-    
+
     public long drain(@Nonnull Fluid fluid, DataComponentPatch components, long amount, boolean simulate) {
         pullUpdate();
         long drained = super.drain(fluid, components, amount, simulate);
@@ -132,7 +139,7 @@ public class ReactorTransitionTank extends FluidTransitionTank {
         }
         return drained;
     }
-    
+
     @Override public long maintenanceDrain(int tank,Fluid fluid,DataComponentPatch components,long amount,boolean simulate) {
         pullUpdate();long drained=super.maintenanceDrain(tank,fluid,components,amount,simulate);
         if(!simulate)pushUpdate();return drained;

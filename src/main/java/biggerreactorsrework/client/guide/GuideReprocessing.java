@@ -1,10 +1,19 @@
 package biggerreactorsrework.client.guide;
 
+//? if =26.1.2 || =26.3 {
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.resources.Identifier;
 import net.minecraft.network.chat.Component;
+//?} else if =1.21.1 {
+/*import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.network.chat.Component;
+*/
+//?}
 import net.minecraft.world.item.ItemStack;
+//? if =26.1.2 || =26.3 {
 import biggerreactorsrework.machine.recipe.ReprocessingRecipe;
 
 /** Native machine process card; follows recipe replacement without a viewer. */
@@ -15,11 +24,32 @@ record GuideReprocessing(Identifier id) implements GuideElement {
         var level=Minecraft.getInstance().level;
         var holder=level==null?null:biggerreactorsrework.machine.recipe.RecipeAccess.byKey(level,net.minecraft.resources.ResourceKey.create(net.minecraft.core.registries.Registries.RECIPE,id)).orElse(null);
         if(holder==null||!(holder.value() instanceof ReprocessingRecipe recipe)){
+//?} else if =1.21.1 {
+/*import biggerreactorsrework.machine.recipe.ReprocessingRecipe;
+
+/^* Native machine process card; follows recipe replacement without a viewer. ^/
+// Modified 2026-11-01: inputs side by side, one output slot, and labelled requirements.
+record GuideReprocessing(ResourceLocation id) implements GuideElement {
+    public int height(GuideScreen screen,int width){return 100;}
+    public void render(GuideScreen screen,GuiGraphics g,int x,int y,int width,int mx,int my){
+        var level=Minecraft.getInstance().level;
+        var holder=level==null?null:level.getRecipeManager().byKey(id).orElse(null);
+        if(holder==null||!(holder.value() instanceof ReprocessingRecipe recipe)){
+*/
+//?}
             screen.fixedText(g,Component.translatable("guide.biggerreactorsrework.recipe_missing"),x,y,width,GuideElements.MUTED);return;
+//? if =26.1.2 || =26.3 {
         }
         var options=biggerreactorsrework.machine.recipe.RecipeAccess.stacks(recipe.ingredient());
         var input=options.length==0?ItemStack.EMPTY:options[(int)(net.minecraft.util.Util.getMillis()/1000%options.length)].copyWithCount(recipe.count());
         boolean usesFluid=recipe.totalFluid()>0;
+//?} else if =1.21.1 {
+/*        }
+        var options=recipe.ingredient().getItems();
+        var input=options.length==0?ItemStack.EMPTY:options[(int)(net.minecraft.Util.getMillis()/1000%options.length)].copyWithCount(recipe.count());
+        boolean usesFluid=recipe.totalFluid()>0;
+*/
+//?}
         screen.fixedText(g,recipe.producesFluid()?recipe.fluidResult().getHoverName():recipe.result().getHoverName(),x,y,width,GuideElements.HEADING);
         screen.fixedText(g,Component.translatable("guide.biggerreactorsrework.process.machine"),x,y+12,width,GuideElements.MUTED);
 
@@ -33,9 +63,16 @@ record GuideReprocessing(Identifier id) implements GuideElement {
         else screen.itemSlot(g,recipe.result(),slot+96,row,mx,my);
 
         int line=y+49;
+//? if =26.1.2 || =26.3 {
         if(usesFluid){screen.fixedText(g,Component.translatable("guide.biggerreactorsrework.process.fluid",recipe.fluid().getFluidType().getDescription(),recipe.totalFluid()),x,line,width,GuideElements.BODY);line+=11;}
         screen.fixedText(g,Component.translatable("guide.biggerreactorsrework.process.energy",(long)recipe.energy()*recipe.duration(),recipe.energy()),x,line,width,GuideElements.BODY);line+=11;
         String seconds=recipe.duration()%20==0?Integer.toString(recipe.duration()/20):Double.toString(recipe.duration()/20d);
+//?} else if =1.21.1 {
+/*        if(usesFluid){screen.fixedText(g,Component.translatable("guide.biggerreactorsrework.process.fluid",recipe.fluid().getFluidType().getDescription(),recipe.totalFluid()),x,line,width,GuideElements.BODY);line+=11;}
+        screen.fixedText(g,Component.translatable("guide.biggerreactorsrework.process.energy",recipe.energy()*recipe.duration(),recipe.energy()),x,line,width,GuideElements.BODY);line+=11;
+        String seconds=recipe.duration()%20==0?Integer.toString(recipe.duration()/20):Double.toString(recipe.duration()/20d);
+*/
+//?}
         screen.fixedText(g,Component.translatable("guide.biggerreactorsrework.process.time",seconds),x,line,width,GuideElements.BODY);line+=11;
         if(recipe.producesFluid())screen.fixedText(g,Component.translatable("guide.biggerreactorsrework.process.produces",recipe.fluidResult().getAmount()),x,line,width,GuideElements.BODY);
     }

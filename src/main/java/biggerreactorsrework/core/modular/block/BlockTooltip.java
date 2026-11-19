@@ -1,3 +1,4 @@
+//? if =26.1.2 || =26.3 {
 package biggerreactorsrework.core.modular.block;
 
 import java.util.function.Consumer;
@@ -8,3 +9,5 @@ import net.minecraft.world.item.ItemStack;
 public interface BlockTooltip {
     void appendTooltip(ItemStack stack, Consumer<Component> tooltip);
 }
+//?} else if =1.21.1 {
+//?}

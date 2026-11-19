@@ -1,6 +1,14 @@
+//? if =26.1.2 || =26.3 {
 package biggerreactorsrework.multiblocks.heatexchanger.tiles;
 
 import net.minecraft.core.BlockPos;
+//?} else if =1.21.1 {
+/*package biggerreactorsrework.multiblocks.heatexchanger.tiles;
+
+import net.minecraft.MethodsReturnNonnullByDefault;
+import net.minecraft.core.BlockPos;
+*/
+//?}
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import biggerreactorsrework.multiblocks.heatexchanger.HeatExchangerMultiblockController;
@@ -11,9 +19,17 @@ import biggerreactorsrework.core.multiblock.rectangular.IRectangularMultiblockTi
 import biggerreactorsrework.core.multiblock.touching.ITouchingMultiblockTile;
 
 import javax.annotation.Nonnull;
+//? if =26.1.2 || =26.3 {
 import javax.annotation.ParametersAreNonnullByDefault;
 
 @ParametersAreNonnullByDefault
+//?} else if =1.21.1 {
+/*import javax.annotation.ParametersAreNonnullByDefault;
+
+@MethodsReturnNonnullByDefault
+@ParametersAreNonnullByDefault
+*/
+//?}
 public class HeatExchangerBaseTile extends ModularTile implements IRectangularMultiblockTile<HeatExchangerBaseTile, HeatExchangerBaseBlock, HeatExchangerMultiblockController>,
         IPersistentMultiblockTile<HeatExchangerBaseTile, HeatExchangerBaseBlock, HeatExchangerMultiblockController>,
         ITouchingMultiblockTile<HeatExchangerBaseTile, HeatExchangerBaseBlock, HeatExchangerMultiblockController> {
@@ -31,7 +47,7 @@ public class HeatExchangerBaseTile extends ModularTile implements IRectangularMu
     public void readAppearance(java.util.Map<?, ?> data) {
         if (data.get("appearancePos") instanceof Long position) appearancePos = BlockPos.of(position);
     }
-    
+
     @Nonnull
     @Override
     public HeatExchangerMultiblockController createController() {

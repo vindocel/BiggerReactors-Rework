@@ -25,45 +25,46 @@ public interface IPersistentMultiblockTile<
         BlockType extends Block & IRectangularMultiblockBlock,
         ControllerType extends MultiblockController<TileType, BlockType, ControllerType> & IPersistentMultiblock<TileType, BlockType, ControllerType>
         > extends IValidatedMultiblockTile<TileType, BlockType, ControllerType> {
-    
+
     final class Module<
             TileType extends BlockEntity & IPersistentMultiblockTile<TileType, BlockType, ControllerType>,
             BlockType extends Block & IRectangularMultiblockBlock,
             ControllerType extends MultiblockController<TileType, BlockType, ControllerType> & IPersistentMultiblock<TileType, BlockType, ControllerType>
             > extends TileModule<TileType> implements ICoreMultiblockTileModule<TileType, BlockType, ControllerType> {
-        
+
         @Nullable
         CompoundTag controllerNBT;
         @Nullable java.util.UUID origin;
         IValidatedMultiblock.AssemblyState lastAssemblyState = IValidatedMultiblock.AssemblyState.DISASSEMBLED;
         int expectedBlocks = 0;
-        
+
         MultiblockTileModule<TileType, BlockType, ControllerType> multiblockModule;
         @Nullable
         IPersistentMultiblock.Module<TileType, BlockType, ControllerType> controllerPersistentModule;
-        
+
         @OnModLoad
         public static void register() {
             ModuleRegistry.registerTileModule(IPersistentMultiblockTile.class, Module::new);
         }
-        
+
         public Module(IModularTile iface) {
             super(iface);
             //noinspection ConstantConditions
             multiblockModule = null;
         }
-        
+
         @Override
         public void postModuleConstruction() {
             multiblockModule = iface.multiblockModule();
         }
-        
+
         @Override
         public String saveKey() {
             return "persistent_multiblock";
         }
-        
+
         @Override
+//? if =26.1.2 || =26.3 {
         public void readNBT(CompoundTag nbt) {
             origin = nbt.read("machine_origin", net.minecraft.core.UUIDUtil.CODEC).orElse(null);
             // backwards compat with opening older worlds
@@ -78,31 +79,55 @@ public interface IPersistentMultiblockTile<
             if (nbt.contains("controller_data")) {
                 this.controllerNBT = nbt.getCompoundOrEmpty("controller_data");
                 return;
+//?} else if =1.21.1 {
+/*        public void readNBT(CompoundTag nbt) {
+            origin = nbt.hasUUID("machine_origin") ? nbt.getUUID("machine_origin") : null;
+            // backwards compat with opening older worlds
+            // TODO: require this
+            if (nbt.contains("last_assembly_state")) {
+                // Modified 2026-10-30: invalid metadata must not prevent reconstruction of valid stored machines.
+                lastAssemblyState = biggerreactorsrework.core.util.SavedValues.enumValue(IValidatedMultiblock.AssemblyState.class, nbt.getString("last_assembly_state"), IValidatedMultiblock.AssemblyState.DISASSEMBLED);
+            }
+            if (nbt.contains("expected_blocks")) {
+                expectedBlocks = Math.max(0, nbt.getInt("expected_blocks"));
+            }
+            if (nbt.contains("controller_data")) {
+                this.controllerNBT = nbt.getCompound("controller_data");
+                return;
+*/
+//?}
             }
             this.controllerNBT = null;
         }
-        
+
         @Override
         public CompoundTag writeNBT() {
             if (controllerPersistentModule != null && controllerPersistentModule.isSaveDelegate(iface) && controllerNBT == null) {
                 controllerNBT = controllerPersistentModule.getNBT();
             }
             final var toReturn = new CompoundTag();
+//? if =26.1.2 || =26.3 {
             if (controllerPersistentModule != null && controllerPersistentModule.origin() != null) origin = controllerPersistentModule.origin();
             if (origin != null) toReturn.store("machine_origin", net.minecraft.core.UUIDUtil.CODEC, origin);
             toReturn.putString("last_assembly_state", lastAssemblyState.toString());
+//?} else if =1.21.1 {
+/*            if (controllerPersistentModule != null && controllerPersistentModule.origin() != null) origin = controllerPersistentModule.origin();
+            if (origin != null) toReturn.putUUID("machine_origin", origin);
+            toReturn.putString("last_assembly_state", lastAssemblyState.toString());
+*/
+//?}
             if (controllerNBT != null) {
                 toReturn.put("controller_data", controllerNBT);
             }
             return toReturn;
         }
-        
+
         @Override
         public void aboutToUnloadDetach() {
             controllerNBT = null;
             writeNBT();
         }
-        
+
         @Override
         public void onControllerChange() {
             final var controller = multiblockModule.controller();

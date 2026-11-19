@@ -1,6 +1,14 @@
+//? if =26.1.2 || =26.3 {
 package biggerreactorsrework.multiblocks.reactor.blocks;
 
 import net.minecraft.core.BlockPos;
+//?} else if =1.21.1 {
+/*package biggerreactorsrework.multiblocks.reactor.blocks;
+
+import net.minecraft.MethodsReturnNonnullByDefault;
+import net.minecraft.core.BlockPos;
+*/
+//?}
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -24,41 +32,56 @@ import java.util.Locale;
 
 import static biggerreactorsrework.multiblocks.reactor.blocks.ReactorAccessPort.PortDirection.*;
 
+//? if =26.1.2 || =26.3 {
 @ParametersAreNonnullByDefault
 public class ReactorAccessPort extends ReactorBaseBlock implements IAssemblyStateBlock, IFaceDirectionBlock {
-    
+//?} else if =1.21.1 {
+/*@ParametersAreNonnullByDefault
+@MethodsReturnNonnullByDefault
+public class ReactorAccessPort extends ReactorBaseBlock implements IAssemblyStateBlock, IFaceDirectionBlock {
+*/
+//?}
+
+//? if =26.1.2 || =26.3 {
     @RegisterBlock(name = "reactor_access_port", tileEntityClass = ReactorAccessPortTile.class)
     public static final ReactorAccessPort INSTANCE = biggerreactorsrework.core.registry.RegistryIds.named("reactor_access_port", () -> new ReactorAccessPort());
-    
+
     public ReactorAccessPort() {
+//?} else if =1.21.1 {
+/*    @RegisterBlock(name = "reactor_access_port", tileEntityClass = ReactorAccessPortTile.class)
+    public static final ReactorAccessPort INSTANCE = new ReactorAccessPort();
+
+    public ReactorAccessPort() {
+*/
+//?}
         super();
         registerDefaultState(defaultBlockState().setValue(PORT_DIRECTION_ENUM_PROPERTY, INLET));
-        
+
     }
-    
+
     @Nullable
     @Override
     public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
         return ReactorAccessPortTile.SUPPLIER.create(pos, state);
     }
-    
+
     public enum PortDirection implements StringRepresentable {
         INLET,
         OUTLET;
-        
+
         public static final EnumProperty<PortDirection> PORT_DIRECTION_ENUM_PROPERTY = EnumProperty.create("portdirection", PortDirection.class);
-        
+
         @Override
         public String getSerializedName() {
             return toString().toLowerCase(Locale.US);
         }
     }
-    
+
     @Override
     protected void buildStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
         builder.add(PORT_DIRECTION_ENUM_PROPERTY);
     }
-    
+
     @Override
     public InteractionResult onUse(BlockState state, Level worldIn, BlockPos pos, Player player, InteractionHand handIn, BlockHitResult hit) {
         if (handIn == InteractionHand.MAIN_HAND) {
@@ -78,7 +101,7 @@ public class ReactorAccessPort extends ReactorBaseBlock implements IAssemblyStat
         }
         return super.onUse(state, worldIn, pos, player, handIn, hit);
     }
-    
+
     @Override
     public void onNeighborChange(BlockState state, Level worldIn, BlockPos pos, Block blockIn, BlockPos fromPos, boolean isMoving) {
         super.onNeighborChange(state, worldIn, pos, blockIn, fromPos, isMoving);

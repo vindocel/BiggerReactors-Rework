@@ -1,10 +1,19 @@
 package biggerreactorsrework.client;
 
+//? if =26.1.2 || =26.3 {
 import biggerreactorsrework.BiggerReactors;
 import net.minecraft.util.Util;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
+//?} else if =1.21.1 {
+/*import biggerreactorsrework.BiggerReactors;
+import net.minecraft.Util;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Mth;
+*/
+//?}
 
 /**
  * Vertical energy bar shared by every screen: a framed bar with an animated blue fill ({@code #36CFEE})
@@ -25,6 +34,7 @@ public final class EnergyBar {
     private static final int FILL_WIDTH = 8;
     private static final int FILL_HEIGHT = 66;
     private static final int FRAMES = 42;
+//? if =26.1.2 || =26.3 {
     private static final long FRAME_MS = 100;
 
     private static final Identifier EMPTY = Identifier.fromNamespaceAndPath(BiggerReactors.modid, "textures/gui/energy/energy_empty.png");
@@ -34,6 +44,18 @@ public final class EnergyBar {
      * Fraction of the bar to fill, safe for any stored/capacity pair (negative, zero or larger than an int).
      */
     public static double fraction(long stored, long capacity) {
+//?} else if =1.21.1 {
+/*    private static final long FRAME_MS = 100;
+
+    private static final ResourceLocation EMPTY = ResourceLocation.fromNamespaceAndPath(BiggerReactors.modid, "textures/gui/energy/energy_empty.png");
+    private static final ResourceLocation SHIMMER = ResourceLocation.fromNamespaceAndPath(BiggerReactors.modid, "textures/gui/energy/energy_shimmer_sheet.png");
+
+    /^*
+     * Fraction of the bar to fill, safe for any stored/capacity pair (negative, zero or larger than an int).
+     ^/
+    public static double fraction(long stored, long capacity) {
+*/
+//?}
         if (capacity <= 0 || stored <= 0) {
             return 0;
         }
@@ -41,6 +63,7 @@ public final class EnergyBar {
             return 1;
         }
         return (double) stored / (double) capacity;
+//? if =26.1.2 || =26.3 {
     }
 
     /**
@@ -48,13 +71,31 @@ public final class EnergyBar {
      */
     private static void frameBand(GuiGraphicsExtractor g, int x, int y, int width, int v, int h) {
         final int middle = width - 2 * BORDER;
+//?} else if =1.21.1 {
+/*    }
+
+    /^*
+     * Draws a frame row band: left border, stretched middle, right border, all from texture rows {@code v..v+h}.
+     ^/
+    private static void frameBand(GuiGraphics g, int x, int y, int width, int v, int h) {
+        final int middle = width - 2 * BORDER;
+*/
+//?}
         GuiTheme.blit(g, EMPTY, x, y, BORDER, h, 0, v, BORDER, h, TEXTURE_WIDTH, FRAME_HEIGHT);
         GuiTheme.blit(g, EMPTY, x + BORDER, y, middle, h, BORDER, v, FILL_WIDTH, h, TEXTURE_WIDTH, FRAME_HEIGHT);
         GuiTheme.blit(g, EMPTY, x + width - BORDER, y, BORDER, h, TEXTURE_WIDTH - BORDER, v, BORDER, h, TEXTURE_WIDTH, FRAME_HEIGHT);
+//? if =26.1.2 || =26.3 {
     }
 
     public static void draw(GuiGraphicsExtractor g, int x, int y, int width, int height, double fraction) {
         final int w = Math.max(TEXTURE_WIDTH, width);
+//?} else if =1.21.1 {
+/*    }
+
+    public static void draw(GuiGraphics g, int x, int y, int width, int height, double fraction) {
+        final int w = Math.max(TEXTURE_WIDTH, width);
+*/
+//?}
         final int h = Mth.clamp(height, 2 * BORDER, FRAME_HEIGHT);
         frameBand(g, x, y, w, 0, BORDER);
         frameBand(g, x, y + BORDER, w, FRAME_HEIGHT - (h - BORDER), h - BORDER);
@@ -62,9 +103,17 @@ public final class EnergyBar {
         final double safeFraction = Double.isNaN(fraction) ? 0 : Mth.clamp(fraction, 0, 1);
         final int filled = (int) Math.round(area * safeFraction);
         if (filled > 0) {
+//? if =26.1.2 || =26.3 {
             final int frame = (int) ((Util.getMillis() / FRAME_MS) % FRAMES);
             g.blit(net.minecraft.client.renderer.RenderPipelines.GUI_TEXTURED, SHIMMER, x + BORDER, y + BORDER + area - filled,
                     0, frame * FILL_HEIGHT + FILL_HEIGHT - filled, w - 2 * BORDER, filled, FILL_WIDTH, filled, FILL_WIDTH, FILL_HEIGHT * FRAMES);
         }
+//?} else if =1.21.1 {
+/*            final int frame = (int) ((Util.getMillis() / FRAME_MS) % FRAMES);
+            g.blit(SHIMMER, x + BORDER, y + BORDER + area - filled, w - 2 * BORDER, filled,
+                    0, frame * FILL_HEIGHT + FILL_HEIGHT - filled, FILL_WIDTH, filled, FILL_WIDTH, FILL_HEIGHT * FRAMES);
+        }
+*/
+//?}
     }
 }

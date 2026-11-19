@@ -11,6 +11,7 @@ import biggerreactorsrework.core.util.HeatBody;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+//? if =26.1.2 || =26.3 {
 public class CoolantTank extends HeatBody implements IReactorSimulation.ICoolantTank, ReactorModeratorRegistry.IModeratorProperties, ISerializable {
     private record TransferState(long liquid, long vapor, double thermalRemainder, double[] pressureHistory) {}
 
@@ -30,13 +31,19 @@ public class CoolantTank extends HeatBody implements IReactorSimulation.ICoolant
 
     // Modified 2026-10-26: applies only to this active-reactor tank.
     public final biggerreactorsrework.core.util.OutputBackpressure outputPressure=new biggerreactorsrework.core.util.OutputBackpressure();
+//?} else if =1.21.1 {
+/*public class CoolantTank extends HeatBody implements IReactorSimulation.ICoolantTank, ReactorModeratorRegistry.IModeratorProperties, ISerializable {
+    // Modified 2026-10-26: applies only to this active-reactor tank.
+    public final biggerreactorsrework.core.util.OutputBackpressure outputPressure=new biggerreactorsrework.core.util.OutputBackpressure();
+*/
+//?}
     public void updateOutputPressure(){outputPressure.tick(vaporAmount,perSideCapacity);}
     private final SimulationConfiguration configuration;
-    
+
     private final long perSideCapacity;
     private long liquidAmount = 0;
     private long vaporAmount = 0;
-    
+
     private final ReactorModeratorRegistry.IModeratorProperties defaultModeratorProperties;
     @Nullable
     private ReactorModeratorRegistry.IModeratorProperties moderatorProperties = null;
@@ -49,14 +56,14 @@ public class CoolantTank extends HeatBody implements IReactorSimulation.ICoolant
     public double environmentalLossLastTick;
     public FluidTransitionRegistry.ITransitionProperties transition() { return transitionProperties; }
     public double recovery() { return transitionProperties instanceof FluidTransitionRegistry.FluidTransition t ? t.recovery : 1; }
-    
+
     CoolantTank(long perSideCapacity, ReactorModeratorRegistry.IModeratorProperties defaultModeratorProperties, SimulationConfiguration configuration) {
         this.configuration = configuration;
         this.perSideCapacity = perSideCapacity;
         this.defaultModeratorProperties = defaultModeratorProperties;
         this.setInfinite(true);
     }
-    
+
     // Modified 2026-11-02: only this tick's paid budget is processed; no productive thermal remainder.
     public biggerreactorsrework.thermal.ThermalModel.Conversion convertHeat(double heat, biggerreactorsrework.thermal.ThermalModel.Preset preset) {
         boolean water=transitionProperties instanceof FluidTransitionRegistry.FluidTransition t && t.liquids.contains(net.minecraft.world.level.material.Fluids.WATER);
@@ -78,28 +85,28 @@ public class CoolantTank extends HeatBody implements IReactorSimulation.ICoolant
         liquidAmount = 0;
         if(vaporAmount==0)thermalRemainder=0;
     }
-    
+
     @Override
     public void dumpVapor() {
         vaporAmount = 0;
         outputPressure.released(vaporAmount,perSideCapacity);
         if(liquidAmount==0)thermalRemainder=0;
     }
-    
+
     @Override
     public long insertLiquid(long amount) {
         amount = Math.max(-liquidAmount,Math.min(amount,Math.max(0,perSideCapacity-liquidAmount)));
         liquidAmount += amount;
         return amount;
     }
-    
+
     @Override
     public long extractLiquid(long amount) {
         amount = Math.max(0,Math.min(amount,liquidAmount));
         liquidAmount -= amount;
         return amount;
     }
-    
+
     @Override
     public long insertVapor(long amount) {
         amount = Math.max(-vaporAmount,Math.min(amount,Math.max(0,perSideCapacity-vaporAmount)));
@@ -107,7 +114,7 @@ public class CoolantTank extends HeatBody implements IReactorSimulation.ICoolant
         if(amount<0)outputPressure.released(vaporAmount,perSideCapacity);
         return amount;
     }
-    
+
     @Override
     public long extractVapor(long amount) {
         amount = Math.max(0,Math.min(amount,vaporAmount));
@@ -115,48 +122,48 @@ public class CoolantTank extends HeatBody implements IReactorSimulation.ICoolant
         if(amount>0)outputPressure.released(vaporAmount,perSideCapacity);
         return amount;
     }
-    
+
     @Override
     public long liquidAmount() {
         return liquidAmount;
     }
-    
+
     @Override
     public long vaporAmount() {
         return vaporAmount;
     }
-    
+
     @Override
     public long perSideCapacity() {
         return perSideCapacity;
     }
-    
+
     @Override
     public void setModeratorProperties(ReactorModeratorRegistry.IModeratorProperties moderatorProperties) {
         this.moderatorProperties = moderatorProperties;
     }
-    
+
     @Override
     public void setTransitionProperties(FluidTransitionRegistry.ITransitionProperties transitionProperties) {
         this.transitionProperties = transitionProperties;
         if(transitionProperties==null)thermalRemainder=0;
     }
-    
+
     @Override
     public long transitionedLastTick() {
         return transitionedLastTick;
     }
-    
+
     @Override
     public long maxTransitionedLastTick() {
         return maxTransitionedLastTick;
     }
-    
+
     @Override
     public long rfTransferredLastTick() {
         return rfTransferredLastTick;
     }
-    
+
     @Override
     public double absorption() {
         if (perSideCapacity == 0 || moderatorProperties == null) {
@@ -168,7 +175,7 @@ public class CoolantTank extends HeatBody implements IReactorSimulation.ICoolant
         absorption /= perSideCapacity;
         return absorption;
     }
-    
+
     @Override
     public double heatEfficiency() {
         if (perSideCapacity == 0 || moderatorProperties == null) {
@@ -180,7 +187,7 @@ public class CoolantTank extends HeatBody implements IReactorSimulation.ICoolant
         heatEfficiency /= perSideCapacity;
         return heatEfficiency;
     }
-    
+
     @Override
     public double moderation() {
         if (perSideCapacity == 0 || moderatorProperties == null) {
@@ -192,7 +199,7 @@ public class CoolantTank extends HeatBody implements IReactorSimulation.ICoolant
         moderation /= perSideCapacity;
         return moderation;
     }
-    
+
     @Override
     public double heatConductivity() {
         if (perSideCapacity == 0 || moderatorProperties == null) {
@@ -204,7 +211,7 @@ public class CoolantTank extends HeatBody implements IReactorSimulation.ICoolant
         heatConductivity /= perSideCapacity;
         return heatConductivity;
     }
-    
+
     @Nullable
     @Override
     public DataCompound save() {
@@ -215,7 +222,7 @@ public class CoolantTank extends HeatBody implements IReactorSimulation.ICoolant
         compound.put("outputPressure",outputPressure.save());
         return compound;
     }
-    
+
     @Override
     public void load(@Nonnull DataCompound compound) {
         liquidAmount = compound.getLong("liquidAmount");

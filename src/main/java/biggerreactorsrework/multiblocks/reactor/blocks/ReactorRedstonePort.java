@@ -1,6 +1,14 @@
+//? if =26.1.2 || =26.3 {
 package biggerreactorsrework.multiblocks.reactor.blocks;
 
 import net.minecraft.core.BlockPos;
+//?} else if =1.21.1 {
+/*package biggerreactorsrework.multiblocks.reactor.blocks;
+
+import net.minecraft.MethodsReturnNonnullByDefault;
+import net.minecraft.core.BlockPos;
+*/
+//?}
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
@@ -17,30 +25,45 @@ import biggerreactorsrework.core.registry.RegisterBlock;
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 
+//? if =26.1.2 || =26.3 {
 @ParametersAreNonnullByDefault
 public class ReactorRedstonePort extends ReactorBaseBlock implements IAssemblyStateBlock, IFaceDirectionBlock {
-    
+//?} else if =1.21.1 {
+/*@ParametersAreNonnullByDefault
+@MethodsReturnNonnullByDefault
+public class ReactorRedstonePort extends ReactorBaseBlock implements IAssemblyStateBlock, IFaceDirectionBlock {
+*/
+//?}
+
     public static BooleanProperty IS_LIT_BOOLEAN_PROPERTY = BooleanProperty.create("is_lit");
-    
+
+//? if =26.1.2 || =26.3 {
     @RegisterBlock(name = "reactor_redstone_port", tileEntityClass = ReactorRedstonePortTile.class)
     public static final ReactorRedstonePort INSTANCE = biggerreactorsrework.core.registry.RegistryIds.named("reactor_redstone_port", () -> new ReactorRedstonePort());
-    
+
     public ReactorRedstonePort() {
+//?} else if =1.21.1 {
+/*    @RegisterBlock(name = "reactor_redstone_port", tileEntityClass = ReactorRedstonePortTile.class)
+    public static final ReactorRedstonePort INSTANCE = new ReactorRedstonePort();
+
+    public ReactorRedstonePort() {
+*/
+//?}
         super();
         registerDefaultState(defaultBlockState().setValue(IS_LIT_BOOLEAN_PROPERTY, false));
     }
-    
+
     @Nullable
     @Override
     public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
         return ReactorRedstonePortTile.SUPPLIER.create(pos, state);
     }
-    
+
     @Override
     public boolean isSignalSource(BlockState p_60457_) {
         return true;
     }
-    
+
     @Override
     public int getSignal(BlockState blockState, BlockGetter blockAccess, BlockPos pos, Direction side) {
         BlockEntity tile = blockAccess.getBlockEntity(pos);
@@ -49,7 +72,7 @@ public class ReactorRedstonePort extends ReactorBaseBlock implements IAssemblySt
         }
         return super.getSignal(blockState, blockAccess, pos, side);
     }
-    
+
     @Override
     public int getDirectSignal(BlockState blockState, BlockGetter blockAccess, BlockPos pos, Direction side) {
         BlockEntity tile = blockAccess.getBlockEntity(pos);
@@ -58,7 +81,7 @@ public class ReactorRedstonePort extends ReactorBaseBlock implements IAssemblySt
         }
         return super.getDirectSignal(blockState, blockAccess, pos, side);
     }
-    
+
     @Override
     public void onNeighborChange(BlockState state, Level worldIn, BlockPos pos, Block blockIn, BlockPos fromPos, boolean isMoving) {
         BlockEntity tile = worldIn.getBlockEntity(pos);
@@ -66,7 +89,7 @@ public class ReactorRedstonePort extends ReactorBaseBlock implements IAssemblySt
             ((ReactorRedstonePortTile) tile).updatePowered();
         }
     }
-    
+
     @Override
     protected void buildStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
         builder.add(IS_LIT_BOOLEAN_PROPERTY);

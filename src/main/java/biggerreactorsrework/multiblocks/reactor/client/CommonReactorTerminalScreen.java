@@ -2,28 +2,63 @@ package biggerreactorsrework.multiblocks.reactor.client;
 
 import biggerreactorsrework.client.GuiTheme;
 
+//? if =26.1.2 || =26.3 {
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
 import biggerreactorsrework.Config;
+//?} else if =1.21.1 {
+/*import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.network.chat.Component;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.world.entity.player.Inventory;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import biggerreactorsrework.Config;
+*/
+//?}
 import biggerreactorsrework.client.Biselector;
 import biggerreactorsrework.client.GaugeBar;
 import biggerreactorsrework.client.SelectorColors;
 import biggerreactorsrework.client.GuiArt;
+//? if =26.1.2 || =26.3 {
 import biggerreactorsrework.client.GuiFrame;
 import biggerreactorsrework.multiblocks.reactor.containers.ReactorTerminalContainer;
+//?} else if =1.21.1 {
+/*import biggerreactorsrework.client.GuiFrame;
+import biggerreactorsrework.client.GuiIcon;
+import biggerreactorsrework.multiblocks.reactor.containers.ReactorTerminalContainer;
+*/
+//?}
 import biggerreactorsrework.multiblocks.reactor.state.ReactorActivity;
 import biggerreactorsrework.multiblocks.reactor.state.ReactorState;
 import biggerreactorsrework.multiblocks.reactor.state.ReactorType;
 import biggerreactorsrework.core.client.gui.screens.ModScreen;
+//? if =26.1.2 || =26.3 {
 import biggerreactorsrework.core.client.gui.RenderHelper;
 import biggerreactorsrework.core.client.gui.elements.RenderedElement;
+//?} else if =1.21.1 {
+/*import biggerreactorsrework.core.client.gui.RenderHelper;
+import biggerreactorsrework.core.client.gui.elements.InteractiveElement;
+import biggerreactorsrework.core.client.gui.elements.RenderedElement;
+*/
+//?}
 import biggerreactorsrework.core.client.gui.elements.TooltipElement;
 
+//? if =26.1.2 || =26.3 {
 import javax.annotation.Nonnull;
 
 public class CommonReactorTerminalScreen extends ModScreen<ReactorTerminalContainer> {
+//?} else if =1.21.1 {
+/*import javax.annotation.Nonnull;
+
+@OnlyIn(Dist.CLIENT)
+public class CommonReactorTerminalScreen extends ModScreen<ReactorTerminalContainer> {
+*/
+//?}
 
     // Modified 2026-10-25: server-authoritative burn limits and current bottleneck.
     private static Component burnTooltip(ModScreen<ReactorTerminalContainer> screen) {
@@ -41,8 +76,15 @@ public class CommonReactorTerminalScreen extends ModScreen<ReactorTerminalContai
     /**
      * Width of the readouts in the left column, up to the end of its separators.
      */
+//? if =26.1.2 || =26.3 {
     public static final int READOUT_WIDTH = 78;
     static final int HEIGHT = 136;
+//?} else if =1.21.1 {
+/*    public static final int READOUT_WIDTH = 78;
+    // Modified 2026-11-04: shorter panel once waste ejection moved to the access ports.
+    static final int HEIGHT = 136;
+*/
+//?}
     /**
      * The title ends before the icons over the gauges.
      */
@@ -64,6 +106,7 @@ public class CommonReactorTerminalScreen extends ModScreen<ReactorTerminalContai
      */
     @Override
     public void init() {
+//? if =26.1.2 || =1.21.1 {
         if (initialState.reactorType == ReactorType.ACTIVE) {
             // Initialize an actively-cooled reactor screen.
             this.getMinecraft().setScreen(new ActiveReactorTerminalScreen(this.menu, this.inventory, this.title));
@@ -71,6 +114,16 @@ public class CommonReactorTerminalScreen extends ModScreen<ReactorTerminalContai
             // Initialize a passively-cooled reactor screen.
             this.getMinecraft().setScreen(new PassiveReactorTerminalScreen(this.menu, this.inventory, this.title));
         }
+//?} else if =26.3 {
+/*        if (initialState.reactorType == ReactorType.ACTIVE) {
+            // Initialize an actively-cooled reactor screen.
+            this.getMinecraft().gui.setScreen(new ActiveReactorTerminalScreen(this.menu, this.inventory, this.title));
+        } else {
+            // Initialize a passively-cooled reactor screen.
+            this.getMinecraft().gui.setScreen(new PassiveReactorTerminalScreen(this.menu, this.inventory, this.title));
+        }
+*/
+//?}
     }
 
     /**
@@ -151,19 +204,40 @@ public class CommonReactorTerminalScreen extends ModScreen<ReactorTerminalContai
      */
     public static void initGauges(@Nonnull ModScreen<ReactorTerminalContainer> screen, ReactorState reactorState) {
         // (Top) Fuel mix gauge:
+//? if =26.1.2 || =26.3 {
         RenderedElement<ReactorTerminalContainer> fuelMixGauge = new RenderedElement<>(screen, 109, 25, 18, 64, 0, 152, Component.empty());
         fuelMixGauge.onRender = (@Nonnull GuiGraphicsExtractor graphics, int mX, int mY) -> CommonReactorTerminalScreen.renderFuelMixGauge(graphics, fuelMixGauge, reactorState.wasteStored, reactorState.fuelStored, reactorState.fuelCapacity);
         screen.addScreenElement(fuelMixGauge);
+//?} else if =1.21.1 {
+/*        RenderedElement<ReactorTerminalContainer> fuelMixGauge = new RenderedElement<>(screen, 109, 25, 18, 64, 0, 152, Component.empty());
+        fuelMixGauge.onRender = (@Nonnull GuiGraphics graphics, int mX, int mY) -> CommonReactorTerminalScreen.renderFuelMixGauge(graphics, fuelMixGauge, reactorState.wasteStored, reactorState.fuelStored, reactorState.fuelCapacity);
+        screen.addScreenElement(fuelMixGauge);
+*/
+//?}
 
         // (Top) Case heat gauge:
+//? if =26.1.2 || =26.3 {
         RenderedElement<ReactorTerminalContainer> caseHeatGauge = new RenderedElement<>(screen, 131, 25, 18, 64, 0, 152, Component.empty());
         caseHeatGauge.onRender = (@Nonnull GuiGraphicsExtractor graphics, int mX, int mY) -> CommonReactorTerminalScreen.renderHeatGauge(graphics, caseHeatGauge, reactorState.heatCapturable, reactorState.heatScale);
         screen.addScreenElement(caseHeatGauge);
+//?} else if =1.21.1 {
+/*        RenderedElement<ReactorTerminalContainer> caseHeatGauge = new RenderedElement<>(screen, 131, 25, 18, 64, 0, 152, Component.empty());
+        caseHeatGauge.onRender = (@Nonnull GuiGraphics graphics, int mX, int mY) -> CommonReactorTerminalScreen.renderHeatGauge(graphics, caseHeatGauge, reactorState.heatCapturable, reactorState.heatScale);
+        screen.addScreenElement(caseHeatGauge);
+*/
+//?}
 
         // (Top) Fuel heat gauge:
+//? if =26.1.2 || =26.3 {
         RenderedElement<ReactorTerminalContainer> fuelHeatGauge = new RenderedElement<>(screen, 153, 25, 18, 64, 0, 152, Component.empty());
         fuelHeatGauge.onRender = (@Nonnull GuiGraphicsExtractor graphics, int mX, int mY) -> CommonReactorTerminalScreen.renderHeatGauge(graphics, fuelHeatGauge, reactorState.heatGenerated, reactorState.heatScale);
         screen.addScreenElement(fuelHeatGauge);
+//?} else if =1.21.1 {
+/*        RenderedElement<ReactorTerminalContainer> fuelHeatGauge = new RenderedElement<>(screen, 153, 25, 18, 64, 0, 152, Component.empty());
+        fuelHeatGauge.onRender = (@Nonnull GuiGraphics graphics, int mX, int mY) -> CommonReactorTerminalScreen.renderHeatGauge(graphics, fuelHeatGauge, reactorState.heatGenerated, reactorState.heatScale);
+        screen.addScreenElement(fuelHeatGauge);
+*/
+//?}
     }
 
     /**
@@ -173,6 +247,7 @@ public class CommonReactorTerminalScreen extends ModScreen<ReactorTerminalContai
      */
     public static void initSymbols(@Nonnull ModScreen<ReactorTerminalContainer> screen, ReactorState reactorState) {
         // None (yet).
+//? if =26.1.2 || =26.3 {
     }
 
     /**
@@ -185,8 +260,24 @@ public class CommonReactorTerminalScreen extends ModScreen<ReactorTerminalContai
      */
     public static void renderHeatGauge(@Nonnull GuiGraphicsExtractor graphics, @Nonnull RenderedElement<ReactorTerminalContainer> symbol, double heatStored, double heatCapacity) {
         GaugeBar.drawHeat(graphics, symbol.x, symbol.y, heatStored, heatCapacity);
+//?} else if =1.21.1 {
+/*    }
+
+    /^*
+     * Render a reactor heat gauge.
+     *
+     * @param poseStack    The current pose stack.
+     * @param symbol       The symbol to draw as.
+     * @param heatStored   The heat value to draw.
+     * @param heatCapacity The max heat capacity this gauge can display.
+     ^/
+    public static void renderHeatGauge(@Nonnull GuiGraphics graphics, @Nonnull RenderedElement<ReactorTerminalContainer> symbol, double heatStored, double heatCapacity) {
+        GaugeBar.drawHeat(graphics, symbol.x, symbol.y, heatStored, heatCapacity);
+*/
+//?}
         // Update tooltip.
         symbol.tooltip = Component.literal(String.format("%.1f/%.1f kJ/t", heatStored, heatCapacity));
+//? if =26.1.2 || =26.3 {
     }
 
     /**
@@ -200,6 +291,22 @@ public class CommonReactorTerminalScreen extends ModScreen<ReactorTerminalContai
      */
     public static void renderFuelMixGauge(@Nonnull GuiGraphicsExtractor graphics, @Nonnull RenderedElement<ReactorTerminalContainer> symbol, double wasteStored, double fuelStored, double fuelCapacity) {
         GaugeBar.drawFuel(graphics, symbol.x, symbol.y, wasteStored, fuelStored, fuelCapacity);
+//?} else if =1.21.1 {
+/*    }
+
+    /^*
+     * Render a reactor fuel mix gauge.
+     *
+     * @param poseStack    The current pose stack.
+     * @param symbol       The symbol to draw as.
+     * @param wasteStored  The waste value to draw.
+     * @param fuelStored   The fuel value to draw.
+     * @param fuelCapacity The max fuel capacity this gauge can display.
+     ^/
+    public static void renderFuelMixGauge(@Nonnull GuiGraphics graphics, @Nonnull RenderedElement<ReactorTerminalContainer> symbol, double wasteStored, double fuelStored, double fuelCapacity) {
+        GaugeBar.drawFuel(graphics, symbol.x, symbol.y, wasteStored, fuelStored, fuelCapacity);
+*/
+//?}
         // Update tooltip.
         symbol.tooltip = Component.literal(String.format(
                 Component.translatable("screen.biggerreactorsrework.reactor_terminal.fuel_mix_gauge.tooltip").getString(),
@@ -207,6 +314,7 @@ public class CommonReactorTerminalScreen extends ModScreen<ReactorTerminalContai
                 RenderHelper.formatValue(fuelCapacity / 1000.0, "B", true),
                 RenderHelper.formatValue(fuelStored / 1000.0, "B", true),
                 RenderHelper.formatValue(wasteStored / 1000.0, "B", true)));
+//? if =26.1.2 || =26.3 {
     }
 
     /**
@@ -230,6 +338,32 @@ public class CommonReactorTerminalScreen extends ModScreen<ReactorTerminalContai
     public static void renderStatusText(@Nonnull GuiGraphicsExtractor graphics, @Nonnull ModScreen<ReactorTerminalContainer> screen, ReactorActivity reactorActivity, double heatStored, double fuelUsageRate, double reactivityRate, int statusRight) {
         // Render text for reactor temperature (no fancy suffix for Celsius):
         renderReadout(graphics, screen, RenderHelper.formatValue(heatStored,1,"kJ/t",true), 23);
+//?} else if =1.21.1 {
+/*    }
+
+    /^*
+     * A readout of the left column, next to its icon; long values slide inside the column.
+     ^/
+    public static void renderReadout(@Nonnull GuiGraphics graphics, @Nonnull ModScreen<ReactorTerminalContainer> screen, String text, int y) {
+        GuiArt.scrollingText(graphics, screen.getFont(), text, screen.getGuiLeft() + 27, screen.getGuiTop() + y, READOUT_WIDTH, GuiTheme.textColor());
+    }
+
+    /^*
+     * Render status text.
+     *
+     * @param poseStack       The current pose stack.
+     * @param reactorActivity The reactor status to draw.
+     * @param heatStored      The heat value to draw.
+     * @param fuelUsageRate   The fuel usage rate to draw.
+     * @param reactivityRate  The reactivity rate to draw.
+     * @param statusRight     Where the status lines next to the toggles must end, relative to the screen.
+     * @implNote Output rate is not rendered by this function, since it changes depending on reactor type. Do that yourself.
+     ^/
+    public static void renderStatusText(@Nonnull GuiGraphics graphics, @Nonnull ModScreen<ReactorTerminalContainer> screen, ReactorActivity reactorActivity, double heatStored, double fuelUsageRate, double reactivityRate, int statusRight) {
+        // Render text for reactor temperature (no fancy suffix for Celsius):
+        renderReadout(graphics, screen, RenderHelper.formatValue(heatStored,1,"kJ/t",true), 23);
+*/
+//?}
 
         // Render text for fuel consumption rate:
         renderReadout(graphics, screen, String.format(java.util.Locale.ROOT,"%.4f mB/t",fuelUsageRate), 61);
@@ -238,6 +372,7 @@ public class CommonReactorTerminalScreen extends ModScreen<ReactorTerminalContai
         renderReadout(graphics, screen, String.format("%.1f%%", (reactivityRate * 100.0)), 80);
 
         // Render text for online/offline status:
+//? if =26.1.2 || =26.3 {
         if (reactorActivity == ReactorActivity.ACTIVE) {
             // Text for an online reactor:
             GuiArt.scrollingText(graphics, screen.getFont(), Component.translatable("screen.biggerreactorsrework.reactor_terminal.activity_toggle.online").getString(), screen.getLeftPos() + 42, screen.getTopPos() + 102, statusRight - 42, GuiTheme.textColor());
@@ -250,6 +385,21 @@ public class CommonReactorTerminalScreen extends ModScreen<ReactorTerminalContai
         GuiArt.scrollingText(graphics,screen.getFont(),Component.translatable("thermal.biggerreactorsrework.balanced_outputs").getString(),screen.getLeftPos()+42,screen.getTopPos()+118,statusRight-42,GuiTheme.textColor());
 
     }
+//?} else if =1.21.1 {
+/*        if (reactorActivity == ReactorActivity.ACTIVE) {
+            // Text for an online reactor:
+            GuiArt.scrollingText(graphics, screen.getFont(), Component.translatable("screen.biggerreactorsrework.reactor_terminal.activity_toggle.online").getString(), screen.getGuiLeft() + 42, screen.getGuiTop() + 102, statusRight - 42, GuiTheme.textColor());
+
+        } else {
+            // Text for an offline reactor:
+            GuiArt.scrollingText(graphics, screen.getFont(), Component.translatable("screen.biggerreactorsrework.reactor_terminal.activity_toggle.offline").getString(), screen.getGuiLeft() + 42, screen.getGuiTop() + 102, statusRight - 42, GuiTheme.textColor());
+        }
+
+        GuiArt.scrollingText(graphics,screen.getFont(),Component.translatable("thermal.biggerreactorsrework.balanced_outputs").getString(),screen.getGuiLeft()+42,screen.getGuiTop()+118,statusRight-42,GuiTheme.textColor());
+
+    }
+*/
+//?}
 
     @Override
     protected GuiFrame frame() {

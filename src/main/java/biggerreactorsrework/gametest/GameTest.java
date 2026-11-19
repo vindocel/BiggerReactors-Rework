@@ -1,3 +1,4 @@
+//? if =26.1.2 || =26.3 {
 package biggerreactorsrework.gametest;
 
 import java.lang.annotation.ElementType;
@@ -26,3 +27,5 @@ public @interface GameTest {
 
     int setupTicks() default 0;
 }
+//?} else if =1.21.1 {
+//?}

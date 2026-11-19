@@ -1,6 +1,14 @@
+//? if =26.1.2 || =26.3 {
 package biggerreactorsrework.multiblocks.reactor.tiles;
 
 import net.minecraft.core.BlockPos;
+//?} else if =1.21.1 {
+/*package biggerreactorsrework.multiblocks.reactor.tiles;
+
+import net.minecraft.MethodsReturnNonnullByDefault;
+import net.minecraft.core.BlockPos;
+*/
+//?}
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -24,35 +32,43 @@ import biggerreactorsrework.core.registry.RegisterTile;
 import biggerreactorsrework.core.util.BlockStates;
 
 import javax.annotation.Nullable;
+//? if =26.1.2 || =26.3 {
 import javax.annotation.ParametersAreNonnullByDefault;
 
 @ParametersAreNonnullByDefault
+//?} else if =1.21.1 {
+/*import javax.annotation.ParametersAreNonnullByDefault;
+
+@MethodsReturnNonnullByDefault
+@ParametersAreNonnullByDefault
+*/
+//?}
 public class ReactorRedstonePortTile extends ReactorBaseTile implements MenuProvider, ITickablePartsMultiblock.Tickable, IHasUpdatableState<ReactorRedstonePortState>, IEventMultiblock.AssemblyStateTransition {
-    
+
     @RegisterTile("reactor_redstone_port")
     public static final BlockEntityType.BlockEntitySupplier<ReactorRedstonePortTile> SUPPLIER = new RegisterTile.Producer<>(ReactorRedstonePortTile::new);
-    
+
     public final ReactorRedstonePortState reactorRedstonePortState = new ReactorRedstonePortState(this);
-    
+
     public ReactorRedstonePortTile(BlockEntityType<?> TYPE, BlockPos pos, BlockState state) {
         super(TYPE, pos, state);
     }
-    
+
     private boolean isEmitting;
     double mainVal = 0;
     double secondaryVal = 0;
     Direction powerOutputDirection = null;
-    
+
     public boolean isEmitting(Direction side) {
         if (side.getOpposite() != powerOutputDirection) {
             return false;
         }
         return isEmitting;
     }
-    
+
     private boolean isPowered = false;
     private boolean wasPowered = false;
-    
+
     public void updatePowered() {
         if (powerOutputDirection == null) {
             return;
@@ -60,9 +76,9 @@ public class ReactorRedstonePortTile extends ReactorBaseTile implements MenuProv
         assert level != null;
         isPowered = level.hasSignal(worldPosition.relative(powerOutputDirection), powerOutputDirection);
     }
-    
+
     private boolean isLit = false;
-    
+
     @Override
     public void preTick() {
         boolean shouldBeEmitting = false;
@@ -203,53 +219,61 @@ public class ReactorRedstonePortTile extends ReactorBaseTile implements MenuProv
             isEmitting = shouldBeEmitting;
             wasPowered = isPowered;
             assert level != null;
+//? if =26.1.2 || =26.3 {
             BlockPos updatePos = worldPosition.relative(powerOutputDirection);
             level.updateNeighborsAt(this.getBlockPos(), this.getBlockState().getBlock());
             level.updateNeighborsAt(updatePos, level.getBlockState(updatePos).getBlock());
         }
+//?} else if =1.21.1 {
+/*            BlockPos updatePos = worldPosition.relative(powerOutputDirection);
+            level.blockUpdated(this.getBlockPos(), this.getBlockState().getBlock());
+            level.blockUpdated(updatePos, level.getBlockState(updatePos).getBlock());
+        }
+*/
+//?}
         if (isLit != shouldLight) {
             isLit = shouldLight;
             assert level != null;
             level.setBlockAndUpdate(worldPosition, getBlockState().setValue(ReactorRedstonePort.IS_LIT_BOOLEAN_PROPERTY, isLit));
         }
-        // TODO: 7/22/21 only mark changed when it actually changed 
+        // TODO: 7/22/21 only mark changed when it actually changed
         this.setChanged();
     }
-    
+
     @Override
     public void postTick() {
-    
+
     }
-    
+
     @Override
     public Component getDisplayName() {
         return Component.translatable(ReactorRedstonePort.INSTANCE.getDescriptionId());
     }
-    
+
     @Nullable
     @Override
     public AbstractContainerMenu createMenu(int windowId, Inventory playerInventory, Player player) {
         return new ReactorRedstonePortContainer(windowId, this.worldPosition, player);
     }
-    
+
     // Current changes/non-active. See reactorRedstonePortState to see what's actually being used for operations.
     private final ReactorRedstonePortState currentChanges = new ReactorRedstonePortState(this);
-    
+
     public ReactorRedstonePortState getCurrentChanges() {
         return this.currentChanges;
     }
-    
+
     @Override
     public ReactorRedstonePortState getState() {
         this.updateState();
         return this.reactorRedstonePortState;
     }
-    
+
     @Override
     public void updateState() {
         // Update committed/active values.
     }
-    
+
     public void applyChanges() {
         final double nextMain;
         final double nextSecondary;
@@ -276,7 +300,7 @@ public class ReactorRedstonePortTile extends ReactorBaseTile implements MenuProv
         if (!Double.isFinite(number) || number < 0) throw new IllegalArgumentException("Invalid setting");
         return number;
     }
-    
+
     public void revertChanges() {
         this.currentChanges.selectedTab = this.reactorRedstonePortState.selectedTab;
         this.currentChanges.triggerPS = this.reactorRedstonePortState.triggerPS;
@@ -285,7 +309,7 @@ public class ReactorRedstonePortTile extends ReactorBaseTile implements MenuProv
         this.currentChanges.textBufferA = this.reactorRedstonePortState.textBufferA;
         this.currentChanges.textBufferB = this.reactorRedstonePortState.textBufferB;
     }
-    
+
     @Override
     public void runRequest(String requestName, Object requestData) {
         switch (requestName) {
@@ -303,7 +327,7 @@ public class ReactorRedstonePortTile extends ReactorBaseTile implements MenuProv
             default -> super.runRequest(requestName, requestData);
         }
     }
-    
+
     @Override
     protected CompoundTag writeNBT() {
         CompoundTag compound = super.writeNBT();
@@ -317,10 +341,11 @@ public class ReactorRedstonePortTile extends ReactorBaseTile implements MenuProv
         compound.putBoolean("isEmitting", isEmitting);
         return compound;
     }
-    
+
     @Override
     protected void readNBT(CompoundTag compound) {
         super.readNBT(compound);
+//? if =26.1.2 || =26.3 {
         if (compound.contains("settingId")) {
             reactorRedstonePortState.selectedTab = ReactorRedstonePortSelection.fromInt(compound.getIntOr("settingId", 0));
         }
@@ -342,11 +367,35 @@ public class ReactorRedstonePortTile extends ReactorBaseTile implements MenuProv
         if (compound.contains("isPowered")) {
             wasPowered = isPowered = compound.getBooleanOr("isPowered", false);
         }
+//?} else if =1.21.1 {
+/*        if (compound.contains("settingId")) {
+            reactorRedstonePortState.selectedTab = ReactorRedstonePortSelection.fromInt(compound.getInt("settingId"));
+        }
+        if (compound.contains("triggerPulseOrSignal")) {
+            reactorRedstonePortState.triggerPS = ReactorRedstonePortTriggers.fromBool(compound.getBoolean("triggerPulseOrSignal"));
+        }
+        if (compound.contains("triggerAboveOrBelow")) {
+            reactorRedstonePortState.triggerAB = ReactorRedstonePortTriggers.fromBool(compound.getBoolean("triggerAboveOrBelow"));
+        }
+        if (compound.contains("mode")) {
+            reactorRedstonePortState.triggerMode = compound.getInt("mode");
+        }
+        if (compound.contains("mainBuffer")) {
+            reactorRedstonePortState.textBufferA = compound.getString("mainBuffer");
+        }
+        if (compound.contains("secondBuffer")) {
+            reactorRedstonePortState.textBufferB = compound.getString("secondBuffer");
+        }
+        if (compound.contains("isPowered")) {
+            wasPowered = isPowered = compound.getBoolean("isPowered");
+        }
+*/
+//?}
         // Call reverted changes to align uncommitted settings to the active ones.
         revertChanges();
         applyChanges();
     }
-    
+
     @Override
     public void onAssemblyStateTransition(IValidatedMultiblock.AssemblyState oldState, IValidatedMultiblock.AssemblyState newState) {
         if (newState == IValidatedMultiblock.AssemblyState.ASSEMBLED) {

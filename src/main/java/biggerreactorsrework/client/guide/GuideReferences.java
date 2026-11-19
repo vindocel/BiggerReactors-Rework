@@ -16,9 +16,16 @@ import net.minecraft.locale.Language;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
+//? if =26.1.2 || =26.3 {
 import net.minecraft.network.chat.contents.TranslatableContents;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.FormattedCharSequence;
+//?} else if =1.21.1 {
+/*import net.minecraft.network.chat.contents.TranslatableContents;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.FormattedCharSequence;
+*/
+//?}
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.material.Fluid;
 
@@ -33,6 +40,7 @@ final class GuideReferences {
     private static final String PREFIX = "biggerreactorsrework:guide_ref/";
     private static final String KEY_PREFIX = "guide.biggerreactorsrework.";
 
+//? if =26.1.2 || =26.3 {
     private static final Map<String, List<String>> POLICY = Map.of();
 
     /** Items already referenced in the chapter being built: only the first mention is marked. */
@@ -40,6 +48,16 @@ final class GuideReferences {
 
     /** What a reference shows: an item, or a fluid that has no item of its own. */
     record Target(ItemStack stack, Fluid fluid, Component name, net.neoforged.neoforge.fluids.FluidStack fluidStack) {
+//?} else if =1.21.1 {
+/*    private static final Map<String, List<String>> POLICY = Map.of();
+
+    /^* Items already referenced in the chapter being built: only the first mention is marked. ^/
+    private static final Set<ResourceLocation> SEEN = new HashSet<>();
+
+    /^* What a reference shows: an item, or a fluid that has no item of its own. ^/
+    record Target(ItemStack stack, Fluid fluid, Component name, net.neoforged.neoforge.fluids.FluidStack fluidStack) {
+*/
+//?}
         Target(ItemStack stack, Fluid fluid, Component name) {
             this(stack, fluid, name, net.neoforged.neoforge.fluids.FluidStack.EMPTY);
         }
@@ -47,6 +65,7 @@ final class GuideReferences {
         static Target of(net.neoforged.neoforge.fluids.FluidStack stack) {
             return new Target(ItemStack.EMPTY, stack.getFluid(), stack.getHoverName(), stack);
         }
+//? if =26.1.2 || =26.3 {
     }
 
     /** A referenced word on one line, in pixels from the start of the line. */
@@ -55,6 +74,17 @@ final class GuideReferences {
 
     private record Alias(String text, Identifier id) {
     }
+//?} else if =1.21.1 {
+/*    }
+
+    /^* A referenced word on one line, in pixels from the start of the line. ^/
+    record Span(int start, int end, ResourceLocation id) {
+    }
+
+    private record Alias(String text, ResourceLocation id) {
+    }
+*/
+//?}
 
     private GuideReferences() {
     }
@@ -114,9 +144,16 @@ final class GuideReferences {
             return;
         }
         List<Alias> aliases = new ArrayList<>();
+//? if =26.1.2 || =26.3 {
         for (String entry : allowed) {
             Identifier id = entry.contains(":") ? Identifier.parse(entry) : GuideIds.id(entry);
             Target target = target(id);
+//?} else if =1.21.1 {
+/*        for (String entry : allowed) {
+            ResourceLocation id = entry.contains(":") ? ResourceLocation.parse(entry) : GuideIds.id(entry);
+            Target target = target(id);
+*/
+//?}
             if (target == null) {
                 continue;
             }
@@ -162,6 +199,7 @@ final class GuideReferences {
             out.append(Character.toLowerCase(decomposed.charAt(0)));
         }
         return out.toString();
+//? if =26.1.2 || =26.3 {
     }
 
     /** The item (or fluid) behind an id, or null when nothing is registered under it. */
@@ -169,10 +207,27 @@ final class GuideReferences {
         if (BuiltInRegistries.ITEM.containsKey(id)) {
             ItemStack stack = new ItemStack(BuiltInRegistries.ITEM.getValue(id));
             return new Target(stack, null, stack.getHoverName());
+//?} else if =1.21.1 {
+/*    }
+
+    /^* The item (or fluid) behind an id, or null when nothing is registered under it. ^/
+    static Target target(ResourceLocation id) {
+        if (BuiltInRegistries.ITEM.containsKey(id)) {
+            ItemStack stack = new ItemStack(BuiltInRegistries.ITEM.get(id));
+            return new Target(stack, null, stack.getHoverName());
+*/
+//?}
         }
+//? if =26.1.2 || =26.3 {
         if (BuiltInRegistries.FLUID.containsKey(id)) {
             Fluid fluid = BuiltInRegistries.FLUID.getValue(id);
             return new Target(ItemStack.EMPTY, fluid, fluid.getFluidType().getDescription());
+//?} else if =1.21.1 {
+/*        if (BuiltInRegistries.FLUID.containsKey(id)) {
+            Fluid fluid = BuiltInRegistries.FLUID.get(id);
+            return new Target(ItemStack.EMPTY, fluid, fluid.getFluidType().getDescription());
+*/
+//?}
         }
         return null;
     }
@@ -187,18 +242,32 @@ final class GuideReferences {
             String insertion = style.getInsertion();
             String id = insertion != null && insertion.startsWith(PREFIX) ? insertion.substring(PREFIX.length()) : null;
             if (!Objects.equals(id, current[0])) {
+//? if =26.1.2 || =26.3 {
                 if (current[0] != null) {
                     out.add(new Span(start[0], x[0], Identifier.parse(current[0])));
                 }
+//?} else if =1.21.1 {
+/*                if (current[0] != null) {
+                    out.add(new Span(start[0], x[0], ResourceLocation.parse(current[0])));
+                }
+*/
+//?}
                 current[0] = id;
                 start[0] = x[0];
             }
             x[0] += font.width(FormattedCharSequence.codepoint(codePoint, style));
             return true;
         });
+//? if =26.1.2 || =26.3 {
         if (current[0] != null) {
             out.add(new Span(start[0], x[0], Identifier.parse(current[0])));
         }
+//?} else if =1.21.1 {
+/*        if (current[0] != null) {
+            out.add(new Span(start[0], x[0], ResourceLocation.parse(current[0])));
+        }
+*/
+//?}
         return out;
     }
 }

@@ -3,20 +3,38 @@ package biggerreactorsrework.core.client.gui;
 import com.google.common.collect.PeekingIterator;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
+//? if =26.1.2 || =26.3 {
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.inventory.InventoryMenu;
+//?} else if =1.21.1 {
+/*import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.inventory.InventoryMenu;
+*/
+//?}
 import net.minecraft.world.level.material.EmptyFluid;
+//? if =26.1.2 || =26.3 {
 import net.minecraft.world.level.material.Fluid;
 import net.neoforged.neoforge.client.extensions.common.IClientFluidTypeExtensions;
+//?} else if =1.21.1 {
+/*import net.minecraft.world.level.material.Fluid;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.neoforge.client.extensions.common.IClientFluidTypeExtensions;
+*/
+//?}
 import biggerreactorsrework.core.CoreEvents;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Arrays;
 
+//? if =26.1.2 || =26.3 {
 import static com.google.common.collect.Iterators.peekingIterator;
 
 public class RenderHelper {
@@ -50,14 +68,56 @@ public class RenderHelper {
      */
     public static Identifier getCurrentResource() {
         return RenderHelper.currentResource;
+//?} else if =1.21.1 {
+/*import static com.google.common.collect.Iterators.peekingIterator;
+
+@OnlyIn(Dist.CLIENT)
+public class RenderHelper {
+    /^*
+     * The current/active texture.
+     ^/
+    private static ResourceLocation currentResource;
+
+    /^*
+     * SI size prefixes, each a factor of 1000 from the previous one: milli-, base, kilo-, mega-, giga-,
+     * tera-, peta-, exa-, zetta-, yotta-, ronna-, quetta-.
+     ^/
+    public static String[] unitPrefixes = {"m", "", "k", "M", "G", "T", "P", "E", "Z", "Y", "R", "Q"};
+
+    /^*
+     * Get a blank resource location texture.
+     *
+     * @return A completely empty texture atlas.
+     ^/
+    public static ResourceLocation getBlankTextureResource() {
+        return ResourceLocation.fromNamespaceAndPath(biggerreactorsrework.BiggerReactors.modid, "textures/blank.png");
+    }
+
+    /^*
+     * Return the current/active texture.
+     *
+     * @return The current texture, as far as RenderHelper is aware of.
+     * @implNote This will only return the last texture used with the RenderHelper, and may not be the ACTUAL current texture that Minecraft is using.
+     ^/
+    public static ResourceLocation getCurrentResource() {
+        return RenderHelper.currentResource;
+*/
+//?}
     }
 
     /**
      * Reset the current texture color.
      */
+//? if =26.1.2 || =26.3 {
     public static void clearRenderColor() {
         currentColor = 0xFFFFFFFF;
     }
+//?} else if =1.21.1 {
+/*    public static void clearRenderColor() {
+        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+    }
+*/
+//?}
 
     /**
      * Sets the current shading color to the specified value via decimal values.
@@ -80,6 +140,7 @@ public class RenderHelper {
      * @param green The amount of green value to shade.
      * @param alpha The amount of alpha/transparency value to shade.
      */
+//? if =26.1.2 || =26.3 {
     public static void setRenderColor(float red, float green, float blue, float alpha) {
         currentColor = net.minecraft.util.ARGB.colorFromFloat(alpha, red, green, blue);
     }
@@ -124,13 +185,76 @@ public class RenderHelper {
         // Preserve the previously selected texture.
         Identifier preservedResource = RenderHelper.getCurrentResource();
         // Bind the new texture, set the color, and draw.
-    
+
         final var stack = new net.neoforged.neoforge.fluids.FluidStack(fluid, 1000);
         RenderHelper.setRenderColor(biggerreactorsrework.client.FluidSprites.tint(stack));
         RenderHelper.drawTexture(graphics, x, y, blitOffset, width, height, biggerreactorsrework.client.FluidSprites.still(stack));
         // Reset color and restore the previously bound texture.
         RenderHelper.clearRenderColor();
+//?} else if =1.21.1 {
+/*    public static void setRenderColor(float red, float green, float blue, float alpha) {
+        RenderSystem.setShaderColor(red, green, blue, alpha);
+    }
+
+    /^*
+     * Set the current texture/resource to draw.
+     *
+     * @param resourceLocation The texture/resource to draw.
+     ^/
+    public static void bindTexture(ResourceLocation resourceLocation) {
+        RenderSystem.setShaderTexture(0, resourceLocation);
+        //Minecraft.getInstance().getTextureManager().bindForSetup(resourceLocation);
+        RenderHelper.currentResource = resourceLocation;
+    }
+
+    /^*
+     * Draw the provided texture.
+     *
+     * @param graphics  The current pose stack.
+     * @param x          The X position to draw at.
+     * @param y          The Y position to draw at.
+     * @param blitOffset The blit offset to use.
+     * @param width      The width of the texture.
+     * @param height     The height of the texture.
+     * @param sprite     The sprite to draw.
+     ^/
+    public static void drawTexture(@Nonnull GuiGraphics graphics, int x, int y, int blitOffset, int width, int height, TextureAtlasSprite sprite) {
+        graphics.blit(x, y, blitOffset, width, height, sprite);
+    }
+
+    /^*
+     * Draw the provided fluid texture.
+     *
+     * @param graphics     The current pose stack.
+     * @param x          The X position to draw at.
+     * @param y          The Y position to draw at.
+     * @param blitOffset The blit offset to use.
+     * @param width      The width of the texture.
+     * @param height     The height of the texture.
+     * @param fluid      The fluid to draw.
+     ^/
+    public static void drawFluid(@Nonnull GuiGraphics graphics, int x, int y, int blitOffset, int width, int height, Fluid fluid) {
+        // Preserve the previously selected texture.
+        ResourceLocation preservedResource = RenderHelper.getCurrentResource();
+        // Bind the new texture, set the color, and draw.
+
+        final var clientExtension = IClientFluidTypeExtensions.of(fluid);
+        final var stillTexture = clientExtension.getStillTexture();
+        if (stillTexture == null) {
+            return;
+        }
+
+        RenderHelper.bindTexture(InventoryMenu.BLOCK_ATLAS);
+        RenderHelper.setRenderColor(clientExtension.getTintColor());
+        RenderHelper.drawTexture(graphics, x, y, blitOffset, width, height,
+                Minecraft.getInstance().getTextureAtlas(InventoryMenu.BLOCK_ATLAS)
+                        .apply(stillTexture));
+        // Reset color and restore the previously bound texture.
+        RenderHelper.clearRenderColor();
+*/
+//?}
         RenderHelper.bindTexture(preservedResource);
+//? if =26.1.2 || =26.3 {
     }
 
     /**
@@ -149,10 +273,32 @@ public class RenderHelper {
      */
     public static void drawTextureGrid(@Nonnull GuiGraphicsExtractor graphics, int x, int y, int blitOffset, int width, int height, TextureAtlasSprite sprite, int horizontalRepeat, int verticalRepeat) {
         for (int iX = 0; iX < horizontalRepeat; iX++) {
+//?} else if =1.21.1 {
+/*    }
+
+    /^*
+     * Draw the provided texture in a repeated grid.
+     *
+     * @param graphics           The current pose stack.
+     * @param x                The x position to draw at.
+     * @param y                The y position to draw at.
+     * @param blitOffset       The blit offset to use.
+     * @param width            The width of the texture.
+     * @param height           The height of the texture.
+     * @param sprite           The sprite to draw.
+     * @param horizontalRepeat How many times to repeat right, drawing in chunks of xSize.
+     * @param verticalRepeat   How many times to repeat down, drawing in chunks of ySize.
+     * @implNote If you need to fill an area that is NOT a multiple of xSize or ySize, it is recommended you use another draw call to mask away the extra part.
+     ^/
+    public static void drawTextureGrid(@Nonnull GuiGraphics graphics, int x, int y, int blitOffset, int width, int height, TextureAtlasSprite sprite, int horizontalRepeat, int verticalRepeat) {
+        for (int iX = 0; iX < horizontalRepeat; iX++) {
+*/
+//?}
             for (int iY = 0; iY < verticalRepeat; iY++) {
                 RenderHelper.drawTexture(graphics, x + (width * iX), y + (height * iY), blitOffset, width, height, sprite);
             }
         }
+//? if =26.1.2 || =26.3 {
     }
 
     /**
@@ -171,10 +317,32 @@ public class RenderHelper {
      */
     public static void drawFluidGrid(@Nonnull GuiGraphicsExtractor graphics, int x, int y, int blitOffset, int width, int height, Fluid fluid, int xRepeat, int yRepeat) {
         for (int iX = 0; iX < xRepeat; iX++) {
+//?} else if =1.21.1 {
+/*    }
+
+    /^*
+     * Draw the provided fluid texture in a repeated grid.
+     *
+     * @param graphics     The current pose stack.
+     * @param x          The x position to draw at.
+     * @param y          The y position to draw at.
+     * @param blitOffset The blit offset to use.
+     * @param width      The width of the texture.
+     * @param height     The height of the texture.
+     * @param fluid      The fluid to draw.
+     * @param xRepeat    How many times to repeat right, drawing in chunks of xSize.
+     * @param yRepeat    How many times to repeat down, drawing in chunks of ySize.
+     * @implNote If you need to fill an area that is NOT a multiple of xSize or ySize, it is recommended you use another draw call to mask away the extra part.
+     ^/
+    public static void drawFluidGrid(@Nonnull GuiGraphics graphics, int x, int y, int blitOffset, int width, int height, Fluid fluid, int xRepeat, int yRepeat) {
+        for (int iX = 0; iX < xRepeat; iX++) {
+*/
+//?}
             for (int iY = 0; iY < yRepeat; iY++) {
                 RenderHelper.drawFluid(graphics, x + (width * iX), y + (height * iY), blitOffset, width, height, fluid);
             }
         }
+//? if =26.1.2 || =26.3 {
     }
 
     /**
@@ -193,8 +361,30 @@ public class RenderHelper {
     public static void drawMaskedFluid(@Nonnull GuiGraphicsExtractor graphics, int x, int y, int blitOffset, int width, int height, int u, int v, Fluid fluid) {
         // Draw the fluid.
         if (!(fluid instanceof EmptyFluid)) {
+//?} else if =1.21.1 {
+/*    }
+
+    /^*
+     * Draw the provided fluid texture.
+     *
+     * @param graphics     The current pose stack.
+     * @param x          The X position to draw at.
+     * @param y          The Y position to draw at.
+     * @param blitOffset The blit offset to use.
+     * @param width      The width of the texture.
+     * @param height     The height of the texture.
+     * @param u          The u offset in the current texture to use as a mask/draw on top.
+     * @param v          The v offset in the current texture to use as a mask/draw on top.
+     * @param fluid      The fluid to draw.
+     ^/
+    public static void drawMaskedFluid(@Nonnull GuiGraphics graphics, int x, int y, int blitOffset, int width, int height, int u, int v, Fluid fluid) {
+        // Draw the fluid.
+        if (!(fluid instanceof EmptyFluid)) {
+*/
+//?}
             // Only attempt to render fluid if it actually exists
             RenderHelper.drawFluid(graphics, x, y, blitOffset, width, height, fluid);
+//? if =26.1.2 || =26.3 {
         }
 
         // Draw frame/mask, or the lightning bolt icon.
@@ -221,6 +411,35 @@ public class RenderHelper {
      */
     public static void drawMaskedFluidGrid(@Nonnull GuiGraphicsExtractor graphics, int x, int y, int blitOffset, int width, int height, int u, int v, Fluid fluid, int xRepeat, int yRepeat) {
         for (int iX = 0; iX < xRepeat; iX++) {
+//?} else if =1.21.1 {
+/*        }
+
+        // Draw frame/mask, or the lightning bolt icon.
+        // I have now noticed that Mojang went (x, y, u, v, w, h), while I did (x, y, w, h, u, v).
+        // And no, I won't change mine, because it'll be a pain to change every call.
+        graphics.blit(getCurrentResource(), x, y, u, v, width, height, 256, 256);
+    }
+
+    /^*
+     * Draw the provided fluid texture in a repeated grid.
+     *
+     * @param graphics     The current pose stack.
+     * @param x          The x position to draw at.
+     * @param y          The y position to draw at.
+     * @param blitOffset The blit offset to use.
+     * @param width      The width of the texture.
+     * @param height     The height of the texture.
+     * @param u          The u offset in the current texture to use as a mask/draw on top.
+     * @param v          The v offset in the current texture to use as a mask/draw on top.
+     * @param fluid      The fluid to draw.
+     * @param xRepeat    How many times to repeat right, drawing in chunks of xSize.
+     * @param yRepeat    How many times to repeat down, drawing in chunks of ySize.
+     * @implNote If you need to fill an area that is NOT a multiple of xSize or ySize, it is recommended you use another draw call to mask away the extra part.
+     ^/
+    public static void drawMaskedFluidGrid(@Nonnull GuiGraphics graphics, int x, int y, int blitOffset, int width, int height, int u, int v, Fluid fluid, int xRepeat, int yRepeat) {
+        for (int iX = 0; iX < xRepeat; iX++) {
+*/
+//?}
             for (int iY = 0; iY < yRepeat; iY++) {
                 RenderHelper.drawMaskedFluid(graphics, x + (width * iX), y + (height * iY), blitOffset, width, height, u, v, fluid);
             }

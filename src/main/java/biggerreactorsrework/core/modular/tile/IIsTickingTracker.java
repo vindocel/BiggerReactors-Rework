@@ -27,42 +27,42 @@ import javax.annotation.Nullable;
 public interface IIsTickingTracker {
     default void startTicking() {
     }
-    
+
     default void stopTicking() {
     }
-    
+
     interface Tile extends IIsTickingTracker, IModularTile {
     }
-    
+
     final class Module extends TileModule<IIsTickingTracker.Tile> {
-        
+
         private static final class ChunkTracker {
             boolean isTicking = false;
             final FastArraySet<Module> modules = new FastArraySet<>();
         }
-        
+
         private static final Object2ObjectMap<ServerLevel, LongSet> isTickingMap = new Object2ObjectOpenHashMap<>();
         private static final Object2ObjectMap<ServerLevel, Long2ObjectMap<ChunkTracker>> trackers = new Object2ObjectOpenHashMap<>();
-        
+
         @Nullable
         ChunkTracker chunkTracker;
         @Nullable
         Long2ObjectMap<ChunkTracker> levelTrackers;
         @Nullable
         ServerLevel serverLevel;
-        
+
         final ObjectArrayList<IIsTickingTracker> tileTrackers = new ObjectArrayList<>();
-        
+
         @OnModLoad
         private static void onModLoad() {
             ModuleRegistry.registerTileModule(Tile.class, Module::new);
             NeoForge.EVENT_BUS.addListener(Module::ticketEventListener);
         }
-        
+
         public Module(IModularTile iface) {
             super(iface);
         }
-        
+
         @Override
         public void postModuleConstruction() {
             iface.modules().forEach(tileModule -> {
@@ -71,7 +71,7 @@ public interface IIsTickingTracker {
                 }
             });
         }
-        
+
         @Override
         public void onAdded() {
             var tile = (BlockEntity) iface;
@@ -81,18 +81,33 @@ public interface IIsTickingTracker {
                 if (levelTrackers == null) {
                     levelTrackers = new Long2ObjectOpenHashMap<>();
                     trackers.put(serverLevel, levelTrackers);
+//? if =26.1.2 || =26.3 {
                 }
                 chunkTracker = levelTrackers.get(ChunkPos.pack(tile.getBlockPos()));
                 if (chunkTracker == null) {
+//?} else if =1.21.1 {
+/*                }
+                chunkTracker = levelTrackers.get(ChunkPos.asLong(tile.getBlockPos()));
+                if (chunkTracker == null) {
+*/
+//?}
                     chunkTracker = new ChunkTracker();
                     var tickingSet = isTickingMap.get(serverLevel);
                     if (tickingSet == null) {
                         tickingSet = new LongOpenHashSet();
                         isTickingMap.put(serverLevel, tickingSet);
+//? if =26.1.2 || =26.3 {
                     }
                     chunkTracker.isTicking = tickingSet.contains(ChunkPos.pack(tile.getBlockPos()));
                     levelTrackers.put(ChunkPos.pack(tile.getBlockPos()), chunkTracker);
                 }
+//?} else if =1.21.1 {
+/*                    }
+                    chunkTracker.isTicking = tickingSet.contains(ChunkPos.asLong(tile.getBlockPos()));
+                    levelTrackers.put(ChunkPos.asLong(tile.getBlockPos()), chunkTracker);
+                }
+*/
+//?}
                 chunkTracker.modules.add(this);
                 if (chunkTracker.isTicking) {
                     // start ticking *is* sent here because chunks can be loaded without being in a ticking statte
@@ -100,15 +115,15 @@ public interface IIsTickingTracker {
                 }
             }
         }
-        
+
         void startTicking() {
             tileTrackers.forEach(IIsTickingTracker::startTicking);
         }
-        
+
         void stopTicking() {
             tileTrackers.forEach(IIsTickingTracker::stopTicking);
         }
-        
+
         @Override
         public void onRemoved(boolean chunkUnload) {
             if (serverLevel == null || chunkTracker == null || levelTrackers == null) {
@@ -116,14 +131,21 @@ public interface IIsTickingTracker {
             }
             // stop ticking isn't sent here because the tile also receives an onRemoved
             chunkTracker.modules.remove(this);
+//? if =26.1.2 || =26.3 {
             if (chunkTracker.modules.size() == 0) {
                 levelTrackers.remove(ChunkPos.pack(((BlockEntity) iface).getBlockPos()));
                 if (levelTrackers.isEmpty()) {
+//?} else if =1.21.1 {
+/*            if (chunkTracker.modules.size() == 0) {
+                levelTrackers.remove(ChunkPos.asLong(((BlockEntity) iface).getBlockPos()));
+                if (levelTrackers.isEmpty()) {
+*/
+//?}
                     trackers.remove(serverLevel);
                 }
             }
         }
-        
+
         public static void ticketEventListener(ChunkTicketLevelUpdatedEvent ticketEvent) {
             final var level = ticketEvent.getLevel();
             var isTickingSet = isTickingMap.get(level);

@@ -1,9 +1,15 @@
 package biggerreactorsrework.gametest;
 
 import biggerreactorsrework.BiggerReactors;
+//? if =26.1.2 || =26.3 {
 import biggerreactorsrework.machine.blocks.IndustrialProcessor;
 import biggerreactorsrework.machine.side.Transmission;
 import biggerreactorsrework.machine.tiles.IndustrialProcessorTile;
+//?} else if =1.21.1 {
+/*import biggerreactorsrework.machine.blocks.IndustrialProcessor;
+import biggerreactorsrework.machine.tiles.IndustrialProcessorTile;
+*/
+//?}
 import biggerreactorsrework.items.ingots.*;
 import biggerreactorsrework.fluids.*;
 import biggerreactorsrework.registries.*;
@@ -13,6 +19,7 @@ import net.minecraft.core.component.DataComponentPatch;
 import net.minecraft.gametest.framework.*;
 import net.minecraft.world.item.*;
 import net.minecraft.world.level.material.Fluids;
+//? if =26.1.2 || =26.3 {
 import net.neoforged.neoforge.fluids.*;
 import biggerreactorsrework.core.transfer.FluidTanks.FluidAction;
 import net.neoforged.neoforge.gametest.*;
@@ -43,14 +50,39 @@ public final class IndustrialProcessorGameTests {
         h.assertTrue(preview.getAmount()==100 && t.fluidFor(null).getFluidInTank(1).getAmount()==100,"drain simulation mutated output");
         h.succeed();
     }
+//?} else if =1.21.1 {
+/*import net.neoforged.neoforge.fluids.*;
+import net.neoforged.neoforge.fluids.capability.IFluidHandler.FluidAction;
+import net.neoforged.neoforge.gametest.*;
+
+/^* Modified 2026-10-27: real Industrial Processor, exact input accounting and legacy coolant rejection. ^/
+@GameTestHolder(BiggerReactors.modid)
+@PrefixGameTestTemplate(false)
+public final class IndustrialProcessorGameTests {
+    private static IndustrialProcessorTile machine(GameTestHelper h) {
+        h.setBlock(2,2,2,IndustrialProcessor.INSTANCE);
+        var t=(IndustrialProcessorTile)h.getBlockEntity(new BlockPos(2,2,2));t.tick();
+        for(int i=0;i<10;i++)t.energyFor(null).receiveEnergy(500,false);
+        t.fluidFor(null).fill(new FluidStack(Fluids.WATER,1000),FluidAction.EXECUTE);return t;
+    }
+*/
+//?}
     @GameTest(template="empty_7x7x7")
     public static void configuredFluidOutputPushesToAdjacentInput(GameTestHelper h) {
         var source = machine(h);
         var destinationPos = new BlockPos(3, 2, 2);
+//? if =26.1.2 || =26.3 {
         h.setBlock(destinationPos, IndustrialProcessor.INSTANCE);
         var destination = (IndustrialProcessorTile) GameTestSupport.be(h, destinationPos);
         int fluidBatch = Transmission.FLUID.ordinal() * 2;
         source.runRequest("sideClearAll", null);
+//?} else if =1.21.1 {
+/*        h.setBlock(destinationPos, IndustrialProcessor.INSTANCE);
+        var destination = (IndustrialProcessorTile) h.getBlockEntity(destinationPos);
+        int fluidBatch = biggerreactorsrework.machine.side.Transmission.FLUID.ordinal() * 2;
+        source.runRequest("sideClearAll", null);
+*/
+//?}
         source.runRequest("sideBatch", fluidBatch);
         source.runRequest("sideBatch", fluidBatch);
         destination.runRequest("sideClearAll", null);
@@ -67,6 +99,7 @@ public final class IndustrialProcessorGameTests {
         h.succeed();
     }
 
+//? if =26.1.2 || =26.3 {
     @GameTest(template="empty_7x7x7")
     // Added 2026-11-03: verify the full Frozen Obsidian process on the registered machine.
     public static void processorMakesFrozenObsidian(GameTestHelper h) {
@@ -78,15 +111,38 @@ public final class IndustrialProcessorGameTests {
         h.assertTrue(t.fluidFor(null).getFluidInTank(0).getAmount() == 50, "wrong Liquid Obsidian consumption");
         h.assertTrue(t.itemHandlerFor(null).getStackInSlot(0).isEmpty(), "Blue Ice was not consumed");
         h.succeed();
+//?} else if =1.21.1 {
+/*    @GameTest(template="empty_7x7x7")
+    public static void obsidianUsesExactlyOneBlockOneHundredWaterAndTwoHundredFE(GameTestHelper h) {
+        var t=machine(h);t.getItemHandler().setStackInSlot(1,new ItemStack(BlutoniumIngot.INSTANCE,64));
+        t.itemHandlerFor(null).insertItem(0,new ItemStack(Items.OBSIDIAN),false);
+        for(int i=0;i<200;i++)t.tick();
+        h.assertTrue(t.fluidFor(null).getFluidInTank(0).getAmount()==900,"obsidian water cost not 100 mB");
+        h.assertTrue(t.fluidFor(null).getFluidInTank(1).getAmount()==100,"fluid output blocked by unrelated full item slot");
+        h.assertTrue(t.energyFor(null).getEnergyStored()==4800,"energy cost not 200 FE");
+        h.assertTrue(t.itemHandlerFor(null).getStackInSlot(0).isEmpty(),"obsidian item not consumed");
+        h.assertTrue(t.fluidFor(null).fill(new FluidStack(LiquidObsidian.INSTANCE,100),FluidAction.EXECUTE)==0,"product can be injected from outside");
+        var preview=t.fluidFor(null).drain(100,FluidAction.SIMULATE);
+        h.assertTrue(preview.getAmount()==100 && t.fluidFor(null).getFluidInTank(1).getAmount()==100,"drain simulation mutated output");
+        h.succeed();
+*/
+//?}
     }
     @GameTest(template="empty_7x7x7")
     // Modified 2026-10-30: the consolidated recipe identity is the forward persistence contract.
     public static void currentCyaniteSavePreservesPaidProgress(GameTestHelper h) {
         var t=machine(h);t.itemHandlerFor(null).insertItem(0,new ItemStack(CyaniteIngot.INSTANCE,2),false);
         for(int i=0;i<40;i++)t.tick();
+//? if =26.1.2 || =26.3 {
         var tag=t.saveWithFullMetadata(h.getLevel().registryAccess());
         GameTestSupport.load(t,tag,h);
         for(int i=0;i<160;i++)t.tick();
+//?} else if =1.21.1 {
+/*        var tag=t.saveWithFullMetadata(h.getLevel().registryAccess());
+        t.loadWithComponents(tag,h.getLevel().registryAccess());
+        for(int i=0;i<160;i++)t.tick();
+*/
+//?}
         h.assertTrue(t.itemHandlerFor(null).getStackInSlot(1).is(BlutoniumIngot.INSTANCE),"current cyanite progress or item output lost");
         h.assertTrue(t.fluidFor(null).getFluidInTank(0).getAmount()==800,"cyanite costs changed");
         h.assertTrue(t.energyFor(null).getEnergyStored()==4800,"legacy FE changed");
@@ -102,9 +158,16 @@ public final class IndustrialProcessorGameTests {
             saved.putString("outFluid",cond?"biggerreactorsrework:liquid_obsidian":"minecraft:lava");
             saved.putLong("inAmount",500);saved.putLong("outAmount",200);
             var restored=new FluidTransitionTank(cond);restored.perSideCapacity=1000;restored.deserializeNBT(saved);
+//? if =26.1.2 || =26.3 {
             h.assertTrue(restored.hasUnresolvedProfile() && restored.activeTransition()==null,"legacy pair reinterpreted");
             h.assertTrue(restored.serializeNBT().getLongOr("outAmount", 0L)==200,"legacy volume discarded");
             h.assertTrue(restored.fill(Fluids.WATER,DataComponentPatch.EMPTY,1,false)==0,"quarantine bypassed");
+//?} else if =1.21.1 {
+/*            h.assertTrue(restored.hasUnresolvedProfile() && restored.activeTransition()==null,"legacy pair reinterpreted");
+            h.assertTrue(restored.serializeNBT().getLong("outAmount")==200,"legacy volume discarded");
+            h.assertTrue(restored.fill(Fluids.WATER,DataComponentPatch.EMPTY,1,false)==0,"quarantine bypassed");
+*/
+//?}
             restored.dumpTank(0);restored.dumpTank(1);
             h.assertTrue(!restored.hasUnresolvedProfile() && !restored.hasStoredContents(),"manual clearing kept invalid stock");
         }
@@ -114,9 +177,16 @@ public final class IndustrialProcessorGameTests {
     public static void fullFluidOutputDoesNotBlockCyaniteAndBlocksOnlyObsidian(GameTestHelper h) {
         var t=machine(h);
         try {
+//? if =26.1.2 || =26.3 {
             var field=t.getClass().getDeclaredField("outputTank");field.setAccessible(true);
             var out=(biggerreactorsrework.core.transfer.SimpleTank)field.get(t);
             out.fill(new FluidStack(LiquidObsidian.INSTANCE,out.getCapacity()),FluidAction.EXECUTE);
+//?} else if =1.21.1 {
+/*            var field=t.getClass().getDeclaredField("outputTank");field.setAccessible(true);
+            var out=(net.neoforged.neoforge.fluids.capability.templates.FluidTank)field.get(t);
+            out.fill(new FluidStack(LiquidObsidian.INSTANCE,out.getCapacity()),FluidAction.EXECUTE);
+*/
+//?}
             t.itemHandlerFor(null).insertItem(0,new ItemStack(CyaniteIngot.INSTANCE,2),false);
             for(int i=0;i<200;i++)t.tick();
             h.assertTrue(t.getItemHandler().getStackInSlot(1).is(BlutoniumIngot.INSTANCE),"unrelated full fluid output blocked cyanite");
@@ -132,10 +202,18 @@ public final class IndustrialProcessorGameTests {
         var t=machine(h);t.itemHandlerFor(null).insertItem(0,new ItemStack(CyaniteIngot.INSTANCE,2),false);
         for(int i=0;i<199;i++)t.tick();
         t.getItemHandler().setStackInSlot(0,new ItemStack(Items.OBSIDIAN));t.tick();
+//? if =26.1.2 || =26.3 {
         h.assertTrue(t.fluidFor(null).getFluidInTank(1).isEmpty(),"cyanite progress reused for obsidian");
         var tag=t.saveWithFullMetadata(h.getLevel().registryAccess());tag.getCompoundOrEmpty("cyaniteReprocessorState").putInt("energyStored",0);
         GameTestSupport.load(t,tag,h);for(int i=0;i<300;i++)t.tick();
         h.assertTrue(t.fluidFor(null).getFluidInTank(1).isEmpty(),"no-energy processor produced fluid");h.succeed();
+//?} else if =1.21.1 {
+/*        h.assertTrue(t.fluidFor(null).getFluidInTank(1).isEmpty(),"cyanite progress reused for obsidian");
+        var tag=t.saveWithFullMetadata(h.getLevel().registryAccess());tag.getCompound("industrialProcessorState").putInt("energyStored",0);
+        t.loadWithComponents(tag,h.getLevel().registryAccess());for(int i=0;i<300;i++)t.tick();
+        h.assertTrue(t.fluidFor(null).getFluidInTank(1).isEmpty(),"no-energy processor produced fluid");h.succeed();
+*/
+//?}
     }
 
 }

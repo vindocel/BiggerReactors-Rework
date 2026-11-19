@@ -3,17 +3,31 @@ package biggerreactorsrework.registries;
 import biggerreactorsrework.Config;
 import biggerreactorsrework.blocks.materials.MaterialBlock;
 import biggerreactorsrework.items.ingots.BlutoniumIngot;
+//? if =26.1.2 || =26.3 {
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
+//?} else if =1.21.1 {
+/*import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.TagKey;
+*/
+//?}
 import net.minecraft.world.item.ItemStack;
 import java.util.*;
 
 /** Added 2026-11-01: registered items/tags supply configurable yields of the existing generic reactor fuel. */
 public final class ReactorFuelRegistry {
+//? if =26.1.2 || =26.3 {
     private ReactorFuelRegistry() {}
     public record Entry(Identifier id, boolean tag, long amount) {}
     public static List<Entry> parse(String text) {
+//?} else if =1.21.1 {
+/*    private ReactorFuelRegistry() {}
+    public record Entry(ResourceLocation id, boolean tag, long amount) {}
+    public static List<Entry> parse(String text) {
+*/
+//?}
         if (text.length() > 32768) throw new IllegalArgumentException("Fuel entries exceed 32768 characters");
         var result = new ArrayList<Entry>();
         var seen = new HashSet<String>();
@@ -21,9 +35,16 @@ public final class ReactorFuelRegistry {
             if (token.isBlank()) continue;
             var pair = token.trim().split("=", -1);
             if (pair.length != 2) throw new IllegalArgumentException("Expected item-or-tag=amount: " + token);
+//? if =26.1.2 || =26.3 {
             String key = pair[0].trim(); boolean tag = key.startsWith("#");
             var id = Identifier.tryParse(tag ? key.substring(1) : key);
             long amount;
+//?} else if =1.21.1 {
+/*            String key = pair[0].trim(); boolean tag = key.startsWith("#");
+            var id = ResourceLocation.tryParse(tag ? key.substring(1) : key);
+            long amount;
+*/
+//?}
             try { amount = Long.parseLong(pair[1].trim()); }
             catch (NumberFormatException error) { throw new IllegalArgumentException("Fuel amount must be an integer: " + token); }
             if (id == null || amount < 0 || amount > Long.MAX_VALUE / Integer.MAX_VALUE || !seen.add((tag ? "#" : "") + id))
@@ -55,10 +76,19 @@ public final class ReactorFuelRegistry {
         for (var entry : overrides) if (entry.tag && item.is(TagKey.create(BuiltInRegistries.ITEM.key(), entry.id))) return entry.amount;
         var data = item.getData(MaterialDataMaps.REACTOR_FUEL);
         if (data != null) return data.amount();
+//? if =26.1.2 || =26.3 {
         long unit = Config.CONFIG.Reactor.FuelMBPerIngot;
         if (item.is(TagKey.create(BuiltInRegistries.ITEM.key(), Identifier.parse("c:storage_blocks/uranium"))) || stack.is(MaterialBlock.BLUTONIUM.asItem()))
             return unit <= Long.MAX_VALUE / 9 ? unit * 9 : 0;
         if (item.is(TagKey.create(BuiltInRegistries.ITEM.key(), Identifier.parse("c:ingots/uranium"))) || stack.is(BlutoniumIngot.INSTANCE)) return unit;
         return 0;
+//?} else if =1.21.1 {
+/*        long unit = Config.CONFIG.Reactor.FuelMBPerIngot;
+        if (item.is(TagKey.create(BuiltInRegistries.ITEM.key(), ResourceLocation.parse("c:storage_blocks/uranium"))) || stack.is(MaterialBlock.BLUTONIUM.asItem()))
+            return unit <= Long.MAX_VALUE / 9 ? unit * 9 : 0;
+        if (item.is(TagKey.create(BuiltInRegistries.ITEM.key(), ResourceLocation.parse("c:ingots/uranium"))) || stack.is(BlutoniumIngot.INSTANCE)) return unit;
+        return 0;
+*/
+//?}
     }
 }

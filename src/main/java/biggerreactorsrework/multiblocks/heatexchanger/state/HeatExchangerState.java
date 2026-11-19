@@ -8,6 +8,7 @@ import javax.annotation.Nullable;
 import java.util.HashMap;
 import java.util.Map;
 
+//? if =26.1.2 || =26.3 {
 public class HeatExchangerState implements GuiSync.IGUIPacket {
 
     /**
@@ -15,15 +16,26 @@ public class HeatExchangerState implements GuiSync.IGUIPacket {
      * This fluid should be hot; its cold (output) variant should match condenserExhaustFluid.
      */
     public String condenserIntakeFluid = "minecraft:empty";
-    
+//?} else if =1.21.1 {
+/*public class HeatExchangerState implements GuiSync.IGUIPacket {
+
+    /^*
+     * The fluid entering the condenser channels. This should match the value of the fluid's ResourceLocation.
+     * This fluid should be hot; its cold (output) variant should match condenserExhaustFluid.
+     ^/
+    public String condenserIntakeFluid = "minecraft:empty";
+*/
+//?}
+
     /**
      * How much fluid is stored in each side of the condenser.
      */
     public long condenserTankSize = 0;
-    
+
     /**
      * How much hot (input) fluid is stored in the condenser.
      */
+//? if =26.1.2 || =26.3 {
     public long condenserIntakeFluidAmount = 0;
 
     /**
@@ -31,6 +43,16 @@ public class HeatExchangerState implements GuiSync.IGUIPacket {
      * This fluid should be cold; its hot (input) variant should match condenserIntakeFluid.
      */
     public String condenserExhaustFluid = "minecraft:empty";
+//?} else if =1.21.1 {
+/*    public long condenserIntakeFluidAmount = 0;
+
+    /^*
+     * The fluid exiting the condenser channels. This should match the value of the fluid's ResourceLocation.
+     * This fluid should be cold; its hot (input) variant should match condenserIntakeFluid.
+     ^/
+    public String condenserExhaustFluid = "minecraft:empty";
+*/
+//?}
 
     /**
      * How much cold (output) fluid is stored in the condenser.
@@ -45,6 +67,7 @@ public class HeatExchangerState implements GuiSync.IGUIPacket {
     /**
      * Flow rate for the condenser channels.
      */
+//? if =26.1.2 || =26.3 {
     public double condenserChannelFlowRate = 0;
 
     /**
@@ -52,15 +75,26 @@ public class HeatExchangerState implements GuiSync.IGUIPacket {
      * This fluid should be cold; its hot (output) variant should match evaporatorExhaustFluid.
      */
     public String evaporatorIntakeFluid = "minecraft:empty";
-    
+//?} else if =1.21.1 {
+/*    public double condenserChannelFlowRate = 0;
+
+    /^*
+     * The fluid entering the evaporator channels. This should match the value of the fluid's ResourceLocation.
+     * This fluid should be cold; its hot (output) variant should match evaporatorExhaustFluid.
+     ^/
+    public String evaporatorIntakeFluid = "minecraft:empty";
+*/
+//?}
+
     /**
      * How much fluid is stored in each side of the evaporator.
      */
     public long evaporatorTankSize = 0;
-    
+
     /**
      * How much cold (input) fluid is stored in the evaporator.
      */
+//? if =26.1.2 || =26.3 {
     public long evaporatorIntakeFluidAmount = 0;
 
     /**
@@ -68,6 +102,16 @@ public class HeatExchangerState implements GuiSync.IGUIPacket {
      * This fluid should be hot; its cold (input) variant should match evaporatorIntakeFluid.
      */
     public String evaporatorExhaustFluid = "minecraft:empty";
+//?} else if =1.21.1 {
+/*    public long evaporatorIntakeFluidAmount = 0;
+
+    /^*
+     * The fluid exiting the evaporator channels. This should match the value of the fluid's ResourceLocation.
+     * This fluid should be hot; its cold (input) variant should match evaporatorIntakeFluid.
+     ^/
+    public String evaporatorExhaustFluid = "minecraft:empty";
+*/
+//?}
 
     /**
      * How much hot (output) fluid is stored in the evaporator.
@@ -111,7 +155,7 @@ public class HeatExchangerState implements GuiSync.IGUIPacket {
         evaporatorExhaustOrigin = data.get("evaporatorExhaustOrigin") instanceof String v ? v : "";
 
         this.condenserTankSize = (Long) data.get("condenserTankSize");
-        
+
         this.condenserIntakeFluid = (String) data.get("condenserIntakeFluid");
         this.condenserIntakeFluidAmount = (Long) data.get("condenserIntakeFluidAmount");
 
@@ -120,9 +164,9 @@ public class HeatExchangerState implements GuiSync.IGUIPacket {
 
         this.condenserChannelTemperature = (Double) data.get("condenserChannelTemperature");
         this.condenserChannelFlowRate = (Double) data.get("condenserChannelFlowRate");
-    
+
         this.evaporatorTankSize = (Long) data.get("evaporatorTankSize");
-        
+
         this.evaporatorIntakeFluid = (String) data.get("evaporatorIntakeFluid");
         this.evaporatorIntakeFluidAmount = (Long) data.get("evaporatorIntakeFluidAmount");
 
@@ -149,7 +193,7 @@ public class HeatExchangerState implements GuiSync.IGUIPacket {
 
 
         data.put("condenserTankSize", this.condenserTankSize);
-        
+
         data.put("condenserIntakeFluid", this.condenserIntakeFluid);
         data.put("condenserIntakeFluidAmount", this.condenserIntakeFluidAmount);
 
@@ -160,7 +204,7 @@ public class HeatExchangerState implements GuiSync.IGUIPacket {
         data.put("condenserChannelFlowRate", this.condenserChannelFlowRate);
 
         data.put("evaporatorTankSize", this.evaporatorTankSize);
-        
+
         data.put("evaporatorIntakeFluid", this.evaporatorIntakeFluid);
         data.put("evaporatorIntakeFluidAmount", this.evaporatorIntakeFluidAmount);
 

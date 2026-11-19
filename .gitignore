@@ -37,3 +37,6 @@ publishlocal
 
 # Generated numerical experiments (kept locally for inspection)
 /output/cooling-study/
+
+# Stonecutter generated source trees
+/.stonecutter/

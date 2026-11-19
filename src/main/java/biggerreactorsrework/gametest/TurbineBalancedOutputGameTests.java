@@ -9,23 +9,49 @@ import biggerreactorsrework.multiblocks.turbine.tiles.TurbineFluidPortTile;
 import biggerreactorsrework.util.FluidTransitionTank;
 import biggerreactorsrework.util.GuideStructures;
 import net.minecraft.core.BlockPos;
+//? if =26.1.2 || =26.3 {
 import net.minecraft.core.component.DataComponentPatch;
 import net.minecraft.gametest.framework.GameTestHelper;
+//?} else if =1.21.1 {
+/*import net.minecraft.core.component.DataComponentPatch;
+import net.minecraft.gametest.framework.GameTest;
+import net.minecraft.gametest.framework.GameTestHelper;
+*/
+//?}
 import net.minecraft.world.level.GameType;
+//? if =26.1.2 || =26.3 {
 import net.minecraft.world.level.block.Blocks;
 import static biggerreactorsrework.core.multiblock.IAssemblyStateBlock.ASSEMBLED;
 
 // Added 2026-11-02: turbine water outlets share flow equally when balanced.
 public final class TurbineBalancedOutputGameTests {
+//?} else if =1.21.1 {
+/*import net.minecraft.world.level.block.Blocks;
+import net.neoforged.neoforge.gametest.GameTestHolder;
+import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
+import static biggerreactorsrework.core.multiblock.IAssemblyStateBlock.ASSEMBLED;
+
+// Added 2026-11-02: turbine water outlets share flow equally when balanced.
+@GameTestHolder(BiggerReactors.modid) @PrefixGameTestTemplate(false)
+public final class TurbineBalancedOutputGameTests {
+*/
+//?}
     @GameTest(template="empty_7x7x7",timeoutTicks=160)
     public static void balancedWaterReachesBothDestinations(GameTestHelper h) {
         GuideStructures.turbine().parts().forEach((pos,state)->h.setBlock(pos.offset(0,0,1),state));
         BlockPos north=new BlockPos(2,1,1),south=new BlockPos(2,1,5),terminal=new BlockPos(0,1,3);
         h.setBlock(north.north(),Blocks.CAULDRON);h.setBlock(south.south(),Blocks.CAULDRON);
         h.startSequence().thenWaitUntil(()->h.assertTrue(h.getBlockState(north).getValue(ASSEMBLED),"turbine not assembled"))
+//? if =26.1.2 || =26.3 {
             .thenExecute(()->{
                 TurbineFluidPortTile a=GameTestSupport.be(h,north),b=GameTestSupport.be(h,south);
                 var c=a.controller();
+//?} else if =1.21.1 {
+/*            .thenExecute(()->{
+                TurbineFluidPortTile a=h.getBlockEntity(north),b=h.getBlockEntity(south);
+                var c=a.controller();
+*/
+//?}
                 var player=h.makeMockPlayer(GameType.CREATIVE);
                 var absolute=h.absolutePos(terminal);player.setPos(absolute.getX()+.5,absolute.getY()+1,absolute.getZ()+.5);
                 player.containerMenu=new TurbineTerminalContainer(23,absolute,player);
@@ -44,9 +70,16 @@ public final class TurbineBalancedOutputGameTests {
             .thenWaitUntil(()->{
                 h.assertBlockPresent(Blocks.WATER_CAULDRON,north.north());
                 h.assertBlockPresent(Blocks.WATER_CAULDRON,south.south());
+//? if =26.1.2 || =26.3 {
             })
             .thenExecute(()->h.assertTrue(((TurbineFluidPortTile)GameTestSupport.be(h,north)).controller().simulation().fluidTank().liquidAmount()==0,"water was lost or kept"))
             .thenSucceed();
+//?} else if =1.21.1 {
+/*            })
+            .thenExecute(()->h.assertTrue(((TurbineFluidPortTile)h.getBlockEntity(north)).controller().simulation().fluidTank().liquidAmount()==0,"water was lost or kept"))
+            .thenSucceed();
+*/
+//?}
     }
     private TurbineBalancedOutputGameTests() { }
 }

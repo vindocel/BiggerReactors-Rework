@@ -127,10 +127,18 @@ public final class BatteryRedstonePortTile extends BatteryBaseTile implements Me
         return tag;
     }
     @Override protected void readNBT(CompoundTag tag) {
+//? if =26.1.2 || =26.3 {
         super.readNBT(tag);
         int m = tag.getIntOr("sensorMode", 0);
         double value = tag.contains("threshold") ? tag.getDoubleOr("threshold", 0D) : 90;
         mode = valid(m, value) ? Mode.values()[m] : Mode.DISABLED;
+//?} else if =1.21.1 {
+/*        super.readNBT(tag);
+        int m = tag.getInt("sensorMode");
+        double value = tag.contains("threshold") ? tag.getDouble("threshold") : 90;
+        mode = valid(m, value) ? Mode.values()[m] : Mode.DISABLED;
+*/
+//?}
         threshold = valid(m, value) ? value : 90;
     }
 }

@@ -1,22 +1,41 @@
+//? if =26.1.2 {
 package biggerreactorsrework.gametest;
 
 // Modified 2026-11-01: native Minecraft 26.1.2 API.
 import biggerreactorsrework.advancement.ReworkAdvancements;
+//?} else if =1.21.1 || =26.3 {
+/*package biggerreactorsrework.gametest;
+
+import biggerreactorsrework.advancement.ReworkAdvancements;
+*/
+//?}
 import biggerreactorsrework.multiblocks.turbine.TurbineRotorHazard;
 import com.mojang.authlib.GameProfile;
 import java.util.List;
 import java.util.UUID;
 import net.minecraft.core.BlockPos;
+//? if =26.1.2 || =26.3 {
 import net.minecraft.core.Vec3i;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ClientInformation;
+//?} else if =1.21.1 {
+/*import net.minecraft.core.Vec3i;
+import net.minecraft.gametest.framework.GameTest;
+import net.minecraft.gametest.framework.GameTestHelper;
+import net.neoforged.neoforge.gametest.GameTestHolder;
+import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ClientInformation;
+*/
+//?}
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.GameType;
+//? if =26.1.2 || =26.3 {
 import org.joml.Vector4i;
 
 /** Added 2026-11-01: loaded native advancements, actual damage/immunities and genuine criterion dispatch. */
@@ -24,13 +43,35 @@ public final class AdvancementGameTests {
     private static net.minecraft.advancements.AdvancementHolder advancement(GameTestHelper h,String name) {
         return h.getLevel().getServer().getAdvancements().get(Identifier.fromNamespaceAndPath("biggerreactorsrework","progression/"+name));
     }
+//?} else if =1.21.1 {
+/*import org.joml.Vector4i;
+
+/^* Added 2026-11-01: loaded native advancements, actual damage/immunities and genuine criterion dispatch. ^/
+@GameTestHolder(biggerreactorsrework.BiggerReactors.modid)
+@PrefixGameTestTemplate(false)
+public final class AdvancementGameTests {
+    private static net.minecraft.advancements.AdvancementHolder advancement(GameTestHelper h,String name) {
+        return h.getLevel().getServer().getAdvancements().get(ResourceLocation.fromNamespaceAndPath("biggerreactorsrework","progression/"+name));
+    }
+*/
+//?}
     private static ServerPlayer player(GameTestHelper h) {
         var p=new ServerPlayer(h.getLevel().getServer(),h.getLevel(),new GameProfile(UUID.randomUUID(),"RotorAudit"),ClientInformation.createDefault());
+//? if =26.1.2 || =26.3 {
         p.connection=new net.neoforged.neoforge.common.util.FakePlayer(h.getLevel(),new GameProfile(UUID.randomUUID(),"NoNetwork")).connection;
         p.connection.markClientLoaded();
         p.setGameMode(GameType.SURVIVAL);
         p.setPos(h.absoluteVec(new net.minecraft.world.phys.Vec3(3.8,2,3.5)));
         return p;
+//?} else if =1.21.1 {
+/*        p.connection=new net.neoforged.neoforge.common.util.FakePlayer(h.getLevel(),new GameProfile(UUID.randomUUID(),"NoNetwork")).connection;
+        p.setGameMode(GameType.SURVIVAL);
+        p.setPos(h.absoluteVec(new net.minecraft.world.phys.Vec3(3.8,2,3.5)));
+        // A freshly created ServerPlayer starts with spawn protection, unlike one that has already been in the world.
+        net.neoforged.fml.util.ObfuscationReflectionHelper.setPrivateValue(ServerPlayer.class,p,0,"spawnInvulnerableTime");
+        return p;
+*/
+//?}
     }
     private static TurbineRotorHazard hazard(GameTestHelper h) {
         var hazard=new TurbineRotorHazard();
@@ -41,9 +82,16 @@ public final class AdvancementGameTests {
         for(String name:List.of("root","guide","reactor_formed","reactor_power","liquid_cooling","heat_exchange","turbine_power","battery_formed","cyanite_reprocessed","turbine_accident")) {
             var holder=advancement(h,name); h.assertTrue(holder!=null,"missing advancement "+name);
             h.assertTrue(holder.value().rewards().equals(net.minecraft.advancements.AdvancementRewards.EMPTY),"advancement grants a reward: "+name);
+//? if =26.1.2 || =1.21.1 {
         }
         h.assertTrue(advancement(h,"turbine_accident").value().display().orElseThrow().isHidden(),"secret is visible before completion");
         h.succeed();
+//?} else if =26.3 {
+/*        }
+        h.assertTrue(advancement(h,"turbine_accident").value().display().orElseThrow().hidden(),"secret is visible before completion");
+        h.succeed();
+*/
+//?}
     }
     @GameTest(template="empty_7x7x7") public static void bladeSweepExcludesCornersAndOtherLevelsForEveryAxis(GameTestHelper h) {
         for(var axis:net.minecraft.core.Direction.Axis.values()) {
@@ -84,9 +132,16 @@ public final class AdvancementGameTests {
         hazard.hit(h.getLevel(),p,2200);
         h.assertTrue(p.isAlive()&&!p.getAdvancements().getOrStartProgress(advancement(h,"turbine_accident")).isDone(),"totem unlocked death milestone");
         var victim=player(h);victim.setHealth(1);hazard.hit(h.getLevel(),victim,2200);
+//? if =26.1.2 || =26.3 {
         h.assertTrue(victim.isDeadOrDying()&&victim.getAdvancements().getOrStartProgress(advancement(h,"turbine_accident")).isDone(),"rotor death did not unlock secret");
         var other=player(h);other.setHealth(1);other.hurtServer(h.getLevel(),other.damageSources().generic(),20);
         h.assertTrue(!other.getAdvancements().getOrStartProgress(advancement(h,"turbine_accident")).isDone(),"unrelated death unlocked secret");
+//?} else if =1.21.1 {
+/*        h.assertTrue(victim.isDeadOrDying()&&victim.getAdvancements().getOrStartProgress(advancement(h,"turbine_accident")).isDone(),"rotor death did not unlock secret");
+        var other=player(h);other.setHealth(1);other.hurt(other.damageSources().generic(),20);
+        h.assertTrue(!other.getAdvancements().getOrStartProgress(advancement(h,"turbine_accident")).isDone(),"unrelated death unlocked secret");
+*/
+//?}
         h.succeed();
     }
 }

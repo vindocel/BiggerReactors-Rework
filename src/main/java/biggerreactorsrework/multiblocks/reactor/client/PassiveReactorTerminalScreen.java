@@ -1,3 +1,4 @@
+//? if =26.1.2 {
 package biggerreactorsrework.multiblocks.reactor.client;
 
 // Modified 2026-11-01: native Minecraft 26.1.2 API.
@@ -7,6 +8,29 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Inventory;
 import biggerreactorsrework.BiggerReactors;
+//?} else if =1.21.1 {
+/*package biggerreactorsrework.multiblocks.reactor.client;
+
+import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.player.Inventory;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import biggerreactorsrework.BiggerReactors;
+*/
+//?} else if =26.3 {
+/*package biggerreactorsrework.multiblocks.reactor.client;
+
+import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
+import net.minecraft.world.entity.player.Inventory;
+import biggerreactorsrework.BiggerReactors;
+*/
+//?}
 import biggerreactorsrework.client.CommonRender;
 import biggerreactorsrework.client.GuiArt;
 import biggerreactorsrework.client.GuiFrame;
@@ -19,9 +43,17 @@ import biggerreactorsrework.core.client.gui.RenderHelper;
 import biggerreactorsrework.core.client.gui.elements.RenderedElement;
 import biggerreactorsrework.core.client.gui.elements.TooltipElement;
 
+//? if =26.1.2 || =26.3 {
 import javax.annotation.Nonnull;
 
 public class PassiveReactorTerminalScreen extends ModScreen<ReactorTerminalContainer> {
+//?} else if =1.21.1 {
+/*import javax.annotation.Nonnull;
+
+@OnlyIn(Dist.CLIENT)
+public class PassiveReactorTerminalScreen extends ModScreen<ReactorTerminalContainer> {
+*/
+//?}
 
 
     private ReactorState reactorState;
@@ -78,9 +110,16 @@ public class PassiveReactorTerminalScreen extends ModScreen<ReactorTerminalConta
      */
     private void initGauges() {
         // (Top) Internal battery:
+//? if =26.1.2 || =26.3 {
         RenderedElement<ReactorTerminalContainer> internalBattery = new RenderedElement<>(this, 175, 25, 18, 64, 0, 152, Component.empty());
         internalBattery.onRender = (@Nonnull GuiGraphicsExtractor graphics, int mX, int mY) -> CommonRender.renderEnergyGauge(graphics,
                 internalBattery, reactorState.energyStored, reactorState.energyCapacity);
+//?} else if =1.21.1 {
+/*        RenderedElement<ReactorTerminalContainer> internalBattery = new RenderedElement<>(this, 175, 25, 18, 64, 0, 152, Component.empty());
+        internalBattery.onRender = (@Nonnull GuiGraphics graphics, int mX, int mY) -> CommonRender.renderEnergyGauge(graphics,
+                internalBattery, reactorState.energyStored, reactorState.energyCapacity);
+*/
+//?}
         this.addScreenElement(internalBattery);
     }
 
@@ -93,9 +132,16 @@ public class PassiveReactorTerminalScreen extends ModScreen<ReactorTerminalConta
         reactorState = (ReactorState) this.getMenu().getGuiPacket();
         super.containerTick();
         // Check if reactor type changed.
+//? if =26.1.2 || =1.21.1 {
         if (reactorState.reactorType != ReactorType.PASSIVE) {
             this.getMinecraft().setScreen(new ActiveReactorTerminalScreen(this.menu, this.inventory, this.title));
         }
+//?} else if =26.3 {
+/*        if (reactorState.reactorType != ReactorType.PASSIVE) {
+            this.getMinecraft().gui.setScreen(new ActiveReactorTerminalScreen(this.menu, this.inventory, this.title));
+        }
+*/
+//?}
     }
 
     /**
@@ -106,12 +152,22 @@ public class PassiveReactorTerminalScreen extends ModScreen<ReactorTerminalConta
      * @param mouseY       The y position of the mouse.
      * @param partialTicks Partial ticks.
      */
+//? if =26.1.2 || =26.3 {
     @Override
     public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTicks) {
         super.extractRenderState(graphics, mouseX, mouseY, partialTicks);
 
         // Render the other text:
         CommonReactorTerminalScreen.renderStatusText(graphics, this, reactorState.reactorActivity,
+//?} else if =1.21.1 {
+/*    @Override
+    public void render(@Nonnull GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
+        super.render(graphics, mouseX, mouseY, partialTicks);
+
+        // Render the other text:
+        CommonReactorTerminalScreen.renderStatusText(graphics, this, reactorState.reactorActivity,
+*/
+//?}
                 reactorState.heatGenerated, reactorState.fuelUsageRate, reactorState.structuralEfficiency,
                 this.imageWidth - 6);
 
@@ -122,9 +178,16 @@ public class PassiveReactorTerminalScreen extends ModScreen<ReactorTerminalConta
     /**
      * Draw the panel and its fixed details.
      */
+//? if =26.1.2 || =26.3 {
     @Override
     protected void drawBackground(@Nonnull GuiGraphicsExtractor graphics, int x, int y) {
         GuiArt.panel(graphics, x, y, 200, CommonReactorTerminalScreen.HEIGHT, this.frame());
+//?} else if =1.21.1 {
+/*    @Override
+    protected void drawBackground(@Nonnull GuiGraphics graphics, int x, int y) {
+        GuiArt.panel(graphics, x, y, 200, CommonReactorTerminalScreen.HEIGHT, this.frame());
+*/
+//?}
         GuiArt.fill(graphics, x + 6, y + 36, x + 105, y + 37, GuiArt.SEPARATOR);
         GuiArt.fill(graphics, x + 6, y + 55, x + 105, y + 56, GuiArt.SEPARATOR);
         GuiArt.fill(graphics, x + 6, y + 74, x + 105, y + 75, GuiArt.SEPARATOR);

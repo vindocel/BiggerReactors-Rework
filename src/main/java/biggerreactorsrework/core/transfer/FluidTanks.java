@@ -1,3 +1,4 @@
+//? if =26.1.2 || =26.3 {
 package biggerreactorsrework.core.transfer;
 
 import net.neoforged.neoforge.fluids.FluidStack;
@@ -68,3 +69,5 @@ public interface FluidTanks {
         return drained.copyWithAmount(filled);
     }
 }
+//?} else if =1.21.1 {
+//?}

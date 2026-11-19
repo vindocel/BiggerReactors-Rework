@@ -1,0 +1,8 @@
+{
+  "type": "minecraft:blasting",
+  "ingredient": "biggerreactorsrework:graphite_dust",
+  "result": {
+    "id": "biggerreactorsrework:graphite_ingot"
+  },
+  "cookingtime": 100
+}

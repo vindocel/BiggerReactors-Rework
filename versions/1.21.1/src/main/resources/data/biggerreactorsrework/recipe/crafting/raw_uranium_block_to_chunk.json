@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    {
+      "item": "biggerreactorsrework:raw_uranium_block"
+    }
+  ],
+  "result": {
+    "id": "biggerreactorsrework:uranium_chunk",
+    "count": 9
+  }
+}

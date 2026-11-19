@@ -15,23 +15,30 @@ import javax.annotation.Nullable;
 @API
 @NonnullDefault
 public interface IEnergyTile extends IModularTile {
-    
+
     @RegisterCapability
     CapabilityRegistration ENERGY_HANDLER_CAP_REGISTRATION = CapabilityRegistration.lazyTileCaps(IEnergyTile.class,
             () -> EnergyHandlerWrappers.wrap((IEnergyTile tile, Direction side) -> side == null ? null : tile.energyHandler(side)));
-    
+
     @API
     IEnergyHandler energyHandler(Direction direction);
-    
+
     @API
     default CachedWrappedBlockCapability<IEnergyHandler, Direction> findEnergyCapability(Direction direction) {
         final var thisTile = this.as(BlockEntity.class);
         @Nullable
         final var level = thisTile.getLevel();
+//? if =26.1.2 || =26.3 {
         assert level != null;
         return new CachedWrappedBlockCapability<>(EnergyHandlerWrappers::findCapability, (ServerLevel) level, thisTile.getBlockPos().offset(direction.getUnitVec3i()), direction.getOpposite(), () -> !thisTile.isRemoved(), () -> onNeighborEnergyCapabilityInvalidated(direction));
     }
-    
+//?} else if =1.21.1 {
+/*        assert level != null;
+        return new CachedWrappedBlockCapability<>(EnergyHandlerWrappers::findCapability, (ServerLevel) level, thisTile.getBlockPos().offset(direction.getNormal()), direction.getOpposite(), () -> !thisTile.isRemoved(), () -> onNeighborEnergyCapabilityInvalidated(direction));
+    }
+*/
+//?}
+
     @API
     default void onNeighborEnergyCapabilityInvalidated(Direction direction) {
     }

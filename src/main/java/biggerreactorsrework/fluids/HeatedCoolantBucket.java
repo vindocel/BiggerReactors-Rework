@@ -1,18 +1,38 @@
 package biggerreactorsrework.fluids;
 
 import biggerreactorsrework.BiggerReactors;
+//? if =26.1.2 || =26.3 {
 import biggerreactorsrework.registries.CoolantComponents;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.item.BucketItem;
+//?} else if =1.21.1 {
+/*import biggerreactorsrework.registries.CoolantComponents;
+import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.BucketItem;
+*/
+//?}
 import net.minecraft.world.item.ItemStack;
+//? if =26.1.2 || =26.3 {
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.material.Fluid;
+//?} else if =1.21.1 {
+/*import net.minecraft.world.level.Level;
+import net.minecraft.world.level.material.Fluid;
+*/
+//?}
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.level.saveddata.SavedData;
 import net.neoforged.bus.api.IEventBus;
+//? if =26.1.2 || =26.3 {
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.fluids.FluidStack;
 
@@ -29,16 +49,33 @@ import net.neoforged.neoforge.fluids.FluidType;
 import java.util.HashMap;
 import java.util.Map;
 import javax.annotation.Nullable;
+//?} else if =1.21.1 {
+/*import net.neoforged.neoforge.capabilities.Capabilities;
+import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
+import net.neoforged.neoforge.fluids.FluidStack;
+import net.neoforged.neoforge.fluids.capability.wrappers.FluidBucketWrapper;
+
+import javax.annotation.Nullable;
+*/
+//?}
 
 /** Added 2026-11-03: heated coolant keeps its cold origin in buckets and in placed source blocks. */
 public final class HeatedCoolantBucket {
     private HeatedCoolantBucket() { }
 
     public static void register(IEventBus modBus) {
+//? if =26.1.2 || =26.3 {
         PlacedCoolantOrigins.register(modBus);
         modBus.addListener(RegisterCapabilitiesEvent.class, event -> event.registerItem(Capabilities.Fluid.ITEM,
                 (stack, access) -> new Wrapper(access), HeatedCoolant.INSTANCE.getBucket()));
     }
+//?} else if =1.21.1 {
+/*        PlacedCoolantOrigins.register(modBus);
+        modBus.addListener(RegisterCapabilitiesEvent.class, event -> event.registerItem(Capabilities.FluidHandler.ITEM,
+                (stack, context) -> new Wrapper(stack), HeatedCoolant.INSTANCE.getBucket()));
+    }
+*/
+//?}
 
     @Nullable
     public static String origin(ItemStack stack) {
@@ -75,15 +112,23 @@ public final class HeatedCoolantBucket {
             return Component.translatable("item.biggerreactorsrework.heated_coolant_bucket.named", CoolantComponents.name(contents(stack)));
         }
 
+//? if =26.1.2 || =26.3 {
         @Override
         public boolean emptyContents(@Nullable LivingEntity player, Level level, BlockPos pos, @Nullable BlockHitResult hit, @Nullable ItemStack container) {
             String origin = container == null ? null : origin(container);
+//?} else if =1.21.1 {
+/*        @Override
+        public boolean emptyContents(@Nullable Player player, Level level, BlockPos pos, @Nullable BlockHitResult hit, @Nullable ItemStack container) {
+            String origin = container == null ? null : origin(container);
+*/
+//?}
             if (origin == null) return false;
             boolean placed = super.emptyContents(player, level, pos, hit, container);
             if (placed && level instanceof ServerLevel server && level.getFluidState(pos).isSourceOfType(HeatedCoolant.INSTANCE))
                 PlacedCoolantOrigins.put(server, pos, origin);
             return placed;
         }
+//? if =26.1.2 || =26.3 {
     }
 
     // Ported 2026-11-03: the native transactional resource handler keeps the origin on both sides.
@@ -124,11 +169,64 @@ public final class HeatedCoolantBucket {
                 var pos = BlockPos.of(Long.parseLong(entry.getKey()));
                 if (chunk.getPos().x() != (pos.getX() >> 4) || chunk.getPos().z() != (pos.getZ() >> 4)) continue;
                 if (chunk.getFluidState(pos).isSourceOfType(HeatedCoolant.INSTANCE)) {
+//?} else if =1.21.1 {
+/*    }
+
+    private static final class Wrapper extends FluidBucketWrapper {
+        Wrapper(ItemStack container) {
+            super(container);
+        }
+
+        @Override
+        public FluidStack getFluid() {
+            return contents(container);
+        }
+    }
+
+    /^* Origins saved per dimension by earlier versions, moved into chunk data as each chunk loads. ^/
+    static final class Origins extends SavedData {
+        private static final String NAME = BiggerReactors.modid + "_heated_coolant_origins";
+        private final Long2ObjectOpenHashMap<String> origins = new Long2ObjectOpenHashMap<>();
+
+        static Origins get(ServerLevel level) {
+            return level.getDataStorage().computeIfAbsent(new SavedData.Factory<>(Origins::new, Origins::load), NAME);
+        }
+
+        private static Origins load(CompoundTag tag, HolderLookup.Provider registries) {
+            var origins = new Origins();
+            for (String key : tag.getAllKeys()) {
+                try { origins.origins.put(Long.parseLong(key), tag.getString(key)); } catch (NumberFormatException ignored) { }
+            }
+            return origins;
+        }
+
+        void migrate(net.minecraft.world.level.chunk.LevelChunk chunk) {
+            if (origins.isEmpty()) return;
+            var iterator = origins.long2ObjectEntrySet().iterator();
+            while (iterator.hasNext()) {
+                var entry = iterator.next();
+                var pos = BlockPos.of(entry.getLongKey());
+                if (chunk.getPos().x != (pos.getX() >> 4) || chunk.getPos().z != (pos.getZ() >> 4)) continue;
+                if (chunk.getFluidState(pos).isSourceOfType(HeatedCoolant.INSTANCE)) {
+*/
+//?}
                     PlacedCoolantOrigins.put(chunk, pos, entry.getValue());
                 }
                 iterator.remove();
                 setDirty();
             }
+//? if =26.1.2 || =26.3 {
         }
     }
+//?} else if =1.21.1 {
+/*        }
+
+        @Override
+        public CompoundTag save(CompoundTag tag, HolderLookup.Provider registries) {
+            origins.forEach((pos, origin) -> tag.putString(Long.toString(pos), origin));
+            return tag;
+        }
+    }
+*/
+//?}
 }

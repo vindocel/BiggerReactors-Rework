@@ -12,10 +12,20 @@ import net.minecraft.gametest.framework.*;
 import net.minecraft.world.level.material.Fluids;
 import net.neoforged.neoforge.gametest.*;
 
+//? if =26.1.2 || =26.3 {
 import java.util.*;
 
 // Added 2026-11-02: exercise production fuel, geometry, tanks, migration and atomic recipes in Minecraft.
 public final class ThermalModelGameTests {
+//?} else if =1.21.1 {
+/*import java.util.*;
+
+// Added 2026-11-02: exercise production fuel, geometry, tanks, migration and atomic recipes in Minecraft.
+@GameTestHolder(BiggerReactors.modid)
+@PrefixGameTestTemplate(false)
+public final class ThermalModelGameTests {
+*/
+//?}
     static SimulationDescription checker(int x,int y,int z,boolean missing,ThermalModel.PassiveClass passive) {
         var d=new SimulationDescription();d.setSize(x,y,z);
         for(int a=0;a<x;a++)for(int c=0;c<z;c++) {

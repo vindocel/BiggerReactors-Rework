@@ -1,6 +1,14 @@
+//? if =26.1.2 || =26.3 {
 package biggerreactorsrework.multiblocks.turbine.tiles;
 
 import net.minecraft.core.BlockPos;
+//?} else if =1.21.1 {
+/*package biggerreactorsrework.multiblocks.turbine.tiles;
+
+import net.minecraft.MethodsReturnNonnullByDefault;
+import net.minecraft.core.BlockPos;
+*/
+//?}
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import biggerreactorsrework.multiblocks.turbine.TurbineMultiblockController;
@@ -13,8 +21,15 @@ import biggerreactorsrework.core.multiblock.touching.ITouchingMultiblockTile;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 
+//? if =26.1.2 || =26.3 {
 @ParametersAreNonnullByDefault
 public class TurbineBaseTile extends ModularTile implements IMultiblockTile<TurbineBaseTile, TurbineBaseBlock, TurbineMultiblockController>,
+//?} else if =1.21.1 {
+/*@ParametersAreNonnullByDefault
+@MethodsReturnNonnullByDefault
+public class TurbineBaseTile extends ModularTile implements IMultiblockTile<TurbineBaseTile, TurbineBaseBlock, TurbineMultiblockController>,
+*/
+//?}
         IRectangularMultiblockTile<TurbineBaseTile, TurbineBaseBlock, TurbineMultiblockController>,
         IPersistentMultiblockTile<TurbineBaseTile, TurbineBaseBlock, TurbineMultiblockController>,
         ITouchingMultiblockTile<TurbineBaseTile, TurbineBaseBlock, TurbineMultiblockController> {
@@ -32,18 +47,18 @@ public class TurbineBaseTile extends ModularTile implements IMultiblockTile<Turb
     public void readAppearance(java.util.Map<?, ?> data) {
         if (data.get("appearancePos") instanceof Long position) appearancePos = BlockPos.of(position);
     }
-    
+
     @Override
     public final TurbineMultiblockController createController() {
         return new TurbineMultiblockController(level);
     }
-    
+
     public void runRequest(String requestName, Object requestData) {
         if (nullableController() != null) {
             controller().runRequest(requestName, requestData);
         }
     }
-    
+
     public boolean isCurrentController(TurbineMultiblockController turbineMultiblockController) {
         return controller() == turbineMultiblockController;
     }

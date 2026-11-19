@@ -12,6 +12,7 @@ import biggerreactorsrework.core.multiblock.ValidationException;
 import biggerreactorsrework.core.multiblock.common.IEventMultiblock;
 import biggerreactorsrework.core.multiblock.common.IPersistentMultiblock;
 import biggerreactorsrework.core.multiblock.rectangular.IRectangularMultiblock;
+//? if =26.1.2 || =26.3 {
 import biggerreactorsrework.core.multiblock.touching.ITouchingMultiblock;
 import biggerreactorsrework.multiblocks.battery.blocks.BatteryBaseBlock;
 import biggerreactorsrework.multiblocks.battery.blocks.BatteryCell;
@@ -19,23 +20,55 @@ import biggerreactorsrework.core.util.Statistics;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.item.component.CustomData;
 import biggerreactorsrework.multiblocks.battery.blocks.BatteryEnergyPort.PortDirection;
+//?} else if =1.21.1 {
+/*import biggerreactorsrework.core.multiblock.touching.ITouchingMultiblock;
+import biggerreactorsrework.core.util.Statistics;
+import biggerreactorsrework.multiblocks.battery.blocks.BatteryBaseBlock;
+import biggerreactorsrework.multiblocks.battery.blocks.BatteryCell;
+import biggerreactorsrework.multiblocks.battery.blocks.BatteryEnergyPort.PortDirection;
+*/
+//?}
 import biggerreactorsrework.multiblocks.battery.state.BatteryActivity;
 import biggerreactorsrework.multiblocks.battery.state.BatteryState;
 import biggerreactorsrework.multiblocks.battery.tiles.BatteryBaseTile;
 import biggerreactorsrework.multiblocks.battery.tiles.BatteryCellTile;
 import biggerreactorsrework.multiblocks.battery.tiles.BatteryEnergyPortTile;
+//? if =26.1.2 || =26.3 {
 import biggerreactorsrework.multiblocks.battery.tiles.BatteryTerminalTile;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
+//?} else if =1.21.1 {
+/*import biggerreactorsrework.multiblocks.battery.tiles.BatteryTerminalTile;
+import net.minecraft.MethodsReturnNonnullByDefault;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.nbt.CompoundTag;
+*/
+//?}
 import net.minecraft.world.Containers;
+//? if =26.1.2 || =26.3 {
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+//?} else if =1.21.1 {
+/*import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.CustomData;
+import net.minecraft.world.level.Level;
+*/
+//?}
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
+//? if =26.1.2 || =26.3 {
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import biggerreactorsrework.core.transfer.EnergyStore;
 import org.joml.Vector3i;
+//?} else if =1.21.1 {
+/*import net.minecraft.world.level.block.state.properties.BooleanProperty;
+import net.neoforged.neoforge.energy.IEnergyStorage;
+import org.joml.Vector3i;
+*/
+//?}
 import org.joml.Vector3ic;
 
 import javax.annotation.Nonnull;
@@ -43,6 +76,7 @@ import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
+//? if =26.1.2 || =26.3 {
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -55,6 +89,23 @@ import java.util.Set;
  * block joins or leaves, so a broken cell keeps its share and brings it into the next battery.
  */
 @ParametersAreNonnullByDefault
+//?} else if =1.21.1 {
+/*import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
+
+/^*
+ * Battery multiblock. Every cell adds {@code CellCapacity} FE of storage and {@code CellTransferRate} FE/t to both the
+ * input and the output limit.
+ * <p>
+ * The running total is kept here and split evenly across the cells before they are saved or dropped and whenever a
+ * block joins or leaves, so a broken cell keeps its share and brings it into the next battery.
+ ^/
+@MethodsReturnNonnullByDefault
+@ParametersAreNonnullByDefault
+*/
+//?}
 public class BatteryMultiblockController extends MultiblockController<BatteryBaseTile, BatteryBaseBlock, BatteryMultiblockController> implements
         IRectangularMultiblock<BatteryBaseTile, BatteryBaseBlock, BatteryMultiblockController>,
         IPersistentMultiblock<BatteryBaseTile, BatteryBaseBlock, BatteryMultiblockController>,
@@ -73,7 +124,7 @@ public class BatteryMultiblockController extends MultiblockController<BatteryBas
     private final List<BatteryEnergyPortTile> outlets = new ArrayList<>();
 
     public final BatteryItemHandler items = new BatteryItemHandler(this::dirty);
-    
+
     private long stored = 0;
     /**
      * Set when the total changed since the cells last received their shares.
@@ -167,7 +218,7 @@ public class BatteryMultiblockController extends MultiblockController<BatteryBas
             }
         }
     }
-    
+
     @Override
     public void onAssembled() {
         validationPassed();
@@ -306,6 +357,7 @@ public class BatteryMultiblockController extends MultiblockController<BatteryBas
 
     public long stored() {
         return stored;
+//? if =26.1.2 || =26.3 {
     }
 
     public long[] transferState() {
@@ -319,6 +371,12 @@ public class BatteryMultiblockController extends MultiblockController<BatteryBas
     }
 
     public long capacity() {
+//?} else if =1.21.1 {
+/*    }
+
+    public long capacity() {
+*/
+//?}
         return capacity;
     }
     // Added 2026-11-01: assembled battery milestone, without changes to saved charge.
@@ -327,7 +385,7 @@ public class BatteryMultiblockController extends MultiblockController<BatteryBas
     @Override
     public void tick() {
         chargeItems();
-        
+
         long available = Math.min(stored, transferLimit - outputThisTick);
         PowerDistribution.distribute(available, outlets, BatteryEnergyPortTile::distributePower, amount -> extract(amount, false));
 
@@ -372,18 +430,33 @@ public class BatteryMultiblockController extends MultiblockController<BatteryBas
         if (discharge.is(BatteryCell.INSTANCE.asItem())) {
             long energy = BatteryCell.storedEnergy(discharge);
             long moved = insert(energy, false);
+//? if =26.1.2 || =26.3 {
             if (moved > 0) {
                 var updated = discharge.copy();
                 var data = updated.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag();
                 if (moved == energy) data.remove(BatteryCellTile.ENERGY_KEY);
+//?} else if =1.21.1 {
+/*            if (moved > 0) {
+                ItemStack updated = discharge.copy();
+                CompoundTag data = updated.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag();
+                if (moved == energy) data.remove(BatteryCellTile.ENERGY_KEY);
+*/
+//?}
                 else data.putLong(BatteryCellTile.ENERGY_KEY, energy - moved);
                 if (data.isEmpty()) updated.remove(DataComponents.CUSTOM_DATA);
                 else updated.set(DataComponents.CUSTOM_DATA, CustomData.of(data));
                 items.setStackInSlot(BatteryItemHandler.DISCHARGE_SLOT, updated);
             }
+//? if =26.1.2 || =26.3 {
         } else {
             EnergyStore source = BatteryItemHandler.energy(discharge);
             if (source != null && source.canExtract()) {
+//?} else if =1.21.1 {
+/*        } else {
+            IEnergyStorage source = BatteryItemHandler.energy(discharge);
+            if (source != null && source.canExtract()) {
+*/
+//?}
                 int room = (int) Math.min(Integer.MAX_VALUE, insert(Long.MAX_VALUE, true));
                 if (room > 0) {
                     insert(source.extractEnergy(room, false), false);
@@ -395,9 +468,16 @@ public class BatteryMultiblockController extends MultiblockController<BatteryBas
 
     public List<Map<String, Object>> statistics() {
         double charge = capacity > 0 ? Math.min(100, 100.0 * stored / capacity) : 0;
+//? if =26.1.2 || =26.3 {
         return List.of(
                 Statistics.row("battery_charge", String.format(java.util.Locale.ROOT, "%.1f%%", charge)),
                 Statistics.row("battery_cells", cells.size()),
+//?} else if =1.21.1 {
+/*        return List.of(
+                Statistics.row("battery_charge", String.format(Locale.ROOT, "%.1f%%", charge)),
+                Statistics.row("battery_cells", cells.size()),
+*/
+//?}
                 Statistics.row("battery_stored", stored + " FE"),
                 Statistics.row("battery_capacity", capacity + " FE"),
                 Statistics.row("battery_input", lastInput + " FE/t"),
@@ -407,9 +487,16 @@ public class BatteryMultiblockController extends MultiblockController<BatteryBas
     }
 
     /** Modified 2026-10-27: item slots and open-menu equipment share the battery's output budget. */
+//? if =26.1.2 || =26.3 {
     public int chargeItem(ItemStack stack) {
         EnergyStore target = BatteryItemHandler.energy(stack);
         if (target == null || !target.canReceive()) return 0;
+//?} else if =1.21.1 {
+/*    public int chargeItem(ItemStack stack) {
+        IEnergyStorage target = BatteryItemHandler.energy(stack);
+        if (target == null || !target.canReceive()) return 0;
+*/
+//?}
         int available = (int) Math.min(Integer.MAX_VALUE, extract(Long.MAX_VALUE, true));
         if (available <= 0) return 0;
         int received = Math.clamp(target.receiveEnergy(available, false), 0, available);
@@ -501,9 +588,16 @@ public class BatteryMultiblockController extends MultiblockController<BatteryBas
 
     @Override
     public void read(CompoundTag nbt) {
+//? if =26.1.2 || =26.3 {
         if (nbt.contains("items")) {
             items.deserializeNBT(level.registryAccess(), nbt.getCompoundOrEmpty("items"));
         }
+//?} else if =1.21.1 {
+/*        if (nbt.contains("items")) {
+            items.deserializeNBT(level.registryAccess(), nbt.getCompound("items"));
+        }
+*/
+//?}
         updateBlockStates = true;
     }
 

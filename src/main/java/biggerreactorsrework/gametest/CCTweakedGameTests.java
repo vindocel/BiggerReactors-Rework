@@ -7,14 +7,32 @@ import biggerreactorsrework.multiblocks.heatexchanger.blocks.HeatExchangerComput
 import biggerreactorsrework.util.GuideStructures;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+//? if =26.1.2 || =26.3 {
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.gametest.framework.GameTestHelper;
+//?} else if =1.21.1 {
+/*import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.gametest.framework.GameTest;
+import net.minecraft.gametest.framework.GameTestHelper;
+*/
+//?}
 import net.minecraft.world.level.block.Blocks;
+//? if =26.1.2 || =26.3 {
 import net.neoforged.fml.ModList;
 
 /** Added 2026-10-31: native CC discovery, real Lua execution, server-thread callbacks and port lifetime. */
 public final class CCTweakedGameTests {
+//?} else if =1.21.1 {
+/*import net.neoforged.fml.ModList;
+
+/^* Added 2026-10-31: native CC discovery, real Lua execution, server-thread callbacks and port lifetime. ^/
+@net.neoforged.neoforge.gametest.GameTestHolder(biggerreactorsrework.BiggerReactors.modid)
+@net.neoforged.neoforge.gametest.PrefixGameTestTemplate(false)
+public final class CCTweakedGameTests {
+*/
+//?}
     private static boolean installed() { return ModList.get().isLoaded("computercraft"); }
     private static void reactor(GameTestHelper h) {
         for(int x=1;x<=3;x++)for(int y=1;y<=3;y++)for(int z=1;z<=3;z++)
@@ -108,14 +126,28 @@ public final class CCTweakedGameTests {
     @GameTest(template="empty_7x7x7",timeoutTicks=160)
     public static void peripheralLifetimeAndOptionalDataRetention(GameTestHelper h) {
         reactor(h);var pos=new BlockPos(3,2,2);
+//? if =26.1.2 || =26.3 {
         h.startSequence().thenWaitUntil(()->{
             var tile=GameTestSupport.be(h,pos);
             h.assertTrue(tile instanceof biggerreactorsrework.multiblocks.reactor.tiles.ReactorComputerPortTile port &&
+//?} else if =1.21.1 {
+/*        h.startSequence().thenWaitUntil(()->{
+            var tile=h.<net.minecraft.world.level.block.entity.BlockEntity>getBlockEntity(pos);
+            h.assertTrue(tile instanceof biggerreactorsrework.multiblocks.reactor.tiles.ReactorComputerPortTile port &&
+*/
+//?}
                     port.nullableController()!=null && port.controller().simulation()!=null,"reactor not assembled");
         }).thenExecute(()->{
+//? if =26.1.2 || =26.3 {
             if(installed())Probe.lifetime(h,pos);
             else h.assertTrue(((ComputerPortState.Port)GameTestSupport.be(h,pos)).computerPortState().component()==null,"optional OC loaded without its mod");
         }).thenSucceed();
+//?} else if =1.21.1 {
+/*            if(installed())Probe.lifetime(h,pos);
+            else if(!ModList.get().isLoaded("opencomputers"))h.assertTrue(((ComputerPortState.Port)h.<net.minecraft.world.level.block.entity.BlockEntity>getBlockEntity(pos)).computerPortState().component()==null,"optional OC loaded without its mod");
+        }).thenSucceed();
+*/
+//?}
     }
     private static final class Probe {
         static dan200.computercraft.api.peripheral.IPeripheral peripheral(GameTestHelper h,BlockPos pos) {
@@ -133,13 +165,27 @@ public final class CCTweakedGameTests {
             catch(Exception error){throw new AssertionError(error);}
             h.assertTrue(Boolean.TRUE.equals(connected),"machine not assembled");
         }
+//? if =26.1.2 || =26.3 {
         static void boot(GameTestHelper h,BlockPos pos,String script) {
             h.setBlock(pos,BuiltInRegistries.BLOCK.getValue(Identifier.fromNamespaceAndPath("computercraft","computer_advanced")));
             try {
+//?} else if =1.21.1 {
+/*        static void boot(GameTestHelper h,BlockPos pos,String script) {
+            h.setBlock(pos,BuiltInRegistries.BLOCK.get(ResourceLocation.fromNamespaceAndPath("computercraft","computer_advanced")));
+            try {
+*/
+//?}
                 var server=h.getLevel().getServer();
+//? if =26.1.2 || =26.3 {
                 int id=dan200.computercraft.api.ComputerCraftAPI.createUniqueNumberedSaveDir(server,"computer");
                 var tile=GameTestSupport.be(h,pos);
                 tile.getClass().getMethod("setComputerID",int.class).invoke(tile,id);
+//?} else if =1.21.1 {
+/*                int id=dan200.computercraft.api.ComputerCraftAPI.createUniqueNumberedSaveDir(server,"computer");
+                var tile=h.<net.minecraft.world.level.block.entity.BlockEntity>getBlockEntity(pos);
+                tile.getClass().getMethod("setComputerID",int.class).invoke(tile,id);
+*/
+//?}
                 // Install files before CC creates its cached root mount and starts the BIOS.
                 var mount=dan200.computercraft.api.ComputerCraftAPI.createSaveDirMount(server,"computer/"+id,1000000);
                 var wrapped="local ok,err=pcall(function()\n"+script+"\nend)\nos.setComputerLabel(ok and 'cc-pass' or ('FAIL:'..tostring(err)))\n";
@@ -157,10 +203,18 @@ public final class CCTweakedGameTests {
         static void label(GameTestHelper h,BlockPos pos,String expected) {
             try {
                 // The test server advances ticks without real-time pacing; let native Lua workers run too.
+//? if =26.1.2 || =26.3 {
                 java.util.concurrent.locks.LockSupport.parkNanos(5_000_000);
                 var tile=GameTestSupport.be(h,pos);
                 // GameTest structures may not have entity-ticking chunk status: tick the real CC block normally.
                 tickBlock(tile);
+//?} else if =1.21.1 {
+/*                java.util.concurrent.locks.LockSupport.parkNanos(5_000_000);
+                var tile=h.<net.minecraft.world.level.block.entity.BlockEntity>getBlockEntity(pos);
+                // GameTest structures may not have entity-ticking chunk status: tick the real CC block normally.
+                tickBlock(tile);
+*/
+//?}
                 var computer=tile.getClass().getMethod("getServerComputer").invoke(tile);
                 String label=computer==null?null:(String)computer.getClass().getMethod("getLabel").invoke(computer);
                 h.assertTrue(expected.equals(label),"Lua computer status: "+label+", "+screen(computer));
@@ -181,26 +235,60 @@ public final class CCTweakedGameTests {
             var ticker=((net.minecraft.world.level.block.EntityBlock)state.getBlock()).getTicker(tile.getLevel(),state,tile.getType());
             if(ticker!=null)((net.minecraft.world.level.block.entity.BlockEntityTicker)ticker).tick(tile.getLevel(),tile.getBlockPos(),state,tile);
         }
+//? if =26.1.2 || =26.3 {
         static void modem(GameTestHelper h,BlockPos pos) {
             h.setBlock(pos,BuiltInRegistries.BLOCK.getValue(Identifier.fromNamespaceAndPath("computercraft","wired_modem_full")));
             try{var tile=GameTestSupport.be(h,pos);tile.getClass().getMethod("use",net.minecraft.world.entity.player.Player.class).invoke(tile,h.makeMockPlayer(net.minecraft.world.level.GameType.CREATIVE));}
             catch(Exception error){throw new AssertionError(error);}
+//?} else if =1.21.1 {
+/*        static void modem(GameTestHelper h,BlockPos pos) {
+            h.setBlock(pos,BuiltInRegistries.BLOCK.get(ResourceLocation.fromNamespaceAndPath("computercraft","wired_modem_full")));
+            try{var tile=h.<net.minecraft.world.level.block.entity.BlockEntity>getBlockEntity(pos);tile.getClass().getMethod("use",net.minecraft.world.entity.player.Player.class).invoke(tile,h.makeMockPlayer(net.minecraft.world.level.GameType.CREATIVE));}
+            catch(Exception error){throw new AssertionError(error);}
+*/
+//?}
         }
+//? if =26.1.2 || =26.3 {
         static void lifetime(GameTestHelper h,BlockPos pos) {
             var p=peripheral(h,pos);var tile=GameTestSupport.be(h,pos);
             h.assertTrue(p.equals(peripheral(h,pos)),"same tile is not an equivalent peripheral");
+//?} else if =1.21.1 {
+/*        static void lifetime(GameTestHelper h,BlockPos pos) {
+            var p=peripheral(h,pos);var tile=h.<net.minecraft.world.level.block.entity.BlockEntity>getBlockEntity(pos);
+            h.assertTrue(p.equals(peripheral(h,pos)),"same tile is not an equivalent peripheral");
+*/
+//?}
             for(var method:p.getClass().getMethods())if(method.isAnnotationPresent(dan200.computercraft.api.lua.LuaFunction.class))
                 h.assertTrue(method.getAnnotation(dan200.computercraft.api.lua.LuaFunction.class).mainThread(),"live callback is not scheduled on the main thread");
             var rejected=java.util.concurrent.CompletableFuture.supplyAsync(()->{
                 try{call(p,"active");return false;}catch(Exception error){return error instanceof dan200.computercraft.api.lua.LuaException;}
             }).join();
             h.assertTrue(rejected,"off-thread callback was not rejected");
+//? if =26.1.2 || =26.3 {
             var tag=tile.saveWithFullMetadata(h.getLevel().registryAccess());
             var opaque=new net.minecraft.nbt.CompoundTag();opaque.putString("address","retained-with-CC-only");
             var local=tag.getCompoundOrEmpty("local");local.put("computerComponent",opaque);tag.put("local",local);
             GameTestSupport.load(tile,tag,h);
             h.assertTrue(tile.saveWithFullMetadata(h.getLevel().registryAccess()).getCompoundOrEmpty("local").getCompoundOrEmpty("computerComponent").equals(opaque),"CC discarded dormant OpenComputers data");
             h.setBlock(pos,Blocks.AIR);
+//?} else if =1.21.1 {
+/*            var tag=tile.saveWithFullMetadata(h.getLevel().registryAccess());
+            if(ModList.get().isLoaded("opencomputers")) {
+                // Both installed: the live node and the peripheral share the port, and CC must not replace the saved node.
+                h.assertTrue(((ComputerPortState.Port)tile).computerPortState().component()!=null,"CC replaced the OpenComputers node");
+                var node=tag.getCompound("local").getCompound("computerComponent").copy();
+                h.assertTrue(!node.isEmpty(),"OpenComputers node data missing");
+                tile.loadWithComponents(tag,h.getLevel().registryAccess());
+                h.assertTrue(tile.saveWithFullMetadata(h.getLevel().registryAccess()).getCompound("local").getCompound("computerComponent").equals(node),"CC changed the OpenComputers node data");
+            } else {
+                var opaque=new net.minecraft.nbt.CompoundTag();opaque.putString("address","retained-with-CC-only");
+                var local=tag.getCompound("local");local.put("computerComponent",opaque);tag.put("local",local);
+                tile.loadWithComponents(tag,h.getLevel().registryAccess());
+                h.assertTrue(tile.saveWithFullMetadata(h.getLevel().registryAccess()).getCompound("local").getCompound("computerComponent").equals(opaque),"CC discarded dormant OpenComputers data");
+            }
+            h.setBlock(pos,Blocks.AIR);
+*/
+//?}
             try{h.assertTrue(Boolean.FALSE.equals(call(p,"connected")),"removed peripheral still connected");call(p,"active");throw new AssertionError("removed port accepted call");}
             catch(dan200.computercraft.api.lua.LuaException expected){}
             catch(Exception error){throw new AssertionError(error);}

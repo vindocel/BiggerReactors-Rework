@@ -1,8 +1,15 @@
 package biggerreactorsrework.client.config;
 
+//? if =26.1.2 || =26.3 {
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
+//?} else if =1.21.1 {
+/*import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.Button;
+*/
+//?}
 import net.minecraft.network.chat.Component;
 
 import java.util.function.BooleanSupplier;
@@ -11,9 +18,16 @@ public final class ConfigStyle {
     public static final int ACCENT = 0xFF6FD9E8, TEXT = 0xFFE0E0E0, MUTED = 0xFF9A9A9A;
     public static final int MARGIN = 6, ROW = 24, CONTROL = 20, RESET = 20;
 
+//? if =26.1.2 || =26.3 {
     private ConfigStyle() {}
     public static void fill(GuiGraphicsExtractor g, int x, int y, int right, int bottom, int color) {
         ConfigPaint.fill(g, x, y, right, bottom, color);
+//?} else if =1.21.1 {
+/*    private ConfigStyle() {}
+    public static void fill(GuiGraphics g, int x, int y, int right, int bottom, int color) {
+        ConfigPaint.fill(g, x, y, right, bottom, color);
+*/
+//?}
     }
 
     public static Button button(Component label, int x, int y, int width, int height, Button.OnPress action) {
@@ -27,9 +41,16 @@ public final class ConfigStyle {
     private static final class FlatButton extends Button {
         private final BooleanSupplier selected;
         FlatButton(Builder builder, BooleanSupplier selected) { super(builder); this.selected = selected; }
+//? if =26.1.2 || =26.3 {
         @Override
         protected void extractContents(GuiGraphicsExtractor g, int mouseX, int mouseY, float partialTick) {
             int x = getX(), y = getY(), w = getWidth(), h = getHeight();
+//?} else if =1.21.1 {
+/*        @Override
+        protected void renderWidget(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
+            int x = getX(), y = getY(), w = getWidth(), h = getHeight();
+*/
+//?}
             fill(g, x, y, x + w, y + h, 0xFF000000);
             fill(g, x + 1, y + 1, x + w - 1, y + h - 1,
                     !active ? 0x88303030 : selected.getAsBoolean() ? 0xE02A2A32 : isHoveredOrFocused() ? 0xD038383E : 0xB0202026);

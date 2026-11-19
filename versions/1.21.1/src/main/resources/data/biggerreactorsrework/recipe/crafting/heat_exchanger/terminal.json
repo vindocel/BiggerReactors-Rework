@@ -1,0 +1,22 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "CDC",
+    "LLL",
+    "CDC"
+  ],
+  "key": {
+    "C": {
+      "item": "biggerreactorsrework:heat_exchanger_casing"
+    },
+    "L": {
+      "tag": "c:ingots/ludicrite"
+    },
+    "D": {
+      "item": "minecraft:diamond"
+    }
+  },
+  "result": {
+    "id": "biggerreactorsrework:heat_exchanger_terminal"
+  }
+}

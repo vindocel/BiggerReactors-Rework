@@ -3,9 +3,16 @@ package biggerreactorsrework.client.config;
 import biggerreactorsrework.core.config.PackConfiguration;
 import biggerreactorsrework.BiggerReactors;
 
+//? if =26.1.2 || =26.3 {
 import biggerreactorsrework.client.GuiThemes;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.AbstractWidget;
+//?} else if =1.21.1 {
+/*import biggerreactorsrework.client.GuiThemes;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.AbstractWidget;
+*/
+//?}
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.Tooltip;
@@ -21,6 +28,15 @@ import java.util.Objects;
 public class PackConfigScreen extends Screen {
     private record Option(String key, int tab, boolean client, boolean appearance, Object fallback) {}
     private record Row(Option option, int y, AbstractWidget control, Button reset) {}
+    private static final int PREVIEW_WIDTH = 208, PREVIEW_HEIGHT = 117, PREVIEW_SCALE = 2;
+    private static final Map<String, String> PREVIEWS = Map.of(
+            "appearance.dark", "dark_backgrounds",
+            "AlwaysShowTooltips", "material_tooltips",
+            "EnableJEIIntegration", "recipe_viewer",
+            "Turbine.GUI.DeltaMB", "turbine_flow_step",
+            "Turbine.GUI.DeltaMBShift", "turbine_flow_step",
+            "Turbine.GUI.DeltaMBCtrl", "turbine_flow_step",
+            "Turbine.GUI.DeltaMBHCtrlShift", "turbine_flow_step");
     private final Screen parent;
     private final List<Option> options = new ArrayList<>();
     private final Map<String, Object> opened = new LinkedHashMap<>(), draft = new LinkedHashMap<>();
@@ -118,8 +134,8 @@ public class PackConfigScreen extends Screen {
         Button undo = addRenderableWidget(ConfigStyle.button(text("undo"), footerX + half + 4, height - 52,
                 footerWidth - half - 4, 20, button -> restoreCategory(true)));
         undo.setTooltip(Tooltip.create(text("category_actions")));
-        done = addRenderableWidget(ConfigStyle.button(Component.translatable("gui.done"), footerX, height - 28,
-                footerWidth, 20, button -> saveAndClose()));
+        done = addRenderableWidget(Button.builder(Component.translatable("gui.done"), button -> saveAndClose())
+                .bounds(footerX, height - 28, footerWidth, 20).build());
         updateControls();
     }
 
@@ -149,19 +165,41 @@ public class PackConfigScreen extends Screen {
         if (done != null) done.active = !saving && options.stream().noneMatch(option -> editable(option) && errors.containsKey(option.key));
     }
 
+//? if =26.1.2 || =26.3 {
     @Override
     public void extractRenderState(GuiGraphicsExtractor g, int mouseX, int mouseY, float partialTick) {
         if (rebuild) { rebuild = false; rebuildWidgets(); }
+//?} else if =1.21.1 {
+/*    @Override
+    public void render(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
+        if (rebuild) { rebuild = false; rebuildWidgets(); }
+*/
+//?}
         updateControls();
         for (Row row : rows) if (mouseX >= 6 && mouseX < panelX - 6 && mouseY >= row.y && mouseY < row.y + 24
+//? if =26.1.2 || =26.3 {
                 || row.control.isFocused() || row.reset.isFocused()) inspected = row.option.key;
         super.extractRenderState(g, mouseX, mouseY, partialTick);
     }
+//?} else if =1.21.1 {
+/*                || row.control.isFocused() || row.reset.isFocused()) inspected = row.option.key;
+        super.render(g, mouseX, mouseY, partialTick);
+    }
+*/
+//?}
 
+//? if =26.1.2 || =26.3 {
     @Override
     public void extractBackground(GuiGraphicsExtractor g, int mouseX, int mouseY, float partialTick) {
         super.extractBackground(g, mouseX, mouseY, partialTick);
         for (Row row : rows) {
+//?} else if =1.21.1 {
+/*    @Override
+    public void renderBackground(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
+        super.renderBackground(g, mouseX, mouseY, partialTick);
+        for (Row row : rows) {
+*/
+//?}
             boolean focused = Objects.equals(inspected, row.option.key);
             ConfigStyle.fill(g, 6, row.y, barRight, row.y + 22, focused ? 0x99000000 : 0x66000000);
             if (focused && editable(row.option)) ConfigStyle.fill(g, 6, row.y, 8, row.y + 22, ConfigStyle.ACCENT);
@@ -183,7 +221,8 @@ public class PackConfigScreen extends Screen {
             if (!selected.appearance) y = paragraph(g, ConfigSettings.range(selected.key), y + 4, ConfigStyle.MUTED);
             if (scripted(selected)) y = paragraph(g, text("scripted"), y + 4, ConfigStyle.ACCENT);
             else if (!editable(selected) && !selected.client) y = paragraph(g, text("server_read_only"), y + 4, ConfigStyle.MUTED);
-            if (errors.containsKey(selected.key)) paragraph(g, text("invalid_value"), y + 4, 0xFFFF7777);
+            if (errors.containsKey(selected.key)) y = paragraph(g, text("invalid_value"), y + 4, 0xFFFF7777);
+            preview(g, selected.key, y + 8);
         }
         if (!saveError.getString().isEmpty()) paragraph(g, saveError, contentTop + 8, 0xFFFF7777);
         List<Option> current = options.stream().filter(option -> option.tab == tab).toList();
@@ -192,14 +231,41 @@ public class PackConfigScreen extends Screen {
             int top = contentTop + (track - thumb) * scroll / Math.max(1, current.size() - visibleRows);
             ConfigStyle.fill(g, panelX - 9, top, panelX - 7, top + thumb, 0xFFBFBFBF);
         }
+//? if =26.1.2 || =26.3 {
     }
     private int paragraph(GuiGraphicsExtractor g, Component value, int y, int color) {
         for (var line : font.split(value, panelWidth - 16)) {
+//?} else if =1.21.1 {
+/*    }
+    private int paragraph(GuiGraphics g, Component value, int y, int color) {
+        for (var line : font.split(value, panelWidth - 16)) {
+*/
+//?}
             if (y + 9 > height - 60) break;
             ConfigPaint.text(g, font, line, panelX + 8, y, color, false);
             y += 10;
         }
         return y;
+    }
+
+//? if =26.1.2 || =26.3 {
+    private void preview(GuiGraphicsExtractor g, String key, int y) {
+//?} else if =1.21.1 {
+/*    private void preview(GuiGraphics g, String key, int y) {
+*/
+//?}
+        String file = PREVIEWS.get(key);
+        int x = panelX + 8, w = Math.min(PREVIEW_WIDTH, panelWidth - 16), h = w * PREVIEW_HEIGHT / PREVIEW_WIDTH;
+        if (file == null || y + h + 1 > height - 60) return;
+        ConfigStyle.fill(g, x - 1, y - 1, x + w + 1, y + h + 1, 0xFF3C5A60);
+        String path = "textures/gui/config/" + file + ".png";
+//? if =26.1.2 || =26.3 {
+        g.blit(net.minecraft.resources.Identifier.fromNamespaceAndPath(BiggerReactors.modid, path), x, y, x + w, y + h, 0, 1, 0, 1);
+//?} else if =1.21.1 {
+/*        g.blit(net.minecraft.resources.ResourceLocation.fromNamespaceAndPath(BiggerReactors.modid, path), x, y, w, h, 0, 0,
+                PREVIEW_WIDTH * PREVIEW_SCALE, PREVIEW_HEIGHT * PREVIEW_SCALE, PREVIEW_WIDTH * PREVIEW_SCALE, PREVIEW_HEIGHT * PREVIEW_SCALE);
+*/
+//?}
     }
 
     @Override

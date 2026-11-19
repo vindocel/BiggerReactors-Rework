@@ -2,6 +2,7 @@ package biggerreactorsrework.multiblocks.heatexchanger.client;
 
 import biggerreactorsrework.client.GuiTheme;
 
+//? if =26.1.2 || =26.3 {
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.network.chat.Component;
@@ -9,6 +10,18 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.entity.player.Inventory;
 import biggerreactorsrework.BiggerReactors;
+//?} else if =1.21.1 {
+/*import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.world.entity.player.Inventory;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import biggerreactorsrework.BiggerReactors;
+*/
+//?}
 import biggerreactorsrework.client.Biselector;
 import biggerreactorsrework.client.SelectorColors;
 import biggerreactorsrework.client.GuiArt;
@@ -20,9 +33,17 @@ import biggerreactorsrework.multiblocks.reactor.containers.ReactorCoolantPortCon
 import biggerreactorsrework.core.client.gui.elements.InteractiveElement;
 import biggerreactorsrework.core.client.gui.screens.ModScreen;
 
+//? if =26.1.2 || =26.3 {
 import javax.annotation.Nonnull;
 
 public class HeatExchangerFluidPortScreen extends ModScreen<HeatExchangerFluidPortContainer> {
+//?} else if =1.21.1 {
+/*import javax.annotation.Nonnull;
+
+@OnlyIn(Dist.CLIENT)
+public class HeatExchangerFluidPortScreen extends ModScreen<HeatExchangerFluidPortContainer> {
+*/
+//?}
 
 
     private HeatExchangerFluidPortState heatExchangerFluidPortState;
@@ -115,14 +136,22 @@ public class HeatExchangerFluidPortScreen extends ModScreen<HeatExchangerFluidPo
      * @param mouseY       The y position of the mouse.
      * @param partialTicks Partial ticks.
      */
+//? if =26.1.2 || =26.3 {
     @Override
     public void extractRenderState(@Nonnull GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTicks) {
         String recoveryKey = heatExchangerFluidPortState.condenser
+//?} else if =1.21.1 {
+/*    @Override
+    public void render(@Nonnull GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
+        String recoveryKey = heatExchangerFluidPortState.condenser
+*/
+//?}
                 ? "thermal.biggerreactorsrework.recover_hot_coolant"
                 : "thermal.biggerreactorsrework.recover_water";
         if (showRecovery()) {
             maintenance.tooltip = Component.translatable(recoveryKey + "_tooltip");
             maintenance.enable();
+//? if =26.1.2 || =26.3 {
         } else maintenance.disable();
         super.extractRenderState(graphics, mouseX, mouseY, partialTicks);
 
@@ -134,8 +163,23 @@ public class HeatExchangerFluidPortScreen extends ModScreen<HeatExchangerFluidPo
             // Text for when connected to an evaporator.
             graphics.text(this.getFont(), Component.translatable("screen.biggerreactorsrework.heat_exchanger_fluid_port.channel_type.evaporator").getString(), this.getLeftPos() + 8, this.getTopPos() + 22, GuiTheme.textColor(), false);
         }
+//?} else if =1.21.1 {
+/*        } else maintenance.disable();
+        super.render(graphics, mouseX, mouseY, partialTicks);
+
+        // Render text to show what channel this is connected to.
+        if (heatExchangerFluidPortState.condenser) {
+            // Text for when connected to a condenser:
+            graphics.drawString(this.getFont(), Component.translatable("screen.biggerreactorsrework.heat_exchanger_fluid_port.channel_type.condenser").getString(), this.getGuiLeft() + 8, this.getGuiTop() + 22, GuiTheme.textColor(), false);
+        } else {
+            // Text for when connected to an evaporator.
+            graphics.drawString(this.getFont(), Component.translatable("screen.biggerreactorsrework.heat_exchanger_fluid_port.channel_type.evaporator").getString(), this.getGuiLeft() + 8, this.getGuiTop() + 22, GuiTheme.textColor(), false);
+        }
+*/
+//?}
 
         String circuit = heatExchangerFluidPortState.condenser ? "coolant_" : "";
+//? if =26.1.2 || =26.3 {
         String direction = heatExchangerFluidPortState.direction ? "input" : "output";
         graphics.text(getFont(), Component.translatable("screen.biggerreactorsrework.heat_exchanger_fluid_port.direction_toggle."
                 + circuit + direction), getLeftPos() + 42, getTopPos() + 37, GuiTheme.textColor(), false);
@@ -144,6 +188,17 @@ public class HeatExchangerFluidPortScreen extends ModScreen<HeatExchangerFluidPo
         graphics.text(this.getFont(), Component.translatable("screen.biggerreactorsrework.heat_exchanger_fluid_port.manual_dump").getString(), this.getLeftPos() + 26, this.getTopPos() + 53, GuiTheme.textColor(), false);
         if (showRecovery()) GuiArt.scrollingText(graphics,getFont(),Component.translatable(recoveryKey).getString(),getLeftPos()+42,getTopPos()+70,126,GuiTheme.textColor());
     }
+//?} else if =1.21.1 {
+/*        String direction = heatExchangerFluidPortState.direction ? "input" : "output";
+        graphics.drawString(getFont(), Component.translatable("screen.biggerreactorsrework.heat_exchanger_fluid_port.direction_toggle."
+                + circuit + direction), getGuiLeft() + 42, getGuiTop() + 37, GuiTheme.textColor(), false);
+
+        // Render text for manual tank eject:
+        graphics.drawString(this.getFont(), Component.translatable("screen.biggerreactorsrework.heat_exchanger_fluid_port.manual_dump").getString(), this.getGuiLeft() + 26, this.getGuiTop() + 53, GuiTheme.textColor(), false);
+        if (showRecovery()) GuiArt.scrollingText(graphics,getFont(),Component.translatable(recoveryKey).getString(),getGuiLeft()+42,getGuiTop()+70,126,GuiTheme.textColor());
+    }
+*/
+//?}
 
     @Override
     protected GuiFrame frame() {

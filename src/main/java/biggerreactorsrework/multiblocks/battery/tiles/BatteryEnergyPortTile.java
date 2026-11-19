@@ -11,8 +11,15 @@ import biggerreactorsrework.core.util.BlockStates;
 import biggerreactorsrework.multiblocks.battery.blocks.BatteryEnergyPort;
 import biggerreactorsrework.multiblocks.battery.blocks.BatteryEnergyPort.PortDirection;
 import biggerreactorsrework.multiblocks.battery.containers.BatteryEnergyPortContainer;
+//? if =26.1.2 || =26.3 {
 import biggerreactorsrework.multiblocks.battery.state.BatteryEnergyPortState;
 import net.minecraft.core.BlockPos;
+//?} else if =1.21.1 {
+/*import biggerreactorsrework.multiblocks.battery.state.BatteryEnergyPortState;
+import net.minecraft.MethodsReturnNonnullByDefault;
+import net.minecraft.core.BlockPos;
+*/
+//?}
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -28,8 +35,15 @@ import javax.annotation.ParametersAreNonnullByDefault;
 
 import static biggerreactorsrework.multiblocks.battery.blocks.BatteryEnergyPort.PortDirection.*;
 
+//? if =26.1.2 || =26.3 {
 @ParametersAreNonnullByDefault
 public class BatteryEnergyPortTile extends BatteryBaseTile implements IEnergyTile, IEnergyHandler, IEventMultiblock.AssemblyStateTransition, MenuProvider, IHasUpdatableState<BatteryEnergyPortState> {
+//?} else if =1.21.1 {
+/*@ParametersAreNonnullByDefault
+@MethodsReturnNonnullByDefault
+public class BatteryEnergyPortTile extends BatteryBaseTile implements IEnergyTile, IEnergyHandler, IEventMultiblock.AssemblyStateTransition, MenuProvider, IHasUpdatableState<BatteryEnergyPortState> {
+*/
+//?}
 
     @RegisterTile("battery_energy_port")
     public static final BlockEntityType.BlockEntitySupplier<BatteryEnergyPortTile> SUPPLIER = new RegisterTile.Producer<>(BatteryEnergyPortTile::new);
@@ -68,6 +82,7 @@ public class BatteryEnergyPortTile extends BatteryBaseTile implements IEnergyTil
 
     @Override
     public IEnergyHandler energyHandler(Direction direction) {
+//? if =26.1.2 || =26.3 {
         return this;
     }
 
@@ -82,6 +97,11 @@ public class BatteryEnergyPortTile extends BatteryBaseTile implements IEnergyTil
             controller().restoreTransferState(state);
         }
     }
+//?} else if =1.21.1 {
+/*        return this;
+    }
+*/
+//?}
 
     @Override
     public long insertEnergy(long maxInsert, boolean simulate) {
@@ -146,10 +166,18 @@ public class BatteryEnergyPortTile extends BatteryBaseTile implements IEnergyTil
     @Override
     protected void readNBT(CompoundTag compound) {
         super.readNBT(compound);
+//? if =26.1.2 || =26.3 {
         if (compound.contains("direction")) {
             // Modified 2026-10-30: tolerate malformed direction metadata.
             direction = biggerreactorsrework.core.util.SavedValues.enumValue(PortDirection.class, compound.getStringOr("direction", ""), PortDirection.INLET);
         }
+//?} else if =1.21.1 {
+/*        if (compound.contains("direction")) {
+            // Modified 2026-10-30: tolerate malformed direction metadata.
+            direction = biggerreactorsrework.core.util.SavedValues.enumValue(PortDirection.class, compound.getString("direction"), PortDirection.INLET);
+        }
+*/
+//?}
     }
 
     @Override

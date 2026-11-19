@@ -5,9 +5,15 @@ import biggerreactorsrework.fluids.LiquidObsidian;
 import biggerreactorsrework.registries.ModParticles;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.Particle;
+//? if =26.1.2 || =26.3 {
 import net.minecraft.client.particle.ParticleEngine;
 import net.minecraft.client.particle.SingleQuadParticle;
 import net.minecraft.core.BlockPos;
+//?} else if =1.21.1 {
+/*import net.minecraft.client.particle.ParticleEngine;
+import net.minecraft.core.BlockPos;
+*/
+//?}
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import org.spongepowered.asm.mixin.Mixin;
@@ -36,9 +42,16 @@ abstract class CoolantParticleMixin {
         if (!frozen && type != LiquidObsidian.INSTANCE.getFluidType()) return;
         var replacement = options == ParticleTypes.BUBBLE ? ModParticles.COOLANT_BUBBLE.get()
                 : options == ParticleTypes.BUBBLE_POP ? ModParticles.COOLANT_BUBBLE_POP.get() : ModParticles.COOLANT_SPLASH.get();
+//? if =26.1.2 || =26.3 {
         var engine = (ParticleEngine) (Object) this;
         if (engine.createParticle(replacement, x, y, z, vx, vy, vz) instanceof SingleQuadParticle particle) {
             if (frozen) particle.setColor(0.04F, 0.94F, 0.85F);
+//?} else if =1.21.1 {
+/*        var engine = (ParticleEngine) (Object) this;
+        if (engine.createParticle(replacement, x, y, z, vx, vy, vz) instanceof Particle particle) {
+            if (frozen) particle.setColor(0.04F, 0.94F, 0.85F);
+*/
+//?}
             else particle.setColor(0.48F, 0.29F, 0.65F);
             callback.setReturnValue(particle);
         }

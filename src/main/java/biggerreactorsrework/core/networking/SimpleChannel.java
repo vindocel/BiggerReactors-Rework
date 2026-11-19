@@ -8,9 +8,16 @@ import biggerreactorsrework.core.util.NonnullDefault;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
+//? if =26.1.2 || =26.3 {
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
+//?} else if =1.21.1 {
+/*import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
+*/
+//?}
 import net.neoforged.fml.ModLoadingContext;
 import net.neoforged.neoforge.network.PacketDistributor;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
@@ -38,9 +45,16 @@ public class SimpleChannel {
 
     private static void register(final RegisterPayloadHandlersEvent event) {
         final var registrar = event.registrar(PROTOCOL_VERSION);
+//? if =26.1.2 || =26.3 {
         for (var channel : channelsToRegister) {
             registrar.playBidirectional(channel.type, channel.codec, channel::handle, channel::handle);
         }
+//?} else if =1.21.1 {
+/*        for (var channel : channelsToRegister) {
+            registrar.playBidirectional(channel.type, channel.codec, channel::handle);
+        }
+*/
+//?}
     }
 
     @OnModLoad
@@ -53,10 +67,18 @@ public class SimpleChannel {
     @Nullable
     private final BiConsumer<DataCompound, IPayloadContext> clientCallback;
     @Nullable
+//? if =26.1.2 || =26.3 {
     private final BiConsumer<DataCompound, IPayloadContext> serverCallback;
 
     public SimpleChannel(Identifier id, @Nullable BiConsumer<DataCompound, IPayloadContext> clientCallback, @Nullable BiConsumer<DataCompound, IPayloadContext> serverCallback) {
         this.type = new CustomPacketPayload.Type<>(id);
+//?} else if =1.21.1 {
+/*    private final BiConsumer<DataCompound, IPayloadContext> serverCallback;
+
+    public SimpleChannel(ResourceLocation id, @Nullable BiConsumer<DataCompound, IPayloadContext> clientCallback, @Nullable BiConsumer<DataCompound, IPayloadContext> serverCallback) {
+        this.type = new CustomPacketPayload.Type<>(id);
+*/
+//?}
         this.codec = StreamCodec.of(
                 (buf, packet) -> buf.writeByteArray(packet.compound.toROBN().toByteArray()),
                 buf -> new CompoundPacket(type, new DataCompound(buf.readByteArray(MAX_PAYLOAD_BYTES)))
@@ -74,9 +96,16 @@ public class SimpleChannel {
         ctx.enqueueWork(() -> callbackToUse.accept(packet.compound, ctx));
     }
 
+//? if =26.1.2 || =26.3 {
     public void sendToServer(DataCompound compound) {
         net.neoforged.neoforge.client.network.ClientPacketDistributor.sendToServer(new CompoundPacket(type, compound));
     }
+//?} else if =1.21.1 {
+/*    public void sendToServer(DataCompound compound) {
+        PacketDistributor.sendToServer(new CompoundPacket(type, compound));
+    }
+*/
+//?}
 
     public void sendToPlayer(ServerPlayer serverPlayer, DataCompound compound) {
         PacketDistributor.sendToPlayer(serverPlayer, new CompoundPacket(type, compound));

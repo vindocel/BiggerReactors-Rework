@@ -4,9 +4,16 @@ package biggerreactorsrework.core.client.gui;
 
 import biggerreactorsrework.core.networking.SimpleChannel;
 import biggerreactorsrework.core.registry.OnModLoad;
+//? if =26.1.2 || =26.3 {
 import biggerreactorsrework.core.serialization.DataCompound;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
+//?} else if =1.21.1 {
+/*import biggerreactorsrework.core.serialization.DataCompound;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
+*/
+//?}
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
@@ -76,9 +83,16 @@ public class GuiSync {
         Map<?, ?> write();
     }
 
+//? if =26.1.2 || =26.3 {
     public static final SimpleChannel INSTANCE = new SimpleChannel(
             Identifier.fromNamespaceAndPath(modid, "menu_sync"),
             GuiSync::clientHandler, GuiSync::serverHandler
+//?} else if =1.21.1 {
+/*    public static final SimpleChannel INSTANCE = new SimpleChannel(
+            ResourceLocation.fromNamespaceAndPath(modid, "menu_sync"),
+            GuiSync::clientHandler, GuiSync::serverHandler
+*/
+//?}
     );
 
     private static int ticksUntilSync = 0;

@@ -99,9 +99,16 @@ public final class GuiThemes {
             world = "local:" + mc.getSingleplayerServer().getWorldPath(LevelResource.ROOT).toAbsolutePath().normalize();
         } else if (mc.getCurrentServer() != null) {
             world = "server:" + mc.getCurrentServer().ip;
+//? if =26.1.2 || =26.3 {
         }
         String dimension = mc.level == null ? "unknown" : mc.level.dimension().identifier().toString();
         return world + "|" + dimension + "|" + pos.getX() + "," + pos.getY() + "," + pos.getZ();
+//?} else if =1.21.1 {
+/*        }
+        String dimension = mc.level == null ? "unknown" : mc.level.dimension().location().toString();
+        return world + "|" + dimension + "|" + pos.getX() + "," + pos.getY() + "," + pos.getZ();
+*/
+//?}
     }
 
     private static void save() {

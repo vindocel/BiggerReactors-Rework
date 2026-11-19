@@ -3,6 +3,7 @@ package biggerreactorsrework.client.guide;
 import biggerreactorsrework.client.deps.RecipeViewers;
 import java.util.ArrayList;
 import java.util.List;
+//? if =26.1.2 || =26.3 {
 import java.util.function.Supplier;
 import net.minecraft.util.Util;
 import net.minecraft.client.Minecraft;
@@ -10,6 +11,16 @@ import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.FormattedCharSequence;
+//?} else if =1.21.1 {
+/*import java.util.function.Supplier;
+import net.minecraft.Util;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.FormattedCharSequence;
+*/
+//?}
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.Recipe;
@@ -33,11 +44,20 @@ final class GuideElements {
     static final int LINE = 10;
 
     private GuideElements() {
+//? if =26.1.2 || =26.3 {
     }
 
     /** Pixel arrow shared by crafting and process diagrams; independent of font glyphs. */
     static void arrow(GuiGraphicsExtractor g, int x, int y) {
         g.fill(x, y + 3, x + 10, y + 5, HEADING);
+//?} else if =1.21.1 {
+/*    }
+
+    /^* Pixel arrow shared by crafting and process diagrams; independent of font glyphs. ^/
+    static void arrow(GuiGraphics g, int x, int y) {
+        g.fill(x, y + 3, x + 10, y + 5, HEADING);
+*/
+//?}
         for (int step = 0; step < 4; step++) {
             g.fill(x + 7 + step, y + step, x + 8 + step, y + 8 - step, HEADING);
         }
@@ -50,9 +70,16 @@ final class GuideElements {
             return 15;
         }
 
+//? if =26.1.2 || =26.3 {
         @Override
         public void render(GuideScreen screen, GuiGraphicsExtractor g, int x, int y, int width, int mouseX, int mouseY) {
             screen.fittedText(g, text, x, y + 2, width, HEADING);
+//?} else if =1.21.1 {
+/*        @Override
+        public void render(GuideScreen screen, GuiGraphics g, int x, int y, int width, int mouseX, int mouseY) {
+            screen.fittedText(g, text, x, y + 2, width, HEADING);
+*/
+//?}
             g.fill(x, y + 12, x + width, y + 13, RULE);
         }
     }
@@ -64,10 +91,18 @@ final class GuideElements {
             return 24;
         }
 
+//? if =26.1.2 || =26.3 {
         @Override
         public void render(GuideScreen screen, GuiGraphicsExtractor g, int x, int y, int width, int mouseX, int mouseY) {
             g.item(icon.get(), x, y + 1);
             screen.fittedText(g, title, x + 20, y + 5, width - 20, HEADING);
+//?} else if =1.21.1 {
+/*        @Override
+        public void render(GuideScreen screen, GuiGraphics g, int x, int y, int width, int mouseX, int mouseY) {
+            g.renderItem(icon.get(), x, y + 1);
+            screen.fittedText(g, title, x + 20, y + 5, width - 20, HEADING);
+*/
+//?}
             g.fill(x, y + 20, x + width, y + 21, RULE);
             g.fill(x, y + 22, x + width, y + 23, RULE);
         }
@@ -99,9 +134,16 @@ final class GuideElements {
             return lines(screen, width).size() * LINE;
         }
 
+//? if =26.1.2 || =26.3 {
         @Override
         public void render(GuideScreen screen, GuiGraphicsExtractor g, int x, int y, int width, int mouseX, int mouseY) {
             lines(screen, width);
+//?} else if =1.21.1 {
+/*        @Override
+        public void render(GuideScreen screen, GuiGraphics g, int x, int y, int width, int mouseX, int mouseY) {
+            lines(screen, width);
+*/
+//?}
             lines.render(screen, g, x, y, width, mouseX, mouseY);
         }
     }
@@ -127,9 +169,16 @@ final class GuideElements {
             return lines.size() * LINE;
         }
 
+//? if =26.1.2 || =26.3 {
         @Override
         public void render(GuideScreen screen, GuiGraphicsExtractor g, int x, int y, int width, int mouseX, int mouseY) {
             if (spans == null) {
+//?} else if =1.21.1 {
+/*        @Override
+        public void render(GuideScreen screen, GuiGraphics g, int x, int y, int width, int mouseX, int mouseY) {
+            if (spans == null) {
+*/
+//?}
                 spans = new ArrayList<>(lines.size());
                 for (FormattedCharSequence line : lines) {
                     spans.add(GuideReferences.spans(screen.font(), line));
@@ -142,9 +191,16 @@ final class GuideElements {
                         g.fill(x + span.start() - 1, ly - 1, x + span.end() + 1, ly + 10, TINT);
                         screen.hoverReference(span.id());
                     }
+//? if =26.1.2 || =26.3 {
                 }
                 g.text(screen.font(), lines.get(i), x, ly, BODY, false);
                 for (GuideReferences.Span span : spans.get(i)) {
+//?} else if =1.21.1 {
+/*                }
+                g.drawString(screen.font(), lines.get(i), x, ly, BODY, false);
+                for (GuideReferences.Span span : spans.get(i)) {
+*/
+//?}
                     for (int px = span.start(); px < span.end() - 1; px += 2) {
                         g.fill(x + px, ly + 9, x + px + 1, ly + 10, REFERENCE);
                     }
@@ -176,27 +232,32 @@ final class GuideElements {
             return 15 + body.height(screen, width - 10) + 4;
         }
 
+//? if =26.1.2 || =26.3 {
         @Override
         public void render(GuideScreen screen, GuiGraphicsExtractor g, int x, int y, int width, int mouseX, int mouseY) {
             int h = height(screen, width);
+//?} else if =1.21.1 {
+/*        @Override
+        public void render(GuideScreen screen, GuiGraphics g, int x, int y, int width, int mouseX, int mouseY) {
+            int h = height(screen, width);
+*/
+//?}
             g.fill(x, y, x + width, y + h, attention ? 0x38D4AC45 : 0x1E000000 | (accent & 0x00FFFFFF));
             g.fill(x, y, x + 2, y + h, accent);
             if (attention) {
-                // Added 2026-10-29: a native pixel warning symbol, independent of font glyphs and external assets.
-                for (int row = 0; row < 12; row++) {
-                    int half = (row + 1) / 2;
-                    g.fill(x + 12 - half, y + 2 + row, x + 13 + half, y + 3 + row, accent);
-                    if (row >= 2 && row < 11) {
-                        int inner = (row - 1) / 2;
-                        g.fill(x + 12 - inner, y + 2 + row, x + 13 + inner, y + 3 + row, 0xFFE2C365);
-                    }
-                }
-                g.fill(x + 11, y + 6, x + 13, y + 10, BODY);
-                g.fill(x + 11, y + 11, x + 13, y + 12, BODY);
+                // Modified 2026-11-18: the warning symbol is an image file.
+                biggerreactorsrework.client.GuiIcon.GUIDE_WARNING.draw(g, x + 6, y + 2);
             }
+//? if =26.1.2 || =26.3 {
             if (attention) screen.fittedText(g, title, x + 23, y + 4, width - 27, accent);
             else g.text(screen.font(), title, x + 6, y + 4, accent, false);
             body.render(screen, g, x + 6, y + 15, width - 10, mouseX, mouseY);
+//?} else if =1.21.1 {
+/*            if (attention) screen.fittedText(g, title, x + 23, y + 4, width - 27, accent);
+            else g.drawString(screen.font(), title, x + 6, y + 4, accent, false);
+            body.render(screen, g, x + 6, y + 15, width - 10, mouseX, mouseY);
+*/
+//?}
         }
     }
 
@@ -230,13 +291,27 @@ final class GuideElements {
             return 15 + summary.height(screen, width - 10) + 3 + BUTTON_H + 4;
         }
 
+//? if =26.1.2 || =26.3 {
         @Override
         public void render(GuideScreen screen, GuiGraphicsExtractor g, int x, int y, int width, int mouseX, int mouseY) {
             int h = height(screen, width);
+//?} else if =1.21.1 {
+/*        @Override
+        public void render(GuideScreen screen, GuiGraphics g, int x, int y, int width, int mouseX, int mouseY) {
+            int h = height(screen, width);
+*/
+//?}
             g.fill(x, y, x + width, y + h, TINT);
+//? if =26.1.2 || =26.3 {
             g.fill(x, y, x + 2, y + h, HEADING);
             g.text(screen.font(), title, x + 6, y + 4, HEADING, false);
             summary.render(screen, g, x + 6, y + 15, width - 10, mouseX, mouseY);
+//?} else if =1.21.1 {
+/*            g.fill(x, y, x + 2, y + h, HEADING);
+            g.drawString(screen.font(), title, x + 6, y + 4, HEADING, false);
+            summary.render(screen, g, x + 6, y + 15, width - 10, mouseX, mouseY);
+*/
+//?}
             screen.textButton(g, x + 6, y + h - BUTTON_H - 4, buttonWidth(screen, width), BUTTON_H, label(), mouseX, mouseY);
         }
 
@@ -266,9 +341,16 @@ final class GuideElements {
             return Math.max(20, 11 + description.height(screen, width - 22)) + 2;
         }
 
+//? if =26.1.2 || =26.3 {
         @Override
         public void render(GuideScreen screen, GuiGraphicsExtractor g, int x, int y, int width, int mouseX, int mouseY) {
             ItemStack item = stack.get();
+//?} else if =1.21.1 {
+/*        @Override
+        public void render(GuideScreen screen, GuiGraphics g, int x, int y, int width, int mouseX, int mouseY) {
+            ItemStack item = stack.get();
+*/
+//?}
             screen.itemSlot(g, item, x, y, mouseX, mouseY);
             screen.fittedText(g, item.getHoverName(), x + 22, y + 1, width - 22, HEADING);
             description.render(screen, g, x + 22, y + 12, width - 22, mouseX, mouseY);
@@ -295,9 +377,16 @@ final class GuideElements {
             return ((count + perRow(width) - 1) / perRow(width)) * 20;
         }
 
+//? if =26.1.2 || =26.3 {
         @Override
         public void render(GuideScreen screen, GuiGraphicsExtractor g, int x, int y, int width, int mouseX, int mouseY) {
             List<ItemStack> list = items.get();
+//?} else if =1.21.1 {
+/*        @Override
+        public void render(GuideScreen screen, GuiGraphics g, int x, int y, int width, int mouseX, int mouseY) {
+            List<ItemStack> list = items.get();
+*/
+//?}
             int per = perRow(width);
             for (int i = 0; i < list.size() + fluids.size(); i++) {
                 int sx = x + (i % per) * 20;
@@ -309,38 +398,77 @@ final class GuideElements {
                 }
             }
         }
+//? if =26.1.2 || =26.3 {
     }
 
     /** A crafting table recipe (shaped or shapeless) read from the recipe manager, tag ingredients cycling. */
     record Crafting(Identifier id) implements GuideElement {
         @Override
+//?} else if =1.21.1 {
+/*    }
+
+    /^* A crafting table recipe (shaped or shapeless) read from the recipe manager, tag ingredients cycling. ^/
+    record Crafting(ResourceLocation id) implements GuideElement {
+        @Override
+*/
+//?}
         public int height(GuideScreen screen, int width) {
             return 80;
         }
 
+//? if =26.1.2 || =26.3 {
         @Override
         public void render(GuideScreen screen, GuiGraphicsExtractor g, int x, int y, int width, int mouseX, int mouseY) {
             Level level = Minecraft.getInstance().level;
             RecipeHolder<?> holder = level == null ? null : biggerreactorsrework.machine.recipe.RecipeAccess.byKey(level, net.minecraft.resources.ResourceKey.create(net.minecraft.core.registries.Registries.RECIPE, id)).orElse(null);
             if (holder == null) {
+//?} else if =1.21.1 {
+/*        @Override
+        public void render(GuideScreen screen, GuiGraphics g, int x, int y, int width, int mouseX, int mouseY) {
+            Level level = Minecraft.getInstance().level;
+            RecipeHolder<?> holder = level == null ? null : level.getRecipeManager().byKey(id).orElse(null);
+            if (holder == null) {
+*/
+//?}
                 screen.fixedText(g, Component.translatable("guide.biggerreactorsrework.recipe_missing"), x, y + 4, width, MUTED);
                 return;
             }
+//? if =26.1.2 || =26.3 {
             Recipe<?> recipe = holder.value();
             ItemStack result = biggerreactorsrework.machine.recipe.RecipeAccess.result(level.registryAccess(), recipe);
             Component name = result.getCount() > 1
+//?} else if =1.21.1 {
+/*            Recipe<?> recipe = holder.value();
+            ItemStack result = recipe.getResultItem(level.registryAccess());
+            Component name = result.getCount() > 1
+*/
+//?}
                     ? Component.literal(result.getCount() + "× ").append(result.getHoverName()) : result.getHoverName();
             screen.fixedText(g, name, x, y + 1, width, HEADING);
+//? if =26.1.2 || =26.3 {
             int gridY = y + 11;
             List<java.util.Optional<Ingredient>> ingredients = biggerreactorsrework.machine.recipe.RecipeAccess.grid(recipe);
             int recipeW = recipe instanceof ShapedRecipe shaped ? shaped.getWidth() : 3;
+//?} else if =1.21.1 {
+/*            int gridY = y + 11;
+            List<Ingredient> ingredients = recipe.getIngredients();
+            int recipeW = recipe instanceof ShapedRecipe shaped ? shaped.getWidth() : 3;
+*/
+//?}
             for (int row = 0; row < 3; row++) {
                 for (int col = 0; col < 3; col++) {
                     int index = row * recipeW + col;
                     ItemStack shown = ItemStack.EMPTY;
+//? if =26.1.2 || =26.3 {
                     if (col < recipeW && index < ingredients.size()) {
                         shown = ingredients.get(index).isPresent() ? cycle(ingredients.get(index).get()) : ItemStack.EMPTY;
                     }
+//?} else if =1.21.1 {
+/*                    if (col < recipeW && index < ingredients.size()) {
+                        shown = cycle(ingredients.get(index));
+                    }
+*/
+//?}
                     screen.itemSlot(g, shown, x + col * 18, gridY + row * 18, mouseX, mouseY);
                 }
             }
@@ -352,9 +480,16 @@ final class GuideElements {
             screen.fixedText(g, kind, x, y + 69, width, MUTED);
         }
 
+//? if =26.1.2 || =26.3 {
         private static ItemStack cycle(Ingredient ingredient) {
             ItemStack[] options = biggerreactorsrework.machine.recipe.RecipeAccess.stacks(ingredient);
             if (options.length == 0) {
+//?} else if =1.21.1 {
+/*        private static ItemStack cycle(Ingredient ingredient) {
+            ItemStack[] options = ingredient.getItems();
+            if (options.length == 0) {
+*/
+//?}
                 return ItemStack.EMPTY;
             }
             return options[(int) ((Util.getMillis() / 1000) % options.length)];
@@ -363,11 +498,20 @@ final class GuideElements {
 
     /** Opens machine recipe categories in EMI / JEI; hidden when no viewer is installed. */
     static final class ViewerButton implements GuideElement {
+//? if =26.1.2 || =26.3 {
         private final Component label;
         private final Identifier[] categories;
 
         ViewerButton(Component label, Identifier... categories) {
             this.label = label;
+//?} else if =1.21.1 {
+/*        private final Component label;
+        private final ResourceLocation[] categories;
+
+        ViewerButton(Component label, ResourceLocation... categories) {
+            this.label = label;
+*/
+//?}
             this.categories = categories;
         }
 
@@ -376,9 +520,16 @@ final class GuideElements {
             return RecipeViewers.available() ? 16 : 0;
         }
 
+//? if =26.1.2 || =26.3 {
         @Override
         public void render(GuideScreen screen, GuiGraphicsExtractor g, int x, int y, int width, int mouseX, int mouseY) {
             if (RecipeViewers.available()) {
+//?} else if =1.21.1 {
+/*        @Override
+        public void render(GuideScreen screen, GuiGraphics g, int x, int y, int width, int mouseX, int mouseY) {
+            if (RecipeViewers.available()) {
+*/
+//?}
                 screen.textButton(g, x, y, buttonWidth(screen, width), 15, label, mouseX, mouseY);
             }
         }
@@ -457,9 +608,16 @@ final class GuideElements {
             return (rows.get().size() + 1) * ROW + 3;
         }
 
+//? if =26.1.2 || =26.3 {
         @Override
         public void render(GuideScreen screen, GuiGraphicsExtractor g, int x, int y, int width, int mouseX, int mouseY) {
             int[] starts = new int[columns.length + 1];
+//?} else if =1.21.1 {
+/*        @Override
+        public void render(GuideScreen screen, GuiGraphics g, int x, int y, int width, int mouseX, int mouseY) {
+            int[] starts = new int[columns.length + 1];
+*/
+//?}
             float total = 0;
             for (float c : columns) {
                 total += c;
@@ -504,8 +662,15 @@ final class GuideElements {
             return size;
         }
 
+//? if =26.1.2 || =26.3 {
         @Override
         public void render(GuideScreen screen, GuiGraphicsExtractor g, int x, int y, int width, int mouseX, int mouseY) {
         }
+//?} else if =1.21.1 {
+/*        @Override
+        public void render(GuideScreen screen, GuiGraphics g, int x, int y, int width, int mouseX, int mouseY) {
+        }
+*/
+//?}
     }
 }

@@ -1,24 +1,39 @@
+//? if =26.1.2 || =26.3 {
 package biggerreactorsrework.core.util;
 
 import net.minecraft.core.BlockPos;
+//?} else if =1.21.1 {
+/*package biggerreactorsrework.core.util;
+
+import net.minecraft.MethodsReturnNonnullByDefault;
+import net.minecraft.core.BlockPos;
+*/
+//?}
 
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.Objects;
 import java.util.TreeSet;
 import java.util.function.Function;
 
+//? if =26.1.2 || =26.3 {
 @ParametersAreNonnullByDefault
 public class AStarList<TileType> {
-    
+//?} else if =1.21.1 {
+/*@ParametersAreNonnullByDefault
+@MethodsReturnNonnullByDefault
+public class AStarList<TileType> {
+*/
+//?}
+
     TreeSet<TileType> targets = new TreeSet<>(this::orderingFunction);
     TreeSet<TileType> nodeSet = new TreeSet<>(this::orderingFunction);
-    
+
     final Function<TileType, BlockPos> posFunc;
-    
+
     public AStarList(Function<TileType, BlockPos> posFunc){
         this.posFunc = posFunc;
     }
-    
+
     private int orderingFunction(TileType a, TileType b) {
         if(targets.isEmpty()){
             return 0;
@@ -30,7 +45,7 @@ public class AStarList<TileType> {
         double bDistance = bPos.distSqr(target);
         return aDistance < bDistance ? -1 : (bDistance == aDistance ? Integer.compare(a.hashCode(), b.hashCode()) : 1);
     }
-    
+
     public void addTarget(TileType target) {
         if (nodeSet.isEmpty()) {
             nodeSet.add(target);
@@ -38,20 +53,20 @@ public class AStarList<TileType> {
             targets.add(target);
         }
     }
-    
+
     public void addNode(TileType node) {
         targets.remove(node);
         nodeSet.add(node);
     }
-    
+
     public TileType nextNode() {
         return Objects.requireNonNull(nodeSet.pollFirst());
     }
-    
+
     public boolean done() {
         return targets.isEmpty() || nodeSet.isEmpty();
     }
-    
+
     public boolean foundAll() {
         return targets.isEmpty();
     }

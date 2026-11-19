@@ -1,5 +1,6 @@
 package biggerreactorsrework.multiblocks.reactor.client;
 
+//? if =26.1.2 || =26.3 {
 import biggerreactorsrework.client.GuiTheme;
 
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -8,6 +9,19 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.entity.player.Inventory;
 import biggerreactorsrework.BiggerReactors;
+//?} else if =1.21.1 {
+/*import biggerreactorsrework.client.GuiTheme;
+
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.world.entity.player.Inventory;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import biggerreactorsrework.BiggerReactors;
+*/
+//?}
 import biggerreactorsrework.client.Biselector;
 import biggerreactorsrework.client.SelectorColors;
 import biggerreactorsrework.client.GuiArt;
@@ -18,9 +32,17 @@ import biggerreactorsrework.multiblocks.reactor.state.ReactorCoolantPortState;
 import biggerreactorsrework.core.client.gui.elements.InteractiveElement;
 import biggerreactorsrework.core.client.gui.screens.ModScreen;
 
+//? if =26.1.2 || =26.3 {
 import javax.annotation.Nonnull;
 
 public class ReactorCoolantPortScreen extends ModScreen<ReactorCoolantPortContainer> {
+//?} else if =1.21.1 {
+/*import javax.annotation.Nonnull;
+
+@OnlyIn(Dist.CLIENT)
+public class ReactorCoolantPortScreen extends ModScreen<ReactorCoolantPortContainer> {
+*/
+//?}
 
 
     private ReactorCoolantPortState reactorCoolantPortState;
@@ -111,6 +133,7 @@ public class ReactorCoolantPortScreen extends ModScreen<ReactorCoolantPortContai
      * @param mouseY       The y position of the mouse.
      * @param partialTicks Partial ticks.
      */
+//? if =26.1.2 || =26.3 {
     @Override
     public void extractRenderState(@Nonnull GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTicks) {
         if (showRecovery()) maintenance.enable();
@@ -131,6 +154,29 @@ public class ReactorCoolantPortScreen extends ModScreen<ReactorCoolantPortContai
         graphics.text(this.getFont(), Component.translatable("screen.biggerreactorsrework.reactor_coolant_port.manual_dump").getString(), this.getLeftPos() + 26, this.getTopPos() + 38, GuiTheme.textColor(), false);
         if (showRecovery()) GuiArt.scrollingText(graphics,getFont(),Component.translatable("thermal.biggerreactorsrework.recover_cold_coolant").getString(),getLeftPos()+42,getTopPos()+54,92,GuiTheme.textColor());
     }
+//?} else if =1.21.1 {
+/*    @Override
+    public void render(@Nonnull GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
+        if (showRecovery()) maintenance.enable();
+        else maintenance.disable();
+        super.render(graphics, mouseX, mouseY, partialTicks);
+
+        // Render text for input/output direction:
+        if (reactorCoolantPortState.direction) {
+            // Text for an inlet:
+            graphics.drawString(this.getFont(), Component.translatable("screen.biggerreactorsrework.reactor_coolant_port.direction_toggle.input").getString(), this.getGuiLeft() + 42, this.getGuiTop() + 22, GuiTheme.textColor(), false);
+
+        } else {
+            // Text for an outlet:
+            graphics.drawString(this.getFont(), Component.translatable("screen.biggerreactorsrework.reactor_coolant_port.direction_toggle.output").getString(), this.getGuiLeft() + 42, this.getGuiTop() + 22, GuiTheme.textColor(), false);
+        }
+
+        // Render text for manual tank eject:
+        graphics.drawString(this.getFont(), Component.translatable("screen.biggerreactorsrework.reactor_coolant_port.manual_dump").getString(), this.getGuiLeft() + 26, this.getGuiTop() + 38, GuiTheme.textColor(), false);
+        if (showRecovery()) GuiArt.scrollingText(graphics,getFont(),Component.translatable("thermal.biggerreactorsrework.recover_cold_coolant").getString(),getGuiLeft()+42,getGuiTop()+54,92,GuiTheme.textColor());
+    }
+*/
+//?}
 
     @Override
     protected GuiFrame frame() {

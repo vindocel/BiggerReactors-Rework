@@ -1,6 +1,14 @@
+//? if =26.1.2 || =26.3 {
 package biggerreactorsrework.multiblocks.turbine.tiles;
 
 import net.minecraft.core.BlockPos;
+//?} else if =1.21.1 {
+/*package biggerreactorsrework.multiblocks.turbine.tiles;
+
+import net.minecraft.MethodsReturnNonnullByDefault;
+import net.minecraft.core.BlockPos;
+*/
+//?}
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
@@ -17,24 +25,31 @@ import javax.annotation.ParametersAreNonnullByDefault;
 
 import static biggerreactorsrework.multiblocks.turbine.blocks.TurbinePowerTap.ConnectionState.*;
 
+//? if =26.1.2 || =26.3 {
 @ParametersAreNonnullByDefault
 public class TurbinePowerTapTile extends TurbineBaseTile implements IEnergyTile, IEnergyHandler, IEventMultiblock.AssemblyStateTransition {
-    
+//?} else if =1.21.1 {
+/*@ParametersAreNonnullByDefault
+@MethodsReturnNonnullByDefault
+public class TurbinePowerTapTile extends TurbineBaseTile implements IEnergyTile, IEnergyHandler, IEventMultiblock.AssemblyStateTransition {
+*/
+//?}
+
     @RegisterTile("turbine_power_tap")
     public static final BlockEntityType.BlockEntitySupplier<TurbinePowerTapTile> SUPPLIER = new RegisterTile.Producer<>(TurbinePowerTapTile::new);
-    
+
     public TurbinePowerTapTile(BlockEntityType<?> TYPE, BlockPos pos, BlockState state) {
         super(TYPE, pos, state);
     }
-    
+
     private boolean connected = false;
     Direction powerOutputDirection = null;
-    
+
     @Override
     public IEnergyHandler energyHandler(Direction direction) {
         return this;
     }
-    
+
     private void setConnected(boolean newState) {
         if (newState != connected) {
             connected = newState;
@@ -42,10 +57,10 @@ public class TurbinePowerTapTile extends TurbineBaseTile implements IEnergyTile,
             level.setBlockAndUpdate(worldPosition, getBlockState().setValue(CONNECTION_STATE_ENUM_PROPERTY, connected ? CONNECTED : DISCONNECTED));
         }
     }
-    
+
     @Nullable
     CachedWrappedBlockCapability<IEnergyHandler, Direction> output = null;;
-    
+
     public long distributePower(long toDistribute, boolean simulate) {
         if(output == null) {
             return 0;
@@ -56,8 +71,9 @@ public class TurbinePowerTapTile extends TurbineBaseTile implements IEnergyTile,
             return 0;
         }
         return Math.max(0, outputCap.insertEnergy(toDistribute, simulate));
+//? if =26.1.2 || =26.3 {
     }
-    
+
     @Override
     public Object transferSnapshot() {
         var battery = nullableController() == null ? null : controller().simulation().battery();
@@ -73,10 +89,16 @@ public class TurbinePowerTapTile extends TurbineBaseTile implements IEnergyTile,
     }
 
     @Override
+//?} else if =1.21.1 {
+/*    }
+
+    @Override
+*/
+//?}
     public long insertEnergy(long maxInsert, boolean simulate) {
         return 0;
     }
-    
+
     @Override
     public long extractEnergy(long maxExtract, boolean simulate) {
         if (maxExtract <= 0 || nullableController() == null || controller().assemblyState() != IValidatedMultiblock.AssemblyState.ASSEMBLED) {
@@ -89,7 +111,7 @@ public class TurbinePowerTapTile extends TurbineBaseTile implements IEnergyTile,
         }
         return toExtract;
     }
-    
+
     @Override
     public long energyStored() {
         if (nullableController() != null) {
@@ -97,7 +119,7 @@ public class TurbinePowerTapTile extends TurbineBaseTile implements IEnergyTile,
         }
         return 0;
     }
-    
+
     @Override
     public long maxEnergyStored() {
         if (nullableController() != null) {
@@ -105,8 +127,8 @@ public class TurbinePowerTapTile extends TurbineBaseTile implements IEnergyTile,
         }
         return 0;
     }
-    
-    
+
+
     @SuppressWarnings("DuplicatedCode")
     public void neighborChanged() {
         output = null;
@@ -114,11 +136,11 @@ public class TurbinePowerTapTile extends TurbineBaseTile implements IEnergyTile,
             setConnected(false);
             return;
         }
-        
+
         output = findEnergyCapability(powerOutputDirection);
         setConnected(output.getCapability() != null);
     }
-    
+
     @Override
     public void onAssemblyStateTransition(IValidatedMultiblock.AssemblyState oldState, IValidatedMultiblock.AssemblyState newState) {
         if (newState == IValidatedMultiblock.AssemblyState.ASSEMBLED) {

@@ -1,7 +1,7 @@
 plugins {
     id 'java-library'
     id 'idea'
-    id 'net.neoforged.moddev' version '2.0.148'
+    id 'net.neoforged.moddev'
 }
 
 // gradle.properties holds the base version; release builds can override it with -Prelease_version.
@@ -13,28 +13,34 @@ base {
     archivesName = "${mod_id}-${minecraft_version}"
 }
 
-java.toolchain.languageVersion = JavaLanguageVersion.of(25)
+// Modified 2026-11-18: native toolchains and isolated runtimes for every Stonecutter target.
+java.toolchain.languageVersion = JavaLanguageVersion.of(java_version as int)
 
 // Inactive parts, switched in gradle.properties: their sources stay in the tree, outside the build.
-var emiEnabled = providers.gradleProperty('emi_enabled').orElse('false').get().toBoolean()
-var reiEnabled = providers.gradleProperty('rei_enabled').orElse('false').get().toBoolean()
-var ocEnabled = providers.gradleProperty('oc_enabled').orElse('false').get().toBoolean()
-var datagenEnabled = providers.gradleProperty('datagen_enabled').orElse('false').get().toBoolean()
+var emiEnabled = (project.findProperty('emi_enabled') ?: 'false').toString().toBoolean()
+var reiEnabled = (project.findProperty('rei_enabled') ?: 'false').toString().toBoolean()
+var ocEnabled = (project.findProperty('oc_enabled') ?: 'false').toString().toBoolean()
+var datagenEnabled = (project.findProperty('datagen_enabled') ?: 'false').toString().toBoolean()
 
 neoForge {
     version = project.neo_version
-
-
+    if (project.hasProperty('parchment_mappings_version')) {
+        parchment {
+            mappingsVersion = project.parchment_mappings_version
+            minecraftVersion = project.parchment_minecraft_version
+        }
+    }
     runs {
         client {
             client()
-            gameDirectory = project.file('run')
+            // Each client has its own mods, settings and saves.
+            gameDirectory = rootProject.file("run/${minecraft_version}")
             systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
         }
 
         server {
             server()
-            gameDirectory = project.file('run/mc-26.1.2/server')
+            gameDirectory = rootProject.file("run/mc-${minecraft_version}/server")
             programArgument '--nogui'
             systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
         }
@@ -42,7 +48,7 @@ neoForge {
         gameTestServer {
             type = 'gameTestServer'
             // own folder: GameTests always run with only Minecraft, NeoForge and this mod
-            gameDirectory = project.file('run/mc-26.1.2/gametest')
+            gameDirectory = rootProject.file("run/mc-${minecraft_version}/gametest")
             systemProperty 'biggerreactorsrework.testEnergyItems', 'true'
             systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
         }
@@ -50,7 +56,7 @@ neoForge {
         // Same GameTests with optional mods placed by hand in run/mc-26.1.2/gametest-compat/mods (never bundled).
         gameTestCompat {
             type = 'gameTestServer'
-            gameDirectory = project.file('run/mc-26.1.2/gametest-compat')
+            gameDirectory = rootProject.file("run/mc-${minecraft_version}/gametest-compat")
             systemProperty 'biggerreactorsrework.testEnergyItems', 'true'
             systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
         }
@@ -58,7 +64,7 @@ neoForge {
         // Optional 26.1.2 scripting runtimes are supplied separately; never add them to the base runtime classpath.
         gameTestScripting {
             type = 'gameTestServer'
-            gameDirectory = project.file('run/mc-26.1.2/gametest-scripting')
+            gameDirectory = rootProject.file("run/mc-${minecraft_version}/gametest-scripting")
             systemProperty 'biggerreactorsrework.testEnergyItems', 'true'
             systemProperty 'biggerreactorsrework.testScripting', 'true'
             systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
@@ -67,15 +73,15 @@ neoForge {
         if (datagenEnabled) {
             data {
                 data()
-                gameDirectory = project.file('run/datagen')
-                programArguments.addAll '--mod', project.mod_id, '--all', '--output', file('src/main/resources/').getAbsolutePath(), '--existing', file('src/main/resources/').getAbsolutePath()
+                gameDirectory = rootProject.file("run/mc-${minecraft_version}/datagen")
+                programArguments.addAll '--mod', project.mod_id, '--all', '--output', file('src/generated/resources/').getAbsolutePath(), '--existing', rootProject.file('src/main/resources/').getAbsolutePath()
             }
         }
 
         clientVerification {
             client()
             def machineDrops = providers.gradleProperty('machineDropRenderTest').orElse('false').get().toBoolean()
-            gameDirectory = project.file(machineDrops ? 'run/mc-26.1.2/exchanger-crash-probe' : 'run/mc-26.1.2/client-verification')
+            gameDirectory = rootProject.file("run/mc-${minecraft_version}/" + (machineDrops ? 'exchanger-crash-probe' : 'client-verification'))
             if (machineDrops) {
                 systemProperty 'rework.testMachineDrops', 'true'
                 jvmArguments.add '-Xmx5G'
@@ -84,7 +90,7 @@ neoForge {
 
         serverVerification {
             server()
-            gameDirectory = project.file('run/mc-26.1.2/server-verification')
+            gameDirectory = rootProject.file("run/mc-${minecraft_version}/server-verification")
             programArgument '--nogui'
         }
 
@@ -123,7 +129,12 @@ repositories {
     // Modified 2026-11-01: official 26.1.2 scripting APIs, compile-only.
     exclusiveContent {
         forRepository {
-            maven {
+            if (minecraft_version == '26.3') ivy {
+                name = 'KubeJS26PortApi'
+                url = 'https://github.com/zoom-packers/zp5-mods/releases/download/kubejs-26.3-8.1.0-port.1'
+                patternLayout { artifact '[artifact]-[revision].[ext]' }
+                metadataSources { artifact() }
+            } else maven {
                 name = 'LatvianMods'
                 url = 'https://maven.latvian.dev/releases'
             }
@@ -197,11 +208,16 @@ dependencies {
 
 test {
     useJUnitPlatform()
+    workingDir rootProject.projectDir
 }
 
 tasks.matching { it.name == 'runGameTestScripting' }.configureEach {
     doFirst {
-        copy { from 'src/test/resources/compat/kubejs'; into 'run/mc-26.1.2/gametest-scripting/kubejs' }
+        copy {
+            from rootProject.file('src/test/resources/compat/kubejs')
+            from file('src/test/resources/compat/kubejs')
+            into rootProject.file("run/mc-${minecraft_version}/gametest-scripting/kubejs")
+        }
     }
 }
 
@@ -231,6 +247,8 @@ var generateModMetadata = tasks.register('generateModMetadata', ProcessResources
             mod_name               : mod_name,
             mod_license            : mod_license,
             mod_version            : project.version,
+            cc_version             : cc_version,
+            oc_version             : project.findProperty('oc_version') ?: '',
             optional_dependencies  : """
 [[dependencies.\${mod_id}]]
     modId="computercraft"
@@ -256,8 +274,8 @@ var generateModMetadata = tasks.register('generateModMetadata', ProcessResources
     ]
     inputs.properties replaceProperties
     expand replaceProperties
-    from 'src/main/templates'
-    into 'build/generated/sources/modMetadata'
+    from file('src/main/templates')
+    into layout.buildDirectory.dir('generated/sources/modMetadata')
 }
 sourceSets.main.resources.srcDir generateModMetadata
 neoForge.ideSyncTask generateModMetadata

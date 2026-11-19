@@ -1,0 +1,18 @@
+{
+    "type": "thermal:pulverizer",
+    "neoforge:conditions": [
+        {
+            "modid": "thermal_expansion",
+            "type": "neoforge:mod_loaded"
+        }
+    ],
+    "ingredient": {
+        "item": "biggerreactorsrework:graphite_ingot"
+    },
+    "result": [
+        {
+            "item": "biggerreactorsrework:graphite_dust",
+            "chance": 1.0
+        }
+    ]
+}

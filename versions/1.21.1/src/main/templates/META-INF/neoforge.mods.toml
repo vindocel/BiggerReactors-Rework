@@ -1,0 +1,66 @@
+modLoader="javafml"
+loaderVersion="${loader_version_range}"
+license="${mod_license}"
+issueTrackerURL="https://github.com/vindocel/BiggerReactors-Rework/issues"
+
+[[mods]]
+modId="${mod_id}"
+version="${mod_version}"
+displayName="${mod_name}"
+displayURL="https://github.com/vindocel/BiggerReactors-Rework"
+logoFile="logo.png"
+credits="Fork of BiggerReactors by RogueLogix (https://github.com/BiggerSeries/BiggerReactors, https://www.curseforge.com/members/roguelogix), with contributions from gizmocodes and Ridanisaurus. Derived from the original Big Reactors by ErogenousBeef (https://github.com/erogenousbeef-zz/BigReactors)."
+authors="RogueLogix, gizmocodes, Ridanisaurus; rework by vindocel"
+description='''
+Independent fork and rework of BiggerReactors for Minecraft ${minecraft_version} on NeoForge.
+
+Original BiggerReactors by RogueLogix: https://github.com/BiggerSeries/BiggerReactors
+Original Big Reactors by ErogenousBeef: https://github.com/erogenousbeef-zz/BigReactors
+
+This rework is not affiliated with or endorsed by the original authors.
+'''
+
+[modproperties.${mod_id}]
+    catalogueImageIcon="icon.png"
+
+[[dependencies.${mod_id}]]
+    modId="neoforge"
+    type="required"
+    versionRange="[${neo_version},)"
+    ordering="NONE"
+    side="BOTH"
+
+[[dependencies.${mod_id}]]
+    modId="minecraft"
+    type="required"
+    versionRange="${minecraft_version_range}"
+    ordering="NONE"
+    side="BOTH"
+
+# Modified 2026-10-31: validate each native API version only when its computer mod is installed.
+[[dependencies.${mod_id}]]
+    modId="computercraft"
+    type="optional"
+    versionRange="[${cc_version},)"
+    ordering="AFTER"
+    side="BOTH"
+
+[[dependencies.${mod_id}]]
+    modId="opencomputers"
+    type="optional"
+    versionRange="[${oc_version},)"
+    ordering="AFTER"
+    side="BOTH"
+
+[[dependencies.${mod_id}]]
+    modId="kubejs"
+    type="optional"
+    versionRange="[2101.7.2-build.377,)"
+    ordering="AFTER"
+    side="BOTH"
+
+[[mixins]]
+config="biggerreactorsrework.coolant-particles.mixins.json"
+
+[[mixins]]
+config="biggerreactorsrework.client.mixins.json"

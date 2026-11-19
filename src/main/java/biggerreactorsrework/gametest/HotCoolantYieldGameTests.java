@@ -7,9 +7,17 @@ import biggerreactorsrework.util.FluidTransitionTank;
 import net.minecraft.core.component.DataComponentPatch;
 import net.minecraft.gametest.framework.*;
 import net.minecraft.world.level.material.Fluids;
+//? if =26.1.2 || =26.3 {
 import net.neoforged.neoforge.gametest.*;
 // Modified 2026-11-02: fixed recipes replace the historical 20-percent obsidian comparison.
 public final class HotCoolantYieldGameTests {
+//?} else if =1.21.1 {
+/*import net.neoforged.neoforge.gametest.*;
+// Modified 2026-11-02: fixed recipes replace the historical 20-percent obsidian comparison.
+@GameTestHolder(BiggerReactors.modid) @PrefixGameTestTemplate(false)
+public final class HotCoolantYieldGameTests {
+*/
+//?}
     static void batch(GameTestHelper h,FluidTransitionRegistry.FluidTransition profile,double rate) {
         var hot=new FluidTransitionTank(true);var water=new FluidTransitionTank(false);hot.perSideCapacity=water.perSideCapacity=100000;
         var components=profile.genericHot()?CoolantComponents.heated(profile):DataComponentPatch.EMPTY;

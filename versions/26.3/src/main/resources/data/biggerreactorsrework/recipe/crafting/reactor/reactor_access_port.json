@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "C C",
+    " V ",
+    "CPC"
+  ],
+  "key": {
+    "C": "biggerreactorsrework:reactor_casing",
+    "V": "#c:chests/wooden",
+    "P": "minecraft:piston"
+  },
+  "result": {
+    "id": "biggerreactorsrework:reactor_access_port"
+  }
+}

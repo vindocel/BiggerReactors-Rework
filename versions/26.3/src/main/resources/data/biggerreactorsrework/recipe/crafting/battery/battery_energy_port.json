@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "redstone",
+  "pattern": [
+    "CRC",
+    "RLR",
+    "CRC"
+  ],
+  "key": {
+    "C": "biggerreactorsrework:battery_casing",
+    "R": "minecraft:redstone_block",
+    "L": "minecraft:lightning_rod"
+  },
+  "result": {
+    "id": "biggerreactorsrework:battery_energy_port"
+  }
+}

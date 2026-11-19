@@ -1,6 +1,14 @@
+//? if =26.1.2 || =26.3 {
 package biggerreactorsrework.core.modular.api;
 
 import net.minecraft.core.Direction;
+//?} else if =1.21.1 {
+/*package biggerreactorsrework.core.modular.api;
+
+import net.minecraft.MethodsReturnNonnullByDefault;
+import net.minecraft.core.Direction;
+*/
+//?}
 import net.minecraft.nbt.CompoundTag;
 import net.neoforged.neoforge.capabilities.BlockCapability;
 import biggerreactorsrework.core.debug.DebugInfo;
@@ -8,34 +16,42 @@ import biggerreactorsrework.core.debug.IDebuggable;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+//? if =26.1.2 || =26.3 {
 import javax.annotation.ParametersAreNonnullByDefault;
 
 @ParametersAreNonnullByDefault
+//?} else if =1.21.1 {
+/*import javax.annotation.ParametersAreNonnullByDefault;
+
+@MethodsReturnNonnullByDefault
+@ParametersAreNonnullByDefault
+*/
+//?}
 public class TileModule<InterfaceType extends IModularTile> implements IDebuggable {
-    
+
     @Nonnull
     public final InterfaceType iface;
-    
+
     public TileModule(IModularTile iface) {
         //noinspection unchecked
         this.iface = (InterfaceType) iface;
     }
-    
+
     public void postModuleConstruction() {
     }
-    
-    
+
+
     public void onAdded() {
     }
-    
+
     public void onRemoved(boolean chunkUnload) {
     }
-    
+
     @Nullable
     public String saveKey() {
         return null;
     }
-    
+
     /**
      * Standard world save NBT
      *
@@ -43,12 +59,12 @@ public class TileModule<InterfaceType extends IModularTile> implements IDebuggab
      */
     public void readNBT(CompoundTag nbt) {
     }
-    
+
     @Nullable
     public CompoundTag writeNBT() {
         return null;
     }
-    
+
     /**
      * Initial server -> client sync on client side chunk load
      *
@@ -58,13 +74,13 @@ public class TileModule<InterfaceType extends IModularTile> implements IDebuggab
         // mimmicks behavior of IForgeTileEntity
         readNBT(nbt);
     }
-    
+
     @Nullable
     public CompoundTag getDataNBT() {
         // mimmicks behavior of IForgeTileEntity
         return writeNBT();
     }
-    
+
     /**
      * Updates while chunk is loaded
      *
@@ -72,12 +88,12 @@ public class TileModule<InterfaceType extends IModularTile> implements IDebuggab
      */
     public void handleUpdateNBT(CompoundTag nbt) {
     }
-    
+
     @Nullable
     public CompoundTag getUpdateNBT() {
         return null;
     }
-    
+
     @Nullable
     public DebugInfo getDebugInfo() {
         return null;

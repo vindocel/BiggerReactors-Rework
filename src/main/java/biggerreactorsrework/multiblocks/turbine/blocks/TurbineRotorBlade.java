@@ -1,6 +1,14 @@
+//? if =26.1.2 || =26.3 {
 package biggerreactorsrework.multiblocks.turbine.blocks;
 
 import net.minecraft.core.BlockPos;
+//?} else if =1.21.1 {
+/*package biggerreactorsrework.multiblocks.turbine.blocks;
+
+import net.minecraft.MethodsReturnNonnullByDefault;
+import net.minecraft.core.BlockPos;
+*/
+//?}
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -17,10 +25,19 @@ import javax.annotation.ParametersAreNonnullByDefault;
 
 import static biggerreactorsrework.multiblocks.turbine.state.TurbineShaftRotationState.Y;
 
+//? if =26.1.2 || =26.3 {
 @ParametersAreNonnullByDefault
 public class TurbineRotorBlade extends TurbineBaseBlock implements IAssemblyStateBlock {
     // Modified 2026-10-31: redirect ordinary blade clicks and orient new real blocks before assembly.
     @Override public net.minecraft.world.InteractionResult onUse(BlockState state, net.minecraft.world.level.Level level, BlockPos pos,
+//?} else if =1.21.1 {
+/*@ParametersAreNonnullByDefault
+@MethodsReturnNonnullByDefault
+public class TurbineRotorBlade extends TurbineBaseBlock implements IAssemblyStateBlock {
+    // Modified 2026-11-01: redirect ordinary blade clicks and orient new real blocks before assembly.
+    @Override public net.minecraft.world.InteractionResult onUse(BlockState state, net.minecraft.world.level.Level level, BlockPos pos,
+*/
+//?}
             net.minecraft.world.entity.player.Player player, net.minecraft.world.InteractionHand hand, net.minecraft.world.phys.BlockHitResult hit) {
         var result = biggerreactorsrework.multiblocks.turbine.TurbineRotorLayout.use(level,pos,player,hand);
         return result == net.minecraft.world.InteractionResult.PASS ? super.onUse(state,level,pos,player,hand,hit) : result;
@@ -28,51 +45,66 @@ public class TurbineRotorBlade extends TurbineBaseBlock implements IAssemblyStat
     @Override public BlockState getStateForPlacement(net.minecraft.world.item.context.BlockPlaceContext context) {
         return biggerreactorsrework.multiblocks.turbine.TurbineRotorLayout.placementState(context,defaultBlockState());
     }
-    
+
+//? if =26.1.2 || =26.3 {
     public static final IntegerProperty BLADE_POSITION = IntegerProperty.create("blade_position", 0, 3);
-    
+
     // Modified 2026-11-01: slim aiming outline; retain full-block collision.
     @Override protected net.minecraft.world.phys.shapes.VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, net.minecraft.world.phys.shapes.CollisionContext context) {
+//?} else if =1.21.1 {
+/*    public static final IntegerProperty BLADE_POSITION = IntegerProperty.create("blade_position", 0, 3);
+
+    @Override protected net.minecraft.world.phys.shapes.VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, net.minecraft.world.phys.shapes.CollisionContext context) {
+*/
+//?}
         return RotorShapes.blade(state.getValue(TurbineShaftRotationState.TURBINE_SHAFT_ROTATION_STATE_ENUM_PROPERTY).ordinal(), state.getValue(BLADE_POSITION));
     }
     @Override protected net.minecraft.world.phys.shapes.VoxelShape getCollisionShape(BlockState state, BlockGetter level, BlockPos pos, net.minecraft.world.phys.shapes.CollisionContext context) {
         return net.minecraft.world.phys.shapes.Shapes.block();
     }
 
+//? if =26.1.2 || =26.3 {
     @RegisterBlock(name = "turbine_rotor_blade", tileEntityClass = TurbineRotorBladeTile.class)
     public static final TurbineRotorBlade INSTANCE = biggerreactorsrework.core.registry.RegistryIds.named("turbine_rotor_blade", () -> new TurbineRotorBlade());
-    
+
     public TurbineRotorBlade() {
+//?} else if =1.21.1 {
+/*    @RegisterBlock(name = "turbine_rotor_blade", tileEntityClass = TurbineRotorBladeTile.class)
+    public static final TurbineRotorBlade INSTANCE = new TurbineRotorBlade();
+
+    public TurbineRotorBlade() {
+*/
+//?}
         super(false);
         registerDefaultState(defaultBlockState().setValue(TurbineShaftRotationState.TURBINE_SHAFT_ROTATION_STATE_ENUM_PROPERTY, Y));
     }
-    
+
     @Override
     protected void buildStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
         builder.add(TurbineShaftRotationState.TURBINE_SHAFT_ROTATION_STATE_ENUM_PROPERTY);
         builder.add(BLADE_POSITION);
     }
-    
+
     @Nullable
     @Override
     public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
         return TurbineRotorBladeTile.SUPPLIER.create(pos, state);
     }
-    
+
     @SuppressWarnings("deprecation")
     public float getShadeBrightness(BlockState state, BlockGetter worldIn, BlockPos pos) {
         return 1.0F;
     }
-    
+
     public boolean propagatesSkylightDown(BlockState state, BlockGetter reader, BlockPos pos) {
         return true;
     }
-    
+
     @Override
     public boolean isGoodForInterior() {
         return true;
     }
-    
+
     @Override
     public boolean isGoodForExterior() {
         return false;

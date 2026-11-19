@@ -1,6 +1,0 @@
-{
-  "parent": "block/cube_all", 
-  "textures": {
-    "all" : "biggerreactorsrework:block/battery/glass/connected_none"
-  }
-}

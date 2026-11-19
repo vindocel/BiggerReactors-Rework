@@ -20,16 +20,23 @@ import biggerreactorsrework.core.util.NonnullDefault;
 @NonnullDefault
 public interface IValidatedMultiblockBlock extends IMultiblockBlock {
     class Module extends BlockModule<IMultiblockBlock> {
-        
+
         public Module(IModularBlock iface) {
             super(iface);
         }
-        
+
         @Override
         public InteractionResult onUse(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult) {
+//? if =26.1.2 || =26.3 {
             if (player.getMainHandItem().isEmpty() && hand == InteractionHand.MAIN_HAND && (!state.hasProperty(IAssemblyStateBlock.ASSEMBLED) || !state.getValue(IAssemblyStateBlock.ASSEMBLED))) {
                 if (!level.isClientSide() && level.getBlockEntity(pos) instanceof IValidatedMultiblockTile tile) {
                     MultiblockController<?, ?, ?> controller = tile.nullableController();
+//?} else if =1.21.1 {
+/*            if (player.getMainHandItem().isEmpty() && hand == InteractionHand.MAIN_HAND && (!state.hasProperty(IAssemblyStateBlock.ASSEMBLED) || !state.getValue(IAssemblyStateBlock.ASSEMBLED))) {
+                if (!level.isClientSide && level.getBlockEntity(pos) instanceof IValidatedMultiblockTile tile) {
+                    MultiblockController<?, ?, ?> controller = tile.nullableController();
+*/
+//?}
                     if (controller != null) {
                         final IValidatedMultiblock.Module<?, ?, ?> module = controller.module(IValidatedMultiblock.class, IValidatedMultiblock.Module.class);
                         if (module != null) {
@@ -49,7 +56,7 @@ public interface IValidatedMultiblockBlock extends IMultiblockBlock {
             }
             return super.onUse(state, level, pos, player, hand, hitResult);
         }
-        
+
         @OnModLoad
         private static void onModLoad() {
             ModuleRegistry.registerBlockModule(IValidatedMultiblockBlock.class, Module::new);

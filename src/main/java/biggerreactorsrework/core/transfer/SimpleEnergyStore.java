@@ -1,3 +1,4 @@
+//? if =26.1.2 || =26.3 {
 package biggerreactorsrework.core.transfer;
 
 import net.minecraft.util.Mth;
@@ -53,3 +54,5 @@ public class SimpleEnergyStore implements EnergyStore {
         return maxReceive > 0;
     }
 }
+//?} else if =1.21.1 {
+//?}

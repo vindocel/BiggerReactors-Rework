@@ -22,25 +22,25 @@ public interface IPersistentMultiblock<
         BlockType extends Block & IRectangularMultiblockBlock,
         ControllerType extends MultiblockController<TileType, BlockType, ControllerType> & IPersistentMultiblock<TileType, BlockType, ControllerType>
         > extends IValidatedMultiblock<TileType, BlockType, ControllerType> {
-    
+
     CompoundTag mergeNBTs(CompoundTag nbtA, CompoundTag nbtB);
-    
+
     void read(CompoundTag nbt);
-    
+
     @Nullable
     CompoundTag write();
-    
+
     default Module<TileType, BlockType, ControllerType> persistentModule() {
         //noinspection unchecked,ConstantConditions
         return module(IPersistentMultiblock.class, IPersistentMultiblock.Module.class);
     }
-    
+
     default void dirty() {
         final var module = module(IPersistentMultiblock.class, Module.class);
         assert module != null;
         module.dirty();
     }
-    
+
     final class Module<
             TileType extends BlockEntity & IPersistentMultiblockTile<TileType, BlockType, ControllerType>,
             BlockType extends Block & IRectangularMultiblockBlock,
@@ -56,10 +56,18 @@ public interface IPersistentMultiblock<
         }
         private static boolean storedData(Object value) {
             var keys=java.util.Set.of("fuel","waste","liquidAmount","gasAmount","inAmount","outAmount","storedPower");
+//? if =26.1.2 || =26.3 {
             if(value instanceof CompoundTag tag) {
                 for(String key:tag.keySet()) {
                     if(keys.contains(key) && tag.get(key) instanceof net.minecraft.nbt.NumericTag n && n.asDouble().orElse(0D)>0)return true;
                     if(key.equals("Items") && tag.get(key) instanceof net.minecraft.nbt.ListTag list && !list.isEmpty())return true;
+//?} else if =1.21.1 {
+/*            if(value instanceof CompoundTag tag) {
+                for(String key:tag.getAllKeys()) {
+                    if(keys.contains(key) && tag.get(key) instanceof net.minecraft.nbt.NumericTag n && n.getAsDouble()>0)return true;
+                    if(key.equals("Items") && tag.get(key) instanceof net.minecraft.nbt.ListTag list && !list.isEmpty())return true;
+*/
+//?}
                     if(key.equals("simulationData") && tag.get(key) instanceof net.minecraft.nbt.ByteArrayTag array) {
                         try {if(storedData(new biggerreactorsrework.core.serialization.DataCompound(array.getAsByteArray()).toROBNMap()))return true;}
                         catch(IllegalArgumentException invalid){return true;}
@@ -82,16 +90,16 @@ public interface IPersistentMultiblock<
         private int expectedBlocks = 0;
         @Nullable
         private IValidatedMultiblock.AssemblyState lastAssemblyState;
-        
+
         @OnModLoad
         public static void register() {
             MultiblockControllerModuleRegistry.registerModule(IPersistentMultiblock.class, Module::new);
         }
-        
+
         public Module(IPersistentMultiblock<TileType, BlockType, ControllerType> controller) {
             super(controller);
         }
-        
+
         private void partAdded(TileType newPart) {
             final var persistentModule = newPart.module(IPersistentMultiblockTile.class, IPersistentMultiblockTile.Module.class);
             assert persistentModule != null;
@@ -106,7 +114,7 @@ public interface IPersistentMultiblock<
             if (lastAssemblyState == null) {
                 lastAssemblyState = persistentModule.lastAssemblyState;
             }
-            
+
             final var newNBT = persistentModule.controllerNBT;
             persistentModule.controllerNBT = null;
             if (newNBT == null) {
@@ -127,7 +135,7 @@ public interface IPersistentMultiblock<
             }
             shouldReadNBT = true;
         }
-        
+
         private void partRemoved(TileType oldPart) {
             if (oldPart == saveDelegate) {
                 // Modified 2026-10-26: allow a surviving part to take over persistence.
@@ -136,7 +144,7 @@ public interface IPersistentMultiblock<
                 saveDelegateModule = null;
             }
         }
-        
+
         @Override
         public void merge(ControllerType other) {
             final var otherPersistentModule = other.module(IPersistentMultiblock.class, Module.class);
@@ -155,33 +163,33 @@ public interface IPersistentMultiblock<
                 shouldReadNBT = true;
             }
         }
-        
+
         public void onPartLoaded(TileType tile) {
             partAdded(tile);
         }
-        
+
         public void onPartUnloaded(TileType tile) {
             partRemoved(tile);
         }
-        
+
         public void onPartAttached(TileType tile) {
             partAdded(tile);
         }
-        
+
         public void onPartDetached(TileType tile) {
             partRemoved(tile);
         }
-        
+
         public void onPartPlaced(TileType tile) {
             // cannot have nbt when first placed
             expectedBlocks = 0;
         }
-        
+
         public void onPartBroken(TileType tile) {
             expectedBlocks = 0;
             partRemoved(tile);
         }
-        
+
         private void pickDelegate() {
             if (hasSaveDelegate) {
                 return;
@@ -194,17 +202,17 @@ public interface IPersistentMultiblock<
             }
             hasSaveDelegate = true;
         }
-        
+
         @Override
         public boolean canValidate() {
             return expectedBlocks <= controller.blocks.size();
         }
-    
+
         @Override
         public boolean canTick() {
             return canValidate();
         }
-        
+
         @Override
         public void onStateTransition(AssemblyState oldAssemblyState, AssemblyState newAssemblyState) {
             if (newAssemblyState == AssemblyState.ASSEMBLED) {
@@ -222,7 +230,7 @@ public interface IPersistentMultiblock<
                 }
             }
         }
-        
+
         void dirty() {
             pickDelegate();
             nbt = null;
@@ -231,12 +239,12 @@ public interface IPersistentMultiblock<
             }
             Util.markRangeDirty(controller.level, controller.min(), controller.max());
         }
-        
+
         boolean isSaveDelegate(TileType tile) {
             pickDelegate();
             return tile == saveDelegate;
         }
-        
+
         @Nullable
         CompoundTag getNBT() {
             if (nbt == null) {
@@ -244,7 +252,7 @@ public interface IPersistentMultiblock<
             }
             return nbt;
         }
-    
+
         @Nullable
         @Override
         public DebugInfo getDebugInfo() {

@@ -2,8 +2,15 @@ package biggerreactorsrework.core.util;
 
 import it.unimi.dsi.fastutil.longs.Long2IntLinkedOpenHashMap;
 import it.unimi.dsi.fastutil.longs.LongArrayList;
+//? if =26.1.2 || =26.3 {
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.core.BlockPos;
+//?} else if =1.21.1 {
+/*import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import net.minecraft.MethodsReturnNonnullByDefault;
+import net.minecraft.core.BlockPos;
+*/
+//?}
 import net.minecraft.world.level.block.entity.BlockEntity;
 import biggerreactorsrework.core.modular.api.IModularTile;
 import biggerreactorsrework.core.modular.api.TileModule;
@@ -15,23 +22,30 @@ import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
+//? if =26.1.2 || =26.3 {
 @ParametersAreNonnullByDefault
 public class ModuleMap<ModuleType extends TileModule<TileType>, TileType extends BlockEntity & IModularTile> {
-    
+//?} else if =1.21.1 {
+/*@ParametersAreNonnullByDefault
+@MethodsReturnNonnullByDefault
+public class ModuleMap<ModuleType extends TileModule<TileType>, TileType extends BlockEntity & IModularTile> {
+*/
+//?}
+
     private final ObjectArrayList<ModuleType> modules;
     @SuppressWarnings("unchecked")
     private final ObjectArrayList<TileType> tiles = ObjectArrayList.wrap((TileType[]) new BlockEntity[0]);
     private final LongArrayList poses = new LongArrayList();
     private final Long2IntLinkedOpenHashMap indexMap = new Long2IntLinkedOpenHashMap();
-    
+
     {
         indexMap.defaultReturnValue(-1);
     }
-    
+
     public ModuleMap(ModuleType[] moduleArray) {
         modules = ObjectArrayList.wrap(moduleArray);
     }
-    
+
     public boolean addModule(final ModuleType module) {
         final TileType tile = module.iface;
         final long posLong = tile.getBlockPos().asLong();
@@ -49,11 +63,11 @@ public class ModuleMap<ModuleType extends TileModule<TileType>, TileType extends
         poses.add(tile.getBlockPos().asLong());
         return true;
     }
-    
+
     public void addAll(ModuleMap<ModuleType, TileType> otherMap) {
         otherMap.forEachModule(this::addModule);
     }
-    
+
     public boolean removeModule(final ModuleType module) {
         final TileType tile = module.iface;
         final long posLong = tile.getBlockPos().asLong();
@@ -73,23 +87,23 @@ public class ModuleMap<ModuleType extends TileModule<TileType>, TileType extends
         }
         return true;
     }
-    
+
     public boolean containsTile(TileType tile) {
         return containsPos(tile.getBlockPos());
     }
-    
+
     public boolean containsModule(ModuleType module) {
         return containsPos(module.iface.getBlockPos());
     }
-    
+
     public boolean containsPos(BlockPos pos) {
         return getModule(pos) != null;
     }
-    
+
     public boolean containsPos(Vector3i pos) {
         return getModule(pos) != null;
     }
-    
+
     @Nullable
     public ModuleType getModule(int x, int y, int z) {
         int index = indexMap.get(BlockPos.asLong(x, y, z));
@@ -98,17 +112,17 @@ public class ModuleMap<ModuleType extends TileModule<TileType>, TileType extends
         }
         return modules.get(index);
     }
-    
+
     @Nullable
     public ModuleType getModule(BlockPos pos) {
         return getModule(pos.getX(), pos.getY(), pos.getZ());
     }
-    
+
     @Nullable
     public ModuleType getModule(Vector3ic pos) {
         return getModule(pos.x(), pos.y(), pos.z());
     }
-    
+
     @Nullable
     public TileType getTile(int x, int y, int z) {
         int index = indexMap.get(BlockPos.asLong(x, y, z));
@@ -117,49 +131,49 @@ public class ModuleMap<ModuleType extends TileModule<TileType>, TileType extends
         }
         return tiles.get(index);
     }
-    
+
     @Nullable
     public TileType getTile(BlockPos pos) {
         return getTile(pos.getX(), pos.getY(), pos.getZ());
     }
-    
+
     @Nullable
     public TileType getTile(Vector3ic pos) {
         return getTile(pos.x(), pos.y(), pos.z());
-        
+
     }
-    
+
     public void forEachPosAndModule(BiConsumer<BlockPos, ModuleType> consumer) {
         for (int i = 0; i < modules.size(); i++) {
             final var module = modules.get(i);
             consumer.accept(module.iface.getBlockPos(), module);
         }
     }
-    
+
     public void forEachPosAndTile(BiConsumer<BlockPos, TileType> consumer) {
         forEachTile((tile) -> consumer.accept(tile.getBlockPos(), tile));
     }
-    
+
     public void forEachTile(Consumer<TileType> consumer) {
         forEachModule(module -> consumer.accept(module.iface));
     }
-    
+
     public void forEachModule(Consumer<ModuleType> consumer) {
         for (int i = 0; i < modules.size(); i++) {
             consumer.accept(modules.get(i));
         }
     }
-    
+
     public void forEachTileAndModule(BiConsumer<TileType, ModuleType> consumer) {
         for (int i = 0; i < modules.size(); i++) {
             consumer.accept(tiles.get(i), modules.get(i));
         }
     }
-    
+
     public interface TileModulePosLong<ModuleType extends TileModule<TileType>, TileType extends BlockEntity & IModularTile> {
         void accept(TileType entity, ModuleType module, long pos);
     }
-    
+
     public void forEachTileAndModuleAndPosLong(TileModulePosLong<ModuleType, TileType> consumer) {
         final int size = modules.size();
         final TileType[] tileElements = tiles.elements();
@@ -172,36 +186,36 @@ public class ModuleMap<ModuleType extends TileModule<TileType>, TileType extends
             consumer.accept(tileElements[i], moduleElements[i], posElements[i]);
         }
     }
-    
+
     public void forEachPos(Consumer<BlockPos> consumer) {
         forEachModule((module) -> consumer.accept(module.iface.getBlockPos()));
     }
-    
+
     public boolean isEmpty() {
         return modules.isEmpty();
     }
-    
+
     public int size() {
         return modules.size();
     }
-    
+
     public TileType[] tileElements() {
         return tiles.elements();
     }
-    
+
     public ModuleType[] moduleElements() {
         return modules.elements();
     }
-    
+
     public long[] posElements() {
         return poses.elements();
     }
-    
+
     @Nullable
     public ModuleType getOne() {
         return modules.get(0);
     }
-    
+
     public void clear() {
         modules.clear();
         poses.clear();

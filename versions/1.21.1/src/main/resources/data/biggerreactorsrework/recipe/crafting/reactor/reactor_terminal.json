@@ -1,0 +1,25 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "C C",
+    "YDY",
+    "CRC"
+  ],
+  "key": {
+    "C": {
+      "item": "biggerreactorsrework:reactor_casing"
+    },
+    "Y": {
+      "tag": "c:ingots/uranium"
+    },
+    "R": {
+      "item": "minecraft:redstone"
+    },
+    "D": {
+      "item": "minecraft:diamond"
+    }
+  },
+  "result": {
+    "id": "biggerreactorsrework:reactor_terminal"
+  }
+}

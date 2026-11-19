@@ -5,9 +5,16 @@ import it.unimi.dsi.fastutil.bytes.ByteArrayList;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.client.Minecraft;
+//? if =26.1.2 || =26.3 {
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
+//?} else if =1.21.1 {
+/*import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.MinecraftServer;
+*/
+//?}
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.packs.resources.Resource;
 import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
@@ -51,9 +58,16 @@ public class ConfigManager {
     // Modified 2026-11-01: configuration edits share synchronization and remain local outside active worlds.
     public static boolean hasActiveWorld() { return server != null || connectedToServer; }
     public static boolean hasRemoteServer() { return connectedToServer && server == null; }
+//? if =26.1.2 || =26.3 {
     public static boolean isLocalServerThread() {
         return FMLEnvironment.getDist().isClient()
                 && server != null && !server.isDedicatedServer() && server.isSameThread();
+//?} else if =1.21.1 {
+/*    public static boolean isLocalServerThread() {
+        return FMLEnvironment.dist.isClient()
+                && server != null && !server.isDedicatedServer() && server.isSameThread();
+*/
+//?}
     }
     public static void rulesChanged() {
         revision++;
@@ -65,26 +79,33 @@ public class ConfigManager {
     }
     static final Logger LOGGER = LogManager.getLogger("BiggerReactors-Rework/Config");
     private static class ClassLoadingHelper {
+//? if =26.1.2 || =26.3 {
         public static final SimpleChannel NETWORK_CHANNEL = new SimpleChannel(
                 Identifier.fromNamespaceAndPath(modid, "configsync"),
                 ConfigManager::clientPacketHandler,
+//?} else if =1.21.1 {
+/*        public static final SimpleChannel NETWORK_CHANNEL = new SimpleChannel(
+                ResourceLocation.fromNamespaceAndPath(modid, "configsync"),
+                ConfigManager::clientPacketHandler,
+*/
+//?}
                 ConfigManager::serverPacketHandler
         );
     }
-    
+
     private static final Object2ObjectOpenHashMap<String, ConfigRegistration> clientConfigs = new Object2ObjectOpenHashMap<>();
     private static final Object2ObjectOpenHashMap<String, ConfigRegistration> commonConfigs = new Object2ObjectOpenHashMap<>();
     private static final Object2ObjectOpenHashMap<String, ConfigRegistration> serverConfigs = new Object2ObjectOpenHashMap<>();
-    
+
     private static boolean connectedToServer = false;
     @Nullable
     private static MinecraftServer server;
     private static final ObjectArrayList<ServerPlayer> players = new ObjectArrayList<>();
-    
+
     public static void registerConfig(Object rootConfigObject, RegisterConfig annotation) {
         registerConfig(rootConfigObject, ModLoadingContext.get().getActiveNamespace(), annotation);
     }
-    
+
     public static void registerConfig(Object rootConfigObject, String modName, RegisterConfig annotation) {
         TriConsumer<Map<ConfigType, List<Runnable>>, Method, ConfigType[]> createCallback = (callbacks, method, applicableTypes) -> {
             if (applicableTypes.length == 0) {
@@ -123,7 +144,7 @@ public class ConfigManager {
                 registrationCallbacks, preLoadCallbacks, postLoadCallbacks
         );
     }
-    
+
     public static void registerConfig(
             Object rootConfigObject, String modName, String name, String folder,
             String comment, ConfigFormat format, ConfigType[] configTypes, ConfigType rootLevelDefaultType, boolean rootLevelReloadableDefault,
@@ -161,15 +182,23 @@ public class ConfigManager {
             registration.loadLocalConfigFile(false);
         }
     }
-    
+
     // TODO: 8/28/22 command to trigger this
     public static void reloadAllConfigs() {
         for (final var value : clientConfigs.values()) {
             value.loadLocalConfigFile(true);
+//? if =26.1.2 || =26.3 {
         }
         if (FMLEnvironment.getDist().isDedicatedServer() || !connectedToServer || server != null && !server.isDedicatedServer()) {
             // dedicated servers, disconnected clients, and integrated servers reload common and server configs too
             for (final var value : commonConfigs.values()) {
+//?} else if =1.21.1 {
+/*        }
+        if (FMLEnvironment.dist.isDedicatedServer() || !connectedToServer || server != null && !server.isDedicatedServer()) {
+            // dedicated servers, disconnected clients, and integrated servers reload common and server configs too
+            for (final var value : commonConfigs.values()) {
+*/
+//?}
                 value.loadLocalConfigFile(true);
             }
             for (final var value : serverConfigs.values()) {
@@ -182,40 +211,47 @@ public class ConfigManager {
             }
         }
     }
-    
+
     public static List<ConfigRegistration> getAllConfigsForMod(String modName) {
         return Stream.concat(clientConfigs.values().stream(), Stream.concat(commonConfigs.values().stream(), serverConfigs.values().stream()))
                 .filter(configRegistration -> configRegistration.modName.equals(modName)).collect(Collectors.toList());
     }
-    
-    
+
+
     @OnModLoad
     private static void onModLoad() {
         ClassLoadingHelper.NETWORK_CHANNEL.forceClassLoad();
         NeoForge.EVENT_BUS.addListener(ConfigManager::onPlayerLogin);
         NeoForge.EVENT_BUS.addListener(ConfigManager::onPlayerLogout);
         NeoForge.EVENT_BUS.addListener(ConfigManager::onServerAboutToStart);
+//? if =26.1.2 || =26.3 {
         NeoForge.EVENT_BUS.addListener(ConfigManager::onServerStopped);
         if (FMLEnvironment.getDist().isClient()) {
             NeoForge.EVENT_BUS.addListener(ConfigManager::onLoggingIn);
+//?} else if =1.21.1 {
+/*        NeoForge.EVENT_BUS.addListener(ConfigManager::onServerStopped);
+        if (FMLEnvironment.dist.isClient()) {
+            NeoForge.EVENT_BUS.addListener(ConfigManager::onLoggingIn);
+*/
+//?}
             NeoForge.EVENT_BUS.addListener(ConfigManager::onLoggingOut);
         }
     }
-    
+
     private static void onServerAboutToStart(ServerAboutToStartEvent event) {
         server = event.getServer();
     }
-    
+
     private static void onServerStopped(ServerStoppedEvent event) {
         PackConfiguration.clearOverrides();
         server = null;
         players.clear();
     }
-    
+
     private static void onLoggingIn(ClientPlayerNetworkEvent.LoggingIn event) {
         connectedToServer = true;
     }
-    
+
     private static void onLoggingOut(ClientPlayerNetworkEvent.LoggingOut event) {
         connectedToServer = false;
         restoreLocalConfigs();
@@ -226,16 +262,25 @@ public class ConfigManager {
         syncedConfigs().forEach(ConfigRegistration::unloadRemoteConfig);
         revision++;
     }
-    
+
+//? if =26.1.2 || =26.3 {
     private static void onPlayerLogin(PlayerEvent.PlayerLoggedInEvent e) {
         var server = e.getEntity().level().getServer();
         assert server != null;
         if (!server.isDedicatedServer() && server.isSingleplayerOwner(e.getEntity().nameAndId())) return;
         var player = (ServerPlayer) e.getEntity();
+//?} else if =1.21.1 {
+/*    private static void onPlayerLogin(PlayerEvent.PlayerLoggedInEvent e) {
+        var server = e.getEntity().getServer();
+        assert server != null;
+        if (!server.isDedicatedServer() && server.isSingleplayerOwner(e.getEntity().getGameProfile())) return;
+        var player = (ServerPlayer) e.getEntity();
+*/
+//?}
         players.add(player);
         sendConfigToPlayer(player, true);
     }
-    
+
     private static void sendConfigToPlayer(ServerPlayer player, boolean initialLogin) {
         ClassLoadingHelper.NETWORK_CHANNEL.sendToPlayer(player, synchronizedSnapshot(initialLogin));
     }
@@ -255,20 +300,28 @@ public class ConfigManager {
         compound.put("scriptedKeys", new java.util.ArrayList<>(PackConfiguration.overrides().keySet()));
         return compound;
     }
-    
+
     private static void onPlayerLogout(PlayerEvent.PlayerLoggedOutEvent e) {
         var player = (ServerPlayer) e.getEntity();
         players.remove(player);
     }
-    
+
     private static void clientPacketHandler(DataCompound compound, IPayloadContext context) {
         applyRemoteSnapshot(compound);
     }
 
+//? if =26.1.2 || =26.3 {
     public static void applyRemoteSnapshot(DataCompound compound) {
         // Modified 2026-11-01: integrated client and server already share the same fields. Do not save script rules as local preferences.
         if (FMLEnvironment.getDist().isClient() && server != null && !server.isDedicatedServer()) { revision++; return; }
         PackConfiguration.remoteScriptedKeys(compound.getList("scriptedKeys").stream()
+//?} else if =1.21.1 {
+/*    public static void applyRemoteSnapshot(DataCompound compound) {
+        // Modified 2026-11-01: integrated client and server already share the same fields. Do not save script rules as local preferences.
+        if (FMLEnvironment.dist.isClient() && server != null && !server.isDedicatedServer()) { revision++; return; }
+        PackConfiguration.remoteScriptedKeys(compound.getList("scriptedKeys").stream()
+*/
+//?}
                 .filter(String.class::isInstance).map(String.class::cast).collect(java.util.stream.Collectors.toSet()));
         boolean initialLogin = compound.getBoolean("initialLogin");
         final var configs = compound.getMap("configs");
@@ -287,26 +340,26 @@ public class ConfigManager {
         }
         revision++;
     }
-    
+
     private static void serverPacketHandler(DataCompound compound, IPayloadContext context) {
     }
-    
+
     private static class ByteArrayPacketMessage {
         public byte[] bytes;
-        
+
         public ByteArrayPacketMessage(@Nonnull byte[] readByteArray) {
             bytes = readByteArray;
         }
-        
+
         private static void encodePacket(@Nonnull ByteArrayPacketMessage packet, @Nonnull FriendlyByteBuf buf) {
             buf.writeBytes(packet.bytes);
         }
-        
+
         private static ByteArrayPacketMessage decodePacket(@Nonnull FriendlyByteBuf buf) {
             byte[] byteBuf = new byte[buf.readableBytes()];
             buf.readBytes(byteBuf);
             return new ByteArrayPacketMessage(byteBuf);
         }
     }
-    
+
 }

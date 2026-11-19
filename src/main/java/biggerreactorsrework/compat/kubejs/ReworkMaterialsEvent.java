@@ -4,16 +4,30 @@ import biggerreactorsrework.registries.MaterialDataMaps;
 import com.google.gson.JsonObject;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.JsonOps;
+//? if =26.1.2 || =26.3 {
 import dev.latvian.mods.kubejs.event.KubeEvent;
 import net.minecraft.resources.Identifier;
 import java.util.*;
+//?} else if =1.21.1 {
+/*import dev.latvian.mods.kubejs.event.KubeEvent;
+import net.minecraft.resources.ResourceLocation;
+import java.util.*;
+*/
+//?}
 
 /** Added 2026-11-01: validated native data-map overlays, regenerated with server scripts on every reload. */
 public final class ReworkMaterialsEvent implements KubeEvent {
     private final Map<String, JsonObject> maps = new LinkedHashMap<>();
+//? if =26.1.2 || =26.3 {
     private static String key(String value) {
         boolean tag = value.startsWith("#"); var id = Identifier.tryParse(tag ? value.substring(1) : value);
         if (id == null) throw new IllegalArgumentException("Invalid item/block/fluid key: " + value);
+//?} else if =1.21.1 {
+/*    private static String key(String value) {
+        boolean tag = value.startsWith("#"); var id = ResourceLocation.tryParse(tag ? value.substring(1) : value);
+        if (id == null) throw new IllegalArgumentException("Invalid item/block/fluid key: " + value);
+*/
+//?}
         return (tag ? "#" : "") + id;
     }
     private void put(String map, String target, JsonObject data, Codec<?> codec) {

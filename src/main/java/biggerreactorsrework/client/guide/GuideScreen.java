@@ -1,3 +1,4 @@
+//? if =26.1.2 {
 package biggerreactorsrework.client.guide;
 
 // Modified 2026-11-01: native Minecraft 26.1.2 API.
@@ -7,15 +8,44 @@ import net.minecraft.util.Util;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.Screen;
+//?} else if =1.21.1 {
+/*package biggerreactorsrework.client.guide;
+
+import com.mojang.blaze3d.systems.RenderSystem;
+import java.util.List;
+import net.minecraft.Util;
+import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.screens.Screen;
+*/
+//?} else if =26.3 {
+/*package biggerreactorsrework.client.guide;
+
+import com.mojang.blaze3d.systems.RenderSystem;
+import java.util.List;
+import net.minecraft.util.Util;
+import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.screens.Screen;
+*/
+//?}
 import net.minecraft.client.gui.screens.inventory.tooltip.TooltipRenderUtil;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
+//? if =26.1.2 || =26.3 {
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvents;
+//?} else if =1.21.1 {
+/*import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.sounds.SoundEvents;
+*/
+//?}
 import net.minecraft.util.Mth;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.item.ItemStack;
+//? if =26.1.2 || =26.3 {
 import net.minecraft.world.level.material.Fluid;
 import net.neoforged.neoforge.fluids.FluidStack;
 
@@ -25,6 +55,20 @@ import net.neoforged.neoforge.fluids.FluidStack;
  * page after page. Turning a page (arrows, keys, mouse wheel or a contents line) animates the sheet around the spine.
  */
 public class GuideScreen extends Screen {
+//?} else if =1.21.1 {
+/*import net.minecraft.world.level.material.Fluid;
+import net.neoforged.neoforge.client.extensions.common.IClientFluidTypeExtensions;
+import net.neoforged.neoforge.fluids.FluidStack;
+import org.lwjgl.glfw.GLFW;
+
+/^*
+ * The reactor guide as an open book in the colors of its model: steel covers, cream pages, a uranium-green ribbon
+ * back to the contents. The first spread holds the presentation and the clickable contents; then the chapters run
+ * page after page. Turning a page (arrows, keys, mouse wheel or a contents line) animates the sheet around the spine.
+ ^/
+public class GuideScreen extends Screen {
+*/
+//?}
     // Modified 2026-10-30: rebuild displayed server limits when configuration is synchronized.
     private long configRevision = -1;
 
@@ -69,12 +113,22 @@ public class GuideScreen extends Screen {
     private static final int URANIUM_GREEN = 0xFF78AC32;
     private static final int URANIUM_GREEN_LIGHT = 0xFFDAF19C;
 
+//? if =26.1.2 || =26.3 {
     private static final long TURN_MS = 380;
     private static final Identifier PAGE_FORWARD = Identifier.withDefaultNamespace("widget/page_forward");
     private static final Identifier PAGE_FORWARD_HOVER = Identifier.withDefaultNamespace("widget/page_forward_highlighted");
     private static final Identifier PAGE_BACKWARD = Identifier.withDefaultNamespace("widget/page_backward");
     private static final Identifier PAGE_BACKWARD_HOVER = Identifier.withDefaultNamespace("widget/page_backward_highlighted");
     private static final int ARROW_W = 23;
+//?} else if =1.21.1 {
+/*    private static final long TURN_MS = 380;
+    private static final ResourceLocation PAGE_FORWARD = ResourceLocation.withDefaultNamespace("widget/page_forward");
+    private static final ResourceLocation PAGE_FORWARD_HOVER = ResourceLocation.withDefaultNamespace("widget/page_forward_highlighted");
+    private static final ResourceLocation PAGE_BACKWARD = ResourceLocation.withDefaultNamespace("widget/page_backward");
+    private static final ResourceLocation PAGE_BACKWARD_HOVER = ResourceLocation.withDefaultNamespace("widget/page_backward_highlighted");
+    private static final int ARROW_W = 23;
+*/
+//?}
     private static final int ARROW_H = 13;
 
     /** Spread shown when the book was last closed, kept while the game runs. */
@@ -92,9 +146,16 @@ public class GuideScreen extends Screen {
 
     private GuideElement dragTarget;
     private ItemStack hoveredStack = ItemStack.EMPTY;
+//? if =26.1.2 || =26.3 {
     private List<Component> hoveredText = List.of();
     private Identifier hoveredReference;
     private GuideReferences.Target hoveredMaterial;
+//?} else if =1.21.1 {
+/*    private List<Component> hoveredText = List.of();
+    private ResourceLocation hoveredReference;
+    private GuideReferences.Target hoveredMaterial;
+*/
+//?}
 
     public GuideScreen() {
         super(Component.translatable("item.biggerreactorsrework.guide_book"));
@@ -197,10 +258,18 @@ public class GuideScreen extends Screen {
 
     // ------------------------------------------------------------------ rendering
 
+//? if =26.1.2 || =26.3 {
     @Override
     public void extractRenderState(GuiGraphicsExtractor g, int mouseX, int mouseY, float partialTick) {
         super.extractRenderState(g, mouseX, mouseY, partialTick);
         hoveredStack = ItemStack.EMPTY;
+//?} else if =1.21.1 {
+/*    @Override
+    public void render(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
+        super.render(g, mouseX, mouseY, partialTick);
+        hoveredStack = ItemStack.EMPTY;
+*/
+//?}
         hoveredText = List.of();
         hoveredReference = null;
         hoveredMaterial = null;
@@ -226,6 +295,7 @@ public class GuideScreen extends Screen {
         GuideReferences.Target reference = hoveredMaterial!=null?hoveredMaterial:hoveredReference == null ? null : GuideReferences.target(hoveredReference);
         if (reference != null) {
             renderReference(g, reference, mouseX, mouseY);
+//? if =26.1.2 || =26.3 {
         } else if (!hoveredStack.isEmpty()) {
             g.setTooltipForNextFrame(font, hoveredStack, mouseX, mouseY);
         } else if (!hoveredText.isEmpty()) {
@@ -236,6 +306,19 @@ public class GuideScreen extends Screen {
     /** Steel covers with beveled edges, reinforced corners, rivets and the spine between them, and the page block. */
     private void renderCover(GuiGraphicsExtractor g) {
         int x0 = bookX;
+//?} else if =1.21.1 {
+/*        } else if (!hoveredStack.isEmpty()) {
+            g.renderTooltip(font, hoveredStack, mouseX, mouseY);
+        } else if (!hoveredText.isEmpty()) {
+            g.renderComponentTooltip(font, hoveredText, mouseX, mouseY);
+        }
+    }
+
+    /^* Steel covers with beveled edges, reinforced corners, rivets and the spine between them, and the page block. ^/
+    private void renderCover(GuiGraphics g) {
+        int x0 = bookX;
+*/
+//?}
         int y0 = bookY;
         int x1 = bookX + bookW;
         int y1 = bookY + bookH;
@@ -283,11 +366,20 @@ public class GuideScreen extends Screen {
 
     int contentHeight() {
         return contentH;
+//? if =26.1.2 || =26.3 {
     }
 
     /** A page: paper with the shade of the spine, its elements and its number. */
     private void renderPage(GuiGraphicsExtractor g, int index, int x, boolean left, int mouseX, int mouseY) {
         int y = pageY();
+//?} else if =1.21.1 {
+/*    }
+
+    /^* A page: paper with the shade of the spine, its elements and its number. ^/
+    private void renderPage(GuiGraphics g, int index, int x, boolean left, int mouseX, int mouseY) {
+        int y = pageY();
+*/
+//?}
         g.fill(x, y, x + pageW, y + pageH, PAPER);
         g.fill(left ? x : x + pageW - 1, y, left ? x + 1 : x + pageW, y + pageH, PAPER_LIGHT);
         for (int i = 0; i < 6; i++) {
@@ -308,13 +400,21 @@ public class GuideScreen extends Screen {
             p.element().render(this, g, cx, cy + p.y(), contentW, mx, my);
         }
         String number = Integer.toString(index + 1);
+//? if =26.1.2 || =26.3 {
         int footerY = y + pageH - 11;
         g.text(font, number, left ? x + PAD_X : x + pageW - PAD_X - font.width(number), footerY, GuideElements.MUTED, false);
         if (page.chapter() >= 0) {
+//?} else if =1.21.1 {
+/*        int footerY = y + pageH - 11;
+        g.drawString(font, number, left ? x + PAD_X : x + pageW - PAD_X - font.width(number), footerY, GuideElements.MUTED, false);
+        if (page.chapter() >= 0) {
+*/
+//?}
             Component name = Component.translatable("guide.biggerreactorsrework.chapter." + book.chapters.get(page.chapter()).id());
             int nameW = contentW - 2 * (font.width(number) + 6);
             fittedText(g, name, x + PAD_X + font.width(number) + 6, footerY, nameW, GuideElements.MUTED, true);
         }
+//? if =26.1.2 || =26.3 {
     }
 
     /**
@@ -323,6 +423,17 @@ public class GuideScreen extends Screen {
      */
     private void renderTurn(GuiGraphicsExtractor g, float progress) {
         boolean forward = turnTo > turnFrom;
+//?} else if =1.21.1 {
+/*    }
+
+    /^*
+     * The turning sheet: forward, the right page lifts from the spine and lands on the left showing its back (the
+     * target's left page); backward, the opposite. Underneath, the target pages are already in place.
+     ^/
+    private void renderTurn(GuiGraphics g, float progress) {
+        boolean forward = turnTo > turnFrom;
+*/
+//?}
         float eased = (float) (0.5 - 0.5 * Math.cos(Math.PI * progress));
         float angle = eased * 180.0F;
         float cos = Mth.cos(angle * Mth.DEG_TO_RAD);
@@ -348,15 +459,26 @@ public class GuideScreen extends Screen {
         }
         float squash = Math.max(0.02F, Math.abs(cos));
         float lift = 1.0F + 0.04F * Mth.sin(angle * Mth.DEG_TO_RAD);
+//? if =26.1.2 || =26.3 {
         int sx = spineX();
         g.pose().pushMatrix();
         g.pose().translate(sx, pageY() + pageH / 2.0F);
         g.pose().scale(squash, lift);
         g.pose().translate(-sx, -(pageY() + pageH / 2.0F));
         renderPage(g, pageIndex, onLeft ? leftPageX() : rightPageX(), onLeft, -1, -1);
+//?} else if =1.21.1 {
+/*        int sx = spineX();
+        g.pose().pushPose();
+        g.pose().translate(sx, pageY() + pageH / 2.0F, 300);
+        g.pose().scale(squash, lift, 1.0F);
+        g.pose().translate(-sx, -(pageY() + pageH / 2.0F), 0);
+        renderPage(g, pageIndex, onLeft ? leftPageX() : rightPageX(), onLeft, -1, -1);
+*/
+//?}
         // The sheet darkens as it stands up.
         int shade = (int) (0x70 * (1.0F - squash));
         int px = onLeft ? leftPageX() : rightPageX();
+//? if =26.1.2 || =26.3 {
         g.fill(px, pageY(), px + pageW, pageY() + pageH, shade << 24 | 0x22232F);
         g.pose().popMatrix();
     }
@@ -364,17 +486,42 @@ public class GuideScreen extends Screen {
     /** The uranium-green ribbon hanging over the right page: back to the contents. */
     private void renderRibbon(GuiGraphicsExtractor g, int mouseX, int mouseY) {
         int x = ribbonX();
+//?} else if =1.21.1 {
+/*        g.fill(px, pageY(), px + pageW, pageY() + pageH, shade << 24 | 0x22232F);
+        g.pose().popPose();
+    }
+
+    /^* The uranium-green ribbon hanging over the right page: back to the contents. ^/
+    private void renderRibbon(GuiGraphics g, int mouseX, int mouseY) {
+        int x = ribbonX();
+*/
+//?}
         int y = bookY;
         boolean hover = overRibbon(mouseX, mouseY);
+//? if =26.1.2 || =26.3 {
         int length = hover ? 22 : 18;
         g.pose().pushMatrix();
         g.pose().translate(0, 0);
         g.fill(x, y, x + 6, y + length, URANIUM_GREEN);
+//?} else if =1.21.1 {
+/*        int length = hover ? 22 : 18;
+        g.pose().pushPose();
+        g.pose().translate(0, 0, 400);
+        g.fill(x, y, x + 6, y + length, URANIUM_GREEN);
+*/
+//?}
         g.fill(x + 1, y, x + 2, y + length, URANIUM_GREEN_LIGHT);
         g.fill(x, y + length, x + 2, y + length + 2, URANIUM_GREEN);
+//? if =26.1.2 || =26.3 {
         g.fill(x + 4, y + length, x + 6, y + length + 2, URANIUM_GREEN);
         g.pose().popMatrix();
         if (hover) {
+//?} else if =1.21.1 {
+/*        g.fill(x + 4, y + length, x + 6, y + length + 2, URANIUM_GREEN);
+        g.pose().popPose();
+        if (hover) {
+*/
+//?}
             hoveredText = List.of(Component.translatable("guide.biggerreactorsrework.index.back"));
         }
     }
@@ -385,6 +532,7 @@ public class GuideScreen extends Screen {
 
     private boolean overRibbon(double mouseX, double mouseY) {
         return mouseX >= ribbonX() && mouseX < ribbonX() + 6 && mouseY >= bookY && mouseY < bookY + 24;
+//? if =26.1.2 || =26.3 {
     }
 
     private void renderArrows(GuiGraphicsExtractor g, int mouseX, int mouseY) {
@@ -392,10 +540,27 @@ public class GuideScreen extends Screen {
             boolean hover = overBack(mouseX, mouseY);
             g.blitSprite(net.minecraft.client.renderer.RenderPipelines.GUI_TEXTURED, hover ? PAGE_BACKWARD_HOVER : PAGE_BACKWARD, backX(), arrowY(), ARROW_W, ARROW_H);
         }
+//?} else if =1.21.1 {
+/*    }
+
+    private void renderArrows(GuiGraphics g, int mouseX, int mouseY) {
+        if (spread > 0) {
+            boolean hover = overBack(mouseX, mouseY);
+            g.blitSprite(hover ? PAGE_BACKWARD_HOVER : PAGE_BACKWARD, backX(), arrowY(), ARROW_W, ARROW_H);
+        }
+*/
+//?}
         if (spread < book.spreads() - 1) {
+//? if =26.1.2 || =26.3 {
             boolean hover = overForward(mouseX, mouseY);
             g.blitSprite(net.minecraft.client.renderer.RenderPipelines.GUI_TEXTURED, hover ? PAGE_FORWARD_HOVER : PAGE_FORWARD, forwardX(), arrowY(), ARROW_W, ARROW_H);
         }
+//?} else if =1.21.1 {
+/*            boolean hover = overForward(mouseX, mouseY);
+            g.blitSprite(hover ? PAGE_FORWARD_HOVER : PAGE_FORWARD, forwardX(), arrowY(), ARROW_W, ARROW_H);
+        }
+*/
+//?}
     }
 
     private int arrowY() {
@@ -421,6 +586,7 @@ public class GuideScreen extends Screen {
 
     // ------------------------------------------------------------------ helpers for the elements
 
+//? if =26.1.2 || =26.3 {
     void textTooltip(List<Component> lines){hoveredText=List.copyOf(lines);}
 
     /** Keep dimensions and recipe quantities fully visible instead of scrolling their first digits away. */
@@ -433,26 +599,67 @@ public class GuideScreen extends Screen {
     /** Slot frame with an item; hovering it shows the item tooltip. */
     void itemSlot(GuiGraphicsExtractor g, ItemStack stack, int x, int y, int mouseX, int mouseY) {
         biggerreactorsrework.client.GuiArt.slot(g, x, y, 18);
+//?} else if =1.21.1 {
+/*    void textTooltip(List<Component> lines){hoveredText=List.copyOf(lines);}
+
+    /^* Keep dimensions and recipe quantities fully visible instead of scrolling their first digits away. ^/
+    void fixedText(GuiGraphics g,Component text,int x,int y,int maxWidth,int color){
+        int width=font.width(text);float scale=width>maxWidth&&width>0?(float)maxWidth/width:1f;
+        g.pose().pushPose();g.pose().translate(x,y+(1-scale)*4,0);g.pose().scale(scale,scale,1);
+        g.drawString(font,text,0,0,color,false);g.pose().popPose();
+    }
+
+    /^* Slot frame with an item; hovering it shows the item tooltip. ^/
+    void itemSlot(GuiGraphics g, ItemStack stack, int x, int y, int mouseX, int mouseY) {
+        biggerreactorsrework.client.GuiArt.slot(g, x, y, 18);
+*/
+//?}
         if (stack.isEmpty()) {
             return;
+//? if =26.1.2 || =26.3 {
         }
         g.item(stack, x + 1, y + 1);
         g.itemDecorations(font, stack, x + 1, y + 1);
         if (mouseX >= x + 1 && mouseX < x + 17 && mouseY >= y + 1 && mouseY < y + 17) {
+//?} else if =1.21.1 {
+/*        }
+        g.renderItem(stack, x + 1, y + 1);
+        g.renderItemDecorations(font, stack, x + 1, y + 1);
+        if (mouseX >= x + 1 && mouseX < x + 17 && mouseY >= y + 1 && mouseY < y + 17) {
+*/
+//?}
             g.fill(x + 1, y + 1, x + 17, y + 17, 0x80FFFFFF);
             hoveredStack = stack;
         }
+//? if =26.1.2 || =26.3 {
     }
 
     /** An item reference in the text is under the mouse: its icon and name are shown this frame. */
     void hoverReference(Identifier id) {
         hoveredReference = id;
+//?} else if =1.21.1 {
+/*    }
+
+    /^* An item reference in the text is under the mouse: its icon and name are shown this frame. ^/
+    void hoverReference(ResourceLocation id) {
+        hoveredReference = id;
+*/
+//?}
     }
+//? if =26.1.2 || =26.3 {
     void materialTooltip(GuideReferences.Target material){hoveredMaterial=material;}
 
     /** Tooltip of an item reference: the item (or fluid) drawn large, with its name beside it. */
     private void renderReference(GuiGraphicsExtractor g, GuideReferences.Target reference, int mouseX, int mouseY) {
         Component name = reference.stack().isEmpty() ? reference.name()
+//?} else if =1.21.1 {
+/*    void materialTooltip(GuideReferences.Target material){hoveredMaterial=material;}
+
+    /^* Tooltip of an item reference: the item (or fluid) drawn large, with its name beside it. ^/
+    private void renderReference(GuiGraphics g, GuideReferences.Target reference, int mouseX, int mouseY) {
+        Component name = reference.stack().isEmpty() ? reference.name()
+*/
+//?}
                 : reference.name().copy().withStyle(reference.stack().getRarity().getStyleModifier());
         boolean icon=!reference.stack().isEmpty()||reference.fluid()!=null;
         int iconWidth=icon?38:0;
@@ -462,6 +669,7 @@ public class GuideScreen extends Screen {
         if (x + w + 4 > width) {
             x = Math.max(4, mouseX - 12 - w);
         }
+//? if =26.1.2 || =26.3 {
         int y = Mth.clamp(mouseY - 12, 4, height - h - 4);
         g.nextStratum();
         g.pose().pushMatrix();
@@ -472,7 +680,21 @@ public class GuideScreen extends Screen {
         if (!reference.stack().isEmpty()) {
             g.item(reference.stack(), 0, 0);
         } else if(reference.fluid()!=null) {
+//?} else if =1.21.1 {
+/*        int y = Mth.clamp(mouseY - 12, 4, height - h - 4);
+        g.pose().pushPose();
+        g.pose().translate(0, 0, 400);
+        TooltipRenderUtil.renderTooltipBackground(g, x, y, w, h, 0);
+        g.pose().pushPose();
+        g.pose().translate(x, y, 0);
+        g.pose().scale(2.0F, 2.0F, 1.0F);
+        if (!reference.stack().isEmpty()) {
+            g.renderItem(reference.stack(), 0, 0);
+        } else if(reference.fluid()!=null) {
+*/
+//?}
             fluidIcon(g, reference.fluidStack().isEmpty() ? new FluidStack(reference.fluid(), 1) : reference.fluidStack(), 0, 0);
+//? if =26.1.2 || =26.3 {
         }
         g.pose().popMatrix();
         g.text(font, name, x + iconWidth, y + (h-font.lineHeight)/2, 0xFFFFFFFF, true);
@@ -491,11 +713,40 @@ public class GuideScreen extends Screen {
     /** Slot frame with the still texture of a fluid; hovering it shows the fluid's name. */
     void fluidSlot(GuiGraphicsExtractor g, Fluid fluid, int x, int y, int mouseX, int mouseY) {
         biggerreactorsrework.client.GuiArt.slot(g, x, y, 18);
+//?} else if =1.21.1 {
+/*        }
+        g.pose().popPose();
+        g.pose().translate(0, 0, 200);
+        g.drawString(font, name, x + iconWidth, y + (h-font.lineHeight)/2, 0xFFFFFFFF, true);
+        g.pose().popPose();
+    }
+
+    /^* The still texture of a fluid, 16 × 16, tinted. ^/
+    void fluidIcon(GuiGraphics g, Fluid fluid, int x, int y) {
+        fluidIcon(g, new FluidStack(fluid, 1), x, y);
+    }
+
+    private void fluidIcon(GuiGraphics g, FluidStack stack, int x, int y) {
+        IClientFluidTypeExtensions ext = IClientFluidTypeExtensions.of(stack.getFluid());
+        TextureAtlasSprite sprite = minecraft.getTextureAtlas(InventoryMenu.BLOCK_ATLAS).apply(ext.getStillTexture(stack));
+        int tint = ext.getTintColor(stack);
+        RenderSystem.enableBlend();
+        g.setColor(((tint >> 16) & 0xFF) / 255.0F, ((tint >> 8) & 0xFF) / 255.0F, (tint & 0xFF) / 255.0F, ((tint >>> 24) & 0xFF) / 255.0F);
+        g.blit(x, y, 0, 16, 16, sprite);
+        g.setColor(1.0F, 1.0F, 1.0F, 1.0F);
+    }
+
+    /^* Slot frame with the still texture of a fluid; hovering it shows the fluid's name. ^/
+    void fluidSlot(GuiGraphics g, Fluid fluid, int x, int y, int mouseX, int mouseY) {
+        biggerreactorsrework.client.GuiArt.slot(g, x, y, 18);
+*/
+//?}
         fluidIcon(g, new FluidStack(fluid, 1), x + 1, y + 1);
         if (mouseX >= x + 1 && mouseX < x + 17 && mouseY >= y + 1 && mouseY < y + 17) {
             g.fill(x + 1, y + 1, x + 17, y + 17, 0x80FFFFFF);
             hoveredText = List.of(fluid.getFluidType().getDescription());
         }
+//? if =26.1.2 || =26.3 {
     }
 
     void textButton(GuiGraphicsExtractor g, int x, int y, int w, int h, Component label, int mouseX, int mouseY) {
@@ -505,7 +756,21 @@ public class GuideScreen extends Screen {
     void textButton(GuiGraphicsExtractor g, int x, int y, int w, int h, Component label, int mouseX, int mouseY, boolean active) {
         boolean hover = active && mouseX >= x && mouseX < x + w && mouseY >= y && mouseY < y + h;
         biggerreactorsrework.client.GuiArt.buttonBackground(g, x, y, w, h, hover, false, !active, biggerreactorsrework.client.GuiFrame.REACTOR);
+//?} else if =1.21.1 {
+/*    }
+
+    void textButton(GuiGraphics g, int x, int y, int w, int h, Component label, int mouseX, int mouseY) {
+        textButton(g, x, y, w, h, label, mouseX, mouseY, true);
+    }
+
+    void textButton(GuiGraphics g, int x, int y, int w, int h, Component label, int mouseX, int mouseY, boolean active) {
+        boolean hover = active && mouseX >= x && mouseX < x + w && mouseY >= y && mouseY < y + h;
+        RenderSystem.enableBlend();
+        biggerreactorsrework.client.GuiArt.buttonBackground(g, x, y, w, h, hover, false, !active, biggerreactorsrework.client.GuiFrame.REACTOR);
+*/
+//?}
         fittedText(g, label, x + 3, y + (h - 8) / 2, w - 6, active ? 0xFFEEEEEE : 0xFF777777, true);
+//? if =26.1.2 || =26.3 {
     }
 
     /** One line of text, shrunk to fit {@code maxWidth}. */
@@ -519,17 +784,41 @@ public class GuideScreen extends Screen {
      */
     void fittedText(GuiGraphicsExtractor g, Component text, int x, int y, int maxWidth, int color, boolean center) {
         int w = font.width(text);
+//?} else if =1.21.1 {
+/*    }
+
+    /^* One line of text, shrunk to fit {@code maxWidth}. ^/
+    void fittedText(GuiGraphics g, Component text, int x, int y, int maxWidth, int color) {
+        fittedText(g, text, x, y, maxWidth, color, false);
+    }
+
+    /^*
+     * One line of text at its normal size. When it does not fit, it slides from one end to the other inside its
+     * width, like the long names on the machine screens; only while a page turns (no clipping then) is it shrunk.
+     ^/
+    void fittedText(GuiGraphics g, Component text, int x, int y, int maxWidth, int color, boolean center) {
+        int w = font.width(text);
+*/
+//?}
         if (w > maxWidth && maxWidth > 0 && !turning()) {
             int overflow = w - maxWidth;
             double seconds = Util.getMillis() / 1000.0;
             double period = Math.max(overflow * 0.5, 3.0);
             double phase = Math.sin(Math.PI / 2 * Math.cos(2 * Math.PI * seconds / period)) / 2 + 0.5;
             int offset = (int) Math.round(Mth.lerp(phase, 0, overflow));
+//? if =26.1.2 || =26.3 {
             g.enableScissor(x, y - 1, x + maxWidth, y + font.lineHeight + 1);
             g.text(font, text, x - offset, y, color, false);
             g.disableScissor();
+//?} else if =1.21.1 {
+/*            g.enableScissor(x, y - 1, x + maxWidth, y + font.lineHeight + 1);
+            g.drawString(font, text, x - offset, y, color, false);
+            g.disableScissor();
+*/
+//?}
             return;
         }
+//? if =26.1.2 || =26.3 {
         float scale = w > maxWidth && w > 0 ? (float) maxWidth / w : 1.0F;
         g.pose().pushMatrix();
         float drawX = center ? x + (maxWidth - w * scale) / 2.0F : x;
@@ -538,9 +827,21 @@ public class GuideScreen extends Screen {
         g.text(font, text, 0, 0, color, false);
         g.pose().popMatrix();
     }
+//?} else if =1.21.1 {
+/*        float scale = w > maxWidth && w > 0 ? (float) maxWidth / w : 1.0F;
+        g.pose().pushPose();
+        float drawX = center ? x + (maxWidth - w * scale) / 2.0F : x;
+        g.pose().translate(drawX, y + (1 - scale) * 4, 0);
+        g.pose().scale(scale, scale, 1);
+        g.drawString(font, text, 0, 0, color, false);
+        g.pose().popPose();
+    }
+*/
+//?}
 
     void playClick() {
         minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
+//? if =26.1.2 {
     }
 
     // ------------------------------------------------------------------ input
@@ -582,6 +883,58 @@ public class GuideScreen extends Screen {
     }
 
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
+//?} else if =1.21.1 {
+/*    }
+
+    // ------------------------------------------------------------------ input
+
+    @Override
+    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+*/
+//?} else if =26.3 {
+/*    }
+
+    // ------------------------------------------------------------------ input
+
+    private net.minecraft.client.input.MouseButtonEvent lastPress, lastRelease, lastDrag;
+    private boolean lastDoubleClick;
+    private net.minecraft.client.input.KeyEvent lastKey;
+    private net.minecraft.client.input.CharacterEvent lastCharacter;
+
+    @Override
+    public final boolean mouseClicked(net.minecraft.client.input.MouseButtonEvent event, boolean doubleClick) {
+        lastPress = event;
+        lastDoubleClick = doubleClick;
+        return mouseClicked(event.x(), event.y(), event.button());
+    }
+
+    @Override
+    public final boolean mouseDragged(net.minecraft.client.input.MouseButtonEvent event, double dragX, double dragY) {
+        lastDrag = event;
+        return mouseDragged(event.x(), event.y(), event.button(), dragX, dragY);
+    }
+
+    @Override
+    public final boolean mouseReleased(net.minecraft.client.input.MouseButtonEvent event) {
+        lastRelease = event;
+        return mouseReleased(event.x(), event.y(), event.button());
+    }
+
+    @Override
+    public final boolean keyPressed(net.minecraft.client.input.KeyEvent event) {
+        lastKey = event;
+        return keyPressed(event.key(), event.keycode(), event.modifiers());
+    }
+
+    @Override
+    public final boolean charTyped(net.minecraft.client.input.CharacterEvent event) {
+        lastCharacter = event;
+        return charTyped((char) event.codepoint(), 0);
+    }
+
+    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+*/
+//?}
         if (turning()) {
             return true;
         }
@@ -612,24 +965,51 @@ public class GuideScreen extends Screen {
                     return true;
                 }
             }
+//? if =26.1.2 || =26.3 {
         }
         return super.mouseClicked(lastPress, lastDoubleClick);
     }
 
     public boolean mouseDragged(double mouseX, double mouseY, int button, double dragX, double dragY) {
+//?} else if =1.21.1 {
+/*        }
+        return super.mouseClicked(mouseX, mouseY, button);
+    }
+
+    @Override
+    public boolean mouseDragged(double mouseX, double mouseY, int button, double dragX, double dragY) {
+*/
+//?}
         if (dragTarget != null && dragTarget.drag(this, dragX, dragY)) {
             return true;
+//? if =26.1.2 || =26.3 {
         }
         return super.mouseDragged(lastDrag, dragX, dragY);
     }
 
     public boolean mouseReleased(double mouseX, double mouseY, int button) {
+//?} else if =1.21.1 {
+/*        }
+        return super.mouseDragged(mouseX, mouseY, button, dragX, dragY);
+    }
+
+    @Override
+    public boolean mouseReleased(double mouseX, double mouseY, int button) {
+*/
+//?}
         if (dragTarget != null) {
             dragTarget.release();
         }
+//? if =26.1.2 || =26.3 {
         dragTarget = null;
         return super.mouseReleased(lastRelease);
     }
+//?} else if =1.21.1 {
+/*        dragTarget = null;
+        return super.mouseReleased(mouseX, mouseY, button);
+    }
+*/
+//?}
 
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
@@ -649,9 +1029,17 @@ public class GuideScreen extends Screen {
             turnTo(spread - 1);
         }
         return true;
+//? if =26.1.2 || =26.3 {
     }
 
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+//?} else if =1.21.1 {
+/*    }
+
+    @Override
+    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+*/
+//?}
         if (!turning()) {
             for (var visible : visibleElements()) {
                 if (((GuideElement) visible[0]).keyPressed(this, keyCode, scanCode, modifiers)) {
@@ -659,6 +1047,7 @@ public class GuideScreen extends Screen {
                 }
             }
         }
+//? if =26.1.2 || =26.3 {
         switch (keyCode) {
             case com.mojang.blaze3d.platform.InputConstants.KEY_RIGHT, com.mojang.blaze3d.platform.InputConstants.KEY_PAGEDOWN -> turnTo(spread + 1);
             case com.mojang.blaze3d.platform.InputConstants.KEY_LEFT, com.mojang.blaze3d.platform.InputConstants.KEY_PAGEUP -> turnTo(spread - 1);
@@ -666,24 +1055,56 @@ public class GuideScreen extends Screen {
             default -> {
                 if (minecraft != null && minecraft.options.keyInventory.matches(lastKey)) {
                     onClose();
+//?} else if =1.21.1 {
+/*        switch (keyCode) {
+            case GLFW.GLFW_KEY_RIGHT, GLFW.GLFW_KEY_PAGE_DOWN -> turnTo(spread + 1);
+            case GLFW.GLFW_KEY_LEFT, GLFW.GLFW_KEY_PAGE_UP -> turnTo(spread - 1);
+            case GLFW.GLFW_KEY_HOME -> turnTo(0);
+            default -> {
+                if (minecraft != null && minecraft.options.keyInventory.matches(keyCode, scanCode)) {
+                    onClose();
+*/
+//?}
                     return true;
+//? if =26.1.2 || =26.3 {
                 }
                 return super.keyPressed(lastKey);
             }
+//?} else if =1.21.1 {
+/*                }
+                return super.keyPressed(keyCode, scanCode, modifiers);
+            }
+*/
+//?}
         }
         return true;
+//? if =26.1.2 || =26.3 {
     }
 
     public boolean charTyped(char codePoint, int modifiers) {
+//?} else if =1.21.1 {
+/*    }
+
+    @Override
+    public boolean charTyped(char codePoint, int modifiers) {
+*/
+//?}
         if (!turning()) {
             for (var visible : visibleElements()) {
                 if (((GuideElement) visible[0]).charTyped(this, codePoint, modifiers)) {
                     return true;
                 }
             }
+//? if =26.1.2 || =26.3 {
         }
         return super.charTyped(lastCharacter);
     }
+//?} else if =1.21.1 {
+/*        }
+        return super.charTyped(codePoint, modifiers);
+    }
+*/
+//?}
 
     /**
      * The screen closed (any way): the book in the hand closes too, and the calculator's form and running

@@ -1,0 +1,8 @@
+{
+  "type": "minecraft:blasting",
+  "ingredient": "biggerreactorsrework:cyanite_dust",
+  "result": {
+    "id": "biggerreactorsrework:cyanite_ingot"
+  },
+  "cookingtime": 100
+}

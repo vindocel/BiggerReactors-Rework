@@ -1,13 +1,27 @@
+//? if =26.1.2 || =26.3 {
 package biggerreactorsrework.machine.blocks;
 
 import net.minecraft.world.level.material.MapColor;
 
 import net.minecraft.core.BlockPos;
+//?} else if =1.21.1 {
+/*package biggerreactorsrework.machine.blocks;
+
+import net.minecraft.core.BlockPos;
+*/
+//?}
 import net.minecraft.core.Direction;
 import net.minecraft.world.InteractionHand;
+//? if =26.1.2 || =26.3 {
 import net.minecraft.world.InteractionResult;
 
 import net.minecraft.world.entity.player.Player;
+//?} else if =1.21.1 {
+/*import net.minecraft.world.InteractionResult;
+import net.minecraft.world.ItemInteractionResult;
+import net.minecraft.world.entity.player.Player;
+*/
+//?}
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.Level;
@@ -18,13 +32,21 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+//? if =26.1.2 || =26.3 {
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.phys.BlockHitResult;
+//?} else if =1.21.1 {
+/*import net.minecraft.world.level.block.state.properties.BooleanProperty;
+import net.minecraft.world.level.block.state.properties.DirectionProperty;
+import net.minecraft.world.phys.BlockHitResult;
+*/
+//?}
 import biggerreactorsrework.machine.tiles.IndustrialProcessorTile;
 import biggerreactorsrework.core.registry.RegisterBlock;
 
 import javax.annotation.Nonnull;
+//? if =26.1.2 || =26.3 {
 import javax.annotation.Nullable;
 
 // Modified 2026-11-01: declare a map palette color without changing block behavior.
@@ -32,7 +54,17 @@ public class IndustrialProcessor extends Block implements EntityBlock {
 
     public static final EnumProperty<Direction> FACING = BlockStateProperties.HORIZONTAL_FACING;
     public static final BooleanProperty ENABLED = BlockStateProperties.ENABLED;
+//?} else if =1.21.1 {
+/*import javax.annotation.Nullable;
 
+public class IndustrialProcessor extends Block implements EntityBlock {
+
+    public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
+    public static final BooleanProperty ENABLED = BlockStateProperties.ENABLED;
+*/
+//?}
+
+//? if =26.1.2 || =26.3 {
     @RegisterBlock(name = "industrial_processor", tileEntityClass = IndustrialProcessorTile.class)
     public static final IndustrialProcessor INSTANCE = biggerreactorsrework.core.registry.RegistryIds.named("industrial_processor", () -> new IndustrialProcessor());
 
@@ -40,11 +72,29 @@ public class IndustrialProcessor extends Block implements EntityBlock {
         super(biggerreactorsrework.core.registry.RegistryIds.block(Properties.of().mapColor(MapColor.COLOR_GRAY)
                 // Modified 2026-10-27: light follows the existing processing animation.
                 .lightLevel(biggerreactorsrework.multiblocks.MachineLighting::emission)
+//?} else if =1.21.1 {
+/*    @RegisterBlock(name = "industrial_processor", tileEntityClass = IndustrialProcessorTile.class)
+    public static final IndustrialProcessor INSTANCE = new IndustrialProcessor();
+
+    public IndustrialProcessor() {
+        super(Properties.of()
+                .mapColor(net.minecraft.world.level.material.MapColor.COLOR_GRAY)
+                // Modified 2026-10-27: light follows the existing processing animation.
+                .lightLevel(biggerreactorsrework.multiblocks.MachineLighting::emission)
+*/
+//?}
                 .sound(SoundType.STONE)
                 .destroyTime(1.0F)
+//? if =26.1.2 || =26.3 {
                 .explosionResistance(1.0F)
                 .requiresCorrectToolForDrops()));
         this.registerDefaultState(this.getStateDefinition().any()
+//?} else if =1.21.1 {
+/*                .explosionResistance(1.0F)
+                .requiresCorrectToolForDrops());
+        this.registerDefaultState(this.getStateDefinition().any()
+*/
+//?}
                 .setValue(FACING, Direction.NORTH)
                 .setValue(ENABLED, Boolean.FALSE));
     }
@@ -57,14 +107,29 @@ public class IndustrialProcessor extends Block implements EntityBlock {
 
     @Nullable
     @Override
+//? if =26.1.2 || =26.3 {
     public <T extends BlockEntity> BlockEntityTicker<T> getTicker(@Nonnull Level level, @Nonnull BlockState state, @Nonnull BlockEntityType<T> type) {
         if (level.isClientSide()) {
             return null;
+//?} else if =1.21.1 {
+/*    public <T extends BlockEntity> BlockEntityTicker<T> getTicker(@Nonnull Level level, @Nonnull BlockState state, @Nonnull BlockEntityType<T> type) {
+        if (level.isClientSide) {
+            return null;
+*/
+//?}
         }
+//? if =26.1.2 || =26.3 {
         return (a, b, c, tile) -> {
             if (tile instanceof IndustrialProcessorTile reprocessor) {
                 reprocessor.tick();
             }
+//?} else if =1.21.1 {
+/*        return (a, b, c, tile) -> {
+            if (tile instanceof IndustrialProcessorTile processor) {
+                processor.tick();
+            }
+*/
+//?}
         };
     }
 
@@ -82,24 +147,62 @@ public class IndustrialProcessor extends Block implements EntityBlock {
     }
 
     @Nonnull
+//? if =26.1.2 || =26.3 {
     @Override
     protected InteractionResult useItemOn(@Nonnull ItemStack stack, @Nonnull BlockState state, @Nonnull Level level, @Nonnull BlockPos pos, @Nonnull Player player, @Nonnull InteractionHand hand, @Nonnull BlockHitResult hitResult) {
         if (level.getBlockEntity(pos) instanceof IndustrialProcessorTile tile) {
+//?} else if =1.21.1 {
+/*    @Override
+    protected ItemInteractionResult useItemOn(@Nonnull ItemStack stack, @Nonnull BlockState state, @Nonnull Level level, @Nonnull BlockPos pos, @Nonnull Player player, @Nonnull InteractionHand hand, @Nonnull BlockHitResult hitResult) {
+        if (level.getBlockEntity(pos) instanceof IndustrialProcessorTile tile) {
+*/
+//?}
             return tile.onItemUse(stack, level, player, hand);
+//? if =26.1.2 || =26.3 {
         }
         return InteractionResult.TRY_WITH_EMPTY_HAND;
     }
+//?} else if =1.21.1 {
+/*        }
+        return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+    }
+*/
+//?}
 
     @Nonnull
     @Override
     protected InteractionResult useWithoutItem(@Nonnull BlockState state, @Nonnull Level level, @Nonnull BlockPos pos, @Nonnull Player player, @Nonnull BlockHitResult hitResult) {
+//? if =26.1.2 || =26.3 {
         if (level.getBlockEntity(pos) instanceof IndustrialProcessorTile tile) {
             if (!level.isClientSide()) {
                 player.openMenu(tile, pos);
             }
             return InteractionResult.SUCCESS;
         }
+//?} else if =1.21.1 {
+/*        if (level.getBlockEntity(pos) instanceof IndustrialProcessorTile tile) {
+            if (!level.isClientSide) {
+                player.openMenu(tile, pos);
+            }
+            return InteractionResult.sidedSuccess(level.isClientSide);
+        }
+*/
+//?}
         return InteractionResult.PASS;
+//? if =26.1.2 || =26.3 {
     }
 
 }
+//?} else if =1.21.1 {
+/*    }
+
+    @Override
+    protected void onRemove(@Nonnull BlockState state, @Nonnull Level level, @Nonnull BlockPos pos, @Nonnull BlockState newState, boolean isMoving) {
+        if (!state.is(newState.getBlock()) && level.getBlockEntity(pos) instanceof IndustrialProcessorTile tile) {
+            tile.dropContents(level, pos);
+        }
+        super.onRemove(state, level, pos, newState, isMoving);
+    }
+}
+*/
+//?}

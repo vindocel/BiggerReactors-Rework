@@ -1,6 +1,14 @@
+//? if =26.1.2 || =26.3 {
 package biggerreactorsrework;
 
 import biggerreactorsrework.core.CoreEvents;
+//?} else if =1.21.1 {
+/*package biggerreactorsrework;
+
+import biggerreactorsrework.compat.opencomputers.OpenComputersCompat;
+import biggerreactorsrework.core.CoreEvents;
+*/
+//?}
 import net.neoforged.fml.ModList;
 import biggerreactorsrework.core.event.ReloadDataEvent;
 import biggerreactorsrework.core.registry.Registry;
@@ -28,17 +36,37 @@ public class BiggerReactors {
 
     public BiggerReactors(IEventBus modBus, ModContainer container) {
         // Modified 2026-10-28: common events, with playback isolated to the client.
+//? if =26.1.2 || =26.3 {
         biggerreactorsrework.registries.MachineSounds.register(modBus);
         biggerreactorsrework.registries.ModParticles.register(modBus);
+//?} else if =1.21.1 {
+/*        biggerreactorsrework.registries.MachineSounds.register(modBus);
+        biggerreactorsrework.fluids.HeatedCoolantBucket.register(modBus);
+        biggerreactorsrework.registries.ModParticles.register(modBus);
+*/
+//?}
         biggerreactorsrework.worldgen.UraniumGeneration.register(modBus);
         biggerreactorsrework.advancement.ReworkAdvancements.register(modBus);
+//? if =26.1.2 || =26.3 {
         biggerreactorsrework.registries.CoolantComponents.register(modBus);
         biggerreactorsrework.fluids.HeatedCoolantBucket.register(modBus);
         version = container.getModInfo().getVersion().toString();
+//?} else if =1.21.1 {
+/*        biggerreactorsrework.registries.CoolantComponents.register(modBus);
+        version = container.getModInfo().getVersion().toString();
+*/
+//?}
         new Registry(modid, BiggerReactors.class.getPackageName(), modBus, new ReferenceArrayList<>(), new ReferenceArrayList<>());
         biggerreactorsrework.machine.recipe.ReprocessingRecipes.register(modBus);
+//? if =26.1.2 || =26.3 {
         modBus.addListener(biggerreactorsrework.registries.MaterialDataMaps::register);
         CoreEvents.init();
+//?} else if =1.21.1 {
+/*        modBus.addListener(biggerreactorsrework.registries.MaterialDataMaps::register);
+        modBus.addListener(biggerreactorsrework.data.ModDataGeneration::gather);
+        CoreEvents.init();
+*/
+//?}
         biggerreactorsrework.registries.CoolantSync.init();
         modBus.addListener(biggerreactorsrework.calculator.service.CalculatorNetwork::register);
         biggerreactorsrework.calculator.service.CalculatorService.init();
@@ -46,6 +74,7 @@ public class BiggerReactors {
         // Modified 2026-10-29: optional pickup protection for assembled multiblocks.
         if (ModList.get().isLoaded("carryon")) {
             biggerreactorsrework.compat.carryon.CarryOnCompat.init();
+//? if =26.1.2 || =26.3 {
         }
         registerGameTests(modBus);
         // Inactive parts: their classes exist only when turned on in gradle.properties.
@@ -63,6 +92,20 @@ public class BiggerReactors {
             container.registerExtensionPoint(net.neoforged.neoforge.client.gui.IConfigScreenFactory.class,
                     (net.neoforged.neoforge.client.gui.IConfigScreenFactory) (mod, parent) -> new biggerreactorsrework.client.PackConfigScreen(parent));
             BiggerReactorsClient.init(modBus);
+//?} else if =1.21.1 {
+/*        }
+        // Modified 2026-10-31: both optional computer integrations use the same port blocks.
+        if (ModList.get().isLoaded("opencomputers")) {
+            OpenComputersCompat.init(modBus);
+        }
+        if (ModList.get().isLoaded("computercraft")) {
+            biggerreactorsrework.compat.cctweaked.CCTweakedCompat.init(modBus);
+        }
+        if (FMLEnvironment.dist.isClient()) {
+            BiggerReactorsClient.registerConfigScreen(container);
+            BiggerReactorsClient.init(modBus);
+*/
+//?}
         }
     }
 
@@ -76,6 +119,7 @@ public class BiggerReactors {
 
     public static String modVersion() {
         return version;
+//? if =26.1.2 || =26.3 {
     }
 
     private static void initIfPresent(String className, String method, IEventBus modBus) {
@@ -104,3 +148,8 @@ public class BiggerReactors {
         }
     }
 }
+//?} else if =1.21.1 {
+/*    }
+}
+*/
+//?}

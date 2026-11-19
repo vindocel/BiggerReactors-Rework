@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "ICI"
+  ],
+  "key": {
+    "I": "minecraft:iron_ingot",
+    "C": "#c:ingots/cyanite"
+  },
+  "result": {
+    "id": "biggerreactorsrework:turbine_rotor_shaft"
+  }
+}

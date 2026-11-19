@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "pattern": [
+    "G G",
+    " U ",
+    " G "
+  ],
+  "key": {
+    "G": {
+      "tag": "c:ingots/graphite"
+    },
+    "U": {
+      "tag": "c:ingots/uranium"
+    }
+  },
+  "result": {
+    "count": 1,
+    "id": "biggerreactorsrework:wrench"
+  }
+}

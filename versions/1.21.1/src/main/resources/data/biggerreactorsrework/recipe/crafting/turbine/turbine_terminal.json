@@ -1,0 +1,22 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "C C",
+    "BDB",
+    "C C"
+  ],
+  "key": {
+    "C" : {
+      "item": "biggerreactorsrework:turbine_casing"
+    },
+    "B": {
+      "item": "biggerreactorsrework:blutonium_ingot"
+    },
+    "D": {
+      "item": "minecraft:diamond"
+    }
+  },
+  "result": {
+    "id": "biggerreactorsrework:turbine_terminal"
+  }
+}

@@ -17,9 +17,16 @@ import biggerreactorsrework.multiblocks.turbine.containers.TurbineTerminalContai
 import biggerreactorsrework.multiblocks.heatexchanger.client.HeatExchangerChannelModels;
 import biggerreactorsrework.multiblocks.turbine.client.TurbineRotorRenderer;
 import biggerreactorsrework.multiblocks.turbine.tiles.TurbineRotorBearingTile;
+//? if =26.1.2 || =26.3 {
 import biggerreactorsrework.core.registry.Registry;
 import net.minecraft.resources.Identifier;
 import net.neoforged.bus.api.IEventBus;
+//?} else if =1.21.1 {
+/*import biggerreactorsrework.core.registry.Registry;
+import net.minecraft.resources.ResourceLocation;
+import net.neoforged.bus.api.IEventBus;
+*/
+//?}
 import net.neoforged.neoforge.client.extensions.common.IClientFluidTypeExtensions;
 import net.neoforged.neoforge.client.extensions.common.RegisterClientExtensionsEvent;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
@@ -34,9 +41,16 @@ public final class BiggerReactorsClient {
 
     public static boolean connected() { return net.minecraft.client.Minecraft.getInstance().getConnection()!=null; }
 
+//? if =26.1.2 || =26.3 {
     public static void refreshPlacedCoolant(net.neoforged.neoforge.attachment.IAttachmentHolder holder,
                                            java.util.Map<String, String> previous, java.util.Map<String, String> next) {
         if (!(holder instanceof net.minecraft.world.level.chunk.LevelChunk chunk)) return;
+//?} else if =1.21.1 {
+/*    public static void refreshPlacedCoolant(net.neoforged.neoforge.attachment.IAttachmentHolder holder,
+                                           @javax.annotation.Nullable java.util.Map<String, String> previous, java.util.Map<String, String> next) {
+        if (!(holder instanceof net.minecraft.world.level.chunk.LevelChunk chunk)) return;
+*/
+//?}
         var client = net.minecraft.client.Minecraft.getInstance();
         if (client.level != chunk.getLevel()) return;
         var dirtySections = new java.util.HashSet<net.minecraft.core.SectionPos>();
@@ -46,23 +60,45 @@ public final class BiggerReactorsClient {
             if (!java.util.Objects.equals(previous == null ? null : previous.get(key), next.get(key))) {
                 dirtySections.add(net.minecraft.core.SectionPos.of(net.minecraft.core.BlockPos.of(Long.parseLong(key))));
             }
+//? if =26.1.2 || =1.21.1 {
         }
         for (var section : dirtySections) client.levelRenderer.setSectionDirtyWithNeighbors(section.x(), section.y(), section.z());
     }
+//?} else if =26.3 {
+/*        }
+        for (var section : dirtySections) client.levelExtractor.setSectionDirtyWithNeighbors(section.x(), section.y(), section.z());
+    }
+*/
+//?}
     private static boolean coolantReloadPending;
     public static void refreshCoolantSprites(java.util.List<biggerreactorsrework.registries.FluidTransitionRegistry.FluidTransition> profiles) {
         if (!coolantReloadPending && biggerreactorsrework.client.HeatedFluidSprites.missing(profiles)) {
             coolantReloadPending=true;
             net.minecraft.client.Minecraft.getInstance().reloadResourcePacks().whenComplete((unused,error)->coolantReloadPending=false);
         }
+//? if =26.1.2 || =26.3 {
     }
 
     static void init(IEventBus modBus) {
         modBus.addListener(biggerreactorsrework.multiblocks.turbine.client.TurbineAtmosphereEffects::registerParticles);
         modBus.addListener((net.neoforged.neoforge.client.event.RegisterParticleProvidersEvent event) -> {
+//?} else if =1.21.1 {
+/*    }
+
+    // Modified 2026-11-01: isolated here so a dedicated server never resolves client screen classes.
+    static void registerConfigScreen(net.neoforged.fml.ModContainer container) {
+        container.registerExtensionPoint(net.neoforged.neoforge.client.gui.IConfigScreenFactory.class,
+                (net.neoforged.neoforge.client.gui.IConfigScreenFactory) (mod, parent) -> new biggerreactorsrework.client.PackConfigScreen(parent));
+    }
+
+    static void init(IEventBus modBus) {
+        modBus.addListener((net.neoforged.neoforge.client.event.RegisterParticleProvidersEvent event) -> {
+*/
+//?}
             event.registerSpriteSet(biggerreactorsrework.registries.ModParticles.COOLANT_BUBBLE.get(), net.minecraft.client.particle.BubbleParticle.Provider::new);
             event.registerSpriteSet(biggerreactorsrework.registries.ModParticles.COOLANT_BUBBLE_POP.get(), net.minecraft.client.particle.BubblePopParticle.Provider::new);
             event.registerSpriteSet(biggerreactorsrework.registries.ModParticles.COOLANT_SPLASH.get(), net.minecraft.client.particle.SplashParticle.Provider::new);
+//? if =26.1.2 || =26.3 {
         });
         modBus.addListener((net.neoforged.neoforge.client.event.RegisterRenderPipelinesEvent event) ->
                 biggerreactorsrework.multiblocks.turbine.client.TurbineSteamRenderer.registerPipelines(event));
@@ -73,9 +109,22 @@ public final class BiggerReactorsClient {
         modBus.addListener(biggerreactorsrework.client.HeatedFluidSprites::register);
         biggerreactorsrework.client.GuiSettingsEvents.register();
         net.neoforged.neoforge.common.NeoForge.EVENT_BUS.addListener(
+//?} else if =1.21.1 {
+/*        });
+        // Modified 2026-10-28: positional loops and per-machine local volume.
+        biggerreactorsrework.client.sound.MachineSoundManager.init();
+        modBus.addListener(biggerreactorsrework.client.HeatedFluidSprites::register);
+        modBus.addListener(biggerreactorsrework.multiblocks.turbine.client.TurbineAtmosphereEffects::registerParticles);
+        biggerreactorsrework.client.GuiSettingsEvents.register();
+        net.neoforged.neoforge.common.NeoForge.EVENT_BUS.addListener(
+                biggerreactorsrework.multiblocks.turbine.client.TurbineAtmosphereEffects::tick);
+        net.neoforged.neoforge.common.NeoForge.EVENT_BUS.addListener(
+*/
+//?}
                 (net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent.LoggingOut event) -> {
                     biggerreactorsrework.registries.CoolantSync.clearClient();
                     biggerreactorsrework.client.calculator.CalculatorClient.disconnected();
+//? if =26.1.2 || =26.3 {
                 });
         modBus.addListener((net.neoforged.neoforge.client.event.RegisterRenderPipelinesEvent event) -> event.registerPipeline(biggerreactorsrework.client.GuiTheme.DARK_PIPELINE));
         modBus.addListener(biggerreactorsrework.client.config.ConfigPaint::registerPipelines);
@@ -97,6 +146,21 @@ public final class BiggerReactorsClient {
                         .withStyle(net.minecraft.ChatFormatting.GRAY, net.minecraft.ChatFormatting.ITALIC));
         });
         modBus.addListener(BiggerReactorsClient::registerScreens);
+//?} else if =1.21.1 {
+/*                });
+        modBus.addListener((net.neoforged.neoforge.client.event.RegisterShadersEvent event) -> {
+            try {
+                event.registerShader(new net.minecraft.client.renderer.ShaderInstance(event.getResourceProvider(),
+                        ResourceLocation.fromNamespaceAndPath(BiggerReactors.modid, "dark_gui"),
+                        com.mojang.blaze3d.vertex.DefaultVertexFormat.POSITION_TEX), biggerreactorsrework.client.GuiTheme::setShader);
+            } catch (java.io.IOException e) {
+                throw new java.io.UncheckedIOException("Could not load the machine GUI theme shader", e);
+            }
+        });
+        modBus.addListener(biggerreactorsrework.compat.DarkModeCompat::onInterModEnqueue);
+        modBus.addListener(BiggerReactorsClient::registerScreens);
+*/
+//?}
         modBus.addListener(BiggerReactorsClient::registerRenderers);
         modBus.addListener(BiggerReactorsClient::registerClientExtensions);
         HeatExchangerChannelModels.init(modBus);
@@ -104,12 +168,27 @@ public final class BiggerReactorsClient {
         biggerreactorsrework.client.ReactorRodModels.init(modBus);
         modBus.addListener((net.neoforged.fml.event.lifecycle.FMLClientSetupEvent event) -> event.enqueueWork(() ->
                 biggerreactorsrework.items.tools.GuideBookItem.open = biggerreactorsrework.client.guide.GuideBookAnimation::requestOpen));
+//? if =26.1.2 || =26.3 {
         net.neoforged.neoforge.common.NeoForge.EVENT_BUS.addListener(biggerreactorsrework.client.guide.GuideBookAnimation::onClientTick);
         net.neoforged.neoforge.common.NeoForge.EVENT_BUS.addListener((net.neoforged.neoforge.client.event.RecipesReceivedEvent event) ->
                 biggerreactorsrework.machine.recipe.RecipeAccess.setClientRecipes(event.getRecipeMap()));
         modBus.addListener((net.neoforged.neoforge.client.event.ModelEvent.RegisterStandalone event) ->
                 biggerreactorsrework.client.guide.GuideBookRenderer.models().forEach(id -> biggerreactorsrework.client.guide.ModelRendering.register(event, id)));
     }
+//?} else if =1.21.1 {
+/*        net.neoforged.neoforge.common.NeoForge.EVENT_BUS.addListener(biggerreactorsrework.client.guide.GuideBookAnimation::onClientTick);
+        // Added 2026-11-03: a short description of how Frozen Obsidian behaves.
+        net.neoforged.neoforge.common.NeoForge.EVENT_BUS.addListener((net.neoforged.neoforge.event.entity.player.ItemTooltipEvent event) -> {
+            if (event.getItemStack().is(biggerreactorsrework.fluids.FrozenObsidian.INSTANCE.getBucket()))
+                event.getToolTip().add(net.minecraft.network.chat.Component.translatable("fluid.biggerreactorsrework.frozen_obsidian.description")
+                        .withStyle(net.minecraft.ChatFormatting.GRAY, net.minecraft.ChatFormatting.ITALIC));
+        });
+        modBus.addListener((net.neoforged.neoforge.client.event.ModelEvent.RegisterAdditional event) -> {
+            biggerreactorsrework.client.guide.GuideBookRenderer.models().forEach(id -> event.register(net.minecraft.client.resources.model.ModelResourceLocation.standalone(id)));
+        });
+    }
+*/
+//?}
 
     private static void registerRenderers(EntityRenderersEvent.RegisterRenderers event) {
         assert TurbineRotorBearingTile.SUPPLIER.TYPE != null;
@@ -117,7 +196,8 @@ public final class BiggerReactorsClient {
         event.registerBlockEntityRenderer(biggerreactorsrework.multiblocks.reactor.tiles.ReactorManifoldTile.SUPPLIER.TYPE,ReactorManifoldRenderer::new);
         event.registerBlockEntityRenderer(biggerreactorsrework.multiblocks.heatexchanger.tiles.HeatExchangerChannelTile.SUPPLIER.TYPE,biggerreactorsrework.multiblocks.heatexchanger.client.HeatExchangerFluidRenderer::new);
     }
-    
+
+//? if =26.1.2 || =26.3 {
     private static void registerClientExtensions(RegisterClientExtensionsEvent event) {
     }
 
@@ -134,6 +214,55 @@ public final class BiggerReactorsClient {
     }
 
     private static void registerScreens(RegisterMenuScreensEvent event) {
+//?} else if =1.21.1 {
+/*    private static void registerClientExtensions(RegisterClientExtensionsEvent event) {
+        event.registerItem(new net.neoforged.neoforge.client.extensions.common.IClientItemExtensions() {
+            private final biggerreactorsrework.client.guide.GuideBookRenderer renderer = new biggerreactorsrework.client.guide.GuideBookRenderer();
+            @Override public net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer getCustomRenderer() { return renderer; }
+        }, biggerreactorsrework.items.tools.GuideBookItem.INSTANCE);
+        for (var info : Registry.FLUID_CLIENT_INFO) {
+            event.registerFluidType(new IClientFluidTypeExtensions() {
+                @Override
+                public ResourceLocation getStillTexture() {
+                    return heated()?biggerreactorsrework.client.HeatedFluidSprites.fallback(false):info.stillTexture();
+                }
+                private boolean heated() {
+                    return info.type()==biggerreactorsrework.fluids.HeatedCoolant.INSTANCE.getFluidType();
+                }
+                @Override public ResourceLocation getStillTexture(net.minecraft.world.level.material.FluidState state, net.minecraft.world.level.BlockAndTintGetter getter, net.minecraft.core.BlockPos pos) {
+                    return heated()?biggerreactorsrework.client.HeatedFluidSprites.texture(biggerreactorsrework.client.HeatedFluidSprites.placedSource(pos),false):getStillTexture();
+                }
+                @Override public ResourceLocation getFlowingTexture(net.minecraft.world.level.material.FluidState state, net.minecraft.world.level.BlockAndTintGetter getter, net.minecraft.core.BlockPos pos) {
+                    return heated()?biggerreactorsrework.client.HeatedFluidSprites.texture(biggerreactorsrework.client.HeatedFluidSprites.placedSource(pos),true):getFlowingTexture();
+                }
+                @Override public ResourceLocation getStillTexture(net.neoforged.neoforge.fluids.FluidStack stack) {
+                    return stack.getFluid()==biggerreactorsrework.fluids.HeatedCoolant.INSTANCE?biggerreactorsrework.client.HeatedFluidSprites.texture(stack,false):getStillTexture();
+                }
+                @Override public ResourceLocation getFlowingTexture(net.neoforged.neoforge.fluids.FluidStack stack) {
+                    return stack.getFluid()==biggerreactorsrework.fluids.HeatedCoolant.INSTANCE?biggerreactorsrework.client.HeatedFluidSprites.texture(stack,true):getFlowingTexture();
+                }
+
+                @Override
+                public ResourceLocation getFlowingTexture() {
+                    return heated()?biggerreactorsrework.client.HeatedFluidSprites.fallback(true):info.flowingTexture();
+                }
+
+                @Override
+                public ResourceLocation getOverlayTexture() {
+                    return info.overlayTexture();
+                }
+
+                @Override
+                public int getTintColor() {
+                    return info.tintColor();
+                }
+            }, info.type());
+        }
+    }
+
+    private static void registerScreens(RegisterMenuScreensEvent event) {
+*/
+//?}
         event.register(ReactorTerminalContainer.INSTANCE, CommonReactorTerminalScreen::new);
         event.register(ReactorCoolantPortContainer.INSTANCE, ReactorCoolantPortScreen::new);
         event.register(ReactorAccessPortContainer.INSTANCE, ReactorAccessPortScreen::new);

@@ -1,18 +1,32 @@
 package biggerreactorsrework.multiblocks.battery.tiles;
 
+//? if =26.1.2 || =26.3 {
 import biggerreactorsrework.core.registry.RegisterTile;
 import net.minecraft.core.BlockPos;
+//?} else if =1.21.1 {
+/*import biggerreactorsrework.core.registry.RegisterTile;
+import net.minecraft.MethodsReturnNonnullByDefault;
+import net.minecraft.core.BlockPos;
+*/
+//?}
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 
+//? if =26.1.2 || =26.3 {
 @ParametersAreNonnullByDefault
 public class BatteryGlassTile extends BatteryBaseTile {
-    
+//?} else if =1.21.1 {
+/*@ParametersAreNonnullByDefault
+@MethodsReturnNonnullByDefault
+public class BatteryGlassTile extends BatteryBaseTile {
+*/
+//?}
+
     @RegisterTile("battery_glass")
     public static final BlockEntityType.BlockEntitySupplier<BatteryGlassTile> SUPPLIER = new RegisterTile.Producer<>(BatteryGlassTile::new);
-    
+
     public BatteryGlassTile(BlockEntityType<?> TYPE, BlockPos pos, BlockState state) {
         super(TYPE, pos, state);
     }

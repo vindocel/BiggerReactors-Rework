@@ -2,6 +2,7 @@ package biggerreactorsrework.multiblocks.reactor.client;
 
 import biggerreactorsrework.client.CoolantVisuals;
 import biggerreactorsrework.multiblocks.reactor.tiles.*;
+//? if =26.1.2 || =26.3 {
 import com.mojang.blaze3d.vertex.*;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.blockentity.*;
@@ -26,17 +27,41 @@ public final class ReactorManifoldRenderer implements BlockEntityRenderer<Reacto
         BlockEntityRenderer.super.extractRenderState(tile,state,partial,camera,progress);
         state.volumes.clear();
         if(tile.coolantAnchor==null || tile.getLevel()==null || !(tile.getLevel().getBlockEntity(tile.coolantAnchor) instanceof ReactorTerminalTile root))return;
+//?} else if =1.21.1 {
+/*import com.mojang.blaze3d.vertex.*;
+import net.minecraft.client.renderer.*;
+import net.minecraft.client.renderer.blockentity.*;
+import net.neoforged.neoforge.fluids.FluidStack;
+
+/^* Reads one aggregate terminal snapshot. Manifolds never own duplicate fluid inventories. ^/
+public final class ReactorManifoldRenderer implements BlockEntityRenderer<ReactorManifoldTile> {
+    public ReactorManifoldRenderer(BlockEntityRendererProvider.Context context){}
+    public void render(ReactorManifoldTile tile,float partial,PoseStack pose,MultiBufferSource buffers,int light,int overlay){
+        if(tile.coolantAnchor==null || tile.getLevel()==null || !(tile.getLevel().getBlockEntity(tile.coolantAnchor) instanceof ReactorTerminalTile root))return;
+*/
+//?}
         var assembled=biggerreactorsrework.core.multiblock.IAssemblyStateBlock.ASSEMBLED;
         if(root.getBlockState().hasProperty(assembled) && !root.getBlockState().getValue(assembled))return;
         double cold=Math.clamp(root.renderColdFill,0,1),hot=Math.clamp(root.renderHotFill,0,1);
         int index=tile.getBlockPos().getY()-tile.coolantColumnBottom;
         var c=biggerreactorsrework.core.util.CoolantColumn.slice(cold,hot,index,tile.coolantColumnHeight,false);
+//? if =26.1.2 || =26.3 {
         var h=biggerreactorsrework.core.util.CoolantColumn.slice(cold,hot,index,tile.coolantColumnHeight,true);
         // Modified 2026-10-27: omit shared column/phase caps instead of drawing coincident surfaces.
         var volumes=state.volumes;
         add(volumes,CoolantVisuals.stack(root.renderCold,""),c.bottom(),c.top(),index,tile.coolantColumnHeight);
         add(volumes,CoolantVisuals.stack(root.renderHot,root.renderOrigin),h.bottom(),h.top(),index,tile.coolantColumnHeight);
     }
+//?} else if =1.21.1 {
+/*        var h=biggerreactorsrework.core.util.CoolantColumn.slice(cold,hot,index,tile.coolantColumnHeight,true);
+        // Modified 2026-10-27: omit shared column/phase caps instead of drawing coincident surfaces.
+        var volumes=new java.util.ArrayList<biggerreactorsrework.client.FluidBoxRenderer.Volume>();
+        add(volumes,CoolantVisuals.stack(root.renderCold,""),c.bottom(),c.top(),index,tile.coolantColumnHeight);
+        add(volumes,CoolantVisuals.stack(root.renderHot,root.renderOrigin),h.bottom(),h.top(),index,tile.coolantColumnHeight);
+        biggerreactorsrework.client.FluidBoxRenderer.draw(pose,buffers,volumes,light,overlay);
+    }
+*/
+//?}
     private static void add(java.util.List<biggerreactorsrework.client.FluidBoxRenderer.Volume> volumes,FluidStack stack,float bottom,float top,int index,int height) {
         if(stack.isEmpty() || top<=bottom)return;
         int hidden=0;

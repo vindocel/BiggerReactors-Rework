@@ -1,3 +1,4 @@
+//? if =26.1.2 || =26.3 {
 package biggerreactorsrework.core.transfer;
 
 import net.minecraft.nbt.CompoundTag;
@@ -17,3 +18,5 @@ public final class TagValues {
         return tag;
     }
 }
+//?} else if =1.21.1 {
+//?}

@@ -1,0 +1,23 @@
+{
+  "display": {
+    "icon": {
+      "id": "biggerreactorsrework:guide_book"
+    },
+    "title": {
+      "translate": "advancements.biggerreactorsrework.root.title"
+    },
+    "description": {
+      "translate": "advancements.biggerreactorsrework.root.description"
+    },
+    "frame": "task",
+    "show_toast": false,
+    "announce_to_chat": false,
+    "hidden": false,
+    "background": "biggerreactorsrework:block/reactor/casing/disassembled"
+  },
+  "criteria": {
+    "milestone": {
+      "trigger": "minecraft:tick"
+    }
+  }
+}

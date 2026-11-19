@@ -2,22 +2,47 @@ package biggerreactorsrework.gametest;
 
 import biggerreactorsrework.BiggerReactors;
 import net.minecraft.core.registries.BuiltInRegistries;
+//? if =26.1.2 || =26.3 {
 import net.minecraft.core.registries.Registries;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.crafting.RecipeHolder;
+//?} else if =1.21.1 {
+/*import net.minecraft.core.registries.Registries;
+import net.minecraft.gametest.framework.GameTest;
+import net.minecraft.gametest.framework.GameTestHelper;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.crafting.RecipeHolder;
+*/
+//?}
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.storage.loot.LootTable;
+//? if =26.1.2 || =26.3 {
 import net.neoforged.fml.ModList;
 
 /**
  * Checks that the migrated datapack content (recipes, loot tables) parses on the native platform.
  */
 public final class ContentGameTests {
+//?} else if =1.21.1 {
+/*import net.neoforged.fml.ModList;
+import net.neoforged.neoforge.gametest.GameTestHolder;
+import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
+
+/^*
+ * Checks that the migrated datapack content (recipes, loot tables) parses on 1.21.1.
+ ^/
+@GameTestHolder(BiggerReactors.modid)
+@PrefixGameTestTemplate(false)
+public final class ContentGameTests {
+*/
+//?}
     private ContentGameTests() {
     }
 
+//? if =26.1.2 || =26.3 {
     private static long countOwn(GameTestHelper helper, RecipeType<?> type) {
         //noinspection unchecked,rawtypes
         return helper.getLevel().getServer().getRecipeManager().recipeMap().values().stream()
@@ -27,14 +52,31 @@ public final class ContentGameTests {
     }
 
     /**
-     * 52 crafting recipe files ship with the mod: 48 always load, 3 computer ports
-     * need CC:Tweaked or OpenComputers and 1 ludicrite variant needs Thermal Expansion (modified 2026-10-31).
+     * 53 crafting recipe files ship with the mod: 49 always load, 3 computer ports
+     * need CC:Tweaked or OpenComputers and 1 ludicrite variant needs Thermal Expansion (modified 2026-11-18).
      * 9 smelting and 9 blasting recipes always load.
      */
     @GameTest(template = "empty_7x7x7")
+//?} else if =1.21.1 {
+/*    private static long countOwn(GameTestHelper helper, RecipeType<?> type) {
+        //noinspection unchecked,rawtypes
+        return helper.getLevel().getRecipeManager().getAllRecipesFor((RecipeType) type).stream()
+                .map(holder -> ((RecipeHolder<?>) holder).id())
+                .filter(id -> ((ResourceLocation) id).getNamespace().equals(BiggerReactors.modid))
+                .count();
+    }
+
+    /^*
+     * 53 crafting recipe files ship with the mod: 49 always load, 3 computer ports
+     * need OpenComputers and 1 ludicrite variant needs Thermal Expansion (modified 2026-11-18).
+     * 9 smelting and 9 blasting recipes always load.
+     ^/
+    @GameTest(template = "empty_7x7x7")
+*/
+//?}
     public static void allRecipesLoad(GameTestHelper helper) {
         final var mods = ModList.get();
-        long expectedCrafting = 48 + (mods.isLoaded("opencomputers") || mods.isLoaded("computercraft") ? 3 : 0) + (mods.isLoaded("thermal_expansion") ? 1 : 0);
+        long expectedCrafting = 49 + (mods.isLoaded("opencomputers") || mods.isLoaded("computercraft") ? 3 : 0) + (mods.isLoaded("thermal_expansion") ? 1 : 0);
         long crafting = countOwn(helper, RecipeType.CRAFTING);
         long smelting = countOwn(helper, RecipeType.SMELTING);
         long blasting = countOwn(helper, RecipeType.BLASTING);
@@ -44,10 +86,18 @@ public final class ContentGameTests {
         helper.succeed();
     }
 
+//? if =26.1.2 || =26.3 {
     private static long countOwnOfType(GameTestHelper helper, String recipeType) {
         return helper.getLevel().getServer().getRecipeManager().recipeMap().values().stream()
                 .filter(holder -> holder.id().identifier().getNamespace().equals(BiggerReactors.modid))
                 .filter(holder -> {
+//?} else if =1.21.1 {
+/*    private static long countOwnOfType(GameTestHelper helper, String recipeType) {
+        return helper.getLevel().getRecipeManager().getRecipes().stream()
+                .filter(holder -> holder.id().getNamespace().equals(BiggerReactors.modid))
+                .filter(holder -> {
+*/
+//?}
                     final var key = BuiltInRegistries.RECIPE_TYPE.getKey(holder.value().getType());
                     return key != null && key.toString().equals(recipeType);
                 })
@@ -82,12 +132,22 @@ public final class ContentGameTests {
             if (!id.getNamespace().equals(BiggerReactors.modid)) {
                 continue;
             }
+//? if =26.1.2 || =26.3 {
             final var lootKey = block.getLootTable();
             if (lootKey.isEmpty() || lootKey.get().identifier().getPath().equals("empty")) {
                 continue;
             }
             final var table = registries.getLootTable(ResourceKey.create(Registries.LOOT_TABLE, lootKey.get().identifier()));
             if (table == LootTable.EMPTY) {
+//?} else if =1.21.1 {
+/*            final var lootKey = block.getLootTable();
+            if (lootKey == null || lootKey.location().getPath().equals("empty")) {
+                continue;
+            }
+            final var table = registries.getLootTable(ResourceKey.create(Registries.LOOT_TABLE, lootKey.location()));
+            if (table == LootTable.EMPTY) {
+*/
+//?}
                 // fluid blocks have no drops; everything else must have a table
                 if (!(block instanceof net.minecraft.world.level.block.LiquidBlock)) {
                     helper.fail("missing or invalid loot table for " + id);
@@ -102,12 +162,22 @@ public final class ContentGameTests {
     /** Added 2026-11-01: map renderers draw MapColor.NONE as black or empty. */
     @GameTest(template="empty_7x7x7")
     public static void everySolidBlockDeclaresAMapColor(GameTestHelper h) {
+//? if =26.1.2 || =26.3 {
         var missing = net.minecraft.core.registries.BuiltInRegistries.BLOCK.entrySet().stream()
                 .filter(e -> e.getKey().identifier().getNamespace().equals(biggerreactorsrework.BiggerReactors.modid))
                 .filter(e -> !(e.getValue() instanceof net.minecraft.world.level.block.LiquidBlock))
                 .filter(e -> e.getValue().defaultMapColor() == net.minecraft.world.level.material.MapColor.NONE)
                 .map(e -> e.getKey().identifier().getPath()).toList();
         h.assertTrue(missing.isEmpty(), "blocks without a map color: " + missing);
+//?} else if =1.21.1 {
+/*        var missing = net.minecraft.core.registries.BuiltInRegistries.BLOCK.entrySet().stream()
+                .filter(e -> e.getKey().location().getNamespace().equals(biggerreactorsrework.BiggerReactors.modid))
+                .filter(e -> !(e.getValue() instanceof net.minecraft.world.level.block.LiquidBlock))
+                .filter(e -> e.getValue().defaultMapColor() == net.minecraft.world.level.material.MapColor.NONE)
+                .map(e -> e.getKey().location().getPath()).toList();
+        h.assertTrue(missing.isEmpty(), "blocks without a map color: " + missing);
+*/
+//?}
         h.succeed();
     }
     /** Added 2026-11-01: Blue Ice equals the diamond defaults and stays a separate entry. */

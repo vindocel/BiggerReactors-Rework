@@ -6,9 +6,16 @@ import it.unimi.dsi.fastutil.objects.ReferenceArrayList;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
+//? if =26.1.2 || =26.3 {
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
+//?} else if =1.21.1 {
+/*import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.MinecraftServer;
+*/
+//?}
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.*;
@@ -50,9 +57,9 @@ import java.util.function.Supplier;
 
 @SuppressWarnings("StringConcatenationArgumentToLogCall")
 public class Registry {
-    
+
     private static final boolean IS_DEV_ENVIRONMENT;
-    
+
     static {
         boolean isInDev = false;
         try {
@@ -64,62 +71,86 @@ public class Registry {
         }
         IS_DEV_ENVIRONMENT = isInDev;
     }
-    
+
     private final Logger LOGGER;
-    
+
     private final WorkQueue blockRegistrationQueue = new WorkQueue();
-    
+
     private RegisterEvent.RegisterHelper<Block> blockRegistryEvent;
-    
+
     private final WorkQueue itemRegistrationQueue = new WorkQueue();
+//? if =26.1.2 || =26.3 {
     private RegisterEvent.RegisterHelper<Item> itemRegistryEvent;
-    
+
     private final Identifier creativeTabResourceLocation;
     private final Component creativeTabTitle;
     private Item itemGroupItem = Items.STONE;
     private List<Identifier> tabsBefore;
     private List<Identifier> tabsAfter;
     private final ObjectArrayList<Item> creativeTabItems = new ObjectArrayList<>();
-    
+//?} else if =1.21.1 {
+/*    private RegisterEvent.RegisterHelper<Item> itemRegistryEvent;
+
+    private final ResourceLocation creativeTabResourceLocation;
+    private final Component creativeTabTitle;
+    private Item itemGroupItem = Items.STONE;
+    private List<ResourceLocation> tabsBefore;
+    private List<ResourceLocation> tabsAfter;
+    private final ObjectArrayList<Item> creativeTabItems = new ObjectArrayList<>();
+*/
+//?}
+
     private final WorkQueue fluidRegistrationQueue = new WorkQueue();
     private RegisterEvent.RegisterHelper<Fluid> fluidRegistryEvent;
-    
+
     private final WorkQueue fluidTypeRegistrationQueue = new WorkQueue();
     private RegisterEvent.RegisterHelper<FluidType> fluidTypeRegistryEvent;
     private final WorkQueue containerRegistrationQueue = new WorkQueue();
     private RegisterEvent.RegisterHelper<MenuType<?>> containerRegistryEvent;
-    
+
     private final WorkQueue tileRegistrationQueue = new WorkQueue();
     private RegisterEvent.RegisterHelper<BlockEntityType<?>> tileRegistryEvent;
     private final Map<Class<?>, LinkedList<Block>> tileBlocks = new HashMap<>();
-    
+
     private final WorkQueue registerCapabilityQueue = new WorkQueue();
     private RegisterCapabilitiesEvent registerCapabilitiesEvent;
-    
+
     private final WorkQueue clientSetupQueue = new WorkQueue();
     private FMLClientSetupEvent clientSetupEvent;
-    
+
     private final WorkQueue commonSetupQueue = new WorkQueue();
+//? if =26.1.2 || =26.3 {
     private FMLCommonSetupEvent commonSetupEvent;
-    
+
     /**
      * Textures and tint of every registered fluid type, consumed by the client to register its render extensions.
      */
     public record FluidClientInfo(FluidType type, Identifier stillTexture, Identifier flowingTexture, Identifier overlayTexture, int tintColor) {
     }
-    
+//?} else if =1.21.1 {
+/*    private FMLCommonSetupEvent commonSetupEvent;
+
+    /^*
+     * Textures and tint of every registered fluid type, consumed by the client to register its render extensions.
+     ^/
+    public record FluidClientInfo(FluidType type, ResourceLocation stillTexture, ResourceLocation flowingTexture, ResourceLocation overlayTexture, int tintColor) {
+    }
+*/
+//?}
+
     public static final List<FluidClientInfo> FLUID_CLIENT_INFO = new ObjectArrayList<>();
-    
+
     private final Map<String, AnnotationHandler> annotationMap = new Object2ObjectOpenHashMap<>();
-    
+
     {
         annotationMap.put(RegisterBlock.class.getName(), this::registerBlockAnnotation);
         annotationMap.put(RegisterItem.class.getName(), this::registerItemAnnotation);
         annotationMap.put(RegisterFluid.class.getName(), this::registerFluidAnnotation);
         annotationMap.put(RegisterContainer.class.getName(), this::registerContainerAnnotation);
         annotationMap.put(RegisterTile.class.getName(), this::registerTileAnnotation);
+//? if =26.1.2 || =26.3 {
     }
-    
+
     /**
      * @param modNamespace registry namespace, also the mod id whose scan data is read
      * @param rootPackage  only annotations on classes inside this package are handled
@@ -129,15 +160,34 @@ public class Registry {
         ModFileScanData modFileScanData = FMLLoader.getCurrent().getLoadingModList().getModFileById(modNamespace).getFile().getScanResult();
 
         LOGGER = LogManager.getLogger("BiggerReactors-Rework/Registry");
-        
+
         creativeTabResourceLocation = Identifier.fromNamespaceAndPath(modNamespace, "creative_tab");
         creativeTabTitle = Component.translatable("item_group." + modNamespace);
         tabsBefore.add(CreativeModeTabs.SPAWN_EGGS.identifier());
         this.tabsBefore = tabsBefore;
+//?} else if =1.21.1 {
+/*    }
+
+    /^*
+     * @param modNamespace registry namespace, also the mod id whose scan data is read
+     * @param rootPackage  only annotations on classes inside this package are handled
+     ^/
+    public Registry(String modNamespace, String rootPackage, IEventBus modBus, @Nonnull List<ResourceLocation> tabsBefore, @Nonnull List<ResourceLocation> tabsAfter) {
+        String callerPackage = rootPackage;
+        ModFileScanData modFileScanData = FMLLoader.getLoadingModList().getModFileById(modNamespace).getFile().getScanResult();
+
+        LOGGER = LogManager.getLogger("BiggerReactors-Rework/Registry");
+
+        creativeTabResourceLocation = ResourceLocation.fromNamespaceAndPath(modNamespace, "creative_tab");
+        creativeTabTitle = Component.translatable("item_group." + modNamespace);
+        tabsBefore.add(CreativeModeTabs.SPAWN_EGGS.location());
+        this.tabsBefore = tabsBefore;
+*/
+//?}
         this.tabsAfter = tabsAfter;
-        
+
         final var ignoredPackages = new ObjectArrayList<String>();
-        
+
         for (ModFileScanData.AnnotationData annotation : modFileScanData.getAnnotations()) {
             if (!IgnoreRegistration.class.getName().equals(annotation.annotationType().getClassName())) {
                 continue;
@@ -158,11 +208,19 @@ public class Registry {
             }
             ignoredPackages.add(packageName);
         }
-        
+
+//? if =26.1.2 || =26.3 {
         final var ignoredTypes = new ObjectArrayList<String>();
-        
+
         if (!FMLEnvironment.getDist().isClient()) {
             final var clientOnlyAnnotationClassName = ClientOnly.class.getName();
+//?} else if =1.21.1 {
+/*        final var ignoredTypes = new ObjectArrayList<String>();
+
+        if (!FMLEnvironment.dist.isClient()) {
+            final var clientOnlyAnnotationClassName = ClientOnly.class.getName();
+*/
+//?}
             for (ModFileScanData.AnnotationData annotation : modFileScanData.getAnnotations()) {
                 // sided checks must be done before classload, as that itself may be problematic
                 if (clientOnlyAnnotationClassName.equals(annotation.annotationType().getClassName())) {
@@ -174,26 +232,34 @@ public class Registry {
                 }
             }
         }
-        
+
         // these two are special cases that need to be handled first
         // in case anything needs config options during static construction
         handleAnnotationTypes(modFileScanData, callerPackage, modNamespace, Map.of(RegisterConfig.class.getName(), this::registerConfigAnnotation), true, ignoredPackages, ignoredTypes);
         // this is used for module registration, which need to happen before block registration
         handleAnnotationTypes(modFileScanData, callerPackage, modNamespace, Map.of(OnModLoad.class.getName(), this::onModLoadAnnotation), true, ignoredPackages, ignoredTypes);
-        
+
         handleAnnotationTypes(modFileScanData, callerPackage, modNamespace, annotationMap, false, ignoredPackages, ignoredTypes);
-        
-        
+
+
         modBus.addListener(this::registerEvent);
 
         modBus.addListener(this::commonSetupEventHandler);
+//? if =26.1.2 || =26.3 {
         modBus.addListener(this::registerCapabilitiesEventHandler);
-        
+
         if (FMLEnvironment.getDist() == Dist.CLIENT) {
             modBus.addListener(this::clientSetupEventHandler);
+//?} else if =1.21.1 {
+/*        modBus.addListener(this::registerCapabilitiesEventHandler);
+
+        if (FMLEnvironment.dist == Dist.CLIENT) {
+            modBus.addListener(this::clientSetupEventHandler);
+*/
+//?}
         }
     }
-    
+
     private void handleAnnotationTypes(ModFileScanData modFileScanData, String callerPackage, String modNamespace, Map<String, AnnotationHandler> annotations, boolean requiredCheck, ObjectArrayList<String> ignoredPackages, ObjectArrayList<String> ignoredTypes) {
         annotations:
         for (ModFileScanData.AnnotationData annotation : modFileScanData.getAnnotations()) {
@@ -225,7 +291,7 @@ public class Registry {
                     LOGGER.debug("Attempting to handle " + annotationClassName + " in class " + className + " on member " + annotation.memberName());
                 }
                 try {
-                    
+
                     Class<?> clazz = Registry.class.getClassLoader().loadClass(className);
                     // class loaded, so, pass it off to the handler
                     handler.run(modNamespace, clazz, annotation.memberName());
@@ -252,7 +318,7 @@ public class Registry {
             }
         }
     }
-    
+
     private void creativeTabEvent(RegisterEvent.RegisterHelper<CreativeModeTab> event) {
         if (creativeTabItems.isEmpty()) {
             return;
@@ -268,7 +334,7 @@ public class Registry {
         final var tab = tabBuilder.build();
         event.register(creativeTabResourceLocation, tab);
     }
-    
+
     private void registerEvent(RegisterEvent registerEvent) {
         registerEvent.register(Registries.BLOCK, this::blockRegistration);
         registerEvent.register(Registries.ITEM, this::itemRegistration);
@@ -278,65 +344,65 @@ public class Registry {
         registerEvent.register(Registries.BLOCK_ENTITY_TYPE, this::tileEntityRegistration);
         registerEvent.register(Registries.CREATIVE_MODE_TAB, this::creativeTabEvent);
     }
-    
+
     private void blockRegistration(RegisterEvent.RegisterHelper<Block> event) {
         blockRegistryEvent = event;
         blockRegistrationQueue.runAll();
         blockRegistryEvent = null;
     }
-    
+
     private void itemRegistration(RegisterEvent.RegisterHelper<Item> event) {
         itemRegistryEvent = event;
         itemRegistrationQueue.runAll();
         itemRegistryEvent = null;
     }
-    
+
     private void fluidRegistration(RegisterEvent.RegisterHelper<Fluid> event) {
         fluidRegistryEvent = event;
         fluidRegistrationQueue.runAll();
         fluidRegistryEvent = null;
     }
-    
+
     private void fluidTypeRegistration(RegisterEvent.RegisterHelper<FluidType> event) {
         fluidTypeRegistryEvent = event;
         fluidTypeRegistrationQueue.runAll();
         fluidTypeRegistryEvent = null;
     }
-    
+
     private void containerRegistration(RegisterEvent.RegisterHelper<MenuType<?>> containerTypeRegistryEvent) {
         containerRegistryEvent = containerTypeRegistryEvent;
         containerRegistrationQueue.runAll();
         containerRegistryEvent = null;
     }
-    
+
     private void tileEntityRegistration(RegisterEvent.RegisterHelper<BlockEntityType<?>> tileEntityTypeRegister) {
         tileRegistryEvent = tileEntityTypeRegister;
         tileRegistrationQueue.runAll();
         tileRegistryEvent = null;
     }
-    
+
     private void clientSetupEventHandler(FMLClientSetupEvent event) {
         clientSetupEvent = event;
         clientSetupQueue.runAll();
         clientSetupEvent = null;
     }
-    
+
     private void commonSetupEventHandler(FMLCommonSetupEvent event) {
         commonSetupEvent = event;
         commonSetupQueue.runAll();
         commonSetupEvent = null;
     }
-    
+
     private void registerCapabilitiesEventHandler(RegisterCapabilitiesEvent event) {
         registerCapabilitiesEvent = event;
         registerCapabilityQueue.runAll();
         registerCapabilitiesEvent = null;
     }
-    
+
     private interface AnnotationHandler {
         void run(final String modNamespace, final Class<?> clazz, final String memberName);
     }
-    
+
     private void registerBlockAnnotation(final String modNamespace, final Class<?> declaringClass, final String memberName) {
         if (declaringClass.isAnnotationPresent(IgnoreRegistration.class)) {
             if (!IS_DEV_ENVIRONMENT || declaringClass.getAnnotation(IgnoreRegistration.class).ignoreInDev()) {
@@ -346,7 +412,7 @@ public class Registry {
                 return;
             }
         }
-        
+
         blockRegistrationQueue.enqueue(() -> {
             final RegisterBlock annotation;
             final Object fieldObject;
@@ -368,7 +434,7 @@ public class Registry {
                 field.setAccessible(true);
                 fieldObject = field.get(null);
                 annotation = field.getAnnotation(RegisterBlock.class);
-                
+
                 if (!Modifier.isFinal(field.getModifiers())) {
                     LOGGER.warn("Non-final block instance variable " + memberName + " in " + declaringClass.getName());
                 }
@@ -379,12 +445,12 @@ public class Registry {
                 LOGGER.error("Unable to access block field for block " + memberName + " in " + declaringClass.getName());
                 return;
             }
-            
+
             if (fieldObject == null) {
                 LOGGER.warn("Null block instance variable " + memberName + " in " + declaringClass.getName());
                 return;
             }
-            
+
             String modid = annotation.modid();
             if (modid.equals("")) {
                 modid = modNamespace;
@@ -394,33 +460,56 @@ public class Registry {
                 LOGGER.error("Unable to register block without a name from class " + declaringClass.getName());
                 return;
             }
-            
+
             if (!(fieldObject instanceof final Block block)) {
                 LOGGER.error("Attempt to register block from class not extended from Block. " + declaringClass.getName());
                 return;
             }
-            
+
             final String registryName = modid + ":" + name;
-            
+
             if (annotation.tileEntityClass() != BlockEntity.class) {
                 tileBlocks.computeIfAbsent(annotation.tileEntityClass(), k -> new LinkedList<>()).add(block);
+//? if =26.1.2 || =26.3 {
             }
-            
+
             blockRegistryEvent.register(Identifier.parse(registryName), block);
-            
+
             if (LOGGER.isDebugEnabled()) {
+//?} else if =1.21.1 {
+/*            }
+
+            blockRegistryEvent.register(ResourceLocation.parse(registryName), block);
+
+            if (LOGGER.isDebugEnabled()) {
+*/
+//?}
                 LOGGER.debug("Block registered: " + registryName);
             }
-            
+
             if (annotation.registerItem()) {
                 boolean creativeTabBlock = field.isAnnotationPresent(CreativeTabBlock.class);
+//? if =26.1.2 || =26.3 {
                 itemRegistrationQueue.enqueue(() -> {
                     var item = new BlockItem(block, new Item.Properties().setId(net.minecraft.resources.ResourceKey.create(net.minecraft.core.registries.Registries.ITEM, Identifier.parse(registryName))).useBlockDescriptionPrefix());
                     if (annotation.creativeTab()) {
+//?} else if =1.21.1 {
+/*                itemRegistrationQueue.enqueue(() -> {
+                    var item = new BlockItem(block, new Item.Properties());
+                    if (annotation.creativeTab()) {
+*/
+//?}
                         creativeTabItems.add(item);
+//? if =26.1.2 || =26.3 {
                     }
                     itemRegistryEvent.register(Identifier.parse(registryName), item);
                     if (creativeTabBlock) {
+//?} else if =1.21.1 {
+/*                    }
+                    itemRegistryEvent.register(ResourceLocation.parse(registryName), item);
+                    if (creativeTabBlock) {
+*/
+//?}
                         if (LOGGER.isDebugEnabled()) {
                             LOGGER.debug("Creative tab item set as " + registryName + " for mod " + modNamespace);
                         }
@@ -433,7 +522,7 @@ public class Registry {
             }
         });
     }
-    
+
     private void registerItemAnnotation(String modNamespace, Class<?> declaringClass, final String memberName) {
         if (declaringClass.isAnnotationPresent(IgnoreRegistration.class)) {
             if (!IS_DEV_ENVIRONMENT || declaringClass.getAnnotation(IgnoreRegistration.class).ignoreInDev()) {
@@ -443,9 +532,9 @@ public class Registry {
                 return;
             }
         }
-        
+
         itemRegistrationQueue.enqueue(() -> {
-            
+
             final Object fieldObject;
             final RegisterItem annotation;
             try {
@@ -461,7 +550,7 @@ public class Registry {
                 field.setAccessible(true);
                 fieldObject = field.get(null);
                 annotation = field.getAnnotation(RegisterItem.class);
-                
+
                 if (!Modifier.isFinal(field.getModifiers())) {
                     LOGGER.warn("Non-final item instance variable " + memberName + " in " + declaringClass.getName());
                 }
@@ -472,17 +561,17 @@ public class Registry {
                 LOGGER.error("Unable to access item field for block " + memberName + " in " + declaringClass.getName());
                 return;
             }
-            
+
             if (fieldObject == null) {
                 LOGGER.warn("Null item instance variable " + memberName + " in " + declaringClass.getName());
                 return;
             }
-            
+
             if (!(fieldObject instanceof final Item item)) {
                 LOGGER.error("Attempt to register item from class not extended from Item. " + declaringClass.getName());
                 return;
             }
-            
+
             String modid = annotation.modid();
             if (modid.equals("")) {
                 modid = modNamespace;
@@ -492,21 +581,30 @@ public class Registry {
                 LOGGER.error("Unable to register item " + memberName + " in " + declaringClass.getName() + " without a registry name");
                 return;
             }
-            
+
             final String registryName = modid + ":" + name;
-            
+
             if (annotation.creativeTab()) {
                 creativeTabItems.add(item);
+//? if =26.1.2 || =26.3 {
             }
-            
+
             itemRegistryEvent.register(Identifier.parse(registryName), item);
-            
+
             if (LOGGER.isDebugEnabled()) {
+//?} else if =1.21.1 {
+/*            }
+
+            itemRegistryEvent.register(ResourceLocation.parse(registryName), item);
+
+            if (LOGGER.isDebugEnabled()) {
+*/
+//?}
                 LOGGER.debug("Item registered: " + registryName);
             }
         });
     }
-    
+
     private void registerFluidAnnotation(String modNamespace, Class<?> fluidClazz, final String memberName) {
         if (fluidClazz.isAnnotationPresent(IgnoreRegistration.class)) {
             if (!IS_DEV_ENVIRONMENT || fluidClazz.getAnnotation(IgnoreRegistration.class).ignoreInDev()) {
@@ -516,32 +614,40 @@ public class Registry {
                 return;
             }
         }
-        
+
         fluidRegistrationQueue.enqueue(() -> {
             assert fluidClazz.isAnnotationPresent(RegisterFluid.class);
-            
+
             final RegisterFluid annotation = fluidClazz.getAnnotation(RegisterFluid.class);
-            
+
             String modid = annotation.modid().equals("") ? modNamespace : annotation.modid();
             String name = annotation.name();
             if (modid.equals("")) {
                 LOGGER.error("Unable to register fluid without a name");
                 return;
             }
-            
-            
+
+
             if (!BaseFlowingFluid.class.isAssignableFrom(fluidClazz)) {
                 LOGGER.error("Attempt to register fluid from class not extended from ModFluid");
                 return;
             }
-            
+
+//? if =26.1.2 || =26.3 {
             final String baseRegistryName = modid + ":" + name;
             final var baseResourceLocation = Identifier.parse(baseRegistryName);
-            
+
             ModFluid[] fluids = new ModFluid[2];
+//?} else if =1.21.1 {
+/*            final String baseRegistryName = modid + ":" + name;
+            final var baseResourceLocation = ResourceLocation.parse(baseRegistryName);
+
+            ModFluid[] fluids = new ModFluid[2];
+*/
+//?}
             Item[] bucketArray = new Item[1];
             LiquidBlock[] blockArray = new LiquidBlock[1];
-            
+
             Constructor<?> constructor;
             try {
                 constructor = fluidClazz.getDeclaredConstructor(BaseFlowingFluid.Properties.class);
@@ -549,12 +655,20 @@ public class Registry {
                 LOGGER.error("Failed to find constructor to create instance of " + fluidClazz.getSimpleName());
                 return;
             }
-            
+
             Supplier<? extends ModFluid> stillSupplier = () -> fluids[0];
+//? if =26.1.2 || =26.3 {
             Supplier<? extends ModFluid> flowingSupplier = () -> fluids[1];
             final var fluidType = new FluidType(FluidType.Properties.create().descriptionId("fluid." + modid + "." + name)
                     .lightLevel(annotation.light()).isWaterLike(annotation.waterLikeMovement())) {
                 @Override public net.minecraft.network.chat.Component getDescription(net.neoforged.neoforge.fluids.FluidStack stack) {
+//?} else if =1.21.1 {
+/*            Supplier<? extends ModFluid> flowingSupplier = () -> fluids[1];
+            final var fluidType = new FluidType(FluidType.Properties.create().descriptionId("fluid." + modid + "." + name).lightLevel(annotation.light())
+                    .fallDistanceModifier(annotation.waterLikeMovement() ? 0F : 0.5F)) {
+                @Override public net.minecraft.network.chat.Component getDescription(net.neoforged.neoforge.fluids.FluidStack stack) {
+*/
+//?}
                     return name.equals("heated_coolant") ? biggerreactorsrework.registries.CoolantComponents.name(stack) : super.getDescription(stack);
                 }
                 // Added 2026-11-03: a filled bucket keeps the heated coolant's origin.
@@ -568,21 +682,30 @@ public class Registry {
                     return source == null ? 0 : source.getFluidType().getLightLevel();
                 }
             };
+//? if =26.1.2 || =26.3 {
             FLUID_CLIENT_INFO.add(new FluidClientInfo(fluidType,
                     Identifier.fromNamespaceAndPath(modid, "block/fluid/" + name + "_still"),
                     Identifier.fromNamespaceAndPath(modid, "block/fluid/" + name + "_flowing"),
                     Identifier.fromNamespaceAndPath(modid, "block/fluid/" + name + "_overlay"),
                     annotation.color()));
-            
+//?} else if =1.21.1 {
+/*            FLUID_CLIENT_INFO.add(new FluidClientInfo(fluidType,
+                    ResourceLocation.fromNamespaceAndPath(modid, "block/fluid/" + name + "_still"),
+                    ResourceLocation.fromNamespaceAndPath(modid, "block/fluid/" + name + "_flowing"),
+                    ResourceLocation.fromNamespaceAndPath(modid, "block/fluid/" + name + "_overlay"),
+                    annotation.color()));
+*/
+//?}
+
             BaseFlowingFluid.Properties properties = new BaseFlowingFluid.Properties(() -> fluidType, stillSupplier, flowingSupplier);
             if (annotation.registerBucket()) {
                 properties.bucket(() -> bucketArray[0]);
             }
             properties.block(() -> blockArray[0]);
-            
+
             ModFluid stillInstance;
             ModFluid flowingInstance;
-            
+
             try {
                 stillInstance = (ModFluid) constructor.newInstance(properties);
                 flowingInstance = (ModFluid) constructor.newInstance(properties);
@@ -591,18 +714,29 @@ public class Registry {
                 e.printStackTrace();
                 return;
             }
-            
+
             stillInstance.isSource = true;
-            
+
             fluids[0] = stillInstance;
+//? if =26.1.2 || =26.3 {
             fluids[1] = flowingInstance;
             // Modified 2026-11-01: placed fluids can be replaced by ordinary blocks, like vanilla liquids.
             blockArray[0] = new LiquidBlock(stillInstance, Block.Properties.of().setId(net.minecraft.resources.ResourceKey.create(net.minecraft.core.registries.Registries.BLOCK, baseResourceLocation)).replaceable().noCollision().explosionResistance(100.0F).noLootTable().overrideDescription("fluid." + modid + "." + name)) {
                 @Override public net.minecraft.world.item.ItemStack pickupBlock(@javax.annotation.Nullable net.minecraft.world.entity.LivingEntity player, net.minecraft.world.level.LevelAccessor level, net.minecraft.core.BlockPos pos, BlockState state) {
                     String origin = name.equals("heated_coolant") && level instanceof net.minecraft.server.level.ServerLevel server
+//?} else if =1.21.1 {
+/*            fluids[1] = flowingInstance;
+            // Modified 2026-11-03: placed fluids show the fluid's name instead of a missing block key.
+            blockArray[0] = new LiquidBlock(stillInstance, Block.Properties.of().replaceable().noCollission().explosionResistance(100.0F).noLootTable()) {
+                @Override public String getDescriptionId() { return "fluid." + modid + "." + name; }
+                @Override public net.minecraft.world.item.ItemStack pickupBlock(@javax.annotation.Nullable net.minecraft.world.entity.player.Player player, net.minecraft.world.level.LevelAccessor level, net.minecraft.core.BlockPos pos, BlockState state) {
+                    String origin = name.equals("heated_coolant") && level instanceof net.minecraft.server.level.ServerLevel server
+*/
+//?}
                             ? biggerreactorsrework.fluids.PlacedCoolantOrigins.get(server.getChunkAt(pos), pos) : null;
                     var bucket = super.pickupBlock(player, level, pos, state);
                     return biggerreactorsrework.fluids.HeatedCoolantBucket.pickup(origin, bucket);
+//? if =26.1.2 || =26.3 {
                 }
                 @Override protected void affectNeighborsAfterRemoval(BlockState state, net.minecraft.server.level.ServerLevel level, net.minecraft.core.BlockPos pos, boolean movedByPiston) {
                     super.affectNeighborsAfterRemoval(state, level, pos, movedByPiston);
@@ -613,8 +747,22 @@ public class Registry {
                     if (annotation.freezes()) effects.apply(net.minecraft.world.entity.InsideBlockEffectType.FREEZE);
                     if (annotation.burns()) effects.apply(net.minecraft.world.entity.InsideBlockEffectType.LAVA_IGNITE);
                 }
+//?} else if =1.21.1 {
+/*                }
+                @Override protected void onRemove(BlockState state, net.minecraft.world.level.Level level, net.minecraft.core.BlockPos pos, BlockState newState, boolean movedByPiston) {
+                    super.onRemove(state, level, pos, newState, movedByPiston);
+                    if (name.equals("heated_coolant") && !newState.is(this) && level instanceof net.minecraft.server.level.ServerLevel server)
+                        biggerreactorsrework.fluids.PlacedCoolantOrigins.put(server, pos, null);
+                }
+                @Override protected void entityInside(BlockState state, net.minecraft.world.level.Level level, net.minecraft.core.BlockPos pos, net.minecraft.world.entity.Entity entity) {
+                    super.entityInside(state, level, pos, entity);
+                    if (annotation.freezes()) entity.setIsInPowderSnow(true);
+                    if (annotation.burns()) entity.lavaHurt();
+                }
+*/
+//?}
             };
-            
+
             for (Field declaredField : fluidClazz.getDeclaredFields()) {
                 if (declaredField.isAnnotationPresent(RegisterFluid.Instance.class)) {
                     if (!declaredField.getType().isAssignableFrom(fluidClazz)) {
@@ -633,41 +781,63 @@ public class Registry {
                     }
                 }
             }
-            
+
             ModFluid still = fluids[0];
             ModFluid flowing = fluids[1];
             if (still == null || flowing == null) {
                 return;
             }
-            
+
+//? if =26.1.2 || =26.3 {
             fluidRegistryEvent.register(baseResourceLocation, still);
             fluidRegistryEvent.register(Identifier.parse(baseRegistryName + "_flowing"), flowing);
             if (LOGGER.isDebugEnabled()) {
+//?} else if =1.21.1 {
+/*            fluidRegistryEvent.register(baseResourceLocation, still);
+            fluidRegistryEvent.register(ResourceLocation.parse(baseRegistryName + "_flowing"), flowing);
+            if (LOGGER.isDebugEnabled()) {
+*/
+//?}
                 LOGGER.debug("Fluid registered: " + baseResourceLocation);
             }
-            
+
             blockRegistrationQueue.enqueue(() -> {
                 blockRegistryEvent.register(baseResourceLocation, blockArray[0]);
                 if (LOGGER.isDebugEnabled()) {
                     LOGGER.debug("FluidBlock registered: " + baseResourceLocation);
                 }
             });
-            
+
             if (annotation.registerBucket()) {
+//? if =26.1.2 || =26.3 {
                 itemRegistrationQueue.enqueue(() -> {
                     var bucketProperties = new Item.Properties().setId(net.minecraft.resources.ResourceKey.create(net.minecraft.core.registries.Registries.ITEM, Identifier.parse(baseRegistryName + "_bucket"))).craftRemainder(Items.BUCKET).stacksTo(1);
                     BucketItem bucket = name.equals("heated_coolant")
                             ? new biggerreactorsrework.fluids.HeatedCoolantBucket.BucketWithOrigin(fluids[0], bucketProperties)
                             : new BucketItem(fluids[0], bucketProperties);
+//?} else if =1.21.1 {
+/*                itemRegistrationQueue.enqueue(() -> {
+                    var bucketProperties = new Item.Properties().craftRemainder(Items.BUCKET).stacksTo(1);
+                    BucketItem bucket = name.equals("heated_coolant") ? new biggerreactorsrework.fluids.HeatedCoolantBucket.BucketWithOrigin(fluids[0], bucketProperties)
+                            : new BucketItem(fluids[0], bucketProperties);
+*/
+//?}
                     if (annotation.creativeTab()) creativeTabItems.add(bucket);
+//? if =26.1.2 || =26.3 {
                     bucketArray[0] = bucket;
                     itemRegistryEvent.register(Identifier.parse(baseRegistryName + "_bucket"), bucket);
                     if (LOGGER.isDebugEnabled()) {
+//?} else if =1.21.1 {
+/*                    bucketArray[0] = bucket;
+                    itemRegistryEvent.register(ResourceLocation.parse(baseRegistryName + "_bucket"), bucket);
+                    if (LOGGER.isDebugEnabled()) {
+*/
+//?}
                         LOGGER.debug("Bucket registered: " + baseResourceLocation);
                     }
                 });
             }
-            
+
             fluidTypeRegistrationQueue.enqueueUntracked(() -> {
                 fluidTypeRegistryEvent.register(baseResourceLocation, fluidType);
                 if (LOGGER.isDebugEnabled()) {
@@ -676,7 +846,7 @@ public class Registry {
             });
         });
     }
-    
+
     // TODO: move this to solution similar to what is used for tile entities
     private void registerContainerAnnotation(String modNamespace, Class<?> containerClazz, final String memberName) {
         if (containerClazz.isAnnotationPresent(IgnoreRegistration.class)) {
@@ -687,11 +857,11 @@ public class Registry {
                 return;
             }
         }
-        
+
         assert containerClazz.isAnnotationPresent(RegisterContainer.class);
-        
+
         final RegisterContainer annotation = containerClazz.getAnnotation(RegisterContainer.class);
-        
+
         String modid = annotation.modid();
         if (modid.equals("")) {
             modid = modNamespace;
@@ -701,17 +871,17 @@ public class Registry {
             LOGGER.error("Unable to register container without a name");
             return;
         }
-        
-        
+
+
         if (!AbstractContainerMenu.class.isAssignableFrom(containerClazz)) {
             LOGGER.error("Attempt to register container from class not extended from Container");
             return;
         }
-        
+
         final String registryName = modid + ":" + name;
-        
+
         MenuType<?>[] containerTypeArray = new MenuType[1];
-        
+
         containerRegistrationQueue.enqueue(() -> {
             ContainerSupplier supplier = null;
             for (Field declaredField : containerClazz.getDeclaredFields()) {
@@ -748,10 +918,10 @@ public class Registry {
                 LOGGER.error("No supplier found for container " + containerClazz.getSimpleName());
                 return;
             }
-            
+
             ContainerSupplier finalSupplier = supplier;
             containerTypeArray[0] = IMenuTypeExtension.create((windowId, playerInventory, data) -> finalSupplier.create(windowId, data.readBlockPos(), playerInventory.player));
-            
+
             for (Field declaredField : containerClazz.getDeclaredFields()) {
                 if (declaredField.isAnnotationPresent(RegisterContainer.Type.class)) {
                     if (!declaredField.getType().isAssignableFrom(MenuType.class)) {
@@ -770,20 +940,27 @@ public class Registry {
                     }
                 }
             }
-            
+
             MenuType<?> type = containerTypeArray[0];
             if (type == null) {
                 return;
+//? if =26.1.2 || =26.3 {
             }
             containerRegistryEvent.register(Identifier.parse(registryName), type);
             if (LOGGER.isDebugEnabled()) {
+//?} else if =1.21.1 {
+/*            }
+            containerRegistryEvent.register(ResourceLocation.parse(registryName), type);
+            if (LOGGER.isDebugEnabled()) {
+*/
+//?}
                 LOGGER.debug("Container registered: " + registryName);
             }
         });
     }
-    
+
     private static final Field tileProducerTYPEField;
-    
+
     static {
         try {
             tileProducerTYPEField = RegisterTile.Producer.class.getDeclaredField("TYPE");
@@ -792,7 +969,7 @@ public class Registry {
             throw new IllegalStateException(e);
         }
     }
-    
+
     private void registerTileAnnotation(String modNamespace, Class<?> declaringClass, final String memberName) {
         if (declaringClass.isAnnotationPresent(IgnoreRegistration.class)) {
             if (!IS_DEV_ENVIRONMENT || declaringClass.getAnnotation(IgnoreRegistration.class).ignoreInDev()) {
@@ -802,13 +979,13 @@ public class Registry {
                 return;
             }
         }
-        
+
         tileRegistrationQueue.enqueue(() -> {
-            
+
             final Field field;
             final RegisterTile annotation;
             final RegisterTile.Producer<?> producer;
-            
+
             try {
                 field = declaringClass.getDeclaredField(memberName);
                 if (!field.isAnnotationPresent(RegisterTile.class)) {
@@ -842,7 +1019,7 @@ public class Registry {
                 LOGGER.error("Unable to access supplier field for tile " + memberName + " in " + declaringClass.getSimpleName());
                 return;
             }
-            
+
             String modid = annotation.modid();
             if (modid.equals("")) {
                 modid = modNamespace;
@@ -853,41 +1030,57 @@ public class Registry {
                 return;
             }
             final String registryName = modid + ":" + name;
-            
+
             // this is safe, surely
             // should actually be, otherwise previous checks should have errored
             // i was wrong, sorta, i do need to check that this is the correct type
             // TODO: check this type, somehow
             Class<?> tileClass = (Class<?>) ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[0];
-            
+
             LinkedList<Block> blocks = tileBlocks.remove(tileClass);
-            
+
             if (blocks == null) {
                 if (LOGGER.isDebugEnabled()) {
                     LOGGER.debug("TileEntity has no blocks, ignoring registration: " + registryName);
                 }
                 return;
             }
-            
+
             // fuck you java, its the correct size here
+//? if =26.1.2 || =26.3 {
             @SuppressWarnings({"ConstantConditions", "ToArrayCallWithZeroLengthArrayArgument"})
             BlockEntityType<?> type = new BlockEntityType<>(producer, blocks.toArray(new Block[blocks.size()]));
-            
+
             try {
+//?} else if =1.21.1 {
+/*            @SuppressWarnings({"ConstantConditions", "ToArrayCallWithZeroLengthArrayArgument"})
+            BlockEntityType<?> type = BlockEntityType.Builder.of(producer, blocks.toArray(new Block[blocks.size()])).build(null);
+
+            try {
+*/
+//?}
                 tileProducerTYPEField.set(producer, type);
             } catch (IllegalAccessException e) {
                 throw new IllegalStateException("Tile entity type unable to be saved for " + memberName + " in " + declaringClass.getSimpleName());
+//? if =26.1.2 || =26.3 {
             }
-            
+
             tileRegistryEvent.register(Identifier.parse(registryName), type);
             if (LOGGER.isDebugEnabled()) {
+//?} else if =1.21.1 {
+/*            }
+
+            tileRegistryEvent.register(ResourceLocation.parse(registryName), type);
+            if (LOGGER.isDebugEnabled()) {
+*/
+//?}
                 LOGGER.debug("TileEntity registered: " + registryName);
             }
-            
+
             // capability registration time!
-            
+
             List<CapabilityRegistration.TileCapRegistration<BlockEntity, Object, Object>> capRegistrations = new ReferenceArrayList<>();
-            
+
             List<Class<?>> classesToCheck = new ReferenceArrayList<>();
             classesToCheck.add(tileClass);
             while (!classesToCheck.isEmpty()) {
@@ -898,7 +1091,7 @@ public class Registry {
                     classesToCheck.add(superClazz);
                 }
                 classesToCheck.addAll(List.of(clazz.getInterfaces()));
-                
+
                 var fields = clazz.getDeclaredFields();
                 for (var capField : fields) {
                     if (capField.getType() != CapabilityRegistration.class) {
@@ -910,7 +1103,7 @@ public class Registry {
                             LOGGER.error("Capability registration fields must be static final. Skipping " + capField);
                             continue;
                         }
-                        
+
                         capField.setAccessible(true);
                         var capFieldObject = capField.get(null);
                         List<?> potentialRegistrations;
@@ -936,7 +1129,7 @@ public class Registry {
                     }
                 }
             }
-            
+
             if (!capRegistrations.isEmpty()) {
                 registerCapabilityQueue.enqueue(() -> {
                     var validBlocks = type.getValidBlocks();
@@ -956,12 +1149,12 @@ public class Registry {
                             }, validBlock);
                         }
                     }
-                    
+
                 });
             }
         });
     }
-    
+
     private void registerConfigAnnotation(String modNamespace, Class<?> configClazz, final String memberName) {
         try {
             Field field = configClazz.getDeclaredField(memberName);
@@ -983,7 +1176,7 @@ public class Registry {
             e.printStackTrace();
         }
     }
-    
+
     private void onModLoadAnnotation(String modNamespace, Class<?> modLoadClazz, final String memberName) {
         try {
             Method method = modLoadClazz.getDeclaredMethod(memberName.substring(0, memberName.indexOf('(')));
@@ -995,27 +1188,27 @@ public class Registry {
                     return;
                 }
             }
-            
+
             var annotation = method.getAnnotation(OnModLoad.class);
             var required = annotation.required();
-            
+
             if (!Modifier.isStatic(method.getModifiers())) {
                 LOGGER.error("Cannot call non-static @OnModLoad method " + method.getName() + " in " + modLoadClazz.getSimpleName());
                 return;
             }
-            
+
             if (method.getParameterCount() != 0) {
                 LOGGER.error("Cannot call @OnModLoad method with parameters " + method.getName() + " in " + modLoadClazz.getSimpleName());
                 return;
             }
-            
+
             method.setAccessible(true);
             method.invoke(null);
-            
+
             if (LOGGER.isDebugEnabled()) {
                 LOGGER.debug("@OnModLoad for " + memberName + " in " + modLoadClazz.getName() + " run");
             }
-            
+
         } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
             e.printStackTrace();
         } catch (ExceptionInInitializerError | RuntimeException e) {

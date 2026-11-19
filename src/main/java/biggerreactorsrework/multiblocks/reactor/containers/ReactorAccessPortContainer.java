@@ -21,7 +21,7 @@ public class ReactorAccessPortContainer extends AbstractContainerMenu implements
     public static MenuType<ReactorAccessPortContainer> INSTANCE;
     @RegisterContainer.Supplier
     public static final ContainerSupplier SUPPLIER = ReactorAccessPortContainer::new;
-    
+
     private Player player;
     private ReactorAccessPortTile tileEntity;
 
@@ -49,15 +49,22 @@ public class ReactorAccessPortContainer extends AbstractContainerMenu implements
 
     @Override
     public void executeRequest(String requestName, Object requestData) {
+//? if =26.1.2 || =26.3 {
         assert tileEntity.getLevel() != null;
         if (tileEntity.getLevel().isClientSide()) {
             runRequest(requestName, requestData);
+//?} else if =1.21.1 {
+/*        assert tileEntity.getLevel() != null;
+        if (tileEntity.getLevel().isClientSide) {
+            runRequest(requestName, requestData);
+*/
+//?}
             return;
         }
 
         tileEntity.runRequest(requestName, requestData);
     }
-    
+
     @Override
     public ItemStack quickMoveStack(Player p_38941_, int p_38942_) {
         return ItemStack.EMPTY;

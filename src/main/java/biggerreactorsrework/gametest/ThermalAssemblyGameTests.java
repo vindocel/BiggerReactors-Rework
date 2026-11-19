@@ -14,10 +14,19 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.material.Fluids;
 import net.neoforged.neoforge.gametest.*;
 import java.util.*;
+//? if =26.1.2 || =26.3 {
 import static biggerreactorsrework.core.multiblock.IAssemblyStateBlock.ASSEMBLED;
 
 // Added 2026-11-02: real block-built machines, independent of description-only numerical fixtures.
 public final class ThermalAssemblyGameTests {
+//?} else if =1.21.1 {
+/*import static biggerreactorsrework.core.multiblock.IAssemblyStateBlock.ASSEMBLED;
+
+// Added 2026-11-02: real block-built machines, independent of description-only numerical fixtures.
+@GameTestHolder(BiggerReactors.modid) @PrefixGameTestTemplate(false)
+public final class ThermalAssemblyGameTests {
+*/
+//?}
     @GameTest(template="empty_64x48x40",timeoutTicks=300)
     public static void assembledReactorSizeAndMissingManifoldMatrix(GameTestHelper h) {
         int[][] sizes={{3,3,3},{5,5,5},{9,9,9},{4,3,7},{3,1,3}};
@@ -35,9 +44,16 @@ public final class ThermalAssemblyGameTests {
                 h.assertTrue(h.getBlockState(e.getKey().offset(origins.get(i))).getValue(ASSEMBLED),"Thermal matrix reactor did not assemble");
         }).thenExecute(()->{
             for(int i=0;i<layouts.size();i++) {
+//? if =26.1.2 || =26.3 {
                 var port=layouts.get(i).ports().getFirst();
                 var c=((ReactorBaseTile)GameTestSupport.be(h,port.pos().offset(origins.get(i)))).controller();
                 c.setAllControlRodLevels(42);c.setActive(ReactorActivity.ACTIVE);
+//?} else if =1.21.1 {
+/*                var port=layouts.get(i).ports().getFirst();
+                var c=((ReactorBaseTile)h.getBlockEntity(port.pos().offset(origins.get(i)))).controller();
+                c.setAllControlRodLevels(42);c.setActive(ReactorActivity.ACTIVE);
+*/
+//?}
                 double burned=0;long steam=0;
                 for(int tick=0;tick<100;tick++) {
                     c.simulation().fuelTank().extractWaste(Long.MAX_VALUE,false);c.simulation().fuelTank().insertFuel(Long.MAX_VALUE,false);
@@ -69,9 +85,16 @@ public final class ThermalAssemblyGameTests {
         BlockPos terminal=new BlockPos(1,1,0);parts.put(terminal,HeatExchangerTerminalBlock.INSTANCE.defaultBlockState());GuideStructures.connect(parts);
         parts.forEach(h::setBlock);
         h.startSequence().thenWaitUntil(()->h.assertTrue(h.getBlockState(terminal).getValue(ASSEMBLED),"Multiple paths did not assemble"))
+//? if =26.1.2 || =26.3 {
             .thenExecute(()->{
                 var c=((HeatExchangerBaseTile)GameTestSupport.be(h,terminal)).controller();
                 h.assertTrue(c.fluidPorts().size()==8,"Extra ports were discarded");
+//?} else if =1.21.1 {
+/*            .thenExecute(()->{
+                var c=((HeatExchangerBaseTile)h.getBlockEntity(terminal)).controller();
+                h.assertTrue(c.fluidPorts().size()==8,"Extra ports were discarded");
+*/
+//?}
                 for(var channels:List.of(c.condenserChannels,c.evaporatorChannels)) {
                     var indices=new HashSet<Integer>();for(var channel:channels) {
                         h.assertTrue(channel.coolantPathLength==channels.size() && channel.coolantAnchor!=null,"Additional path missing render data");indices.add(channel.coolantPathIndex);

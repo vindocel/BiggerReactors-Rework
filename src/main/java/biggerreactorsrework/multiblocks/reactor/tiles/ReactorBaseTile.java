@@ -1,6 +1,14 @@
+//? if =26.1.2 || =26.3 {
 package biggerreactorsrework.multiblocks.reactor.tiles;
 
 import net.minecraft.core.BlockPos;
+//?} else if =1.21.1 {
+/*package biggerreactorsrework.multiblocks.reactor.tiles;
+
+import net.minecraft.MethodsReturnNonnullByDefault;
+import net.minecraft.core.BlockPos;
+*/
+//?}
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import biggerreactorsrework.multiblocks.reactor.ReactorMultiblockController;
@@ -12,18 +20,26 @@ import biggerreactorsrework.core.multiblock.common.IPersistentMultiblockTile;
 import biggerreactorsrework.core.multiblock.touching.ITouchingMultiblockTile;
 
 import javax.annotation.Nullable;
+//? if =26.1.2 || =26.3 {
 import javax.annotation.ParametersAreNonnullByDefault;
 
 @ParametersAreNonnullByDefault
+//?} else if =1.21.1 {
+/*import javax.annotation.ParametersAreNonnullByDefault;
+
+@MethodsReturnNonnullByDefault
+@ParametersAreNonnullByDefault
+*/
+//?}
 public class ReactorBaseTile extends ModularTile implements IMultiblockTile<ReactorBaseTile, ReactorBaseBlock, ReactorMultiblockController>,
         IRectangularMultiblockTile<ReactorBaseTile, ReactorBaseBlock, ReactorMultiblockController>,
         IPersistentMultiblockTile<ReactorBaseTile, ReactorBaseBlock, ReactorMultiblockController>,
         ITouchingMultiblockTile<ReactorBaseTile, ReactorBaseBlock, ReactorMultiblockController> {
-    
+
     public int index = -1;
     // Modified 2026-10-30: client appearance identity, separate from menu/request position.
     public BlockPos appearancePos;
-    
+
     public ReactorBaseTile(BlockEntityType<?> tileEntityTypeIn, BlockPos pos, BlockState state) {
         super(tileEntityTypeIn, pos, state);
         appearancePos = pos.immutable();
@@ -36,7 +52,7 @@ public class ReactorBaseTile extends ModularTile implements IMultiblockTile<Reac
     public void readAppearance(java.util.Map<?, ?> data) {
         if (data.get("appearancePos") instanceof Long position) appearancePos = BlockPos.of(position);
     }
-    
+
     @Override
     public final ReactorMultiblockController createController() {
         if (level == null) {
@@ -44,13 +60,13 @@ public class ReactorBaseTile extends ModularTile implements IMultiblockTile<Reac
         }
         return new ReactorMultiblockController(level);
     }
-    
+
     public void runRequest(String requestName, Object requestData) {
         if (nullableController() != null) {
             controller().runRequest(requestName, requestData);
         }
     }
-    
+
     public boolean isCurrentController(@Nullable ReactorMultiblockController reactorMultiblockController) {
         return controller() == reactorMultiblockController;
     }

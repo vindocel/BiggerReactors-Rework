@@ -30,9 +30,16 @@ public final class MachineAudio {
             if (old.kind() == kind && old.min().equals(state.min()) && old.max().equals(state.max())
                     && old.running() == running && CoreEvents.tickNumber() % 10 != 0) continue;
             tile.machineAudio = state;
+//? if =26.1.2 || =26.3 {
             var level = tile.getLevel();
             if (level != null && !level.isClientSide() && !tile.isRemoved()) {
                 level.sendBlockUpdated(tile.getBlockPos(), tile.getBlockState(), tile.getBlockState(), 2);
+//?} else if =1.21.1 {
+/*            var level = tile.getLevel();
+            if (level != null && !level.isClientSide && !tile.isRemoved()) {
+                level.sendBlockUpdated(tile.getBlockPos(), tile.getBlockState(), tile.getBlockState(), 2);
+*/
+//?}
             }
         }
     }

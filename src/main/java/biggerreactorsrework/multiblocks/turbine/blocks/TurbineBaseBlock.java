@@ -1,8 +1,16 @@
+//? if =26.1.2 || =26.3 {
 package biggerreactorsrework.multiblocks.turbine.blocks;
 
 import net.minecraft.world.level.material.MapColor;
 
 import net.minecraft.core.BlockPos;
+//?} else if =1.21.1 {
+/*package biggerreactorsrework.multiblocks.turbine.blocks;
+
+import net.minecraft.MethodsReturnNonnullByDefault;
+import net.minecraft.core.BlockPos;
+*/
+//?}
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -24,56 +32,75 @@ import javax.annotation.ParametersAreNonnullByDefault;
 
 import static biggerreactorsrework.core.multiblock.IAssemblyStateBlock.ASSEMBLED;
 
+//? if =26.1.2 || =26.3 {
 @ParametersAreNonnullByDefault
 public abstract class TurbineBaseBlock extends ModularBlock implements IMultiblockBlock, EntityBlock, IRectangularMultiblockBlock {
     // Modified 2026-10-27: operating terminal light.
     // Modified 2026-11-01: declare the machine palette color for map renderers.
     public static final Block.Properties PROPERTIES_SOLID = Block.Properties.of().mapColor(MapColor.COLOR_LIGHT_GRAY).lightLevel(biggerreactorsrework.multiblocks.MachineLighting::emission).sound(SoundType.METAL).destroyTime(2).explosionResistance(10).isValidSpawn((a, b, c, d) -> false).requiresCorrectToolForDrops();
     public static final Block.Properties PROPERTIES_GLASS = Block.Properties.of().mapColor(MapColor.COLOR_LIGHT_GRAY).lightLevel(biggerreactorsrework.multiblocks.MachineLighting::emission).sound(SoundType.METAL).noOcclusion().destroyTime(2).explosionResistance(2).isValidSpawn((a, b, c, d) -> false).requiresCorrectToolForDrops();
-    
+
     public TurbineBaseBlock() {
+//?} else if =1.21.1 {
+/*@ParametersAreNonnullByDefault
+@MethodsReturnNonnullByDefault
+public abstract class TurbineBaseBlock extends ModularBlock implements IMultiblockBlock, EntityBlock, IRectangularMultiblockBlock {
+    // Modified 2026-10-27: operating terminal light.
+    public static final Block.Properties PROPERTIES_SOLID = Block.Properties.of().mapColor(net.minecraft.world.level.material.MapColor.COLOR_LIGHT_GRAY).lightLevel(biggerreactorsrework.multiblocks.MachineLighting::emission).sound(SoundType.METAL).destroyTime(2).explosionResistance(10).isValidSpawn((a, b, c, d) -> false).requiresCorrectToolForDrops();
+    public static final Block.Properties PROPERTIES_GLASS = Block.Properties.of().mapColor(net.minecraft.world.level.material.MapColor.COLOR_LIGHT_GRAY).lightLevel(biggerreactorsrework.multiblocks.MachineLighting::emission).sound(SoundType.METAL).noOcclusion().destroyTime(2).explosionResistance(2).isValidSpawn((a, b, c, d) -> false).requiresCorrectToolForDrops();
+
+    public TurbineBaseBlock() {
+*/
+//?}
         this(true);
     }
-    
+
     public TurbineBaseBlock(boolean solid) {
         super(solid ? PROPERTIES_SOLID : PROPERTIES_GLASS);
         if (usesTurbineState()) {
             registerDefaultState(defaultBlockState().setValue(TurbineActivity.TURBINE_STATE_ENUM_PROPERTY, TurbineActivity.INACTIVE));
         }
     }
-    
+
     public boolean usesTurbineState() {
         return false;
     }
-    
+
     @Override
     protected void buildStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
         if (usesTurbineState()) {
             builder.add(TurbineActivity.TURBINE_STATE_ENUM_PROPERTY);
         }
     }
-    
+
     @Override
     public boolean isGoodForInterior() {
         return false;
     }
-    
+
     @Override
     public boolean isGoodForExterior() {
         return true;
     }
-    
+
     @Override
     public boolean isGoodForFrame() {
         return false;
     }
-    
+
     @Override
     public InteractionResult onUse(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult) {
         if (hand == InteractionHand.MAIN_HAND && state.hasProperty(ASSEMBLED) && state.getValue(ASSEMBLED)) {
+//? if =26.1.2 || =26.3 {
             if (level.getBlockEntity(pos) instanceof MenuProvider menuProvider) {
                 if (!level.isClientSide()) {
                     player.openMenu(menuProvider, pos);
+//?} else if =1.21.1 {
+/*            if (level.getBlockEntity(pos) instanceof MenuProvider menuProvider) {
+                if (!level.isClientSide) {
+                    player.openMenu(menuProvider, pos);
+*/
+//?}
                 }
                 return InteractionResult.SUCCESS;
             }

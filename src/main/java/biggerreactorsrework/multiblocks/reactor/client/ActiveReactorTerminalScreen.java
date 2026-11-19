@@ -1,18 +1,47 @@
+//? if =26.1.2 {
 package biggerreactorsrework.multiblocks.reactor.client;
 
 // Modified 2026-11-01: native Minecraft 26.1.2 API.
 import biggerreactorsrework.client.GuiTheme;
+//?} else if =1.21.1 || =26.3 {
+/*package biggerreactorsrework.multiblocks.reactor.client;
 
+import biggerreactorsrework.client.GuiTheme;
+*/
+//?}
+
+//? if =26.1.2 || =26.3 {
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.core.Registry;
+//?} else if =1.21.1 {
+/*import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.core.Registry;
+*/
+//?}
 import net.minecraft.core.registries.BuiltInRegistries;
+//? if =26.1.2 || =26.3 {
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Inventory;
+//?} else if =1.21.1 {
+/*import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.player.Inventory;
+*/
+//?}
 import net.minecraft.world.level.material.Fluid;
+//? if =26.1.2 || =26.3 {
 import net.minecraft.world.level.material.Fluids;
 import biggerreactorsrework.BiggerReactors;
+//?} else if =1.21.1 {
+/*import net.minecraft.world.level.material.Fluids;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import biggerreactorsrework.BiggerReactors;
+*/
+//?}
 import biggerreactorsrework.client.CommonRender;
 import biggerreactorsrework.client.GaugeBar;
 import biggerreactorsrework.client.GuiArt;
@@ -28,9 +57,17 @@ import biggerreactorsrework.core.client.gui.elements.RenderedElement;
 import biggerreactorsrework.core.client.gui.elements.TooltipElement;
 
 import javax.annotation.Nonnull;
+//? if =26.1.2 || =26.3 {
 import java.util.Objects;
 
 public class ActiveReactorTerminalScreen extends ModScreen<ReactorTerminalContainer> {
+//?} else if =1.21.1 {
+/*import java.util.Objects;
+
+@OnlyIn(Dist.CLIENT)
+public class ActiveReactorTerminalScreen extends ModScreen<ReactorTerminalContainer> {
+*/
+//?}
 
 
     private ReactorState reactorState;
@@ -50,10 +87,18 @@ public class ActiveReactorTerminalScreen extends ModScreen<ReactorTerminalContai
         super(container, playerInventory, title, 222, CommonReactorTerminalScreen.HEIGHT);
 
         // Initialize reactor state.
+//? if =26.1.2 || =26.3 {
         reactorState = (ReactorState) this.getMenu().getGuiPacket();
         coolantFluid = BuiltInRegistries.FLUID.getValue(Identifier.parse(reactorState.coolantResourceLocation));
         exhaustFluid = BuiltInRegistries.FLUID.getValue(Identifier.parse(reactorState.exhaustResourceLocation));
     }
+//?} else if =1.21.1 {
+/*        reactorState = (ReactorState) this.getMenu().getGuiPacket();
+        coolantFluid = BuiltInRegistries.FLUID.get(ResourceLocation.parse(reactorState.coolantResourceLocation));
+        exhaustFluid = BuiltInRegistries.FLUID.get(ResourceLocation.parse(reactorState.exhaustResourceLocation));
+    }
+*/
+//?}
 
     /**
      * Initialize the screen.
@@ -95,22 +140,44 @@ public class ActiveReactorTerminalScreen extends ModScreen<ReactorTerminalContai
      */
     private void initGauges() {
         // (Top) Coolant intake tank:
+//? if =26.1.2 || =26.3 {
         RenderedElement<ReactorTerminalContainer> coolantIntakeTank = new RenderedElement<>(this, 175, 25, 18, 64, 0, 152, Component.empty());
         coolantIntakeTank.onRender = (@Nonnull GuiGraphicsExtractor graphics, int mX, int mY) -> CommonRender.renderFluidGauge(graphics,
                 coolantIntakeTank, reactorState.coolantStored, reactorState.coolantCapacity, coolantFluid);
+//?} else if =1.21.1 {
+/*        RenderedElement<ReactorTerminalContainer> coolantIntakeTank = new RenderedElement<>(this, 175, 25, 18, 64, 0, 152, Component.empty());
+        coolantIntakeTank.onRender = (@Nonnull GuiGraphics graphics, int mX, int mY) -> CommonRender.renderFluidGauge(graphics,
+                coolantIntakeTank, reactorState.coolantStored, reactorState.coolantCapacity, coolantFluid);
+*/
+//?}
         this.addScreenElement(coolantIntakeTank);
 
         // (Top) Hot exhaust tank:
+//? if =26.1.2 || =26.3 {
         RenderedElement<ReactorTerminalContainer> hotExhaustTank = new RenderedElement<>(this, 197, 25, 18, 64, 0, 152, Component.empty());
         hotExhaustTank.onRender = (@Nonnull GuiGraphicsExtractor graphics, int mX, int mY) -> CommonRender.renderFluidGauge(graphics,
                 hotExhaustTank, reactorState.exhaustStored, reactorState.exhaustCapacity, biggerreactorsrework.client.CoolantVisuals.stack(reactorState.exhaustResourceLocation,reactorState.exhaustOrigin));
+//?} else if =1.21.1 {
+/*        RenderedElement<ReactorTerminalContainer> hotExhaustTank = new RenderedElement<>(this, 197, 25, 18, 64, 0, 152, Component.empty());
+        hotExhaustTank.onRender = (@Nonnull GuiGraphics graphics, int mX, int mY) -> CommonRender.renderFluidGauge(graphics,
+                hotExhaustTank, reactorState.exhaustStored, reactorState.exhaustCapacity, biggerreactorsrework.client.CoolantVisuals.stack(reactorState.exhaustResourceLocation,reactorState.exhaustOrigin));
+*/
+//?}
         this.addScreenElement(hotExhaustTank);
 
         // (Bottom) Progress bar:
+//? if =26.1.2 || =26.3 {
         RenderedElement<ReactorTerminalContainer> progressBar = new RenderedElement<>(this, 197, 90, 18, 26, 90, 152, null);
         progressBar.onRender = (@Nonnull GuiGraphicsExtractor graphics, int mX, int mY) -> {
             // Custom rendering. Without coolant, the bar and its tank are drawn empty.
             if (reactorState.coolantStored > 0) {
+//?} else if =1.21.1 {
+/*        RenderedElement<ReactorTerminalContainer> progressBar = new RenderedElement<>(this, 197, 90, 18, 26, 90, 152, null);
+        progressBar.onRender = (@Nonnull GuiGraphics graphics, int mX, int mY) -> {
+            // Custom rendering. Without coolant, the bar and its tank are drawn empty.
+            if (reactorState.coolantStored > 0) {
+*/
+//?}
                 ActiveReactorTerminalScreen.renderProgressBar(graphics, progressBar, reactorState.reactorActivity, screenWorkTime++, screenWorkTimeTotal, coolantFluid);
                 if (screenWorkTime >= screenWorkTimeTotal) {
                     screenWorkTime = 0;
@@ -127,21 +194,42 @@ public class ActiveReactorTerminalScreen extends ModScreen<ReactorTerminalContai
      */
     private void initSymbols() {
         // (Top) Coolant intake tank symbol:
+//? if =26.1.2 || =26.3 {
         RenderedElement<ReactorTerminalContainer> coolantIntakeTankSymbol = new RenderedElement<>(this, 176, 6, 16, 16, 0, 0, Component.translatable("screen.biggerreactorsrework.reactor_terminal.coolant_intake_tank.tooltip"));
         coolantIntakeTankSymbol.onRender = (@Nonnull GuiGraphicsExtractor graphics, int mX, int mY) -> GuiArt.fluidSymbol(graphics,
                 coolantIntakeTankSymbol.x, coolantIntakeTankSymbol.y, coolantFluid, GuiIcon.DROP_INPUT_MASK, GuiIcon.DROP_INPUT, GuiTheme.panelColor(), true);
+//?} else if =1.21.1 {
+/*        RenderedElement<ReactorTerminalContainer> coolantIntakeTankSymbol = new RenderedElement<>(this, 176, 6, 16, 16, 0, 0, Component.translatable("screen.biggerreactorsrework.reactor_terminal.coolant_intake_tank.tooltip"));
+        coolantIntakeTankSymbol.onRender = (@Nonnull GuiGraphics graphics, int mX, int mY) -> GuiArt.fluidSymbol(graphics,
+                coolantIntakeTankSymbol.x, coolantIntakeTankSymbol.y, coolantFluid, GuiIcon.DROP_INPUT_MASK, GuiIcon.DROP_INPUT, GuiTheme.panelColor(), true);
+*/
+//?}
         this.addScreenElement(coolantIntakeTankSymbol);
 
         // (Top) Hot exhaust tank symbol:
+//? if =26.1.2 || =26.3 {
         RenderedElement<ReactorTerminalContainer> hotExhaustTankSymbol = new RenderedElement<>(this, 198, 6, 16, 16, 0, 0, Component.translatable("screen.biggerreactorsrework.reactor_terminal.exhaust_tank.tooltip"));
         hotExhaustTankSymbol.onRender = (@Nonnull GuiGraphicsExtractor graphics, int mX, int mY) -> GuiArt.fluidSymbol(graphics,
                 hotExhaustTankSymbol.x, hotExhaustTankSymbol.y, exhaustFluid, GuiIcon.DROP_OUTPUT_MASK, GuiIcon.DROP_OUTPUT, GuiTheme.panelColor(), true);
+//?} else if =1.21.1 {
+/*        RenderedElement<ReactorTerminalContainer> hotExhaustTankSymbol = new RenderedElement<>(this, 198, 6, 16, 16, 0, 0, Component.translatable("screen.biggerreactorsrework.reactor_terminal.exhaust_tank.tooltip"));
+        hotExhaustTankSymbol.onRender = (@Nonnull GuiGraphics graphics, int mX, int mY) -> GuiArt.fluidSymbol(graphics,
+                hotExhaustTankSymbol.x, hotExhaustTankSymbol.y, exhaustFluid, GuiIcon.DROP_OUTPUT_MASK, GuiIcon.DROP_OUTPUT, GuiTheme.panelColor(), true);
+*/
+//?}
         this.addScreenElement(hotExhaustTankSymbol);
 
         // (Left) Exhaust generation rate symbol:
+//? if =26.1.2 || =26.3 {
         RenderedElement<ReactorTerminalContainer> exhaustGenerationRateSymbol = new RenderedElement<>(this, 8, 38, 16, 16, 0, 0, Component.translatable("screen.biggerreactorsrework.reactor_terminal.exhaust_generation_rate.tooltip"));
         exhaustGenerationRateSymbol.onRender = (@Nonnull GuiGraphicsExtractor graphics, int mX, int mY) -> GuiArt.fluidSymbol(graphics,
                 exhaustGenerationRateSymbol.x, exhaustGenerationRateSymbol.y, exhaustFluid, GuiIcon.DROP_RATE_MASK, GuiIcon.DROP_RATE, GuiTheme.panelColor(), true);
+//?} else if =1.21.1 {
+/*        RenderedElement<ReactorTerminalContainer> exhaustGenerationRateSymbol = new RenderedElement<>(this, 8, 38, 16, 16, 0, 0, Component.translatable("screen.biggerreactorsrework.reactor_terminal.exhaust_generation_rate.tooltip"));
+        exhaustGenerationRateSymbol.onRender = (@Nonnull GuiGraphics graphics, int mX, int mY) -> GuiArt.fluidSymbol(graphics,
+                exhaustGenerationRateSymbol.x, exhaustGenerationRateSymbol.y, exhaustFluid, GuiIcon.DROP_RATE_MASK, GuiIcon.DROP_RATE, GuiTheme.panelColor(), true);
+*/
+//?}
         this.addScreenElement(exhaustGenerationRateSymbol);
     }
 
@@ -154,17 +242,38 @@ public class ActiveReactorTerminalScreen extends ModScreen<ReactorTerminalContai
         reactorState = (ReactorState) this.getMenu().getGuiPacket();
         super.containerTick();
         // Check if reactor type changed.
+//? if =26.1.2 || =1.21.1 {
         if (reactorState.reactorType != ReactorType.ACTIVE) {
             this.getMinecraft().setScreen(new PassiveReactorTerminalScreen(this.menu, this.inventory, this.title));
         }
+//?} else if =26.3 {
+/*        if (reactorState.reactorType != ReactorType.ACTIVE) {
+            this.getMinecraft().gui.setScreen(new PassiveReactorTerminalScreen(this.menu, this.inventory, this.title));
+        }
+*/
+//?}
         // Check if coolant type changed.
+//? if =26.1.2 || =26.3 {
         if (!reactorState.coolantResourceLocation.equals(Objects.requireNonNull(BuiltInRegistries.FLUID.getKey(coolantFluid)).toString())) {
             coolantFluid = BuiltInRegistries.FLUID.getValue(Identifier.parse(reactorState.coolantResourceLocation));
         }
+//?} else if =1.21.1 {
+/*        if (!reactorState.coolantResourceLocation.equals(Objects.requireNonNull(BuiltInRegistries.FLUID.getKey(coolantFluid)).toString())) {
+            coolantFluid = BuiltInRegistries.FLUID.get(ResourceLocation.parse(reactorState.coolantResourceLocation));
+        }
+*/
+//?}
         // Check if exhaust type changed.
+//? if =26.1.2 || =26.3 {
         if (!reactorState.exhaustResourceLocation.equals(Objects.requireNonNull(BuiltInRegistries.FLUID.getKey(exhaustFluid)).toString())) {
             exhaustFluid = BuiltInRegistries.FLUID.getValue(Identifier.parse(reactorState.exhaustResourceLocation));
         }
+//?} else if =1.21.1 {
+/*        if (!reactorState.exhaustResourceLocation.equals(Objects.requireNonNull(BuiltInRegistries.FLUID.getKey(exhaustFluid)).toString())) {
+            exhaustFluid = BuiltInRegistries.FLUID.get(ResourceLocation.parse(reactorState.exhaustResourceLocation));
+        }
+*/
+//?}
     }
 
     /**
@@ -175,16 +284,27 @@ public class ActiveReactorTerminalScreen extends ModScreen<ReactorTerminalContai
      * @param mouseY       The y position of the mouse.
      * @param partialTicks Partial ticks.
      */
+//? if =26.1.2 || =26.3 {
     @Override
     public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTicks) {
         super.extractRenderState(graphics, mouseX, mouseY, partialTicks);
 
         // Render the other text:
         CommonReactorTerminalScreen.renderStatusText(graphics, this, reactorState.reactorActivity,
+//?} else if =1.21.1 {
+/*    @Override
+    public void render(@Nonnull GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
+        super.render(graphics, mouseX, mouseY, partialTicks);
+
+        // Render the other text:
+        CommonReactorTerminalScreen.renderStatusText(graphics, this, reactorState.reactorActivity,
+*/
+//?}
                 reactorState.heatGenerated, reactorState.fuelUsageRate, reactorState.structuralEfficiency, STATUS_RIGHT);
 
         // Render text for output rate:
         CommonReactorTerminalScreen.renderReadout(graphics, this, String.format("%,.1f mB/t", reactorState.reactorOutputRate), 42);
+//? if =26.1.2 || =26.3 {
     }
 
     /**
@@ -199,6 +319,23 @@ public class ActiveReactorTerminalScreen extends ModScreen<ReactorTerminalContai
     private static void renderProgressBar(@Nonnull GuiGraphicsExtractor graphics, @Nonnull RenderedElement<ReactorTerminalContainer> symbol, ReactorActivity reactorActivity, int workTime, int workTimeTotal, Fluid coolant) {
         // Check that the reactor is active. If not, reset work time.
         if (reactorActivity != ReactorActivity.ACTIVE) {
+//?} else if =1.21.1 {
+/*    }
+
+    /^*
+     * Render the progress bar.
+     *
+//     * @param poseStack       The current pose stack.
+     * @param symbol          The symbol to draw as.
+     * @param reactorActivity Current status of the reactor.
+     * @param workTime        The time the machine has been working.
+     * @param workTimeTotal   The total time needed for completion.
+     ^/
+    private static void renderProgressBar(@Nonnull GuiGraphics graphics, @Nonnull RenderedElement<ReactorTerminalContainer> symbol, ReactorActivity reactorActivity, int workTime, int workTimeTotal, Fluid coolant) {
+        // Check that the reactor is active. If not, reset work time.
+        if (reactorActivity != ReactorActivity.ACTIVE) {
+*/
+//?}
             workTime = 0;
         }
         // Progress rises from the bottom, above the coolant "undertank."
@@ -209,9 +346,16 @@ public class ActiveReactorTerminalScreen extends ModScreen<ReactorTerminalContai
     /**
      * Draw the panel and its fixed details.
      */
+//? if =26.1.2 || =26.3 {
     @Override
     protected void drawBackground(@Nonnull GuiGraphicsExtractor graphics, int x, int y) {
         GuiArt.panel(graphics, x, y, 222, CommonReactorTerminalScreen.HEIGHT, this.frame());
+//?} else if =1.21.1 {
+/*    @Override
+    protected void drawBackground(@Nonnull GuiGraphics graphics, int x, int y) {
+        GuiArt.panel(graphics, x, y, 222, CommonReactorTerminalScreen.HEIGHT, this.frame());
+*/
+//?}
         GuiArt.fill(graphics, x + 6, y + 36, x + 105, y + 37, GuiArt.SEPARATOR);
         GuiArt.fill(graphics, x + 6, y + 55, x + 105, y + 56, GuiArt.SEPARATOR);
         GuiArt.fill(graphics, x + 6, y + 74, x + 105, y + 75, GuiArt.SEPARATOR);

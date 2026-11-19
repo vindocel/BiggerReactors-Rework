@@ -29,30 +29,30 @@ public final class MultiblockTileModule<
         BlockType extends Block & IMultiblockBlock,
         ControllerType extends MultiblockController<TileType, BlockType, ControllerType>
         > extends TileModule<TileType> implements IIsTickingTracker {
-    
+
     @Nullable
     private ControllerType controller;
-    
+
     boolean preExistingBlock = false;
     boolean allowAttach = false;
-    
+
     long lastSavedTick = 0;
-    
+
     @SuppressWarnings("unchecked") // its fine
     final MultiblockTileModule<TileType, BlockType, ControllerType>[] neighbors = new MultiblockTileModule[6];
     final BlockEntity[] neighborTiles = new BlockEntity[6];
-    
+
     private final ObjectArrayList<ICoreMultiblockTileModule<TileType, BlockType, ControllerType>> coreMultiblockTileModules = new ObjectArrayList<>();
-    
+
     @OnModLoad
     private static void onModLoad() {
         ModuleRegistry.registerTileModule(IMultiblockTile.class, MultiblockTileModule::new);
     }
-    
+
     public MultiblockTileModule(IModularTile blockEntity) {
         super(blockEntity);
     }
-    
+
     @Override
     public void postModuleConstruction() {
         for (TileModule<?> module : iface.modules()) {
@@ -62,7 +62,7 @@ public final class MultiblockTileModule<
             }
         }
     }
-    
+
     /*
      * There is a potential edge case where a multiblock can have blocks half loaded be broken by non-player means (quarry)
      */
@@ -72,7 +72,7 @@ public final class MultiblockTileModule<
         allowAttach = true;
         attachToNeighborsLater();
     }
-    
+
     @Override
     public void stopTicking() {
         if (controller != null) {
@@ -84,7 +84,7 @@ public final class MultiblockTileModule<
             preExistingBlock = true;
         }
     }
-    
+
     @Override
     public void onRemoved(boolean chunkUnload) {
         if (controller != null) {
@@ -96,12 +96,12 @@ public final class MultiblockTileModule<
             controller.detach(this, chunkUnload, false, true);
         }
     }
-    
+
     @Nullable
     public ControllerType controller() {
         return controller;
     }
-    
+
     @Contract
     @Nullable
     ControllerType controller(@Nullable ControllerType newController) {
@@ -111,22 +111,22 @@ public final class MultiblockTileModule<
         }
         return controller;
     }
-    
+
     @Override
     public String saveKey() {
         return "multiblock";
     }
-    
+
     @Override
     public void readNBT(CompoundTag nbt) {
         preExistingBlock = true;
     }
-    
+
     @Override
     public CompoundTag writeNBT() {
         return new CompoundTag();
     }
-    
+
     @Contract(pure = true)
     private boolean shouldConnectTo(IMultiblockTile<?, ?, ?> otherRawTile, Direction direction) {
         if (!allowAttach) {
@@ -142,7 +142,7 @@ public final class MultiblockTileModule<
                 return false;
             }
         }
-        
+
         // its safe to cast at this point because both (if existing) controllers agree that the they can be attached to each other
         //noinspection unchecked
         final var otherTile = (TileType) otherRawTile;
@@ -150,24 +150,24 @@ public final class MultiblockTileModule<
         final var otherModule = (MultiblockTileModule<TileType, BlockType, ControllerType>) otherTile.module(IMultiblockTile.class);
         assert otherModule != null;
         final var oppositeDirection = direction.getOpposite();
-        
+
         for (int i = 0; i < coreMultiblockTileModules.size(); i++) {
             final var extensionModule = coreMultiblockTileModules.get(i);
             if (!extensionModule.shouldConnectTo(otherTile, direction)) {
                 return false;
             }
         }
-        
+
         for (int i = 0; i < otherModule.coreMultiblockTileModules.size(); i++) {
             final var extensionModule = otherModule.coreMultiblockTileModules.get(i);
             if (!extensionModule.shouldConnectTo(iface, oppositeDirection)) {
                 return false;
             }
         }
-        
+
         return true;
     }
-    
+
     void updateNeighbors() {
         if (controller == null) {
             return;
@@ -190,7 +190,7 @@ public final class MultiblockTileModule<
             }
         }
     }
-    
+
     void nullNeighbors() {
         for (int i = 0; i < neighbors.length; i++) {
             MultiblockTileModule<?, ?, ?> neighbor = neighbors[i];
@@ -202,24 +202,38 @@ public final class MultiblockTileModule<
             neighborTiles[i] = null;
         }
     }
-    
+
     @Nullable
     public MultiblockTileModule<TileType, BlockType, ControllerType> getNeighbor(Direction direction) {
         return neighbors[direction.get3DDataValue()];
     }
-    
+
+//? if =26.1.2 || =26.3 {
     public void attachToNeighborsLater() {
         if (Objects.requireNonNull(iface.getLevel()).isClientSide()) {
             return;
+//?} else if =1.21.1 {
+/*    public void attachToNeighborsLater() {
+        if (Objects.requireNonNull(iface.getLevel()).isClientSide) {
+            return;
+*/
+//?}
         }
         Queues.serverThread.enqueueUntracked(this::attachToNeighborsNow);
     }
-    
+
     public void attachToNeighborsNow() {
         final var level = iface.getLevel();
+//? if =26.1.2 || =26.3 {
         assert level != null;
         if (level.isClientSide()) {
             return;
+//?} else if =1.21.1 {
+/*        assert level != null;
+        if (level.isClientSide) {
+            return;
+*/
+//?}
         }
         if (iface.isRemoved()) {
             return;
@@ -249,11 +263,11 @@ public final class MultiblockTileModule<
             iface.createController().attemptAttach(this);
         }
     }
-    
+
     @Override
     public DebugInfo getDebugInfo() {
         final var debugInfo = new DebugInfo(this.getClass().getSimpleName());
-        
+
         var controller = controller();
         if (controller == null) {
             debugInfo.add("Null Multiblock controller");

@@ -1,6 +1,14 @@
+//? if =26.1.2 || =26.3 {
 package biggerreactorsrework.multiblocks.turbine.blocks;
 
 import net.minecraft.core.BlockPos;
+//?} else if =1.21.1 {
+/*package biggerreactorsrework.multiblocks.turbine.blocks;
+
+import net.minecraft.MethodsReturnNonnullByDefault;
+import net.minecraft.core.BlockPos;
+*/
+//?}
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -16,15 +24,31 @@ import javax.annotation.ParametersAreNonnullByDefault;
 
 import static biggerreactorsrework.multiblocks.turbine.state.TurbineShaftRotationState.Y;
 
+//? if =26.1.2 || =26.3 {
 @ParametersAreNonnullByDefault
 public class TurbineRotorShaft extends TurbineBaseBlock implements IAssemblyStateBlock {
     // Modified 2026-11-01: orient the first real shaft before the multiblock's delayed topology update.
     @Override public BlockState getStateForPlacement(net.minecraft.world.item.context.BlockPlaceContext context) {
+//?} else if =1.21.1 {
+/*@ParametersAreNonnullByDefault
+@MethodsReturnNonnullByDefault
+public class TurbineRotorShaft extends TurbineBaseBlock implements IAssemblyStateBlock {
+    // Modified 2026-11-01: the first shaft beside a bearing takes its axis from the clicked face.
+    @Override public BlockState getStateForPlacement(net.minecraft.world.item.context.BlockPlaceContext context) {
+*/
+//?}
         return defaultBlockState().setValue(TurbineShaftRotationState.TURBINE_SHAFT_ROTATION_STATE_ENUM_PROPERTY,
                 TurbineShaftRotationState.values()[context.getClickedFace().getAxis().ordinal()]);
+//? if =26.1.2 || =26.3 {
     }
     // Modified 2026-10-31: real blade blocks can be managed through the shaft.
     @Override public net.minecraft.world.InteractionResult onUse(BlockState state, net.minecraft.world.level.Level level, BlockPos pos,
+//?} else if =1.21.1 {
+/*    }
+    // Modified 2026-11-01: real blade blocks can be managed through the shaft.
+    @Override public net.minecraft.world.InteractionResult onUse(BlockState state, net.minecraft.world.level.Level level, BlockPos pos,
+*/
+//?}
             net.minecraft.world.entity.player.Player player, net.minecraft.world.InteractionHand hand, net.minecraft.world.phys.BlockHitResult hit) {
         var result = biggerreactorsrework.multiblocks.turbine.TurbineRotorLayout.use(level,pos,player,hand);
         return result == net.minecraft.world.InteractionResult.PASS ? super.onUse(state,level,pos,player,hand,hit) : result;
@@ -33,49 +57,64 @@ public class TurbineRotorShaft extends TurbineBaseBlock implements IAssemblyStat
             net.minecraft.world.entity.player.Player player) {
         biggerreactorsrework.multiblocks.turbine.TurbineRotorLayout.breakShaft(level,pos,player);
         return super.playerWillDestroy(level,pos,state,player);
+//? if =26.1.2 || =26.3 {
     }
-    
+
     // Modified 2026-11-01: slim aiming outline; retain full-block collision.
     @Override protected net.minecraft.world.phys.shapes.VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, net.minecraft.world.phys.shapes.CollisionContext context) {
+//?} else if =1.21.1 {
+/*    }
+
+    @Override protected net.minecraft.world.phys.shapes.VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, net.minecraft.world.phys.shapes.CollisionContext context) {
+*/
+//?}
         return RotorShapes.shaft(state.getValue(TurbineShaftRotationState.TURBINE_SHAFT_ROTATION_STATE_ENUM_PROPERTY).ordinal());
     }
     @Override protected net.minecraft.world.phys.shapes.VoxelShape getCollisionShape(BlockState state, BlockGetter level, BlockPos pos, net.minecraft.world.phys.shapes.CollisionContext context) {
         return net.minecraft.world.phys.shapes.Shapes.block();
     }
 
+//? if =26.1.2 || =26.3 {
     @RegisterBlock(name = "turbine_rotor_shaft", tileEntityClass = TurbineRotorShaftTile.class)
     public static final TurbineRotorShaft INSTANCE = biggerreactorsrework.core.registry.RegistryIds.named("turbine_rotor_shaft", () -> new TurbineRotorShaft());
-    
+
     public TurbineRotorShaft() {
+//?} else if =1.21.1 {
+/*    @RegisterBlock(name = "turbine_rotor_shaft", tileEntityClass = TurbineRotorShaftTile.class)
+    public static final TurbineRotorShaft INSTANCE = new TurbineRotorShaft();
+
+    public TurbineRotorShaft() {
+*/
+//?}
         super(false);
         registerDefaultState(defaultBlockState().setValue(TurbineShaftRotationState.TURBINE_SHAFT_ROTATION_STATE_ENUM_PROPERTY, Y));
     }
-    
+
     @Override
     protected void buildStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
         builder.add(TurbineShaftRotationState.TURBINE_SHAFT_ROTATION_STATE_ENUM_PROPERTY);
     }
-    
+
     @Nullable
     @Override
     public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
         return TurbineRotorShaftTile.SUPPLIER.create(pos, state);
     }
-    
+
     @SuppressWarnings("deprecation")
     public float getShadeBrightness(BlockState state, BlockGetter worldIn, BlockPos pos) {
         return 1.0F;
     }
-    
+
     public boolean propagatesSkylightDown(BlockState state, BlockGetter reader, BlockPos pos) {
         return true;
     }
-    
+
     @Override
     public boolean isGoodForInterior() {
         return true;
     }
-    
+
     @Override
     public boolean isGoodForExterior() {
         return false;

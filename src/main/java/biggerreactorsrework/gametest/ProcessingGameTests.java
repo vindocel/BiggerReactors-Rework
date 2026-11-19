@@ -12,27 +12,55 @@ import net.minecraft.core.component.DataComponentPatch;
 import net.minecraft.gametest.framework.*;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.material.Fluids;
+//? if =26.1.2 || =26.3 {
 import net.neoforged.neoforge.fluids.FluidStack;
 import biggerreactorsrework.core.transfer.FluidTanks.FluidAction;
 import net.neoforged.neoforge.gametest.*;
 
 /** Actual machine processing and tank contracts. */
 public final class ProcessingGameTests {
+//?} else if =1.21.1 {
+/*import net.neoforged.neoforge.fluids.FluidStack;
+import net.neoforged.neoforge.fluids.capability.IFluidHandler.FluidAction;
+import net.neoforged.neoforge.gametest.*;
+
+/^* Actual machine processing and tank contracts. ^/
+@GameTestHolder(BiggerReactors.modid)
+@PrefixGameTestTemplate(false)
+public final class ProcessingGameTests {
+*/
+//?}
     @GameTest(template="empty_7x7x7")
     public static void reprocessingSurvivesSave(GameTestHelper h) {
+//? if =26.1.2 || =26.3 {
         var pos=new BlockPos(2,2,2);h.setBlock(pos,IndustrialProcessor.INSTANCE);
         var tile=(IndustrialProcessorTile)GameTestSupport.be(h,pos);tile.tick();
         var recipe=ReprocessingRecipes.all(h.getLevel()).getFirst().value();
+//?} else if =1.21.1 {
+/*        var pos=new BlockPos(2,2,2);h.setBlock(pos,IndustrialProcessor.INSTANCE);
+        var tile=(IndustrialProcessorTile)h.getBlockEntity(pos);tile.tick();
+        var recipe=ReprocessingRecipes.all(h.getLevel()).getFirst().value();
+*/
+//?}
         var items=tile.itemHandlerFor(null);items.insertItem(0,new ItemStack(CyaniteIngot.INSTANCE,recipe.count()+1),false);
         int energy=recipe.energy()*recipe.duration(),water=recipe.water()*recipe.duration();
         for(int i=0;i<energy;i++)tile.energyFor(null).receiveEnergy(1,false);
         tile.fluidFor(null).fill(new FluidStack(recipe.fluid(),water),FluidAction.EXECUTE);
         for(int i=0;i<recipe.duration()/2;i++)tile.tick();
+//? if =26.1.2 || =26.3 {
         var saved=tile.saveWithoutMetadata(h.getLevel().registryAccess());
         int progress=saved.getCompoundOrEmpty("cyaniteReprocessorState").getIntOr("workTime",0);
         h.assertTrue(progress>0,"machine made no progress");
         GameTestSupport.load(tile,saved,h);
         for(int i=progress;i<recipe.duration();i++)tile.tick();
+//?} else if =1.21.1 {
+/*        var saved=tile.saveWithoutMetadata(h.getLevel().registryAccess());
+        int progress=saved.getCompound("industrialProcessorState").getInt("workTime");
+        h.assertTrue(progress>0,"machine made no progress");
+        tile.loadWithComponents(saved,h.getLevel().registryAccess());
+        for(int i=progress;i<recipe.duration();i++)tile.tick();
+*/
+//?}
         h.assertTrue(items.getStackInSlot(0).getCount()==1,"wrong input count or work lost on load");
         h.assertTrue(items.getStackInSlot(1).is(BlutoniumIngot.INSTANCE)&&items.getStackInSlot(1).getCount()==1,"wrong output");
         h.assertTrue(tile.energyFor(null).getEnergyStored()==0,"energy not conserved");

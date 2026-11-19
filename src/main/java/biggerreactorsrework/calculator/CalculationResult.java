@@ -65,12 +65,22 @@ public record CalculationResult(String id, long createdAt, CalculatorRequest req
     @Nullable
     public static CalculationResult fromTag(CompoundTag tag) {
         if (newerSchema(tag)) return null;
+//? if =26.1.2 || =26.3 {
         try {
             var request = CalculatorRequest.fromTag(tag.getCompoundOrEmpty("request"));
             if (request == null) return null;
             String id = tag.getStringOr("id", "");
             if (id.isEmpty() || id.length() > 64) return null;
+//?} else if =1.21.1 {
+/*        try {
+            var request = CalculatorRequest.fromTag(tag.getCompound("request"));
+            if (request == null) return null;
+            String id = tag.getString("id");
+            if (id.isEmpty() || id.length() > 64) return null;
+*/
+//?}
             var missing = new TreeSet<String>();
+//? if =26.1.2 || =26.3 {
             PlantLayout plant = null;
             if (tag.contains("plant")) {
                 plant = PlantCodec.decode(tag.getCompoundOrEmpty("plant"), missing);
@@ -87,11 +97,37 @@ public record CalculationResult(String id, long createdAt, CalculatorRequest req
                     CalculationStatus.valueOf(tag.getStringOr("status", "")), tag.getStringOr("fingerprint", ""), tag.getIntOr("engine", 0),
                     tag.getStringOr("mod", ""), plant, Collections.unmodifiableMap(values), Collections.unmodifiableSet(missing));
         } catch (IllegalArgumentException e) {
+//?} else if =1.21.1 {
+/*            PlantLayout plant = null;
+            if (tag.contains("plant", Tag.TAG_COMPOUND)) {
+                plant = PlantCodec.decode(tag.getCompound("plant"), missing);
+                if (plant == null) return null;
+            }
+            var numbers = tag.getCompound("values");
+            if (numbers.size() > 256) return null;
+            var values = new LinkedHashMap<String, Double>();
+            for (String key : numbers.getAllKeys()) {
+                double v = numbers.getDouble(key);
+                if (Double.isFinite(v) && key.length() <= 64) values.put(key, v);
+            }
+            return new CalculationResult(id, tag.getLong("created"), request, Route.valueOf(tag.getString("route")),
+                    CalculationStatus.valueOf(tag.getString("status")), tag.getString("fingerprint"), tag.getInt("engine"),
+                    tag.getString("mod"), plant, Collections.unmodifiableMap(values), Collections.unmodifiableSet(missing));
+        } catch (IllegalArgumentException e) {
+*/
+//?}
             return null;
         }
     }
 
+//? if =26.1.2 || =26.3 {
     public static boolean newerSchema(CompoundTag tag) {
         return tag.getIntOr("schema", 0) > SCHEMA;
     }
+//?} else if =1.21.1 {
+/*    public static boolean newerSchema(CompoundTag tag) {
+        return tag.getInt("schema") > SCHEMA;
+    }
+*/
+//?}
 }

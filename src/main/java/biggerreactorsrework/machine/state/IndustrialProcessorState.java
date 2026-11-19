@@ -52,6 +52,7 @@ public class IndustrialProcessorState implements GuiSync.IGUIPacket {
      * Automation switches.
      */
     public boolean autoInput = false;
+//? if =26.1.2 || =26.3 {
     public boolean autoInputFluid = false;
 
     /**
@@ -62,6 +63,19 @@ public class IndustrialProcessorState implements GuiSync.IGUIPacket {
     public IndustrialProcessorState(IndustrialProcessorTile cyaniteReprocessorTile) {
         this.cyaniteReprocessorTile = cyaniteReprocessorTile;
     }
+//?} else if =1.21.1 {
+/*    public boolean autoInputFluid = false;
+
+    /^*
+     * The tile whose information this belongs to.
+     ^/
+    IndustrialProcessorTile industrialProcessorTile;
+
+    public IndustrialProcessorState(IndustrialProcessorTile industrialProcessorTile) {
+        this.industrialProcessorTile = industrialProcessorTile;
+    }
+*/
+//?}
 
     @Override
     public void read(@Nonnull Map<?, ?> data) {
@@ -86,9 +100,16 @@ public class IndustrialProcessorState implements GuiSync.IGUIPacket {
 
     @Nullable
     @Override
+//? if =26.1.2 || =26.3 {
     public Map<?, ?> write() {
         this.cyaniteReprocessorTile.updateState();
         HashMap<String, Object> data = new HashMap<>();
+//?} else if =1.21.1 {
+/*    public Map<?, ?> write() {
+        this.industrialProcessorTile.updateState();
+        HashMap<String, Object> data = new HashMap<>();
+*/
+//?}
 
         data.put("workTime", this.workTime);
         data.put("workTimeTotal", this.workTimeTotal);

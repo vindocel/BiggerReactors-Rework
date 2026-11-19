@@ -5,9 +5,17 @@ import biggerreactorsrework.registries.*;
 import biggerreactorsrework.thermal.ThermalModel;
 import net.minecraft.gametest.framework.*;
 import net.minecraft.world.level.material.Fluids;
+//? if =26.1.2 || =26.3 {
 import net.neoforged.neoforge.gametest.*;
 // Modified 2026-11-03: Ludicrite-level passive cooling lands 40-45% below best-coil water; the rarest materials beat it.
 public final class CoolingCalibrationGameTests {
+//?} else if =1.21.1 {
+/*import net.neoforged.neoforge.gametest.*;
+// Modified 2026-11-03: Ludicrite-level passive cooling lands 40-45% below best-coil water; the rarest materials beat it.
+@GameTestHolder(BiggerReactors.modid) @PrefixGameTestTemplate(false)
+public final class CoolingCalibrationGameTests {
+*/
+//?}
     @GameTest(template="empty_7x7x7",timeoutTicks=400)
     public static void superiorPassiveStaysBelowBestCoilWater(GameTestHelper h) {
         var d=ThermalModelGameTests.checker(3,3,3,false,null);

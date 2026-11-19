@@ -8,6 +8,7 @@ import net.minecraft.core.component.DataComponentPatch;
 import net.minecraft.gametest.framework.*;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.material.Fluids;
+//? if =26.1.2 || =26.3 {
 import net.neoforged.neoforge.gametest.*;
 
 /** Modified 2026-10-27: coolant identity and volumes must survive casing repair within the same session. */
@@ -15,6 +16,18 @@ public final class ReactorCoolantReassemblyGameTests {
     private static final BlockPos TERMINAL=new BlockPos(1,3,3),BROKEN=new BlockPos(1,5,1);
     private static ReactorTerminalTile terminal(GameTestHelper h){return (ReactorTerminalTile)GameTestSupport.be(h,TERMINAL);}
     private static void build(GameTestHelper h) {
+//?} else if =1.21.1 {
+/*import net.neoforged.neoforge.gametest.*;
+
+/^* Modified 2026-10-27: coolant identity and volumes must survive casing repair within the same session. ^/
+@GameTestHolder(BiggerReactors.modid)
+@PrefixGameTestTemplate(false)
+public final class ReactorCoolantReassemblyGameTests {
+    private static final BlockPos TERMINAL=new BlockPos(1,3,3),BROKEN=new BlockPos(1,5,1);
+    private static ReactorTerminalTile terminal(GameTestHelper h){return (ReactorTerminalTile)h.getBlockEntity(TERMINAL);}
+    private static void build(GameTestHelper h) {
+*/
+//?}
         for(int x=1;x<=5;x++)for(int y=1;y<=5;y++)for(int z=1;z<=5;z++)
             if(x==1 || x==5 || y==1 || y==5 || z==1 || z==5)h.setBlock(x,y,z,ReactorCasing.INSTANCE);
         for(int y=2;y<=4;y++){

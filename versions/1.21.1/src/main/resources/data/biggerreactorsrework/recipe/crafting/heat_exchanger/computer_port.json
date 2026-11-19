@@ -1,0 +1,40 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "neoforge:conditions": [
+    {
+      "type": "neoforge:or",
+      "values": [
+        {
+          "type": "neoforge:mod_loaded",
+          "modid": "opencomputers"
+        },
+        {
+          "type": "neoforge:mod_loaded",
+          "modid": "computercraft"
+        }
+      ]
+    }
+  ],
+  "pattern": [
+    "CDC",
+    "GRG",
+    "CDC"
+  ],
+  "key": {
+    "C": {
+      "item": "biggerreactorsrework:heat_exchanger_casing"
+    },
+    "R": {
+      "item": "minecraft:repeater"
+    },
+    "D": {
+      "item": "minecraft:redstone"
+    },
+    "G": {
+      "item": "minecraft:gold_ingot"
+    }
+  },
+  "result": {
+    "id": "biggerreactorsrework:heat_exchanger_computer_port"
+  }
+}

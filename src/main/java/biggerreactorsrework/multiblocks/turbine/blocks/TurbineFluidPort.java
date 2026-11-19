@@ -1,6 +1,14 @@
+//? if =26.1.2 || =26.3 {
 package biggerreactorsrework.multiblocks.turbine.blocks;
 
 import net.minecraft.core.BlockPos;
+//?} else if =1.21.1 {
+/*package biggerreactorsrework.multiblocks.turbine.blocks;
+
+import net.minecraft.MethodsReturnNonnullByDefault;
+import net.minecraft.core.BlockPos;
+*/
+//?}
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -24,44 +32,61 @@ import java.util.Locale;
 
 import static biggerreactorsrework.multiblocks.turbine.blocks.TurbineFluidPort.PortDirection.*;
 
+//? if =26.1.2 || =26.3 {
 @ParametersAreNonnullByDefault
 public class TurbineFluidPort extends TurbineBaseBlock implements IAssemblyStateBlock, IFaceDirectionBlock {
     @RegisterBlock(name = "turbine_fluid_port", tileEntityClass = TurbineFluidPortTile.class)
     public static final TurbineFluidPort INSTANCE = biggerreactorsrework.core.registry.RegistryIds.named("turbine_fluid_port", () -> new TurbineFluidPort());
-    
+
     public TurbineFluidPort() {
+//?} else if =1.21.1 {
+/*@ParametersAreNonnullByDefault
+@MethodsReturnNonnullByDefault
+public class TurbineFluidPort extends TurbineBaseBlock implements IAssemblyStateBlock, IFaceDirectionBlock {
+    @RegisterBlock(name = "turbine_fluid_port", tileEntityClass = TurbineFluidPortTile.class)
+    public static final TurbineFluidPort INSTANCE = new TurbineFluidPort();
+
+    public TurbineFluidPort() {
+*/
+//?}
         super();
         registerDefaultState(defaultBlockState().setValue(PORT_DIRECTION_ENUM_PROPERTY, INLET));
     }
-    
+
     public enum PortDirection implements StringRepresentable {
         INLET,
         OUTLET;
-        
+
         @SuppressWarnings("SpellCheckingInspection")
         public static final EnumProperty<PortDirection> PORT_DIRECTION_ENUM_PROPERTY = EnumProperty.create("portdirection", PortDirection.class);
-        
+
         @Override
         public String getSerializedName() {
             return toString().toLowerCase(Locale.US);
         }
     }
-    
+
     @Nullable
     @Override
     public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
         return TurbineFluidPortTile.SUPPLIER.create(pos, state);
     }
-    
+
     @Override
     protected void buildStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
         builder.add(PORT_DIRECTION_ENUM_PROPERTY);
     }
-    
+
     @Override
+//? if =26.1.2 || =26.3 {
     public InteractionResult onUse(BlockState state, Level worldIn, BlockPos pos, Player player, InteractionHand handIn, BlockHitResult hit) {
         // Modified 2026-11-01: containers respect inlet/outlet rules before opening the menu.
         var container = biggerreactorsrework.core.fluids.FluidPortInteraction.use(worldIn, pos, player, handIn, hit);
+//?} else if =1.21.1 {
+/*    public InteractionResult onUse(BlockState state, Level worldIn, BlockPos pos, Player player, InteractionHand handIn, BlockHitResult hit) {
+        var container = biggerreactorsrework.core.fluids.FluidPortInteraction.use(worldIn, pos, player, handIn, hit);
+*/
+//?}
         if (container != InteractionResult.PASS) return container;
         if (handIn == InteractionHand.MAIN_HAND) {
             if (Util.isWrench(player.getMainHandItem().getItem())) {
@@ -80,7 +105,7 @@ public class TurbineFluidPort extends TurbineBaseBlock implements IAssemblyState
         }
         return super.onUse(state, worldIn, pos, player, handIn, hit);
     }
-    
+
     @Override
     public void onNeighborChange(BlockState state, Level worldIn, BlockPos pos, Block blockIn, BlockPos fromPos, boolean isMoving) {
         super.onNeighborChange(state, worldIn, pos, blockIn, fromPos, isMoving);

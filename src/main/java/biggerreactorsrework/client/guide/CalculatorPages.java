@@ -5,16 +5,34 @@ import biggerreactorsrework.calculator.CalculatorCatalog;
 import biggerreactorsrework.calculator.CalculatorRequest;
 import biggerreactorsrework.calculator.Route;
 import biggerreactorsrework.client.calculator.CalculatorClient;
+//? if =26.1.2 || =26.3 {
 import biggerreactorsrework.client.calculator.CalculatorLibrary;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.EditBox;
+//?} else if =1.21.1 {
+/*import biggerreactorsrework.client.calculator.CalculatorLibrary;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.EditBox;
+*/
+//?}
 import net.minecraft.core.registries.BuiltInRegistries;
+//? if =26.1.2 || =26.3 {
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.item.ItemStack;
 
 import javax.annotation.Nullable;
+//?} else if =1.21.1 {
+/*import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.FormattedCharSequence;
+import net.minecraft.world.item.ItemStack;
+import org.lwjgl.glfw.GLFW;
+
+import javax.annotation.Nullable;
+*/
+//?}
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -35,23 +53,46 @@ final class CalculatorPages {
     static final class Spread implements GuideElement {
         Left left(int height) { return new Left(height); }
         Right right(int height) { return new Right(height); }
+//? if =26.1.2 || =26.3 {
         public int height(GuideScreen s, int w) { return 0; }
         public void render(GuideScreen s, GuiGraphicsExtractor g, int x, int y, int w, int mx, int my) { }
     }
+//?} else if =1.21.1 {
+/*        public int height(GuideScreen s, int w) { return 0; }
+        public void render(GuideScreen s, GuiGraphics g, int x, int y, int w, int mx, int my) { }
+    }
+*/
+//?}
 
     private static boolean over(double mx, double my, int x, int y, int w, int h) {
         return mx >= x && mx < x + w && my >= y && my < y + h;
+//? if =26.1.2 || =26.3 {
     }
 
     // Modified 2026-10-30: keep persistence errors fully readable in narrow book pages.
     private static int persistenceNotice(GuideScreen screen, GuiGraphicsExtractor graphics, int x, int bottom, int width) {
         var library = CalculatorLibrary.get();
+//?} else if =1.21.1 {
+/*    }
+
+    // Modified 2026-10-30: keep persistence errors fully readable in narrow book pages.
+    private static int persistenceNotice(GuideScreen screen, GuiGraphics graphics, int x, int bottom, int width) {
+        var library = CalculatorLibrary.get();
+*/
+//?}
         if (!library.readOnly() && !library.writeFailed()) return 0;
         var lines = screen.font().split(t(library.readOnly() ? "library.read_only" : "library.write_failed"), width);
         int height = lines.size() * GuideElements.LINE + 2;
+//? if =26.1.2 || =26.3 {
         for (int i = 0; i < lines.size(); i++)
             graphics.text(screen.font(), lines.get(i), x, bottom - height + i * GuideElements.LINE, CalculatorReport.ERROR, false);
         return height;
+//?} else if =1.21.1 {
+/*        for (int i = 0; i < lines.size(); i++)
+            graphics.drawString(screen.font(), lines.get(i), x, bottom - height + i * GuideElements.LINE, CalculatorReport.ERROR, false);
+        return height;
+*/
+//?}
     }
 
     // ------------------------------------------------------------------ form helpers
@@ -183,10 +224,18 @@ final class CalculatorPages {
 
         Left(int height) { this.height = height; }
 
+//? if =26.1.2 || =26.3 {
         public int height(GuideScreen s, int w) { return height; }
 
         public void render(GuideScreen s, GuiGraphicsExtractor g, int x, int y, int w, int mx, int my) {
             CalculatorClient.requestCatalog();
+//?} else if =1.21.1 {
+/*        public int height(GuideScreen s, int w) { return height; }
+
+        public void render(GuideScreen s, GuiGraphics g, int x, int y, int w, int mx, int my) {
+            CalculatorClient.requestCatalog();
+*/
+//?}
             if (CalculatorSession.layout && CalculatorSession.shown != null) {
                 legend(s, g, x, y, w, mx, my);
                 return;
@@ -216,10 +265,18 @@ final class CalculatorPages {
 
         private int[] fieldBox(int x, int top, int w) {
             return new int[]{x, top + 10, w, FIELD_H};
+//? if =26.1.2 || =26.3 {
         }
 
         private void form(GuideScreen s, GuiGraphicsExtractor g, int x, int top, int w, int h, int mx, int my) {
             int buttonY = top + h - BUTTON_H;
+//?} else if =1.21.1 {
+/*        }
+
+        private void form(GuideScreen s, GuiGraphics g, int x, int top, int w, int h, int mx, int my) {
+            int buttonY = top + h - BUTTON_H;
+*/
+//?}
             int viewport = Math.max(1, buttonY - top - 4);
             formScroll = Math.clamp(formScroll, 0, maxFormScroll(viewport));
             g.enableScissor(x, top, x + w, top + viewport);
@@ -240,10 +297,18 @@ final class CalculatorPages {
         private int maxFormScroll(int viewport) {
             int content = rowsTop(0) + kinds().length * ROW_STEP;
             return Math.max(0, content - viewport);
+//? if =26.1.2 || =26.3 {
         }
 
         private void formFields(GuideScreen s, GuiGraphicsExtractor g, int x, int top, int w, int mx, int my) {
             var catalog = CalculatorClient.catalog();
+//?} else if =1.21.1 {
+/*        }
+
+        private void formFields(GuideScreen s, GuiGraphics g, int x, int top, int w, int mx, int my) {
+            var catalog = CalculatorClient.catalog();
+*/
+//?}
             boolean locked = CalculatorClient.running();
             s.fittedText(g, t("target"), x, top, w, GuideElements.MUTED);
             var box = fieldBox(x, top, w);
@@ -253,9 +318,16 @@ final class CalculatorPages {
             field.setX(box[0] + 4);
             field.setY(box[1] + 3);
             field.setWidth(box[2] - 8);
+//? if =26.1.2 || =26.3 {
             field.setEditable(!locked);
             field.extractRenderState(g, mx, my, 0);
             var parsed = parse(field.getValue());
+//?} else if =1.21.1 {
+/*            field.setEditable(!locked);
+            field.render(g, mx, my, 0);
+            var parsed = parse(field.getValue());
+*/
+//?}
             Component reading = parsed.error() == null ? t("target.reading", CalculatorReport.whole(parsed.value()))
                     : parsed.error().equals("target.range") ? t("target.range", CalculatorReport.whole(CalculatorRequest.MAX_TARGET)) : t(parsed.error());
             s.fittedText(g, reading, x, box[1] + FIELD_H + 2, w, parsed.error() == null ? GuideElements.TIP : field.getValue().isEmpty() ? GuideElements.MUTED : CalculatorReport.ERROR);
@@ -300,16 +372,32 @@ final class CalculatorPages {
             }
             int rows = Math.min(count, above);
             return new int[]{lx, rowTop - rows * DROP_ROW, lw, rows, kind};
+//? if =26.1.2 || =26.3 {
         }
 
         private void renderDropdown(GuideScreen s, GuiGraphicsExtractor g, int x, int y, int w, int mx, int my) {
             var list = dropdown(s, x, y, w);
+//?} else if =1.21.1 {
+/*        }
+
+        private void renderDropdown(GuideScreen s, GuiGraphics g, int x, int y, int w, int mx, int my) {
+            var list = dropdown(s, x, y, w);
+*/
+//?}
             if (list == null) return;
             var options = options(CalculatorClient.catalog(), list[4]);
+//? if =26.1.2 || =26.3 {
             CalculatorSession.dropScroll = Math.max(0, Math.min(CalculatorSession.dropScroll, options.size() - list[3]));
             g.pose().pushMatrix();
             g.pose().translate(0, 0);
             int lx = list[0], ly = list[1], lw = list[2], lh = list[3] * DROP_ROW;
+//?} else if =1.21.1 {
+/*            CalculatorSession.dropScroll = Math.max(0, Math.min(CalculatorSession.dropScroll, options.size() - list[3]));
+            g.pose().pushPose();
+            g.pose().translate(0, 0, 400);
+            int lx = list[0], ly = list[1], lw = list[2], lh = list[3] * DROP_ROW;
+*/
+//?}
             g.fill(lx - 1, ly - 1, lx + lw + 1, ly + lh + 1, PAPER_EDGE);
             g.fill(lx, ly, lx + lw, ly + lh, PAPER_LIGHT);
             String current = selected(list[4]);
@@ -327,6 +415,7 @@ final class CalculatorPages {
                 int barH = Math.max(6, lh * list[3] / options.size());
                 int barY = ly + (lh - barH) * CalculatorSession.dropScroll / Math.max(1, options.size() - list[3]);
                 g.fill(lx + lw - 2, barY, lx + lw, barY + barH, GuideElements.RULE);
+//? if =26.1.2 || =26.3 {
             }
             g.pose().popMatrix();
         }
@@ -346,6 +435,28 @@ final class CalculatorPages {
 
         static void status(GuideScreen s, GuiGraphicsExtractor g, int x, int y, int w) {
             if (!CalculatorClient.running()) return;
+//?} else if =1.21.1 {
+/*            }
+            g.pose().popPose();
+        }
+
+        /^* Item or fluid of an option, 16 px, at (x, y + 0). ^/
+        private static void icon(GuideScreen s, GuiGraphics g, int kind, String id, int x, int y) {
+            var key = ResourceLocation.tryParse(id);
+            if (key == null) return;
+            if (kind == COOLANT) {
+                if (BuiltInRegistries.FLUID.containsKey(key)) s.fluidIcon(g, BuiltInRegistries.FLUID.get(key), x, y);
+            } else if (kind == FUEL && BuiltInRegistries.ITEM.containsKey(key)) {
+                g.renderItem(new ItemStack(BuiltInRegistries.ITEM.get(key)), x, y);
+            } else if (BuiltInRegistries.BLOCK.containsKey(key)) {
+                g.renderItem(new ItemStack(BuiltInRegistries.BLOCK.get(key)), x, y);
+            }
+        }
+
+        static void status(GuideScreen s, GuiGraphics g, int x, int y, int w) {
+            if (!CalculatorClient.running()) return;
+*/
+//?}
             String progress = CalculatorClient.total() > 0 ? CalculatorClient.done() + "/" + CalculatorClient.total() : "";
             Component text = switch (CalculatorClient.phase()) {
                 case SEARCHING -> t("phase.searching", progress);
@@ -358,10 +469,18 @@ final class CalculatorPages {
         /** Label on the left, the selector button on the rest of the row. */
         private static int labelWidth(int w) {
             return w * 2 / 5;
+//? if =26.1.2 || =26.3 {
         }
 
         private void selector(GuideScreen s, GuiGraphicsExtractor g, int x, int y, int w, int mx, int my, int kind, CalculatorCatalog catalog, boolean locked) {
             int lw = labelWidth(w), bx = x + lw, bw = w - lw;
+//?} else if =1.21.1 {
+/*        }
+
+        private void selector(GuideScreen s, GuiGraphics g, int x, int y, int w, int mx, int my, int kind, CalculatorCatalog catalog, boolean locked) {
+            int lw = labelWidth(w), bx = x + lw, bw = w - lw;
+*/
+//?}
             s.fittedText(g, t(KIND_LABELS[kind]), x, y + 5, lw - 3, GuideElements.MUTED);
             boolean hover = !locked && over(mx, my, bx, y, bw, SELECTOR_H);
             boolean open = CalculatorSession.dropdown == kind;
@@ -373,12 +492,20 @@ final class CalculatorPages {
                 return;
             }
             if (id == null) {
+//? if =26.1.2 || =26.3 {
                 s.fittedText(g, t("choose"), bx + 4, y + 5, bw - 14, GuideElements.MUTED, true);
                 g.text(s.font(), "\u25BE", bx + bw - 9, y + 5, GuideElements.MUTED, false);
                 return;
+//?} else if =1.21.1 {
+/*                s.fittedText(g, t("choose"), bx + 4, y + 5, bw - 14, GuideElements.MUTED, true);
+                g.drawString(s.font(), "\u25BE", bx + bw - 9, y + 5, GuideElements.MUTED, false);
+                return;
+*/
+//?}
             }
             icon(s, g, kind, id, bx + 1, y + 1);
             var name = name(kind, id);
+//? if =26.1.2 || =26.3 {
             s.fittedText(g, name, bx + 19, y + 5, bw - 30, GuideElements.BODY);
             g.text(s.font(), "\u25BE", bx + bw - 9, y + 5, GuideElements.MUTED, false);
             if (hover && CalculatorSession.dropdown < 0) s.textTooltip(List.of(name));
@@ -386,6 +513,16 @@ final class CalculatorPages {
 
         private void list(GuideScreen s, GuiGraphicsExtractor g, int x, int top, int w, int h, int mx, int my, List<CalculationResult> entries, String empty) {
             h -= persistenceNotice(s, g, x, top + h, w);
+//?} else if =1.21.1 {
+/*            s.fittedText(g, name, bx + 19, y + 5, bw - 30, GuideElements.BODY);
+            g.drawString(s.font(), "\u25BE", bx + bw - 9, y + 5, GuideElements.MUTED, false);
+            if (hover && CalculatorSession.dropdown < 0) s.textTooltip(List.of(name));
+        }
+
+        private void list(GuideScreen s, GuiGraphics g, int x, int top, int w, int h, int mx, int my, List<CalculationResult> entries, String empty) {
+            h -= persistenceNotice(s, g, x, top + h, w);
+*/
+//?}
             if (entries.isEmpty()) {
                 s.fittedText(g, t(empty), x, top, w, GuideElements.MUTED);
                 return;
@@ -403,11 +540,20 @@ final class CalculatorPages {
                         r.status() == biggerreactorsrework.calculator.CalculationStatus.TARGET_MET ? GuideElements.MUTED : CalculatorReport.ERROR);
             }
             g.disableScissor();
+//? if =26.1.2 || =26.3 {
         }
 
         /** Layout view: back button, the warning, the parts of the selected machine with hover highlight, and the ports. */
         private void legend(GuideScreen s, GuiGraphicsExtractor g, int x, int y, int w, int mx, int my) {
             s.textButton(g, x, y, w, BUTTON_H, t("back"), mx, my);
+//?} else if =1.21.1 {
+/*        }
+
+        /^* Layout view: back button, the warning, the parts of the selected machine with hover highlight, and the ports. ^/
+        private void legend(GuideScreen s, GuiGraphics g, int x, int y, int w, int mx, int my) {
+            s.textButton(g, x, y, w, BUTTON_H, t("back"), mx, my);
+*/
+//?}
             int top = y + BUTTON_H + 4, bottom = y + height;
             var rows = legendRows(s, w);
             int total = rows.stream().mapToInt(row -> row.height).sum();
@@ -487,9 +633,16 @@ final class CalculatorPages {
             var box = fieldBox(x, top, w);
             if (!locked && over(mx, my, box[0], box[1], box[2], box[3])) {
                 var field = field(s);
+//? if =26.1.2 || =26.3 {
                 field.setFocused(true);
                 field.mouseClicked(new net.minecraft.client.input.MouseButtonEvent(mx, my, new net.minecraft.client.input.MouseButtonInfo(button, 0)), false);
                 return true;
+//?} else if =1.21.1 {
+/*                field.setFocused(true);
+                field.mouseClicked(mx, my, button);
+                return true;
+*/
+//?}
             }
             int modeY = box[1] + FIELD_H + 12, half = (w - 2) / 2;
             if (!locked && over(mx, my, x, modeY, w, BUTTON_H)) {
@@ -548,31 +701,66 @@ final class CalculatorPages {
         }
 
         @Override
+//? if =26.1.2 || =26.3 {
         public boolean keyPressed(GuideScreen s, int keyCode, int scanCode, int modifiers) {
             if (CalculatorSession.dropdown >= 0 && keyCode == com.mojang.blaze3d.platform.InputConstants.KEY_ESCAPE) {
                 CalculatorSession.dropdown = -1;
+//?} else if =1.21.1 {
+/*        public boolean keyPressed(GuideScreen s, int keyCode, int scanCode, int modifiers) {
+            if (CalculatorSession.dropdown >= 0 && keyCode == GLFW.GLFW_KEY_ESCAPE) {
+                CalculatorSession.dropdown = -1;
+*/
+//?}
                 return true;
             }
             var field = CalculatorSession.target;
+//? if =26.1.2 || =26.3 {
             if (field == null || !field.isFocused() || CalculatorSession.tab != CalculatorSession.Tab.NEW || CalculatorSession.layout) return false;
             if (keyCode == com.mojang.blaze3d.platform.InputConstants.KEY_ESCAPE || keyCode == com.mojang.blaze3d.platform.InputConstants.KEY_TAB) {
                 field.setFocused(false);
+//?} else if =1.21.1 {
+/*            if (field == null || !field.isFocused() || CalculatorSession.tab != CalculatorSession.Tab.NEW || CalculatorSession.layout) return false;
+            if (keyCode == GLFW.GLFW_KEY_ESCAPE || keyCode == GLFW.GLFW_KEY_TAB) {
+                field.setFocused(false);
+*/
+//?}
                 return true;
+//? if =26.1.2 || =26.3 {
             }
             if (keyCode == com.mojang.blaze3d.platform.InputConstants.KEY_RETURN || keyCode == com.mojang.blaze3d.platform.InputConstants.KEY_NUMPADENTER) {
                 calculate(s);
+//?} else if =1.21.1 {
+/*            }
+            if (keyCode == GLFW.GLFW_KEY_ENTER || keyCode == GLFW.GLFW_KEY_KP_ENTER) {
+                calculate(s);
+*/
+//?}
                 return true;
+//? if =26.1.2 || =26.3 {
             }
             field.keyPressed(new net.minecraft.client.input.KeyEvent(keyCode, scanCode, modifiers));
             return true;
+//?} else if =1.21.1 {
+/*            }
+            field.keyPressed(keyCode, scanCode, modifiers);
+            return true;
+*/
+//?}
         }
 
         @Override
         public boolean charTyped(GuideScreen s, char codePoint, int modifiers) {
             var field = CalculatorSession.target;
+//? if =26.1.2 || =26.3 {
             if (field == null || !field.isFocused()) return false;
             field.charTyped(new net.minecraft.client.input.CharacterEvent(codePoint));
             return true;
+//?} else if =1.21.1 {
+/*            if (field == null || !field.isFocused()) return false;
+            field.charTyped(codePoint, modifiers);
+            return true;
+*/
+//?}
         }
 
         @Override
@@ -590,16 +778,31 @@ final class CalculatorPages {
         Row(int height, @Nullable String group) {
             this.height = height;
             this.group = group;
+//? if =26.1.2 || =26.3 {
         }
 
         abstract void draw(GuideScreen s, GuiGraphicsExtractor g, int x, int y, int w, int mx, int my);
     }
+//?} else if =1.21.1 {
+/*        }
+
+        abstract void draw(GuideScreen s, GuiGraphics g, int x, int y, int w, int mx, int my);
+    }
+*/
+//?}
 
     private static List<Row> textRows(GuideScreen s, int w, Component text, int color) {
         var rows = new ArrayList<Row>();
+//? if =26.1.2 || =26.3 {
         for (FormattedCharSequence line : s.font().split(text, w)) rows.add(new Row(GuideElements.LINE, null) {
             void draw(GuideScreen s, GuiGraphicsExtractor g, int x, int y, int w, int mx, int my) { g.text(s.font(), line, x, y, color, false); }
         });
+//?} else if =1.21.1 {
+/*        for (FormattedCharSequence line : s.font().split(text, w)) rows.add(new Row(GuideElements.LINE, null) {
+            void draw(GuideScreen s, GuiGraphics g, int x, int y, int w, int mx, int my) { g.drawString(s.font(), line, x, y, color, false); }
+        });
+*/
+//?}
         return rows;
     }
 
@@ -628,9 +831,16 @@ final class CalculatorPages {
         for (var line : CalculatorReport.lines(r, CalculatorSession.View.CONNECTIONS).subList(0, 2))
             rows.addAll(textRows(s, w, line.text(), line.color()));
         rows.addAll(textRows(s, w, t("layout.parts"), GuideElements.HEADING));
+//? if =26.1.2 || =26.3 {
         counts.forEach((group, count) -> rows.add(new Row(ROW_H - 4, group) {
             void draw(GuideScreen s, GuiGraphicsExtractor g, int x, int y, int w, int mx, int my) {
                 var stack = items.get(group);
+//?} else if =1.21.1 {
+/*        counts.forEach((group, count) -> rows.add(new Row(ROW_H - 4, group) {
+            void draw(GuideScreen s, GuiGraphics g, int x, int y, int w, int mx, int my) {
+                var stack = items.get(group);
+*/
+//?}
                 s.itemSlot(g, stack, x, y, mx, my);
                 Component name = group.equals("frame") ? Component.translatable("guide.biggerreactorsrework.viewer.frame", count[0])
                         : group.equals("walls") ? Component.translatable("guide.biggerreactorsrework.viewer.walls", count[0])
@@ -679,25 +889,47 @@ final class CalculatorPages {
                 CalculatorSession.lastReceived = received;
                 if (received.status().hasDesign()) CalculatorSession.show(received, true);
             }
+//? if =26.1.2 || =26.3 {
         }
 
         public void render(GuideScreen s, GuiGraphicsExtractor g, int x, int y, int w, int mx, int my) {
             collect();
+//?} else if =1.21.1 {
+/*        }
+
+        public void render(GuideScreen s, GuiGraphics g, int x, int y, int w, int mx, int my) {
+            collect();
+*/
+//?}
             var r = CalculatorSession.shown;
             if (CalculatorClient.running()) {
                 s.fittedText(g, t("running"), x, y, w, GuideElements.HEADING);
                 Left.status(s, g, x, y + 14, w);
+//? if =26.1.2 || =26.3 {
                 var lines = s.font().split(t("running.text"), w);
                 for (int i = 0; i < lines.size(); i++) g.text(s.font(), lines.get(i), x, y + 28 + i * GuideElements.LINE, GuideElements.BODY, false);
                 return;
+//?} else if =1.21.1 {
+/*                var lines = s.font().split(t("running.text"), w);
+                for (int i = 0; i < lines.size(); i++) g.drawString(s.font(), lines.get(i), x, y + 28 + i * GuideElements.LINE, GuideElements.BODY, false);
+                return;
+*/
+//?}
             }
             if (r == null) {
                 var failure = CalculatorClient.failure();
                 Component text = failure != null ? CalculatorReport.status(failure) : t("idle");
                 var lines = s.font().split(text, w);
+//? if =26.1.2 || =26.3 {
                 for (int i = 0; i < lines.size(); i++)
                     g.text(s.font(), lines.get(i), x, y + i * GuideElements.LINE, failure != null ? CalculatorReport.ERROR : GuideElements.MUTED, false);
                 return;
+//?} else if =1.21.1 {
+/*                for (int i = 0; i < lines.size(); i++)
+                    g.drawString(s.font(), lines.get(i), x, y + i * GuideElements.LINE, failure != null ? CalculatorReport.ERROR : GuideElements.MUTED, false);
+                return;
+*/
+//?}
             }
             if (CalculatorSession.layout) {
                 layout(s, g, x, y, w, mx, my, r);
@@ -708,9 +940,16 @@ final class CalculatorPages {
                 boolean available = available(r, VIEWS[i]);
                 boolean active = CalculatorSession.view == VIEWS[i];
                 biggerreactorsrework.client.GuiArt.buttonBackground(g, bx, y, 18, 18, available && over(mx, my, bx, y, 18, 18), active, !available,
+//? if =26.1.2 || =26.3 {
                         biggerreactorsrework.client.GuiFrame.REACTOR);
                 g.item(new ItemStack(BuiltInRegistries.ITEM.getValue(GuideIds.id(VIEW_ICONS[i]))), bx + 1, y + 1);
                 if (over(mx, my, bx, y, 18, 18)) s.textTooltip(List.of(t("view." + VIEWS[i].name().toLowerCase(java.util.Locale.ROOT))));
+//?} else if =1.21.1 {
+/*                        biggerreactorsrework.client.GuiFrame.REACTOR);
+                g.renderItem(new ItemStack(BuiltInRegistries.ITEM.get(GuideIds.id(VIEW_ICONS[i]))), bx + 1, y + 1);
+                if (over(mx, my, bx, y, 18, 18)) s.textTooltip(List.of(t("view." + VIEWS[i].name().toLowerCase(java.util.Locale.ROOT))));
+*/
+//?}
             }
             int top = y + 22, bottom = y + height - BUTTON_H - 4;
             bottom -= persistenceNotice(s, g, x, bottom, w);
@@ -729,9 +968,16 @@ final class CalculatorPages {
             }
             int visible = (bottom - top) / GuideElements.LINE;
             CalculatorSession.scroll = Math.max(0, Math.min(CalculatorSession.scroll, lines.size() - visible));
+//? if =26.1.2 || =26.3 {
             for (int i = 0; i < Math.min(visible, lines.size() - CalculatorSession.scroll); i++)
                 g.text(s.font(), lines.get(i + CalculatorSession.scroll), x, top + i * GuideElements.LINE, colors.get(i + CalculatorSession.scroll), false);
             if (lines.size() > visible) {
+//?} else if =1.21.1 {
+/*            for (int i = 0; i < Math.min(visible, lines.size() - CalculatorSession.scroll); i++)
+                g.drawString(s.font(), lines.get(i + CalculatorSession.scroll), x, top + i * GuideElements.LINE, colors.get(i + CalculatorSession.scroll), false);
+            if (lines.size() > visible) {
+*/
+//?}
                 int barH = Math.max(8, (bottom - top) * visible / lines.size());
                 int barY = top + (bottom - top - barH) * CalculatorSession.scroll / Math.max(1, lines.size() - visible);
                 g.fill(x + w - 2, top, x + w, bottom, GuideElements.TINT);
@@ -753,10 +999,18 @@ final class CalculatorPages {
                 case TURBINE -> r.route() != Route.SOLID;
                 default -> true;
             };
+//? if =26.1.2 || =26.3 {
         }
 
         private void layout(GuideScreen s, GuiGraphicsExtractor g, int x, int y, int w, int mx, int my, CalculationResult r) {
             var machines = r.plant().machines();
+//?} else if =1.21.1 {
+/*        }
+
+        private void layout(GuideScreen s, GuiGraphics g, int x, int y, int w, int mx, int my, CalculationResult r) {
+            var machines = r.plant().machines();
+*/
+//?}
             int count = machines.size() + (machines.size() > 1 ? 1 : 0);
             int bw = (w - 2 * (count - 1)) / count;
             for (int i = 0; i < count; i++) {
@@ -805,9 +1059,16 @@ final class CalculatorPages {
                 if (library.readOnly()) return true;
                 if (library.isSaved(r.id())) library.removeSaved(r.id());
                 else library.save(r);
+//? if =26.1.2 || =26.3 {
                 if (library.writeFailed() && net.minecraft.client.Minecraft.getInstance().player != null)
                     net.minecraft.client.Minecraft.getInstance().player.sendOverlayMessage(t("library.write_failed"));
                 s.playClick();
+//?} else if =1.21.1 {
+/*                if (library.writeFailed() && net.minecraft.client.Minecraft.getInstance().player != null)
+                    net.minecraft.client.Minecraft.getInstance().player.displayClientMessage(t("library.write_failed"), true);
+                s.playClick();
+*/
+//?}
                 return true;
             }
             if (over(mx, my, x + half + 2, buttonY, w - half - 2, BUTTON_H) && r.plant() != null) {

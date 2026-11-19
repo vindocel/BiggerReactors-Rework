@@ -1,3 +1,4 @@
+//? if =26.1.2 || =26.3 {
 package biggerreactorsrework.gametest;
 
 import net.minecraft.core.BlockPos;
@@ -24,3 +25,5 @@ final class GameTestSupport {
         return (T) helper.getBlockEntity(pos, BlockEntity.class);
     }
 }
+//?} else if =1.21.1 {
+//?}

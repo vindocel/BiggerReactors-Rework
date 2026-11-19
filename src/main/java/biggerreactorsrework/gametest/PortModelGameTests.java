@@ -2,16 +2,35 @@ package biggerreactorsrework.gametest;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+//? if =26.1.2 || =26.3 {
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.block.state.BlockState;
+//?} else if =1.21.1 {
+/*import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.gametest.framework.GameTest;
+import net.minecraft.gametest.framework.GameTestHelper;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.block.state.BlockState;
+*/
+//?}
 import net.minecraft.world.level.block.state.properties.Property;
 import java.io.InputStreamReader;
+//? if =26.1.2 || =26.3 {
 import java.nio.charset.StandardCharsets;
 
 /** Added 2026-10-31: validate asset selectors against every actual registered port state. */
 public final class PortModelGameTests {
+//?} else if =1.21.1 {
+/*import java.nio.charset.StandardCharsets;
+
+/^* Added 2026-10-31: validate asset selectors against every actual registered port state. ^/
+@net.neoforged.neoforge.gametest.GameTestHolder(biggerreactorsrework.BiggerReactors.modid)
+@net.neoforged.neoforge.gametest.PrefixGameTestTemplate(false)
+public final class PortModelGameTests {
+*/
+//?}
     private static JsonObject asset(String path) throws Exception {
         try (var stream = PortModelGameTests.class.getResourceAsStream("/assets/biggerreactorsrework/" + path)) {
             if (stream == null) throw new AssertionError("Missing asset: " + path);
@@ -34,9 +53,16 @@ public final class PortModelGameTests {
     public static void everyPortStateSelectsExactlyOneCompatibleModel(GameTestHelper h) throws Exception {
         for (String name : new String[]{"reactor_access_port","reactor_coolant_port","reactor_power_tap","reactor_redstone_port",
                 "reactor_computer_port","turbine_fluid_port","turbine_power_tap","turbine_redstone_port","turbine_computer_port",
+//? if =26.1.2 || =26.3 {
                 "heat_exchanger_fluid_port","heat_exchanger_computer_port","battery_energy_port","battery_redstone_port"}) {
             var block = BuiltInRegistries.BLOCK.getValue(Identifier.fromNamespaceAndPath("biggerreactorsrework", name));
             var variants = asset("blockstates/" + name + ".json").getAsJsonObject("variants");
+//?} else if =1.21.1 {
+/*                "heat_exchanger_fluid_port","heat_exchanger_computer_port","battery_energy_port","battery_redstone_port"}) {
+            var block = BuiltInRegistries.BLOCK.get(ResourceLocation.fromNamespaceAndPath("biggerreactorsrework", name));
+            var variants = asset("blockstates/" + name + ".json").getAsJsonObject("variants");
+*/
+//?}
             for (var state : block.getStateDefinition().getPossibleStates()) {
                 var selected = variants.entrySet().stream().filter(v -> matches(v.getKey(), state)).toList();
                 h.assertTrue(selected.size() == 1, name + " has ambiguous/missing model for " + state);

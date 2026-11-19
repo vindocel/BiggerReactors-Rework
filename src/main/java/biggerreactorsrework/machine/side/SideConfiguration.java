@@ -181,13 +181,27 @@ public final class SideConfiguration {
      */
     public void load(CompoundTag tag) {
         resetToDefaults();
+//? if =26.1.2 || =26.3 {
         for (Transmission t : Transmission.VALUES) {
             ListTag list = tag.getListOrEmpty(t.name().toLowerCase(java.util.Locale.ROOT));
             SideRoute[] target = routes[t.ordinal()];
+//?} else if =1.21.1 {
+/*        for (Transmission t : Transmission.VALUES) {
+            ListTag list = tag.getList(t.name().toLowerCase(java.util.Locale.ROOT), Tag.TAG_STRING);
+            SideRoute[] target = routes[t.ordinal()];
+*/
+//?}
             for (int i = 0; i < target.length && i < list.size(); i++) {
+//? if =26.1.2 || =26.3 {
                 try {
                     target[i] = SideRoute.valueOf(list.getStringOr(i, ""));
                 } catch (IllegalArgumentException ignored) {
+//?} else if =1.21.1 {
+/*                try {
+                    target[i] = SideRoute.valueOf(list.getString(i));
+                } catch (IllegalArgumentException ignored) {
+*/
+//?}
                     // Unknown route name: keep the default for that face.
                 }
             }

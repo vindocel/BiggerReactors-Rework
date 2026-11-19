@@ -10,8 +10,15 @@ import biggerreactorsrework.multiblocks.turbine.blocks.TurbineRotorShaft;
 import biggerreactorsrework.multiblocks.turbine.state.TurbineShaftRotationState;
 import biggerreactorsrework.util.GuideStructures;
 import net.minecraft.core.BlockPos;
+//? if =26.1.2 || =26.3 {
 import net.minecraft.core.Direction;
 import net.minecraft.gametest.framework.GameTestHelper;
+//?} else if =1.21.1 {
+/*import net.minecraft.core.Direction;
+import net.minecraft.gametest.framework.GameTest;
+import net.minecraft.gametest.framework.GameTestHelper;
+*/
+//?}
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -21,11 +28,24 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.LiquidBlock;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
+//? if =26.1.2 || =26.3 {
 import net.neoforged.neoforge.common.util.FakePlayer;
 import java.util.UUID;
 
 /** Added 2026-11-01: native placement and whole-bucket interactions, including rejection and creative conservation. */
 public final class PortInteractionGameTests {
+//?} else if =1.21.1 {
+/*import net.neoforged.neoforge.common.util.FakePlayer;
+import net.neoforged.neoforge.gametest.GameTestHolder;
+import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
+import java.util.UUID;
+
+/^* Added 2026-11-01: native placement and whole-bucket interactions, including rejection and creative conservation. ^/
+@GameTestHolder(biggerreactorsrework.BiggerReactors.modid)
+@PrefixGameTestTemplate(false)
+public final class PortInteractionGameTests {
+*/
+//?}
     private static FakePlayer player(GameTestHelper h, boolean creative) {
         var p = new FakePlayer(h.getLevel(), new com.mojang.authlib.GameProfile(UUID.randomUUID(), "port_test"));
         p.setGameMode(creative ? GameType.CREATIVE : GameType.SURVIVAL);
@@ -105,6 +125,7 @@ public final class PortInteractionGameTests {
         var pos=h.absolutePos(new BlockPos(4,1,2));
         h.startSequence().thenWaitUntil(()->h.assertTrue(h.getLevel().getBlockState(pos).getValue(IAssemblyStateBlock.ASSEMBLED),"reactor not assembled"))
                 .thenExecute(()->{
+//? if =26.1.2 || =26.3 {
                     var tile=(ReactorCoolantPortTile)h.getLevel().getBlockEntity(pos);var p=player(h,false);
                     var empty=tile.transferSnapshot();
                     long amount=tile.tankCapacity(0)-500;
@@ -117,10 +138,31 @@ public final class PortInteractionGameTests {
                     click(h,p,pos,Direction.EAST,InteractionHand.MAIN_HAND);
                     h.assertTrue(tile.fluidAmountInTank(0)==0,"denied player changed stock");
                     p.getAbilities().mayBuild=true;
+//?} else if =1.21.1 {
+/*                    var tile=(ReactorCoolantPortTile)h.getLevel().getBlockEntity(pos);var p=player(h,false);
+                    p.setItemInHand(InteractionHand.MAIN_HAND,new ItemStack(Items.WATER_BUCKET));
+                    p.getAbilities().mayBuild=false;
+                    click(h,p,pos,Direction.EAST,InteractionHand.MAIN_HAND);
+                    h.assertTrue(tile.fluidAmountInTank(0)==0&&p.getMainHandItem().is(Items.WATER_BUCKET),"denied player changed stock");
+                    h.assertTrue(h.getLevel().getFluidState(pos.east()).isEmpty(),"denied bucket spilled into world");
+                    p.getAbilities().mayBuild=true;
+*/
+//?}
                     tile.setDirection(biggerreactorsrework.multiblocks.reactor.blocks.ReactorAccessPort.PortDirection.OUTLET);
                     click(h,p,pos,Direction.EAST,InteractionHand.MAIN_HAND);
+//? if =26.1.2 || =26.3 {
                     h.assertTrue(tile.fluidAmountInTank(0)==0&&p.getMainHandItem().is(Items.WATER_BUCKET),"outlet accepted cold input");
                 }).thenSucceed();
+//?} else if =1.21.1 {
+/*                    h.assertTrue(tile.fluidAmountInTank(0)==0&&p.getMainHandItem().is(Items.WATER_BUCKET),"outlet accepted cold input");
+                    tile.setDirection(biggerreactorsrework.multiblocks.reactor.blocks.ReactorAccessPort.PortDirection.INLET);
+                    long amount=tile.tankCapacity(0)-500;
+                    tile.fill(net.minecraft.world.level.material.Fluids.WATER,net.minecraft.core.component.DataComponentPatch.EMPTY,amount,false);
+                    click(h,p,pos,Direction.EAST,InteractionHand.MAIN_HAND);
+                    h.assertTrue(tile.fluidAmountInTank(0)==amount&&p.getMainHandItem().is(Items.WATER_BUCKET),"partial bucket insertion changed stock or item");
+                }).thenSucceed();
+*/
+//?}
     }
 
     @GameTest(template="empty_7x7x7",timeoutTicks=120)
@@ -128,10 +170,21 @@ public final class PortInteractionGameTests {
         GuideStructures.turbine().parts().forEach(h::setBlock);var pos=h.absolutePos(new BlockPos(2,1,0));
         h.startSequence().thenWaitUntil(()->h.assertTrue(h.getLevel().getBlockState(pos).getValue(IAssemblyStateBlock.ASSEMBLED),"turbine not assembled"))
                 .thenExecute(()->{
+//? if =26.1.2 || =26.3 {
                     var tile=(biggerreactorsrework.multiblocks.turbine.tiles.TurbineFluidPortTile)h.getLevel().getBlockEntity(pos);var p=player(h,false);
                     // Modified 2026-11-03: steam enters through the fluid port, since it has no bucket.
                     h.assertTrue(tile.fill(Steam.INSTANCE,net.minecraft.core.component.DataComponentPatch.EMPTY,1000,false)==1000,"steam did not fill turbine");
                     var tank=(biggerreactorsrework.util.FluidTransitionTank)tile.controller().simulation().fluidTank();
+//?} else if =1.21.1 {
+/*                    var tile=(biggerreactorsrework.multiblocks.turbine.tiles.TurbineFluidPortTile)h.getLevel().getBlockEntity(pos);var p=player(h,false);
+                    h.assertTrue(Steam.INSTANCE.getBucket()==Items.AIR,"steam still has a bucket");
+                    tile.fill(Steam.INSTANCE,net.minecraft.core.component.DataComponentPatch.EMPTY,1000,false);
+                    p.setItemInHand(InteractionHand.MAIN_HAND,new ItemStack(Items.BUCKET));
+                    click(h,p,pos,Direction.NORTH,InteractionHand.MAIN_HAND);
+                    h.assertTrue(tile.fluidAmountInTank(0)==1000&&p.getMainHandItem().is(Items.BUCKET),"a bucket collected steam");
+                    var tank=(biggerreactorsrework.util.FluidTransitionTank)tile.controller().simulation().fluidTank();
+*/
+//?}
                     tank.absorbRF(1e9);
                     h.assertTrue(tile.fluidAmountInTank(1)==1000,"steam was not condensed for extraction");
                     tile.setDirection(biggerreactorsrework.multiblocks.turbine.blocks.TurbineFluidPort.PortDirection.OUTLET);
@@ -151,10 +204,20 @@ public final class PortInteractionGameTests {
                     for(var relative:java.util.List.of(new BlockPos(0,1,1),new BlockPos(0,1,2))){
                         var pos=h.absolutePos(relative);var tile=(biggerreactorsrework.multiblocks.heatexchanger.tiles.HeatExchangerFluidPortTile)h.getLevel().getBlockEntity(pos);
                         tile.setInletOtherOutlet(true);
+//? if =26.1.2 || =26.3 {
                         if(tile.isCondenser()){
                             h.assertTrue(tile.fill(Steam.INSTANCE,net.minecraft.core.component.DataComponentPatch.EMPTY,1000,false)==1000,"steam did not fill primary circuit");
                             p.setItemInHand(InteractionHand.MAIN_HAND,new ItemStack(Items.BUCKET));
                         }else{
+//?} else if =1.21.1 {
+/*                        if(tile.isCondenser()){
+                            tile.fill(Steam.INSTANCE,net.minecraft.core.component.DataComponentPatch.EMPTY,1000,false);
+                            p.setItemInHand(InteractionHand.MAIN_HAND,new ItemStack(Items.BUCKET));
+                            click(h,p,pos,Direction.WEST,InteractionHand.MAIN_HAND);
+                            h.assertTrue(tile.fluidAmountInTank(0)==1000&&tile.fluidTypeInTank(0)==Steam.INSTANCE,"a bucket collected primary steam");
+                        }else{
+*/
+//?}
                             p.setItemInHand(InteractionHand.MAIN_HAND,new ItemStack(Items.WATER_BUCKET));
                             click(h,p,pos,Direction.WEST,InteractionHand.MAIN_HAND);
                             h.assertTrue(tile.fluidAmountInTank(0)==1000,"water bucket did not fill secondary circuit");
@@ -204,6 +267,7 @@ public final class PortInteractionGameTests {
                         hotTank.absorbRF(-1e9);hot.setInletOtherOutlet(false);
                         var p=player(h,false);p.setItemInHand(InteractionHand.MAIN_HAND,new ItemStack(Items.BUCKET));
                         long before=hotTank.fluidAmountInTank(1);
+//? if =26.1.2 || =26.3 {
                         h.assertTrue(before==1000&&!hotTank.fluidComponentsInTank(1).isEmpty(),"test did not prepare identified generic hot output");
                         click(h,p,hot.getBlockPos(),Direction.WEST,InteractionHand.MAIN_HAND);
                         var expected=biggerreactorsrework.registries.CoolantComponents.fingerprint(
@@ -211,5 +275,15 @@ public final class PortInteractionGameTests {
                         h.assertTrue(hotTank.fluidAmountInTank(1)==0 && expected.equals(
                                 biggerreactorsrework.fluids.HeatedCoolantBucket.origin(p.getMainHandItem())),"filled bucket lost heated identity");
                 }).thenSucceed();
+//?} else if =1.21.1 {
+/*                        h.assertTrue(before==1000&&!hotTank.fluidComponentsInTank(1).isEmpty(),"test did not prepare identified generic hot output");
+                        var origin=biggerreactorsrework.registries.CoolantComponents.origin(hotTank.fluidComponentsInTank(1));
+                        click(h,p,hot.getBlockPos(),Direction.WEST,InteractionHand.MAIN_HAND);
+                        var held=p.getMainHandItem();
+                        h.assertTrue(hotTank.fluidAmountInTank(1)==0&&held.is(biggerreactorsrework.fluids.HeatedCoolant.INSTANCE.getBucket()),"bucket did not collect heated coolant");
+                        h.assertTrue(origin.equals(held.get(biggerreactorsrework.registries.CoolantComponents.ORIGIN.get())),"bucket lost heated identity");
+                }).thenSucceed();
+*/
+//?}
     }
 }

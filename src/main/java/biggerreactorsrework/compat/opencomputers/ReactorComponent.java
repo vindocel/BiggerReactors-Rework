@@ -10,11 +10,19 @@ public final class ReactorComponent extends PortComponent {
     public ReactorComponent(ReactorComputerPortTile tile) {
         super(tile, "biggerreactorsrework_reactor");
         access = ReactorAccess.create(tile::nullableController);
+//? if =26.1.2 || =26.3 {
     }
     @Callback(doc = "function():table -- Thermal model snapshot: kJ/t heat and RF/t electricity.")
     public Object[] thermal(Context context, Arguments args) { checkAvailable(); return result(access.thermal()); }
 
     @Callback(doc = "function():boolean -- Whether the port belongs to an assembled machine.")
+//?} else if =1.21.1 {
+/*    }
+    @Callback(doc="function():table -- Thermal model snapshot: kJ/t heat, RF/t electricity; deprecated temperatures remain ambient.")
+    public Object[] thermal(Context context,Arguments args) { checkAvailable();return result(access.thermal()); }
+    @Callback(doc = "function():boolean -- Whether the port belongs to an assembled machine.")
+*/
+//?}
     public Object[] connected(Context context, Arguments args) {
         checkThread(); return result(available() && access.connected());
     }

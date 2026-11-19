@@ -1,8 +1,15 @@
 package biggerreactorsrework.core.config.spec;
 
+//? if =26.1.2 || =26.3 {
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.resources.Identifier;
 import biggerreactorsrework.core.config.ConfigType;
+//?} else if =1.21.1 {
+/*import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import net.minecraft.resources.ResourceLocation;
+import biggerreactorsrework.core.config.ConfigType;
+*/
+//?}
 import biggerreactorsrework.core.config.ConfigValue;
 import biggerreactorsrework.core.parsers.Element;
 import biggerreactorsrework.core.util.NonnullDefault;
@@ -14,61 +21,73 @@ import java.util.stream.Collectors;
 
 @NonnullDefault
 public class SpecObjectNode extends SpecNode {
-    
+
     @Nullable
     public SpecObjectNode parent;
-    
+
     private final Object object;
     @Nullable
     private final Field field;
     private Object activeObject;
     public final Map<String, SpecNode> subNodes;
+//? if =26.1.2 || =26.3 {
     public final List<SpecNode> subNodeList;
-    
+
     private static final Class<Identifier> RESOURCE_LOCATION_CLASS;
     static {
         Class<Identifier> foundClass = null;
         try {
             foundClass = Identifier.class;
         } catch (NoClassDefFoundError ignored){
+//?} else if =1.21.1 {
+/*    public final List<SpecNode> subNodeList;
+
+    private static final Class<ResourceLocation> RESOURCE_LOCATION_CLASS;
+    static {
+        Class<ResourceLocation> foundClass = null;
+        try {
+            foundClass = ResourceLocation.class;
+        } catch (NoClassDefFoundError ignored){
+*/
+//?}
         }
         RESOURCE_LOCATION_CLASS = foundClass;
     }
-    
+
     protected static class EnableAdvancedNode extends SpecNode {
-        
+
         private boolean advancedEnabled;
-        
+
         protected EnableAdvancedNode() {
             super("EnableAdvancedConfig", "EnableAdvancedConfig", false, false, true);
         }
-        
+
         @Override
         public void writeDefault() {
             advancedEnabled = false;
         }
-        
+
         @Nullable
         @Override
         public Element generateDefaultElement() {
             return new Element(Element.Type.Boolean, generateComment(), "EnableAdvancedConfig", false);
         }
-        
+
         @Override
         public Element generateCurrentElement() {
             return new Element(Element.Type.Boolean, generateComment(), "EnableAdvancedConfig", advancedEnabled);
         }
-        
+
         @Override
         public Element generateSyncElement() {
             return new Element(Element.Type.Boolean, null, "EnableAdvancedConfig", advancedEnabled);
         }
-        
+
         public String generateComment() {
             return "Enabled advanced config options\nAdditional options will be shown after next config load";
         }
-        
-        
+
+
         @Override
         public Element correctToValidState(Element element) {
             if (element.type != Element.Type.Boolean || !(element.value instanceof Boolean)) {
@@ -76,13 +95,13 @@ public class SpecObjectNode extends SpecNode {
             }
             return new Element(Element.Type.Boolean, Objects.requireNonNull(generateDefaultElement()).comment, name, element.asBool());
         }
-        
+
         @Override
         public void writeElement(Element element) {
             advancedEnabled = element.asBool();
         }
     }
-    
+
     private SpecObjectNode(SpecObjectNode parent, Field field, ConfigType type, ConfigOptionsDefaults defaults) {
         // fuckery so i dont need to create two records
         super(field.getName(), field.getAnnotation(ConfigValue.class), defaults = defaults.transform(field.getAnnotation(ConfigValue.class)));
@@ -100,7 +119,7 @@ public class SpecObjectNode extends SpecNode {
         this.subNodeList = Collections.unmodifiableList(readObjectSubNodes(type, defaults));
         subNodes = subNodeList.stream().collect(Collectors.toUnmodifiableMap(node -> Objects.requireNonNull(node.name), node -> node));
     }
-    
+
     public SpecObjectNode(Object rootObject, String comment, ConfigType type, ConfigOptionsDefaults defaults) {
         super(null, comment, defaults.advanced(), defaults.hidden(), defaults.reloadable());
         object = rootObject;
@@ -112,18 +131,18 @@ public class SpecObjectNode extends SpecNode {
         //noinspection ConstantConditions
         subNodes = subNodeList.stream().collect(Collectors.toUnmodifiableMap(node -> node.name, node -> node));
     }
-    
+
     public Object object() {
         return activeObject;
     }
-    
+
     public void resetObject() {
         boolean reset = setActiveObject(object);
         if (!reset) {
             throw new IllegalStateException("Failed to reset to previous active object");
         }
     }
-    
+
     public boolean setActiveObject(@Nullable Object newObject) {
         if (newObject == null) {
             resetObject();
@@ -154,22 +173,22 @@ public class SpecObjectNode extends SpecNode {
         activeObject = newObject;
         return true;
     }
-    
+
     private List<SpecNode> readObjectSubNodes(ConfigType type, ConfigOptionsDefaults defaults) {
         final var subNodes = new ObjectArrayList<SpecNode>();
-        
+
         final var objectClazz = object.getClass();
         for (final var objectField : objectClazz.getDeclaredFields()) {
             if (!objectField.isAnnotationPresent(ConfigValue.class)) {
                 continue;
             }
-            
+
             objectField.setAccessible(true);
-            
+
             final var fieldAnnotation = objectField.getAnnotation(ConfigValue.class);
             final var fieldClazz = objectField.getType();
             final SpecNode subNode;
-            
+
             if (fieldClazz == String.class) {
                 subNode = new SpecStringNode(this, objectField, defaults);
             } else if (fieldClazz == RESOURCE_LOCATION_CLASS) {
@@ -192,30 +211,30 @@ public class SpecObjectNode extends SpecNode {
                     continue;
                 }
             }
-            
+
             // the type for an object node is semi-ignored because its really just setting the default for the values within it, which dont need to respect it directly
             if (!(subNode instanceof SpecObjectNode) && fieldAnnotation.configType().from(defaults.type()) != type) {
                 continue;
             }
-            
+
             subNodes.add(subNode);
         }
-        
+
         return subNodes;
     }
-    
+
     @Override
     public void writeDefault() {
         subNodeList.forEach(SpecNode::writeDefault);
     }
-    
-    
+
+
     @Override
     @Nullable
     public Element generateDefaultElement() {
         return generateDefaultElement(false);
     }
-    
+
     @Nullable
     public Element generateDefaultElement(boolean advanced) {
         final var subElements = subNodeList.stream()
@@ -236,13 +255,13 @@ public class SpecObjectNode extends SpecNode {
         }
         return new Element(Element.Type.Map, baseComment, name, subElements);
     }
-    
+
     @Override
     @Nullable
     public Element generateCurrentElement() {
         return generateCurrentElement(false);
     }
-    
+
     @Nullable
     public Element generateCurrentElement(boolean advanced) {
         final var subElements = subNodeList.stream()
@@ -263,13 +282,13 @@ public class SpecObjectNode extends SpecNode {
         }
         return new Element(Element.Type.Map, baseComment, name, subElements);
     }
-    
+
     @Override
     public Element generateSyncElement() {
         final var subElements = subNodeList.stream().map(SpecNode::generateSyncElement).toArray(Element[]::new);
         return new Element(Element.Type.Map, null, name, subElements);
     }
-    
+
     @Override
     @Nullable
     public Element correctToValidState(Element element) {
@@ -291,13 +310,13 @@ public class SpecObjectNode extends SpecNode {
         }
         return new Element(Element.Type.Map, baseComment, name, subElements);
     }
-    
+
     @Override
     public void writeElement(Element element) {
         if (element.subArray == null) {
             return;
         }
-        
+
         for (final var value : element.subArray) {
             final var subNode = subNodes.get(value.name);
             if (subNode == null) {
@@ -306,7 +325,7 @@ public class SpecObjectNode extends SpecNode {
             subNode.writeElement(value);
         }
     }
-    
+
     /**
      * @param element: the element to be regenerated
      * @return an element with any missing subnodes added as subelements, may return original element, will return original subelements
@@ -315,7 +334,7 @@ public class SpecObjectNode extends SpecNode {
         final var specNode = subNodes.get("EnableAdvancedConfig");
         return regenerateMissingElements(element, specNode instanceof EnableAdvancedNode eaNode && eaNode.advancedEnabled);
     }
-    
+
     private Element regenerateMissingElements(Element element, boolean enableAdvanced) {
         assert element.subArray != null;
         final var newElements = new ObjectArrayList<Element>();
@@ -344,7 +363,7 @@ public class SpecObjectNode extends SpecNode {
                 newElements.add(newElement);
             }
         }
-        
+
         final var subElements = new Element[element.subArray.length + newElements.size()];
         int i = 0;
         for (int j = 0; j < element.subArray.length; i++, j++) {
@@ -361,14 +380,14 @@ public class SpecObjectNode extends SpecNode {
         for (int j = 0; j < newElements.size(); i++, j++) {
             subElements[i] = newElements.get(j);
         }
-        
+
         return new Element(Element.Type.Map, baseComment, name, subElements);
     }
-    
+
     @Nullable
     public Element removeUnknownElements(Element element) {
         final var retainedElements = new ObjectArrayList<Element>();
-        
+
         assert element.subArray != null;
         for (var value : element.subArray) {
             final var subNode = subNodes.get(value.name);
@@ -382,14 +401,14 @@ public class SpecObjectNode extends SpecNode {
                 retainedElements.add(value);
             }
         }
-        
+
         if (retainedElements.isEmpty()) {
             return null;
         }
-        
+
         return new Element(Element.Type.Map, element.comment, name, retainedElements.toArray(new Element[0]));
     }
-    
+
     public Element correctElementOrder(Element element) {
         final var elementMap = Arrays.stream(element.subArray).collect(Collectors.toMap(node -> node.name, node -> node));
         final var newElementArray = new Element[element.subArray.length];
@@ -412,11 +431,11 @@ public class SpecObjectNode extends SpecNode {
         }
         return new Element(element.type, element.comment, element.name, newElementArray);
     }
-    
+
     @Nullable
     public Element trimToReloadable(Element element) {
         final var retainedElements = new ObjectArrayList<Element>();
-        
+
         assert element.subArray != null;
         for (var value : element.subArray) {
             final var subNode = subNodes.get(value.name);
@@ -432,11 +451,11 @@ public class SpecObjectNode extends SpecNode {
                 retainedElements.add(value);
             }
         }
-        
+
         if (retainedElements.isEmpty()) {
             return null;
         }
-        
+
         return new Element(Element.Type.Map, element.comment, name, retainedElements.toArray(new Element[0]));
     }
 }

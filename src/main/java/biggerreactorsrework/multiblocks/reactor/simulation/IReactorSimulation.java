@@ -14,7 +14,7 @@ import javax.annotation.ParametersAreNonnullByDefault;
 @ParametersAreNonnullByDefault
 @NonnullDefault
 public interface IReactorSimulation extends ISerializable, IDebuggable {
-    
+
     /**
      * tick the reactor simulation
      * call this even if inactive, as there can be some inactive decay
@@ -29,108 +29,123 @@ public interface IReactorSimulation extends ISerializable, IDebuggable {
     /** Complete a pending calculation once before saving or moving fuel. */
     default void settle() { }
 
-    
+
     @Nullable
     IBattery battery();
-    
+
     @Nullable
     ICoolantTank coolantTank();
-    
+
     IFuelTank fuelTank();
-    
+
     @Nullable
     ControlRod controlRodAt(int x, int z);
-    
+
     void setAllControlRodInsertions(double insertion);
-    
+
     double fertility();
-    
+
     double fuelHeat();
-    
+
     double stackHeat();
-    
+
     double ambientTemperature();
-    
+
     default boolean isAsync() {
         return false;
     }
-    
+
     default boolean readyToTick() {
         return true;
     }
-    
+
     @NotNull
     @Override
     DataCompound save();
-    
+
     interface ControlRod {
         double insertion();
-        
+
         void setInsertion(double insertion);
     }
-    
+
     interface IBattery {
         long extract(long toExtract);
-        
+
         long stored();
-        
+
         long capacity();
-        
+
+//? if =26.1.2 || =26.3 {
         long generatedLastTick();
-        
+
         void restoreStored(long stored);
     }
-    
+
     interface ICoolantTank extends biggerreactorsrework.core.transfer.TransferSnapshots {
         void dumpLiquid();
-        
+//?} else if =1.21.1 {
+/*        long generatedLastTick();
+    }
+
+    interface ICoolantTank {
+        void dumpLiquid();
+*/
+//?}
+
         void dumpVapor();
-        
+
         long insertLiquid(long amount);
-        
+
         long extractLiquid(long amount);
-        
+
         long insertVapor(long amount);
-        
+
         long extractVapor(long amount);
-        
+
         long liquidAmount();
-        
+
         long vaporAmount();
-    
+
         long perSideCapacity();
-    
+
         void setModeratorProperties(ReactorModeratorRegistry.IModeratorProperties moderatorProperties);
-    
+
         void setTransitionProperties(FluidTransitionRegistry.ITransitionProperties transitionProperties);
-    
+
         long transitionedLastTick();
-    
+
         long maxTransitionedLastTick();
-    
+
         long rfTransferredLastTick();
     }
-    
+
     interface IFuelTank {
         long capacity();
-        
+
         long totalStored();
-        
+
         long fuel();
-        
+
         long waste();
-        
+
         long insertFuel(long amount, boolean simulated);
-        
+
         long insertWaste(long amount, boolean simulated);
-        
+
         long extractFuel(long amount, boolean simulated);
-        
+
         long extractWaste(long amount, boolean simulated);
-        
+
         default double usableFuel() { return fuel(); }
+//? if =26.1.2 || =26.3 {
         double burnedLastTick();
-        
+
         void restoreStored(long fuel, long waste);
     }
+//?} else if =1.21.1 {
+/*        double burnedLastTick();
+    }
+*/
+//?}
 }

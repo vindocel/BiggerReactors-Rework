@@ -1,12 +1,27 @@
 package biggerreactorsrework.gametest;
 
 import biggerreactorsrework.BiggerReactors;
+//? if =26.1.2 || =26.3 {
 import biggerreactorsrework.util.GuideStructures;
 import net.minecraft.gametest.framework.GameTestHelper;
 import static biggerreactorsrework.core.multiblock.IAssemblyStateBlock.ASSEMBLED;
 
 /** The exact examples rendered in the guide must assemble. */
 public final class GuideGameTests {
+//?} else if =1.21.1 {
+/*import biggerreactorsrework.util.GuideStructures;
+import net.minecraft.gametest.framework.GameTest;
+import net.minecraft.gametest.framework.GameTestHelper;
+import net.neoforged.neoforge.gametest.GameTestHolder;
+import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
+import static biggerreactorsrework.core.multiblock.IAssemblyStateBlock.ASSEMBLED;
+
+/^* The exact examples rendered in the guide must assemble. ^/
+@GameTestHolder(BiggerReactors.modid)
+@PrefixGameTestTemplate(false)
+public final class GuideGameTests {
+*/
+//?}
     private static void build(GameTestHelper h, GuideStructures.Example example) {
         example.parts().forEach(h::setBlock);
         h.succeedWhen(() -> example.parts().forEach((pos,state)-> {

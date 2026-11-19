@@ -40,7 +40,7 @@ class SteamWindowMeshTest {
         assertEquals(0,SteamWindowMesh.frame(0));
         assertEquals(1,SteamWindowMesh.frame(4));
         assertEquals(0,SteamWindowMesh.frame(256));
-        try(var input=java.nio.file.Files.newInputStream(java.nio.file.Path.of("src/main/resources/assets/biggerreactorsrework/textures/effect/turbine_steam.png"))) {
+        try(var input=getClass().getResourceAsStream("/assets/biggerreactorsrework/textures/effect/turbine_steam.png")) {
             var image=javax.imageio.ImageIO.read(input);
             assertEquals(32,image.getWidth());assertEquals(32*64,image.getHeight());
             int differences=0,maxStep=0;

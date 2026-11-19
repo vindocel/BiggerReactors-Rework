@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "IGI",
+    "GYG",
+    "IGI"
+  ],
+  "key": {
+    "I": "minecraft:iron_ingot",
+    "G": "#c:ingots/graphite",
+    "Y": "#c:ingots/uranium"
+  },
+  "result": {
+    "id": "biggerreactorsrework:reactor_casing",
+    "count": 4
+  }
+}

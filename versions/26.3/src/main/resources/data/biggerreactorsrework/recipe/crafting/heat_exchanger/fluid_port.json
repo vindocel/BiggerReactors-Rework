@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "C C",
+    "IVI",
+    "CPC"
+  ],
+  "key": {
+    "C": "biggerreactorsrework:heat_exchanger_casing",
+    "I": "minecraft:iron_ingot",
+    "V": "minecraft:bucket",
+    "P": "minecraft:piston"
+  },
+  "result": {
+    "id": "biggerreactorsrework:heat_exchanger_fluid_port"
+  }
+}

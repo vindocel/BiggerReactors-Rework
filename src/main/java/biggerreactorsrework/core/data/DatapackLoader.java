@@ -3,9 +3,16 @@ package biggerreactorsrework.core.data;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectMaps;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+//? if =26.1.2 || =26.3 {
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.Resource;
+//?} else if =1.21.1 {
+/*import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.resources.Resource;
+*/
+//?}
 import biggerreactorsrework.core.CoreEvents;
 import biggerreactorsrework.core.config.ConfigType;
 import biggerreactorsrework.core.config.spec.ConfigOptionsDefaults;
@@ -22,25 +29,42 @@ import java.util.function.Supplier;
 
 @NonnullDefault
 public class DatapackLoader<T> {
-    
+
     private final SpecObjectNode baseSpecNode;
     private final Supplier<T> objectSupplier;
-    
+
     public DatapackLoader(Supplier<T> objectSupplier) {
         final var templateObject = objectSupplier.get();
         baseSpecNode = new SpecObjectNode(templateObject, "", ConfigType.NULL, new ConfigOptionsDefaults(ConfigType.NULL, false, false, false));
         this.objectSupplier = objectSupplier;
+//? if =26.1.2 || =26.3 {
     }
-    
+
     public Map<Identifier, List<T>> loadAllMappedStack(Identifier baseResourceLocation) {
         if (CoreEvents.serverResourceManager == null) {
+//?} else if =1.21.1 {
+/*    }
+
+    public Map<ResourceLocation, List<T>> loadAllMappedStack(ResourceLocation baseResourceLocation) {
+        if (CoreEvents.serverResourceManager == null) {
+*/
+//?}
             return new Object2ObjectOpenHashMap<>();
+//? if =26.1.2 || =26.3 {
         }
-        
+
         final var map = new Object2ObjectOpenHashMap<Identifier, List<T>>();
-        
+
         final var resourceLocations = CoreEvents.serverResourceManager.listResourceStacks(baseResourceLocation.getPath(), s -> s.getPath().contains(".json"));
-        
+//?} else if =1.21.1 {
+/*        }
+
+        final var map = new Object2ObjectOpenHashMap<ResourceLocation, List<T>>();
+
+        final var resourceLocations = CoreEvents.serverResourceManager.listResourceStacks(baseResourceLocation.getPath(), s -> s.getPath().contains(".json"));
+*/
+//?}
+
         for (final var entry : resourceLocations.entrySet()) {
             final var resourceLocation = entry.getKey();
             // TODO: 9/8/22 add an option for enforcing this
@@ -59,21 +83,39 @@ public class DatapackLoader<T> {
             }
             map.put(resourceLocation, list);
         }
-        
+
         return map;
+//? if =26.1.2 || =26.3 {
     }
-    
+
     public List<T> loadAll(Identifier baseResourceLocation) {
         if (CoreEvents.serverResourceManager == null) {
+//?} else if =1.21.1 {
+/*    }
+
+    public List<T> loadAll(ResourceLocation baseResourceLocation) {
+        if (CoreEvents.serverResourceManager == null) {
+*/
+//?}
             return new ObjectArrayList<>();
         }
-        
+
+//? if =26.1.2 || =26.3 {
         final var list = new ObjectArrayList<T>();
-        
+
         Map<Identifier, Resource> resourceLocations = CoreEvents.serverResourceManager.listResources(baseResourceLocation.getPath(), s -> s.getPath().contains(".json"));
-        
+
         for (Map.Entry<Identifier, Resource> entry : resourceLocations.entrySet()) {
             final var resourceLocation = entry.getKey();
+//?} else if =1.21.1 {
+/*        final var list = new ObjectArrayList<T>();
+
+        Map<ResourceLocation, Resource> resourceLocations = CoreEvents.serverResourceManager.listResources(baseResourceLocation.getPath(), s -> s.getPath().contains(".json"));
+
+        for (Map.Entry<ResourceLocation, Resource> entry : resourceLocations.entrySet()) {
+            final var resourceLocation = entry.getKey();
+*/
+//?}
             // TODO: 9/8/22 add an option for enforcing this
             if (!resourceLocation.getNamespace().equals(baseResourceLocation.getNamespace())) {
                 continue;
@@ -83,21 +125,35 @@ public class DatapackLoader<T> {
                 list.add(t);
             }
         }
-        
+
         return list;
     }
-    
+
+//? if =26.1.2 || =26.3 {
     @Nullable
     public T load(Identifier location) {
         if (CoreEvents.serverResourceManager == null) {
+//?} else if =1.21.1 {
+/*    @Nullable
+    public T load(ResourceLocation location) {
+        if (CoreEvents.serverResourceManager == null) {
+*/
+//?}
             return null;
         }
         return load(location, CoreEvents.serverResourceManager.getResource(location).orElseThrow());
     }
-    
+
+//? if =26.1.2 || =26.3 {
     @Nullable
     private T load(Identifier location, Resource resource) {
         String json;
+//?} else if =1.21.1 {
+/*    @Nullable
+    private T load(ResourceLocation location, Resource resource) {
+        String json;
+*/
+//?}
         try {
             try (BufferedReader reader = resource.openAsReader()) {
                 StringBuilder builder = new StringBuilder();
@@ -108,33 +164,33 @@ public class DatapackLoader<T> {
                 }
                 json = builder.toString();
             }
-            
+
         } catch (IOException e) {
             CoreEvents.LOGGER.error("Error reading json at " + location.toString());
             e.printStackTrace();
             return null;
         }
-        
+
         final var object = objectSupplier.get();
-        
+
         final var elements = JSON5.parseString(json);
-        
+
         if (!baseSpecNode.setActiveObject(object)) {
             return null;
         }
-        
+
         if (elements == null) {
             return object;
         }
-        
+
         final var correctedElements = baseSpecNode.correctToValidState(elements);
-        
+
         if (correctedElements == null) {
             return object;
         }
-        
+
         baseSpecNode.writeElement(correctedElements);
-        
+
         return object;
     }
 }

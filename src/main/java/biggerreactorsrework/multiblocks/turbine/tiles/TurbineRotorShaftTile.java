@@ -1,6 +1,14 @@
+//? if =26.1.2 || =26.3 {
 package biggerreactorsrework.multiblocks.turbine.tiles;
 
 import net.minecraft.core.BlockPos;
+//?} else if =1.21.1 {
+/*package biggerreactorsrework.multiblocks.turbine.tiles;
+
+import net.minecraft.MethodsReturnNonnullByDefault;
+import net.minecraft.core.BlockPos;
+*/
+//?}
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
@@ -16,16 +24,23 @@ import javax.annotation.ParametersAreNonnullByDefault;
 import static biggerreactorsrework.multiblocks.turbine.blocks.TurbineRotorBlade.BLADE_POSITION;
 import static biggerreactorsrework.multiblocks.turbine.state.TurbineShaftRotationState.*;
 
+//? if =26.1.2 || =26.3 {
 @ParametersAreNonnullByDefault
 public class TurbineRotorShaftTile extends TurbineBaseTile implements IEventMultiblock.AssemblyStateTransition {
-    
+//?} else if =1.21.1 {
+/*@ParametersAreNonnullByDefault
+@MethodsReturnNonnullByDefault
+public class TurbineRotorShaftTile extends TurbineBaseTile implements IEventMultiblock.AssemblyStateTransition {
+*/
+//?}
+
     @RegisterTile("turbine_rotor_shaft")
     public static final BlockEntityType.BlockEntitySupplier<TurbineRotorShaftTile> SUPPLIER = new RegisterTile.Producer<>(TurbineRotorShaftTile::new);
-    
+
     public TurbineRotorShaftTile(BlockEntityType<?> TYPE, BlockPos pos, BlockState state) {
         super(TYPE, pos, state);
     }
-    
+
     @Override
     public void onAssemblyStateTransition(IValidatedMultiblock.AssemblyState oldState, IValidatedMultiblock.AssemblyState newState) {
         TurbineShaftRotationState newRotation = getBlockState().getValue(TurbineShaftRotationState.TURBINE_SHAFT_ROTATION_STATE_ENUM_PROPERTY);
@@ -36,11 +51,11 @@ public class TurbineRotorShaftTile extends TurbineBaseTile implements IEventMult
         if (axis != null) newRotation = TurbineShaftRotationState.values()[axis.ordinal()];
         if(level.hasChunkAt(worldPosition)) level.setBlockAndUpdate(worldPosition,
                 getBlockState().setValue(TURBINE_SHAFT_ROTATION_STATE_ENUM_PROPERTY,newRotation));
-        
+
         // propagate it out to the blades
         int i = 0;
         for (Direction value : biggerreactorsrework.multiblocks.turbine.TurbineRotorLayout.arms(Direction.Axis.values()[newRotation.ordinal()])) {
-            
+
             BlockPos pos = getBlockPos();
             while (true) {
                 pos = pos.relative(value);

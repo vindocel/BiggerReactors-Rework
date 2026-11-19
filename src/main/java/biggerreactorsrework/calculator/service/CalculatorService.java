@@ -90,9 +90,16 @@ public final class CalculatorService {
         return cachedCatalog;
     }
 
+//? if =26.1.2 || =26.3 {
     static void receive(ServerPlayer player, CompoundTag tag) {
         switch (tag.getStringOr("type", "")) {
             case CalculatorNetwork.CATALOG -> {
+//?} else if =1.21.1 {
+/*    static void receive(ServerPlayer player, CompoundTag tag) {
+        switch (tag.getString("type")) {
+            case CalculatorNetwork.CATALOG -> {
+*/
+//?}
                 if (!LAST_CATALOG.acquire(player.getUUID(), System.nanoTime())) return;
                 var reply = new CompoundTag();
                 reply.putString("type", CalculatorNetwork.CATALOG);
@@ -100,23 +107,44 @@ public final class CalculatorService {
                 CalculatorNetwork.toPlayer(player, reply);
             }
             case CalculatorNetwork.CANCEL -> {
+//? if =26.1.2 || =26.3 {
                 var job = JOBS.get(player.getUUID());
                 if (job != null && job.session.equals(tag.getStringOr("session", ""))) cancel(player.getUUID());
             }
+//?} else if =1.21.1 {
+/*                var job = JOBS.get(player.getUUID());
+                if (job != null && job.session.equals(tag.getString("session"))) cancel(player.getUUID());
+            }
+*/
+//?}
             case CalculatorNetwork.START -> start(player, tag);
             default -> { }
         }
     }
 
+//? if =26.1.2 || =26.3 {
     private static void start(ServerPlayer player, CompoundTag tag) {
         String session = tag.getStringOr("session", "");
         if (session.isEmpty() || session.length() > MAX_SESSION) return;
+//?} else if =1.21.1 {
+/*    private static void start(ServerPlayer player, CompoundTag tag) {
+        String session = tag.getString("session");
+        if (session.isEmpty() || session.length() > MAX_SESSION) return;
+*/
+//?}
         if (!LAST_REQUEST.acquire(player.getUUID(), System.nanoTime())) {
             finish(player, session, failure(CalculationStatus.BUSY));
             return;
+//? if =26.1.2 || =26.3 {
         }
         var request = CalculatorRequest.fromTag(tag.getCompoundOrEmpty("request"));
         if (request == null) {
+//?} else if =1.21.1 {
+/*        }
+        var request = CalculatorRequest.fromTag(tag.getCompound("request"));
+        if (request == null) {
+*/
+//?}
             finish(player, session, failure(CalculationStatus.INVALID_INPUT));
             return;
         }
@@ -134,9 +162,16 @@ public final class CalculatorService {
             return;
         }
         cancel(player.getUUID());
+//? if =26.1.2 || =26.3 {
         var cancelled = new AtomicBoolean();
         var server = player.level().getServer();
         var id = player.getUUID();
+//?} else if =1.21.1 {
+/*        var cancelled = new AtomicBoolean();
+        var server = player.server;
+        var id = player.getUUID();
+*/
+//?}
         long[] lastProgress = {0};
         PlantSearch.Progress progress = (phase, done, total) -> {
             long t = System.currentTimeMillis();

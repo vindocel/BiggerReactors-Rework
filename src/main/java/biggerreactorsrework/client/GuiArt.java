@@ -1,10 +1,21 @@
+//? if =26.1.2 || =26.3 {
 package biggerreactorsrework.client;
 
 import net.minecraft.util.Util;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.util.Mth;
+//?} else if =1.21.1 {
+/*package biggerreactorsrework.client;
+
+import net.minecraft.Util;
+import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.util.Mth;
+*/
+//?}
 import net.minecraft.world.level.material.EmptyFluid;
+//? if =26.1.2 || =26.3 {
 import net.minecraft.world.level.material.Fluid;
 import biggerreactorsrework.core.client.gui.RenderHelper;
 
@@ -17,6 +28,25 @@ import javax.annotation.Nullable;
  * plain fills; the metal frame around the panels comes from {@link GuiFrame}. Icons live in their own files, see {@link GuiIcon}.
  */
 public final class GuiArt {
+//?} else if =1.21.1 {
+/*import net.minecraft.world.level.material.Fluid;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import biggerreactorsrework.core.client.gui.RenderHelper;
+
+import org.joml.Vector3f;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
+/^*
+ * Draws the pieces every Bigger Reactors screen is made of (panel, slots, buttons, tabs, selectors, text boxes) with
+ * plain fills; the metal frame around the panels comes from {@link GuiFrame}. Icons live in their own files, see {@link GuiIcon}.
+ ^/
+@OnlyIn(Dist.CLIENT)
+public final class GuiArt {
+*/
+//?}
 
     public static final int BLACK = 0xFF000000;
     public static final int WHITE = 0xFFFFFFFF;
@@ -27,6 +57,8 @@ public final class GuiArt {
     public static final int SEPARATOR = PANEL_SHADOW;
 
     public static final int SWITCH_WIDTH = 31;
+    /** Added 2026-11-18: every window close button is this square, with the close icon centered. */
+    public static final int CLOSE_SIZE = 10;
     public static final int TOGGLE_HEIGHT = 14;
     private static final int TOGGLE_OUTLINE = 0xFF303B42;
     private static final int TOGGLE_OUTLINE_HOVER = 0xFF4AABB9;
@@ -58,6 +90,7 @@ public final class GuiArt {
     private static final int TEXT_BOX_CORNER = 0xFF474747;
 
     private GuiArt() {
+//? if =26.1.2 || =26.3 {
     }
 
     public static void fill(@Nonnull GuiGraphicsExtractor graphics, int x0, int y0, int x1, int y1, int color) {
@@ -77,7 +110,30 @@ public final class GuiArt {
      */
     public static void tabButton(@Nonnull GuiGraphicsExtractor graphics, int earX, int y, boolean leftSide, boolean hovered, boolean selected, @Nonnull GuiFrame frame) {
         buttonBackground(graphics, GuiFrame.tabButtonX(earX, leftSide), y + GuiFrame.TAB_BUTTON_TOP, GuiFrame.TAB_BUTTON,
+//?} else if =1.21.1 {
+/*    }
+
+    public static void fill(@Nonnull GuiGraphics graphics, int x0, int y0, int x1, int y1, int color) {
+        graphics.fill(x0, y0, x1, y1, GuiTheme.chromeColor(color));
+    }
+
+    /^*
+     * The themed center of a screen or window, set into the unchanged metal frame of its machine.
+     ^/
+    public static void panel(@Nonnull GuiGraphics graphics, int x, int y, int width, int height, @Nonnull GuiFrame frame) {
+        frame.panel(graphics, x, y, width, height, GuiTheme.panelColor());
+    }
+
+    /^*
+     * Button of a side tab whose ear starts at {@code earX} and whose top is {@code y}: switched on while the tab is
+     * selected. The ears themselves are drawn by {@link GuiFrame#ear}, one per block of stacked tabs.
+     ^/
+    public static void tabButton(@Nonnull GuiGraphics graphics, int earX, int y, boolean leftSide, boolean hovered, boolean selected, @Nonnull GuiFrame frame) {
+        buttonBackground(graphics, GuiFrame.tabButtonX(earX, leftSide), y + GuiFrame.TAB_BUTTON_TOP, GuiFrame.TAB_BUTTON,
+*/
+//?}
                 GuiFrame.TAB_BUTTON, hovered, selected, false, frame);
+//? if =26.1.2 || =26.3 {
     }
 
     /**
@@ -100,7 +156,33 @@ public final class GuiArt {
      */
     public static void button(@Nonnull GuiGraphicsExtractor graphics, int x, int y, int width, int height, boolean hovered, boolean active, boolean disabled, GuiIcon glyph, @Nonnull GuiFrame frame) {
         buttonBackground(graphics, x, y, width, height, hovered, active, disabled, frame);
+//?} else if =1.21.1 {
+/*    }
+
+    /^*
+     * Icon of {@code width} x {@code height} centered on the button of a tab (see {@link #tabButton}), drawn at
+     * {@link GuiFrame#TAB_ICON_SCALE}; {@code draw} paints it with its top-left corner at (0, 0).
+     ^/
+    public static void tabIcon(@Nonnull GuiGraphics graphics, int earX, int y, boolean leftSide, int width, int height, Runnable draw) {
+        float scale = GuiFrame.TAB_ICON_SCALE;
+        graphics.pose().pushPose();
+        graphics.pose().translate(GuiFrame.tabButtonX(earX, leftSide) + (GuiFrame.TAB_BUTTON - width * scale) / 2,
+                y + GuiFrame.TAB_BUTTON_TOP + (GuiFrame.TAB_BUTTON - height * scale) / 2, 0);
+        graphics.pose().scale(scale, scale, 1);
+        draw.run();
+        graphics.pose().popPose();
+    }
+
+    /^*
+     * Every button of the screens: dark outline (cyan when hovered), light border (grey when disabled), slate fill
+     * (teal when the button is switched on) and its glyph centered. The dark parts take the tone of the screen's frame.
+     ^/
+    public static void button(@Nonnull GuiGraphics graphics, int x, int y, int width, int height, boolean hovered, boolean active, boolean disabled, GuiIcon glyph, @Nonnull GuiFrame frame) {
+        buttonBackground(graphics, x, y, width, height, hovered, active, disabled, frame);
+*/
+//?}
         glyph.draw(graphics, x + (width - glyph.width()) / 2, y + (height - glyph.height()) / 2);
+//? if =26.1.2 || =26.3 {
     }
 
     public static void button(@Nonnull GuiGraphicsExtractor graphics, int x, int y, int width, int height, boolean hovered, GuiIcon glyph, @Nonnull GuiFrame frame) {
@@ -112,7 +194,22 @@ public final class GuiArt {
      */
     public static void buttonBackground(@Nonnull GuiGraphicsExtractor graphics, int x, int y, int width, int height, boolean hovered, boolean active, boolean disabled, @Nonnull GuiFrame frame) {
         buttonBorder(graphics, x, y, width, height, hovered, disabled, frame);
+//?} else if =1.21.1 {
+/*    }
+
+    public static void button(@Nonnull GuiGraphics graphics, int x, int y, int width, int height, boolean hovered, GuiIcon glyph, @Nonnull GuiFrame frame) {
+        button(graphics, x, y, width, height, hovered, false, false, glyph, frame);
+    }
+
+    /^*
+     * Button without a glyph.
+     ^/
+    public static void buttonBackground(@Nonnull GuiGraphics graphics, int x, int y, int width, int height, boolean hovered, boolean active, boolean disabled, @Nonnull GuiFrame frame) {
+        buttonBorder(graphics, x, y, width, height, hovered, disabled, frame);
+*/
+//?}
         graphics.fill(x + 2, y + 2, x + width - 2, y + height - 2, buttonFill(active, disabled, frame));
+//? if =26.1.2 || =26.3 {
     }
 
     /**
@@ -120,6 +217,16 @@ public final class GuiArt {
      */
     public static void buttonBorder(@Nonnull GuiGraphicsExtractor graphics, int x, int y, int width, int height, boolean hovered, boolean disabled, @Nonnull GuiFrame frame) {
         int outline = hovered && !disabled ? TOGGLE_OUTLINE_HOVER : frame.tint(BUTTON_OUTLINE);
+//?} else if =1.21.1 {
+/*    }
+
+    /^*
+     * Only the outline and the light border of a button, for symbols that cover the inside of the button.
+     ^/
+    public static void buttonBorder(@Nonnull GuiGraphics graphics, int x, int y, int width, int height, boolean hovered, boolean disabled, @Nonnull GuiFrame frame) {
+        int outline = hovered && !disabled ? TOGGLE_OUTLINE_HOVER : frame.tint(BUTTON_OUTLINE);
+*/
+//?}
         fill(graphics, x, y, x + width, y + 1, outline);
         fill(graphics, x, y + height - 1, x + width, y + height, outline);
         fill(graphics, x, y + 1, x + 1, y + height - 1, outline);
@@ -136,6 +243,7 @@ public final class GuiArt {
      */
     public static int buttonFill(boolean active, boolean disabled, @Nonnull GuiFrame frame) {
         return GuiTheme.chromeColor(disabled ? frame.tint(BUTTON_FILL_DISABLED) : (active ? BUTTON_FILL_ACTIVE : frame.tint(BUTTON_FILL)));
+//? if =26.1.2 || =26.3 {
     }
 
     /**
@@ -143,10 +251,21 @@ public final class GuiArt {
      */
     public static void slot(@Nonnull GuiGraphicsExtractor graphics, int x, int y, int size) {
         fill(graphics, x, y, x + size, y + size, SLOT_FILL);
+//?} else if =1.21.1 {
+/*    }
+
+    /^*
+     * Sunken slot: shadow on the top and left, white on the bottom and right.
+     ^/
+    public static void slot(@Nonnull GuiGraphics graphics, int x, int y, int size) {
+        fill(graphics, x, y, x + size, y + size, SLOT_FILL);
+*/
+//?}
         fill(graphics, x, y, x + size - 1, y + 1, SLOT_SHADOW);
         fill(graphics, x, y, x + 1, y + size - 1, SLOT_SHADOW);
         fill(graphics, x + 1, y + size - 1, x + size, y + size, WHITE);
         fill(graphics, x + size - 1, y + 1, x + size, y + size, WHITE);
+//? if =26.1.2 || =26.3 {
     }
 
     /**
@@ -159,9 +278,25 @@ public final class GuiArt {
     // Modified 2026-10-28: rectangular controls keep a full-size focus outline.
     public static void ring(@Nonnull GuiGraphicsExtractor graphics, int x, int y, int width, int height, int color) {
         fill(graphics, x, y, x + width, y + 1, color);
+//?} else if =1.21.1 {
+/*    }
+
+    /^*
+     * 1 pixel colored ring.
+     ^/
+    public static void ring(@Nonnull GuiGraphics graphics, int x, int y, int size, int color) {
+        ring(graphics, x, y, size, size, color);
+    }
+
+    // Modified 2026-10-28: rectangular controls keep a full-size focus outline.
+    public static void ring(@Nonnull GuiGraphics graphics, int x, int y, int width, int height, int color) {
+        fill(graphics, x, y, x + width, y + 1, color);
+*/
+//?}
         fill(graphics, x, y + height - 1, x + width, y + height, color);
         fill(graphics, x, y, x + 1, y + height, color);
         fill(graphics, x + width - 1, y, x + width, y + height, color);
+//? if =26.1.2 || =26.3 {
     }
 
     /**
@@ -169,6 +304,16 @@ public final class GuiArt {
      */
     public static void playerInventory(@Nonnull GuiGraphicsExtractor graphics, int x, int y) {
         for (int row = 0; row < 3; row++) {
+//?} else if =1.21.1 {
+/*    }
+
+    /^*
+     * Player inventory: three rows of nine slots and the hotbar 4 pixels below them.
+     ^/
+    public static void playerInventory(@Nonnull GuiGraphics graphics, int x, int y) {
+        for (int row = 0; row < 3; row++) {
+*/
+//?}
             for (int column = 0; column < 9; column++) {
                 slot(graphics, x + 18 * column, y + 18 * row, 18);
             }
@@ -176,6 +321,7 @@ public final class GuiArt {
         for (int column = 0; column < 9; column++) {
             slot(graphics, x + 18 * column, y + 58, 18);
         }
+//? if =26.1.2 || =26.3 {
     }
 
     /**
@@ -184,9 +330,21 @@ public final class GuiArt {
      */
     private static void toggleFrame(GuiGraphicsExtractor graphics, int x, int y, int width, boolean hovered, boolean disabled, GuiFrame frame) {
         fill(graphics, x, y, x + width, y + TOGGLE_HEIGHT, hovered ? TOGGLE_OUTLINE_HOVER : frame.tint(TOGGLE_OUTLINE));
+//?} else if =1.21.1 {
+/*    }
+
+    /^*
+     * Toggles: dark rounded frame (the outline turns cyan when hovered, the light border greys out when disabled); the
+     * dark parts take the tone of the screen's frame.
+     ^/
+    private static void toggleFrame(GuiGraphics graphics, int x, int y, int width, boolean hovered, boolean disabled, GuiFrame frame) {
+        fill(graphics, x, y, x + width, y + TOGGLE_HEIGHT, hovered ? TOGGLE_OUTLINE_HOVER : frame.tint(TOGGLE_OUTLINE));
+*/
+//?}
         fill(graphics, x + 1, y + 1, x + width - 1, y + TOGGLE_HEIGHT - 1, disabled ? frame.tint(TOGGLE_BORDER_DISABLED) : TOGGLE_BORDER);
         fill(graphics, x + 2, y + 2, x + width - 2, y + TOGGLE_HEIGHT - 2, frame.tint(TOGGLE_INSET));
         fill(graphics, x + 3, y + 3, x + width - 3, y + TOGGLE_HEIGHT - 3, frame.tint(TOGGLE_TRACK));
+//? if =26.1.2 || =26.3 {
     }
 
     /**
@@ -199,6 +357,22 @@ public final class GuiArt {
 
     public static void toggleSwitch(@Nonnull GuiGraphicsExtractor graphics, int x, int y, boolean on, boolean hovered, boolean disabled,
                                     @Nullable SelectorColors offColor, SelectorColors onColor, @Nonnull GuiFrame frame) {
+//?} else if =1.21.1 {
+/*    }
+
+    /^*
+     * On/off switch, 31x14: the knob sits on the left when off; when on it sits on the right, after a block in the
+     * switch's color.
+     ^/
+    public static void toggleSwitch(@Nonnull GuiGraphics graphics, int x, int y, boolean on, boolean hovered, boolean disabled, SelectorColors color, @Nonnull GuiFrame frame) {
+        toggleSwitch(graphics, x, y, on, hovered, disabled, null, color, frame);
+    }
+
+    // Modified 2026-11-04: an optional color for the off position shows the port mode in both states.
+    public static void toggleSwitch(@Nonnull GuiGraphics graphics, int x, int y, boolean on, boolean hovered, boolean disabled,
+                                    @Nullable SelectorColors offColor, SelectorColors onColor, @Nonnull GuiFrame frame) {
+*/
+//?}
         SelectorColors color = on ? onColor : offColor;
         toggleFrame(graphics, x, y, SWITCH_WIDTH, hovered, disabled, frame);
         if (color != null) {
@@ -208,15 +382,24 @@ public final class GuiArt {
             graphics.fill(x + 12, y + 10, x + 20, y + 11, color.switchBottom);
         }
         knob(graphics, x + (on ? 20 : 3), y + 3, disabled);
+//? if =26.1.2 || =26.3 {
     }
 
     private static void knob(GuiGraphicsExtractor graphics, int x, int y, boolean disabled) {
         fill(graphics, x, y, x + 8, y + 8, disabled ? KNOB_FILL_DISABLED : KNOB_FILL);
+//?} else if =1.21.1 {
+/*    }
+
+    private static void knob(GuiGraphics graphics, int x, int y, boolean disabled) {
+        fill(graphics, x, y, x + 8, y + 8, disabled ? KNOB_FILL_DISABLED : KNOB_FILL);
+*/
+//?}
         fill(graphics, x + 1, y, x + 7, y + 1, disabled ? KNOB_TOP_DISABLED : KNOB_TOP);
         fill(graphics, x + 1, y + 1, x + 2, y + 6, KNOB_SHINE);
         fill(graphics, x + 3, y + 2, x + 6, y + 3, KNOB_SHINE);
         fill(graphics, x, y, x + 1, y + 8, KNOB_EDGE);
         fill(graphics, x, y + 7, x + 8, y + 8, KNOB_EDGE);
+//? if =26.1.2 || =26.3 {
     }
 
     /**
@@ -224,6 +407,16 @@ public final class GuiArt {
      */
     public static void toggleCells(@Nonnull GuiGraphicsExtractor graphics, int x, int y, int selected, boolean hovered, boolean disabled, @Nonnull GuiFrame frame, SelectorColors... colors) {
         toggleFrame(graphics, x, y, cellsWidth(colors.length), hovered, disabled, frame);
+//?} else if =1.21.1 {
+/*    }
+
+    /^*
+     * Selector with {@code colors.length} cells of 12x8 split by the track; only the {@code selected} cell is lit.
+     ^/
+    public static void toggleCells(@Nonnull GuiGraphics graphics, int x, int y, int selected, boolean hovered, boolean disabled, @Nonnull GuiFrame frame, SelectorColors... colors) {
+        toggleFrame(graphics, x, y, cellsWidth(colors.length), hovered, disabled, frame);
+*/
+//?}
         for (int i = 0; i < colors.length; i++) {
             int cx = x + 3 + 14 * i;
             boolean lit = i == selected;
@@ -239,6 +432,7 @@ public final class GuiArt {
 
     public static int cellsWidth(int cells) {
         return 6 + 14 * cells - 2;
+//? if =26.1.2 || =26.3 {
     }
 
     /**
@@ -246,14 +440,32 @@ public final class GuiArt {
      */
     public static void textBox(@Nonnull GuiGraphicsExtractor graphics, int x, int y, int width, int charLimit) {
         textBoxPiece(graphics, x, y, 3, true, false);
+//?} else if =1.21.1 {
+/*    }
+
+    /^*
+     * Text box frame, drawn as the old one was: left cap, 6 pixel middle pieces up to {@code width}, right cap.
+     ^/
+    public static void textBox(@Nonnull GuiGraphics graphics, int x, int y, int width, int charLimit) {
+        textBoxPiece(graphics, x, y, 3, true, false);
+*/
+//?}
         for (int i = 0; i <= width; i += 6) {
             textBoxPiece(graphics, x + 3 + i, y, 6, false, false);
         }
         textBoxPiece(graphics, x + 6 + 6 * charLimit, y, 3, false, true);
+//? if =26.1.2 || =26.3 {
     }
 
     private static void textBoxPiece(GuiGraphicsExtractor graphics, int x, int y, int width, boolean left, boolean right) {
         fill(graphics, x, y, x + width, y + 16, BLACK);
+//?} else if =1.21.1 {
+/*    }
+
+    private static void textBoxPiece(GuiGraphics graphics, int x, int y, int width, boolean left, boolean right) {
+        fill(graphics, x, y, x + width, y + 16, BLACK);
+*/
+//?}
         fill(graphics, x, y, x + width, y + 1, TEXT_BOX_LIGHT);
         fill(graphics, x, y + 15, x + width, y + 16, TEXT_BOX_SHADOW);
         if (left) {
@@ -264,6 +476,7 @@ public final class GuiArt {
             fill(graphics, x + width - 1, y, x + width, y + 16, TEXT_BOX_SHADOW);
             fill(graphics, x + width - 1, y, x + width, y + 1, TEXT_BOX_CORNER);
         }
+//? if =26.1.2 || =26.3 {
     }
 
     /**
@@ -272,6 +485,17 @@ public final class GuiArt {
      */
     public static void fluidSymbol(@Nonnull GuiGraphicsExtractor graphics, int x, int y, Fluid fluid, GuiIcon mask, GuiIcon outline, int background, boolean well) {
         if (well) {
+//?} else if =1.21.1 {
+/*    }
+
+    /^*
+     * 16x16 symbol filled with a fluid: grey well, the fluid, the panel colored cover around the shape, then the
+     * outline 3 pixels in.
+     ^/
+    public static void fluidSymbol(@Nonnull GuiGraphics graphics, int x, int y, Fluid fluid, GuiIcon mask, GuiIcon outline, int background, boolean well) {
+        if (well) {
+*/
+//?}
             fill(graphics, x, y, x + 16, y + 16, SLOT_FILL);
         }
         if (fluid != null && !(fluid instanceof EmptyFluid)) {
@@ -279,6 +503,7 @@ public final class GuiArt {
         }
         mask.drawTinted(graphics, x, y, background);
         outline.draw(graphics, x + 3, y);
+//? if =26.1.2 || =26.3 {
     }
 
     /**
@@ -294,14 +519,44 @@ public final class GuiArt {
         if (textWidth <= width) {
             graphics.text(font, text, x, y, color, false);
             return;
+//?} else if =1.21.1 {
+/*    }
+
+    /^*
+     * Text at (x, y) kept inside {@code width}: drawn as is when it fits; otherwise it slides from one side to the other
+     * (and back) inside that width, so all of it can be read without shrinking or cutting it.
+     ^/
+    public static void scrollingText(@Nonnull GuiGraphics graphics, @Nonnull Font font, String text, int x, int y, int width, int color) {
+        scrollingText(graphics, font, net.minecraft.network.chat.Component.literal(text), x, y, width, color);
+    }
+
+    public static void scrollingText(@Nonnull GuiGraphics graphics, @Nonnull Font font, net.minecraft.network.chat.Component text, int x, int y, int width, int color) {
+        int textWidth = font.width(text);
+        if (textWidth <= width) {
+            graphics.drawString(font, text, x, y, color, false);
+            return;
+*/
+//?}
         }
         int overflow = textWidth - width;
         double seconds = Util.getMillis() / 1000.0;
         double period = Math.max(overflow * 0.5, 3.0);
         double phase = Math.sin(Math.PI / 2 * Math.cos(2 * Math.PI * seconds / period)) / 2 + 0.5;
+//? if =26.1.2 || =26.3 {
         int offset = (int) Math.round(Mth.lerp(phase, 0, overflow));
         graphics.enableScissor(x, y - 1, x + width, y + font.lineHeight + 1);
         graphics.text(font, text, x - offset, y, color, false);
         graphics.disableScissor();
+//?} else if =1.21.1 {
+/*        int offset = (int) Math.round(Mth.lerp(phase, 0, overflow));
+        // The scissor works in screen coordinates, while the text may be drawn relative to the screen's corner.
+        Vector3f origin = graphics.pose().last().pose().getTranslation(new Vector3f());
+        int left = Math.round(origin.x) + x;
+        int top = Math.round(origin.y) + y;
+        graphics.enableScissor(left, top - 1, left + width, top + font.lineHeight + 1);
+        graphics.drawString(font, text, x - offset, y, color, false);
+        graphics.disableScissor();
+*/
+//?}
     }
 }

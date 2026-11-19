@@ -5,6 +5,7 @@ import biggerreactorsrework.multiblocks.reactor.blocks.ReactorCasing;
 import biggerreactorsrework.multiblocks.reactor.blocks.ReactorControlRod;
 import biggerreactorsrework.multiblocks.reactor.blocks.ReactorFuelRod;
 import biggerreactorsrework.multiblocks.reactor.blocks.ReactorTerminal;
+//? if =26.1.2 || =26.3 {
 import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.world.level.block.Blocks;
@@ -15,6 +16,24 @@ import static biggerreactorsrework.core.multiblock.IAssemblyStateBlock.ASSEMBLED
  * Formation and disassembly of the multiblocks, driven by the internal multiblock framework.
  */
 public final class MultiblockGameTests {
+//?} else if =1.21.1 {
+/*import net.minecraft.core.BlockPos;
+import net.minecraft.gametest.framework.GameTest;
+import net.minecraft.gametest.framework.GameTestHelper;
+import net.minecraft.world.level.block.Blocks;
+import net.neoforged.neoforge.gametest.GameTestHolder;
+import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
+
+import static biggerreactorsrework.core.multiblock.IAssemblyStateBlock.ASSEMBLED;
+
+/^*
+ * Formation and disassembly of the multiblocks, driven by the internal multiblock framework.
+ ^/
+@GameTestHolder(BiggerReactors.modid)
+@PrefixGameTestTemplate(false)
+public final class MultiblockGameTests {
+*/
+//?}
     private MultiblockGameTests() {
     }
 

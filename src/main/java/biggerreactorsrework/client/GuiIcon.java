@@ -2,11 +2,22 @@ package biggerreactorsrework.client;
 
 // Modified 2026-10-26: remove three unused icon declarations.
 
+//? if =26.1.2 || =26.3 {
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.resources.Identifier;
 import biggerreactorsrework.BiggerReactors;
+//?} else if =1.21.1 {
+/*import com.mojang.blaze3d.systems.RenderSystem;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.resources.ResourceLocation;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import biggerreactorsrework.BiggerReactors;
+*/
+//?}
 
+//? if =26.1.2 || =26.3 {
 import javax.annotation.Nonnull;
 
 /**
@@ -16,6 +27,19 @@ public record GuiIcon(Identifier texture, int width, int height) {
 
     // Status icons.
     public static final GuiIcon BATTERY = of("battery", 10, 16);
+//?} else if =1.21.1 {
+/*import javax.annotation.Nonnull;
+
+/^*
+ * One icon of the screens, each in its own file under {@code textures/gui/icons/}, drawn at its real size.
+ ^/
+@OnlyIn(Dist.CLIENT)
+public record GuiIcon(ResourceLocation texture, int width, int height) {
+
+    // Status icons.
+    public static final GuiIcon BATTERY = of("battery", 10, 16);
+*/
+//?}
     public static final GuiIcon CASE_HEAT = of("case_heat", 16, 16);
     public static final GuiIcon CONDENSER_EXHAUST = of("condenser_exhaust", 16, 16);
     public static final GuiIcon CONDENSER_FLOW_RATE = of("condenser_flow_rate", 16, 16);
@@ -61,13 +85,19 @@ public record GuiIcon(Identifier texture, int width, int height) {
     public static final GuiIcon ARROW_DOWN = of("arrow_down", 6, 8);
     public static final GuiIcon ARROW_ENTER_DISABLED = of("arrow_enter_disabled", 9, 7);
     public static final GuiIcon ARROW_ENTER = of("arrow_enter", 9, 7);
-    public static final GuiIcon CLOSE = of("close", 4, 5);
+    public static final GuiIcon CLOSE = of("close", 4, 4);
     public static final GuiIcon CONFIRM = of("confirm", 7, 8);
     public static final GuiIcon EJECT = of("eject", 7, 8);
     public static final GuiIcon AUTO_INPUT = of("auto_input", 4, 3);
     public static final GuiIcon AUTO_EJECT = of("auto_eject", 4, 3);
     public static final GuiIcon REVERT = of("revert", 7, 8);
+    public static final GuiIcon GUIDE_WARNING = of("guide_warning", 13, 12);
 
+    public static GuiIcon named(String name, int width, int height) {
+        return of(name, width, height);
+    }
+
+//? if =26.1.2 || =26.3 {
     private static GuiIcon of(String name, int width, int height) {
         return new GuiIcon(Identifier.fromNamespaceAndPath(BiggerReactors.modid, "textures/gui/icons/" + name + ".png"), width, height);
     }
@@ -82,4 +112,26 @@ public record GuiIcon(Identifier texture, int width, int height) {
     public void drawTinted(@Nonnull GuiGraphicsExtractor graphics, int x, int y, int color) {
         graphics.blit(net.minecraft.client.renderer.RenderPipelines.GUI_TEXTURED, this.texture, x, y, 0, 0, this.width, this.height, this.width, this.height, 0xFF000000 | color);
     }
+//?} else if =1.21.1 {
+/*    private static GuiIcon of(String name, int width, int height) {
+        return new GuiIcon(ResourceLocation.fromNamespaceAndPath(BiggerReactors.modid, "textures/gui/icons/" + name + ".png"), width, height);
+    }
+
+    public void draw(@Nonnull GuiGraphics graphics, int x, int y) {
+        RenderSystem.enableBlend();
+        RenderSystem.defaultBlendFunc();
+        graphics.blit(this.texture, x, y, 0, 0, this.width, this.height, this.width, this.height);
+        RenderSystem.disableBlend();
+    }
+
+    /^*
+     * Draw the icon multiplied by a color; used to paint white masks in the color behind them.
+     ^/
+    public void drawTinted(@Nonnull GuiGraphics graphics, int x, int y, int color) {
+        RenderSystem.setShaderColor(((color >> 16) & 0xFF) / 255F, ((color >> 8) & 0xFF) / 255F, (color & 0xFF) / 255F, 1.0F);
+        this.draw(graphics, x, y);
+        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+    }
+*/
+//?}
 }

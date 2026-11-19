@@ -101,6 +101,13 @@ public final class TurbineRedstonePortTile extends TurbineBaseTile implements Me
         if(data.get("low") instanceof Number n)low=n.doubleValue();
         if(data.get("high") instanceof Number n)high=n.doubleValue();
     }
+//? if =26.1.2 || =26.3 {
     @Override protected CompoundTag writeNBT(){var n=super.writeNBT();n.putInt("sensor",mode);n.putInt("behavior",behavior);n.putDouble("low",low);n.putDouble("high",high);return n;}
     @Override protected void readNBT(CompoundTag n){super.readNBT(n);configure(Map.of("mode",n.getIntOr("sensor", 0),"behavior",n.getIntOr("behavior", 0),"low",n.getDoubleOr("low", 0D),"high",n.getDoubleOr("high", 0D)));}
 }
+//?} else if =1.21.1 {
+/*    @Override protected CompoundTag writeNBT(){var n=super.writeNBT();n.putInt("sensor",mode);n.putInt("behavior",behavior);n.putDouble("low",low);n.putDouble("high",high);return n;}
+    @Override protected void readNBT(CompoundTag n){super.readNBT(n);configure(Map.of("mode",n.getInt("sensor"),"behavior",n.getInt("behavior"),"low",n.getDouble("low"),"high",n.getDouble("high")));}
+}
+*/
+//?}

@@ -29,10 +29,16 @@ public final class TurbineAtmosphereEffects {
         if (level == null) { BEARINGS.clear(); return; }
         if (mc.isPaused() || mc.player == null) return;
         BEARINGS.removeIf(b -> b.isRemoved() || b.getLevel() != level || !level.hasChunkAt(b.getBlockPos()) ||
+//? if =26.1.2 || =26.3 {
                 level.getBlockEntity(b.getBlockPos()) != b);
         for (var bearing : BEARINGS) bearing.visibleSteam = TurbineAtmosphere.fade(bearing.visibleSteam,
                 bearing.isRenderBearing ? bearing.steamDensity : 0, 0.05F);
         if (level.getGameTime() % 20 != 0) return;
+//?} else if =1.21.1 {
+/*                level.getBlockEntity(b.getBlockPos()) != b);
+        if (level.getGameTime() % 20 != 0) return;
+*/
+//?}
         for (var bearing : BEARINGS) {
             var bounds = bearing.AABB;
             if (!bearing.isRenderBearing || !bearing.condensationReady || bounds == null ||

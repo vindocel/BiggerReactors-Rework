@@ -1,7 +1,14 @@
+//? if =26.1.2 {
 package biggerreactorsrework.gametest;
 
 // Modified 2026-11-01: native Minecraft 26.1.2 API.
 import biggerreactorsrework.BiggerReactors;
+//?} else if =1.21.1 || =26.3 {
+/*package biggerreactorsrework.gametest;
+
+import biggerreactorsrework.BiggerReactors;
+*/
+//?}
 import biggerreactorsrework.multiblocks.reactor.blocks.*;
 import biggerreactorsrework.multiblocks.reactor.tiles.*;
 import biggerreactorsrework.core.multiblock.common.*;
@@ -9,19 +16,36 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.*;
 import net.minecraft.world.level.block.Blocks;
 import net.neoforged.neoforge.gametest.*;
+//? if =26.1.2 || =26.3 {
 import com.mojang.datafixers.util.Pair;
 
 /** Modified 2026-10-26: real controllers, persistence takeover and independent-inventory protection. */
 public final class AuditRegressionGameTests {
+//?} else if =1.21.1 {
+/*import com.mojang.datafixers.util.Pair;
+
+/^* Modified 2026-10-26: real controllers, persistence takeover and independent-inventory protection. ^/
+@GameTestHolder(BiggerReactors.modid)
+@PrefixGameTestTemplate(false)
+public final class AuditRegressionGameTests {
+*/
+//?}
     private static void build(GameTestHelper h,int offset) {
         for(int x=offset;x<offset+3;x++)for(int y=1;y<=3;y++)for(int z=1;z<=3;z++)
             if(x==offset || x==offset+2 || y==1 || y==3 || z==1 || z==3)h.setBlock(x,y,z,ReactorCasing.INSTANCE);
         h.setBlock(offset+1,2,2,ReactorFuelRod.INSTANCE);
         h.setBlock(offset+1,3,2,ReactorControlRod.INSTANCE);
         h.setBlock(offset,2,2,ReactorTerminal.INSTANCE);
+//? if =26.1.2 || =26.3 {
     }
     private static ReactorControlRodTile rod(GameTestHelper h,int offset) {return (ReactorControlRodTile)GameTestSupport.be(h,new BlockPos(offset+1,3,2));}
     private static java.lang.reflect.Field field(Object target,String name) {
+//?} else if =1.21.1 {
+/*    }
+    private static ReactorControlRodTile rod(GameTestHelper h,int offset) {return (ReactorControlRodTile)h.getBlockEntity(new BlockPos(offset+1,3,2));}
+    private static java.lang.reflect.Field field(Object target,String name) {
+*/
+//?}
         try {var f=target.getClass().getDeclaredField(name);f.setAccessible(true);return f;}
         catch(ReflectiveOperationException error){throw new AssertionError(error);}
     }
@@ -44,9 +68,16 @@ public final class AuditRegressionGameTests {
         final Object[] module={null};final BlockPos broken=new BlockPos(1,1,1);
         h.startSequence().thenWaitUntil(()->h.assertTrue(rod(h,1).nullableController()!=null && rod(h,1).controller().simulation()!=null,"reactor not ready"))
             .thenExecute(()->{
+//? if =26.1.2 || =26.3 {
                 var controller=rod(h,1).controller();module[0]=controller.persistentModule();
                 var tile=(ReactorBaseTile)GameTestSupport.be(h,broken);
                 try {
+//?} else if =1.21.1 {
+/*                var controller=rod(h,1).controller();module[0]=controller.persistentModule();
+                var tile=(ReactorBaseTile)h.getBlockEntity(broken);
+                try {
+*/
+//?}
                     field(module[0],"saveDelegate").set(module[0],tile);
                     field(module[0],"saveDelegateModule").set(module[0],tile.module(IPersistentMultiblockTile.class,IPersistentMultiblockTile.Module.class));
                     field(module[0],"hasSaveDelegate").setBoolean(module[0],true);
@@ -59,9 +90,16 @@ public final class AuditRegressionGameTests {
                     h.assertTrue(delegate!=null && !delegate.isRemoved(),"save delegate was not replaced");
                     h.assertTrue(!delegate.getBlockPos().equals(h.absolutePos(broken)),"removed delegate reused");
                     var data=delegate.module(IPersistentMultiblockTile.class,IPersistentMultiblockTile.Module.class).writeNBT();
+//? if =26.1.2 || =26.3 {
                     h.assertTrue(data.contains("controller_data"),"replacement did not save controller state");
                     h.assertTrue(data.contains("machine_origin"),"machine identity not persisted");
                 } catch(IllegalAccessException error){throw new AssertionError(error);}
+//?} else if =1.21.1 {
+/*                    h.assertTrue(data.contains("controller_data"),"replacement did not save controller state");
+                    h.assertTrue(data.hasUUID("machine_origin"),"machine identity not persisted");
+                } catch(IllegalAccessException error){throw new AssertionError(error);}
+*/
+//?}
             }).thenSucceed();
     }
     @GameTest(template="empty_7x7x7",timeoutTicks=180)
@@ -75,10 +113,18 @@ public final class AuditRegressionGameTests {
                 h.setBlock(0,3,1,Blocks.AIR);h.setBlock(4,3,1,Blocks.AIR);
             }).thenExecuteAfter(8,()->h.setBlock(3,1,2,ReactorCasing.INSTANCE))
             .thenExecuteAfter(8,()->{
+//? if =26.1.2 || =26.3 {
                 h.assertTrue(rod(h,0).controller()!=rod(h,4).controller(),"independent inventories merged");
                 var a=(ReactorFuelRodTile)GameTestSupport.be(h,new BlockPos(1,2,2));
                 var b=(ReactorFuelRodTile)GameTestSupport.be(h,new BlockPos(5,2,2));
                 h.assertTrue(a.fuel+b.fuel==3000,"fuel lost during blocked merge");
+//?} else if =1.21.1 {
+/*                h.assertTrue(rod(h,0).controller()!=rod(h,4).controller(),"independent inventories merged");
+                var a=(ReactorFuelRodTile)h.getBlockEntity(new BlockPos(1,2,2));
+                var b=(ReactorFuelRodTile)h.getBlockEntity(new BlockPos(5,2,2));
+                h.assertTrue(a.fuel+b.fuel==3000,"fuel lost during blocked merge");
+*/
+//?}
             }).thenSucceed();
     }
     @GameTest(template="empty_7x7x7")
@@ -91,21 +137,38 @@ public final class AuditRegressionGameTests {
         h.assertTrue(codec.parse(com.mojang.serialization.JsonOps.INSTANCE,json).error().isPresent(),"invalid recovery accepted");h.succeed();
     }
 
+//? if =26.1.2 || =26.3 {
     @GameTest(template="empty_7x7x7")
     public static void settlingPendingRadiationHonorsFullOutput(GameTestHelper h) {
         var d=OperationGameTests.description(3);
+//?} else if =1.21.1 {
+/*    @GameTest(template="empty_7x7x7")
+    public static void settlingDoesNotDuplicatePaidHeat(GameTestHelper h) {
+        var d=OperationGameTests.description(3);
+*/
+//?}
         for(int y=0;y<3;y++)d.setManifold(0,y,1,true);
         var sim=new biggerreactorsrework.multiblocks.reactor.simulation.SimulationDescription.Builder(true,true,true).build(d,
                 new biggerreactorsrework.multiblocks.reactor.simulation.SimulationConfiguration(293.15,false));
         sim.fuelTank().insertFuel(10000,false);
         var tank=new biggerreactorsrework.multiblocks.reactor.util.ReactorTransitionTank(sim.coolantTank());
         tank.fill(net.minecraft.world.level.material.Fluids.WATER,net.minecraft.core.component.DataComponentPatch.EMPTY,1000,false);
+//? if =26.1.2 || =26.3 {
         sim.coolantTank().insertVapor(sim.coolantTank().perSideCapacity());
         sim.tick(true);double fuel=sim.fuelTank().usableFuel();var thermal=sim.thermal();
         sim.settle();
         h.assertTrue(thermal.generated()>0 && thermal.blockedOutput()>0,"full output did not discard paid heat");
         h.assertTrue(sim.fuelTank().usableFuel()==fuel && sim.thermal().equals(thermal),"settle repeated a paid tick");h.succeed();
     }
+//?} else if =1.21.1 {
+/*        sim.coolantTank().insertVapor(sim.coolantTank().perSideCapacity());
+        sim.tick(true);long fuel=sim.fuelTank().fuel();double heat=sim.thermal().generated();double burn=sim.fuelTank().burnedLastTick();
+        sim.settle();
+        h.assertTrue(sim.fuelTank().fuel()==fuel && sim.fuelTank().burnedLastTick()==burn && burn>0,"settle duplicated a paid tick");
+        h.assertTrue(sim.thermal().generated()==heat && sim.coolantTank().transitionedLastTick()==0,"settle changed heat or overfilled output");h.succeed();
+    }
+*/
+//?}
     @GameTest(template="empty_7x7x7")
     public static void pendingStockIsDetectedBeforeControllerLoad(GameTestHelper h) {
         build(h,1);
@@ -122,6 +185,7 @@ public final class AuditRegressionGameTests {
         });
     }
 
+//? if =26.1.2 {
     @GameTest(template="empty_7x7x7")
     public static void reprocessorSelectsAndPullsAlternativeFluid(GameTestHelper h) {
         try {
@@ -146,6 +210,61 @@ public final class AuditRegressionGameTests {
         } catch(ReflectiveOperationException error){throw new AssertionError(error);}
         finally {biggerreactorsrework.machine.recipe.RecipeAccess.overrideRecipes(null);}
         h.succeed();
+//?} else if =1.21.1 {
+/*    @GameTest(template="empty_7x7x7")
+    public static void processorSelectsAndPullsAlternativeFluid(GameTestHelper h) {
+        var manager=h.getLevel().getRecipeManager();
+        var saved=new java.util.ArrayList<>(manager.getRecipes());
+        try {
+            var ingredient=net.minecraft.world.item.crafting.Ingredient.of(biggerreactorsrework.items.ingots.CyaniteIngot.INSTANCE);
+            var output=new net.minecraft.world.item.ItemStack(biggerreactorsrework.items.ingots.BlutoniumIngot.INSTANCE);
+            var water=new biggerreactorsrework.machine.recipe.ReprocessingRecipe(ingredient,1,output,net.minecraft.world.level.material.Fluids.WATER,2,0,1);
+            var lava=new biggerreactorsrework.machine.recipe.ReprocessingRecipe(ingredient,1,output,net.minecraft.world.level.material.Fluids.LAVA,2,0,1);
+            var recipes=new java.util.ArrayList<net.minecraft.world.item.crafting.RecipeHolder<?>>();
+            recipes.add(new net.minecraft.world.item.crafting.RecipeHolder<>(net.minecraft.resources.ResourceLocation.fromNamespaceAndPath(BiggerReactors.modid,"audit_a_water"),water));
+            recipes.add(new net.minecraft.world.item.crafting.RecipeHolder<>(net.minecraft.resources.ResourceLocation.fromNamespaceAndPath(BiggerReactors.modid,"audit_b_lava"),lava));
+            manager.replaceRecipes(recipes);
+            h.setBlock(2,2,2,biggerreactorsrework.machine.blocks.IndustrialProcessor.INSTANCE);
+            var tile=(biggerreactorsrework.machine.tiles.IndustrialProcessorTile)h.getBlockEntity(new BlockPos(2,2,2));tile.tick();
+            tile.itemHandlerFor(null).insertItem(0,new net.minecraft.world.item.ItemStack(biggerreactorsrework.items.ingots.CyaniteIngot.INSTANCE),false);
+            var source=new net.neoforged.neoforge.fluids.capability.templates.FluidTank(1000);
+            source.fill(new net.neoforged.neoforge.fluids.FluidStack(net.minecraft.world.level.material.Fluids.LAVA,1000),net.neoforged.neoforge.fluids.capability.IFluidHandler.FluidAction.EXECUTE);
+            var method=tile.getClass().getDeclaredMethod("pullRecipeFluid",net.neoforged.neoforge.fluids.capability.IFluidHandler.class,int.class);method.setAccessible(true);
+            h.assertTrue((Integer)method.invoke(tile,source,1000)==1000,"automatic transfer ignored the alternative recipe fluid");
+            tile.tick();tile.tick();
+            h.assertTrue(tile.itemHandlerFor(null).getStackInSlot(1).is(output.getItem()),"first water recipe blocked the lava recipe");
+            h.assertTrue(tile.fluidFor(null).getFluidInTank(0).getAmount()==998 && source.isEmpty(),"fluid balance failed");
+        } catch(ReflectiveOperationException error){throw new AssertionError(error);}
+        finally {manager.replaceRecipes(saved);}
+        h.succeed();
+*/
+//?} else if =26.3 {
+/*    @GameTest(template="empty_7x7x7")
+    public static void reprocessorSelectsAndPullsAlternativeFluid(GameTestHelper h) {
+        try {
+            var ingredient=net.minecraft.world.item.crafting.Ingredient.of(biggerreactorsrework.items.ingots.CyaniteIngot.INSTANCE);
+            var output=java.util.Optional.of(new net.minecraft.world.item.ItemStackTemplate(biggerreactorsrework.items.ingots.BlutoniumIngot.INSTANCE));
+            var water=new biggerreactorsrework.machine.recipe.ReprocessingRecipe(ingredient,1,output,net.minecraft.world.level.material.Fluids.WATER,2,0,1,java.util.Optional.empty(),-1);
+            var lava=new biggerreactorsrework.machine.recipe.ReprocessingRecipe(ingredient,1,output,net.minecraft.world.level.material.Fluids.LAVA,2,0,1,java.util.Optional.empty(),-1);
+            var recipes=new java.util.ArrayList<net.minecraft.world.item.crafting.RecipeHolder<?>>();
+            recipes.add(new net.minecraft.world.item.crafting.RecipeHolder<>(net.minecraft.resources.ResourceKey.create(net.minecraft.core.registries.Registries.RECIPE,net.minecraft.resources.Identifier.fromNamespaceAndPath(BiggerReactors.modid,"audit_a_water")),water));
+            recipes.add(new net.minecraft.world.item.crafting.RecipeHolder<>(net.minecraft.resources.ResourceKey.create(net.minecraft.core.registries.Registries.RECIPE,net.minecraft.resources.Identifier.fromNamespaceAndPath(BiggerReactors.modid,"audit_b_lava")),lava));
+            biggerreactorsrework.machine.recipe.RecipeAccess.overrideRecipes(net.minecraft.world.item.crafting.RecipeMap.createClient(recipes));
+            h.setBlock(2,2,2,biggerreactorsrework.machine.blocks.IndustrialProcessor.INSTANCE);
+            var tile=(biggerreactorsrework.machine.tiles.IndustrialProcessorTile)GameTestSupport.be(h,new BlockPos(2,2,2));tile.tick();
+            tile.itemHandlerFor(null).insertItem(0,new net.minecraft.world.item.ItemStack(biggerreactorsrework.items.ingots.CyaniteIngot.INSTANCE),false);
+            var source=new biggerreactorsrework.core.transfer.SimpleTank(1000);
+            source.fill(new net.neoforged.neoforge.fluids.FluidStack(net.minecraft.world.level.material.Fluids.LAVA,1000),biggerreactorsrework.core.transfer.FluidTanks.FluidAction.EXECUTE);
+            var method=tile.getClass().getDeclaredMethod("pullRecipeFluid",biggerreactorsrework.core.transfer.FluidTanks.class,int.class);method.setAccessible(true);
+            h.assertTrue((Integer)method.invoke(tile,source,1000)==1000,"automatic transfer ignored the alternative recipe fluid");
+            tile.tick();tile.tick();
+            h.assertTrue(tile.itemHandlerFor(null).getStackInSlot(1).is(biggerreactorsrework.items.ingots.BlutoniumIngot.INSTANCE),"first water recipe blocked the lava recipe");
+            h.assertTrue(tile.fluidFor(null).getFluidInTank(0).getAmount()==998 && source.isEmpty(),"fluid balance failed");
+        } catch(ReflectiveOperationException error){throw new AssertionError(error);}
+        finally {biggerreactorsrework.machine.recipe.RecipeAccess.overrideRecipes(null);}
+        h.succeed();
+*/
+//?}
     }
 
     @GameTest(template="empty_7x7x7")
@@ -154,7 +273,14 @@ public final class AuditRegressionGameTests {
         original.fill(net.minecraft.world.level.material.Fluids.WATER,net.minecraft.core.component.DataComponentPatch.EMPTY,1000,false);
         var saved=original.serializeNBT();saved.putString("profile","incompatible-profile");
         var restored=new biggerreactorsrework.util.FluidTransitionTank(false);restored.perSideCapacity=1000;restored.deserializeNBT(saved);
+//? if =26.1.2 || =26.3 {
         h.assertTrue(restored.hasStoredContents(),"quarantined inventory was treated as empty");
         h.assertTrue(restored.serializeNBT().getLongOr("inAmount", 0L)==1000,"quarantined inventory lost");h.succeed();
     }
+//?} else if =1.21.1 {
+/*        h.assertTrue(restored.hasStoredContents(),"quarantined inventory was treated as empty");
+        h.assertTrue(restored.serializeNBT().getLong("inAmount")==1000,"quarantined inventory lost");h.succeed();
+    }
+*/
+//?}
 }

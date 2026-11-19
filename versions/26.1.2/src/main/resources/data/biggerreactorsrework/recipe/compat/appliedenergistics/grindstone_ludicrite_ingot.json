@@ -1,0 +1,17 @@
+{
+    "type": "ae2:inscriber",
+    "neoforge:conditions": [
+        {
+            "modid": "ae2",
+            "type": "neoforge:mod_loaded"
+        }
+    ],
+    "ingredients": {
+        "middle": "biggerreactorsrework:ludicrite_ingot"
+    },
+    "mode": "inscribe",
+    "result": {
+        "count": 1,
+        "id": "biggerreactorsrework:ludicrite_dust"
+    }
+}

@@ -8,9 +8,16 @@ import java.util.List;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
+//? if =26.1.2 || =26.3 {
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
+//?} else if =1.21.1 {
+/*import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.ResourceKey;
+*/
+//?}
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.damagesource.DamageSource;
@@ -21,9 +28,16 @@ import org.joml.Vector4i;
 
 /** Added 2026-11-01: server-side rotating blade envelopes, cached once per assembly. */
 public final class TurbineRotorHazard {
+//? if =26.1.2 || =26.3 {
     public static final ResourceKey<DamageType> DAMAGE = ResourceKey.create(Registries.DAMAGE_TYPE,
             Identifier.fromNamespaceAndPath(BiggerReactors.modid, "turbine_rotor"));
     public record Sweep(Vec3 center, Direction.Axis axis, double radius) {
+//?} else if =1.21.1 {
+/*    public static final ResourceKey<DamageType> DAMAGE = ResourceKey.create(Registries.DAMAGE_TYPE,
+            ResourceLocation.fromNamespaceAndPath(BiggerReactors.modid, "turbine_rotor"));
+    public record Sweep(Vec3 center, Direction.Axis axis, double radius) {
+*/
+//?}
         public boolean intersects(AABB body) {
             double axialMin = axis == Direction.Axis.X ? body.minX : axis == Direction.Axis.Y ? body.minY : body.minZ;
             double axialMax = axis == Direction.Axis.X ? body.maxX : axis == Direction.Axis.Y ? body.maxY : body.maxZ;
@@ -65,9 +79,16 @@ public final class TurbineRotorHazard {
         if (damage == 0 || !player.isAlive() || player.isSpectator()) return false;
         for (Sweep sweep : sweeps) {
             if (!sweep.intersects(player.getBoundingBox())) continue;
+//? if =26.1.2 || =26.3 {
             var source = new DamageSource(level.registryAccess().lookupOrThrow(Registries.DAMAGE_TYPE).getOrThrow(DAMAGE), sweep.center());
             boolean hurt = player.hurtServer(level, source, damage);
             if (hurt && player.isDeadOrDying()) ReworkAdvancements.award(player, "turbine_accident");
+//?} else if =1.21.1 {
+/*            var source = new DamageSource(level.registryAccess().lookupOrThrow(Registries.DAMAGE_TYPE).getOrThrow(DAMAGE), sweep.center());
+            boolean hurt = player.hurt(source, damage);
+            if (hurt && player.isDeadOrDying()) ReworkAdvancements.award(player, "turbine_accident");
+*/
+//?}
             return hurt;
         }
         return false;

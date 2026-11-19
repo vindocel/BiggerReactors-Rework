@@ -1,8 +1,18 @@
+//? if =26.1.2 || =26.3 {
 package biggerreactorsrework.multiblocks.heatexchanger;
 
 // Modified 2026-10-26: protect inventories when joining controllers.
 
 import net.minecraft.core.BlockPos;
+//?} else if =1.21.1 {
+/*package biggerreactorsrework.multiblocks.heatexchanger;
+
+// Modified 2026-10-26: protect inventories when joining controllers.
+
+import net.minecraft.MethodsReturnNonnullByDefault;
+import net.minecraft.core.BlockPos;
+*/
+//?}
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -38,19 +48,27 @@ import java.util.Set;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
+//? if =26.1.2 || =26.3 {
 import static biggerreactorsrework.core.modular.block.IConnectedTexture.Module.*;
 
 @ParametersAreNonnullByDefault
+//?} else if =1.21.1 {
+/*import static biggerreactorsrework.core.modular.block.IConnectedTexture.Module.*;
+
+@MethodsReturnNonnullByDefault
+@ParametersAreNonnullByDefault
+*/
+//?}
 public class HeatExchangerMultiblockController extends MultiblockController<HeatExchangerBaseTile, HeatExchangerBaseBlock, HeatExchangerMultiblockController> implements
         IRectangularMultiblock<HeatExchangerBaseTile, HeatExchangerBaseBlock, HeatExchangerMultiblockController>,
         IPersistentMultiblock<HeatExchangerBaseTile, HeatExchangerBaseBlock, HeatExchangerMultiblockController>,
         ITouchingMultiblock<HeatExchangerBaseTile, HeatExchangerBaseBlock, HeatExchangerMultiblockController>,
         IEventMultiblock<HeatExchangerBaseTile, HeatExchangerBaseBlock, HeatExchangerMultiblockController> {
-    
+
     public HeatExchangerMultiblockController(Level level) {
         super(level, HeatExchangerBaseTile.class, HeatExchangerBaseBlock.class);
     }
-    
+
     public final Set<HeatExchangerChannelTile> condenserChannels = new LinkedHashSet<>();
     public final Set<HeatExchangerChannelTile> evaporatorChannels = new LinkedHashSet<>();
     private final Set<HeatExchangerFluidPortTile> fluidPorts = new LinkedHashSet<>();
@@ -61,42 +79,42 @@ public class HeatExchangerMultiblockController extends MultiblockController<Heat
                 .map(net.minecraft.core.BlockPos::immutable).orElse(fallback);
     }
     private long soundActiveUntil;
-    
+
     @Nullable
     @Override
     public Vector3ic minSize() {
         return new Vector3i(4, 3, 3);
     }
-    
+
     @Nullable
     @Override
     public Vector3ic maxSize() {
         return new Vector3i(Config.CONFIG.HeatExchanger.MaxLength, Config.CONFIG.HeatExchanger.MaxHeight, Config.CONFIG.HeatExchanger.MaxWidth);
     }
-    
+
     @Override
     public boolean allowedInteriorBlock(Block block) {
         return block instanceof AirBlock;
     }
-    
+
     @Override
     public void validateStage1() throws ValidationException {
         if (condenserChannels.isEmpty() || evaporatorChannels.isEmpty()) {
             throw new ValidationException(Component.translatable("multiblock.error.biggerreactorsrework.heat_exchanger.missing_channel_type"));
         }
-        
+
         if (fluidPorts.size() < 4) {
             throw new ValidationException(Component.translatable("multiblock.error.biggerreactorsrework.heat_exchanger.invalid_port_count"));
         }
     }
-    
+
     @Override
     public void validateStage2() throws ValidationException {
         BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
-        
+
         int condenserPorts = 0;
         int evaporatorPorts = 0;
-        
+
         for (HeatExchangerFluidPortTile fluidPort : fluidPorts) {
             BlockPos portPos = fluidPort.getBlockPos();
             boolean channelFound = false;
@@ -122,12 +140,12 @@ public class HeatExchangerMultiblockController extends MultiblockController<Heat
             // technically this isn't the problem im checking, but this is a secondary check that happens, without having to march the channels
             throw new ValidationException(Component.translatable("multiblock.error.biggerreactorsrework.heat_exchanger.duplicate_port_types"));
         }
-        
+
         verifyFluidChannels(condenserChannels);
         verifyFluidChannels(evaporatorChannels);
-        
+
         long tick = CoreEvents.tickNumber();
-        
+
         // *not that i dont have to march them anyway*
         for (HeatExchangerFluidPortTile fluidPort : fluidPorts) {
             if (fluidPort.lastCheckedTick == tick) {
@@ -173,7 +191,7 @@ public class HeatExchangerMultiblockController extends MultiblockController<Heat
                     nextDirection = Direction.DOWN;
                     continue;
                 }
-                
+
                 if (nextDirection != Direction.SOUTH && channelState.getValue(NORTH_CONNECTED_PROPERTY)) {
                     nextDirection = Direction.NORTH;
                     continue;
@@ -182,7 +200,7 @@ public class HeatExchangerMultiblockController extends MultiblockController<Heat
                     nextDirection = Direction.SOUTH;
                     continue;
                 }
-                
+
                 if (nextDirection != Direction.WEST && channelState.getValue(EAST_CONNECTED_PROPERTY)) {
                     nextDirection = Direction.EAST;
                     continue;
@@ -194,14 +212,14 @@ public class HeatExchangerMultiblockController extends MultiblockController<Heat
                 throw new ValidationException("Unknown channel verification error, this shouldn't be possible " + mutableBlockPos);
             }
         }
-        
+
         for (HeatExchangerChannelTile condenserChannel : condenserChannels) {
             if (condenserChannel.lastCheckedTick != tick) {
                 BlockPos channelPos = condenserChannel.getBlockPos();
                 throw new ValidationException(Component.translatable("multiblock.error.biggerreactorsrework.heat_exchanger.dangling_channel", channelPos.getX(), channelPos.getY(), channelPos.getZ()));
             }
         }
-        
+
         for (HeatExchangerChannelTile evaporatorChannel : evaporatorChannels) {
             if (evaporatorChannel.lastCheckedTick != tick) {
                 BlockPos channelPos = evaporatorChannel.getBlockPos();
@@ -209,7 +227,7 @@ public class HeatExchangerMultiblockController extends MultiblockController<Heat
             }
         }
     }
-    
+
     @Override
     public void validateStage3() throws ValidationException {
         BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
@@ -222,7 +240,7 @@ public class HeatExchangerMultiblockController extends MultiblockController<Heat
             }
         });
     }
-    
+
     private void verifyFluidChannels(Set<? extends HeatExchangerBaseTile> channels) throws ValidationException {
         for (HeatExchangerBaseTile tile : channels) {
             BlockState state = tile.getBlockState();
@@ -233,7 +251,7 @@ public class HeatExchangerMultiblockController extends MultiblockController<Heat
             connectedSides += state.getValue(SOUTH_CONNECTED_PROPERTY) ? 1 : 0;
             connectedSides += state.getValue(EAST_CONNECTED_PROPERTY) ? 1 : 0;
             connectedSides += state.getValue(WEST_CONNECTED_PROPERTY) ? 1 : 0;
-            
+
             if (connectedSides != 2) {
                 throw new ValidationException("all fluid channels must have exactly two connections " + tile.getBlockPos());
             }
@@ -254,7 +272,7 @@ public class HeatExchangerMultiblockController extends MultiblockController<Heat
             fluidPorts.add((HeatExchangerFluidPortTile) toAttach);
         }
     }
-    
+
     @Override
     protected void onPartRemoved(HeatExchangerBaseTile toDetach) {
         renderTerminals.remove(toDetach);
@@ -352,17 +370,26 @@ public class HeatExchangerMultiblockController extends MultiblockController<Heat
     public void onAssembled() {
         validationPassed();
     }
-    
+
     @Override
     public void onReassembled() {
         validationPassed();
     }
-    
+
+//? if =26.1.2 || =26.3 {
     private void validationPassed() {
-        
+
         // its in kelvin, 150C and 20C
         double ambientTemperature = level.environmentAttributes().getValue(net.minecraft.world.attribute.EnvironmentAttributes.WATER_EVAPORATES, net.minecraft.world.phys.Vec3.ZERO, null) ? 423.15 : 293.15; // TODO config these, also the end
         ambientHeatBody.setTemperature(ambientTemperature);
+//?} else if =1.21.1 {
+/*    private void validationPassed() {
+
+        // its in kelvin, 150C and 20C
+        double ambientTemperature = level.dimensionType().ultraWarm() ? 423.15 : 293.15; // TODO config these, also the end
+        ambientHeatBody.setTemperature(ambientTemperature);
+*/
+//?}
         // Modified 2026-11-02: deprecated temperatures are neutral and never a productive reserve.
         airHeatBody.setTemperature(ambientTemperature);condenserHeatBody.setTemperature(ambientTemperature);evaporatorHeatBody.setTemperature(ambientTemperature);
 
@@ -384,7 +411,7 @@ public class HeatExchangerMultiblockController extends MultiblockController<Heat
         int evaporatorAirContactArea = 0;
         int condenserAirContactArea = 0;
         int airAmbientContactArea = 0;
-        
+
         for (HeatExchangerChannelTile condenserChannel : condenserChannels) {
             for (Direction value : Direction.values()) {
                 mutableBlockPos.set(condenserChannel.getBlockPos());
@@ -539,7 +566,7 @@ public class HeatExchangerMultiblockController extends MultiblockController<Heat
             dirty();
         }
     }
-    
+
     @Override
     protected boolean hasStoredContents() { return condenserTank.hasStoredContents() || evaporatorTank.hasStoredContents(); }
 
@@ -548,8 +575,9 @@ public class HeatExchangerMultiblockController extends MultiblockController<Heat
         // TODO: this, as a whole, this
         return nbtA;
     }
-    
+
     @Override
+//? if =26.1.2 || =26.3 {
     public void read(CompoundTag nbt) {
         balancedOutputs=nbt.getBooleanOr("balancedOutputs", false);primaryCursor=nbt.getIntOr("primaryCursor", 0);secondaryCursor=nbt.getIntOr("secondaryCursor", 0);primaryMaintenanceCursor=nbt.getIntOr("primaryMaintenanceCursor", 0);secondaryMaintenanceCursor=nbt.getIntOr("secondaryMaintenanceCursor", 0);
         condenserTank.deserializeNBT(nbt.getCompoundOrEmpty("condenserTank"));
@@ -558,6 +586,17 @@ public class HeatExchangerMultiblockController extends MultiblockController<Heat
         if(nbt.getIntOr("thermalModelVersion", 0)==biggerreactorsrework.thermal.ThermalModel.VERSION){ thermalExchange.restoreCredit(nbt.getDoubleOr("flowCredit", 0D));thermalExchange.restoreRecipe(nbt.getStringOr("flowRecipe", "")); }
         double ambient=level.environmentAttributes().getValue(net.minecraft.world.attribute.EnvironmentAttributes.WATER_EVAPORATES, net.minecraft.world.phys.Vec3.ZERO, null)?423.15:293.15;
         for(var body:new HeatBody[]{ambientHeatBody,airHeatBody,condenserHeatBody,evaporatorHeatBody})body.setTemperature(ambient);
+//?} else if =1.21.1 {
+/*    public void read(CompoundTag nbt) {
+        balancedOutputs=nbt.getBoolean("balancedOutputs");primaryCursor=nbt.getInt("primaryCursor");secondaryCursor=nbt.getInt("secondaryCursor");primaryMaintenanceCursor=nbt.getInt("primaryMaintenanceCursor");secondaryMaintenanceCursor=nbt.getInt("secondaryMaintenanceCursor");
+        condenserTank.deserializeNBT(nbt.getCompound("condenserTank"));
+        evaporatorTank.deserializeNBT(nbt.getCompound("evaporatorTank"));
+        outputPressure.load(nbt.getCompound("outputPressure"));
+        if(nbt.getInt("thermalModelVersion")==biggerreactorsrework.thermal.ThermalModel.VERSION){ thermalExchange.restoreCredit(nbt.getDouble("flowCredit"));thermalExchange.restoreRecipe(nbt.getString("flowRecipe")); }
+        double ambient=level.dimensionType().ultraWarm()?423.15:293.15;
+        for(var body:new HeatBody[]{ambientHeatBody,airHeatBody,condenserHeatBody,evaporatorHeatBody})body.setTemperature(ambient);
+*/
+//?}
 
     }
 

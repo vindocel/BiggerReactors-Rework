@@ -1,6 +1,6 @@
 # BiggerReactors-Rework
 
-BiggerReactors-Rework is an independent fork and rework of BiggerReactors for **Minecraft 26.1.2 on NeoForge**.
+BiggerReactors-Rework is an independent fork and rework of BiggerReactors for **Minecraft 1.21.1, 26.1.2 and 26.3 on NeoForge**.
 It runs with only Minecraft, NeoForge and this mod installed.
 
 - Mod id and namespace: `biggerreactorsrework`
@@ -8,11 +8,14 @@ It runs with only Minecraft, NeoForge and this mod installed.
 - Reactor, heat-exchanger and RPM-dependent turbine sounds, with individual volume/mute controls in each multiblock's Settings window.
 - Repository: https://github.com/vindocel/BiggerReactors-Rework
 - Meant for new worlds. Worlds and machines from the original BiggerReactors are not migrated.
-- Optional JEI and Roughly Enough Items integration: Industrial Processor recipes, moderator and coolant properties, turbine coils and heat-exchanger conversions. Machine shortcuts open the installed viewer. EMI and OpenComputers remain inactive on this line until compatible builds are available.
+- Optional recipe viewers show Industrial Processor recipes, moderator and coolant properties, turbine coils and heat-exchanger conversions. Machine shortcuts open the installed viewer. Integrations depend on the selected Minecraft target.
 - Optional CC:Tweaked integration: the reactor, turbine and heat-exchanger computer ports expose live telemetry and controls through native peripherals, including wired modems. OpenComputers support is retained separately for its compatible builds.
-- Requires Java 25 and NeoForge 26.1.2.126 or newer for Minecraft 26.1.2. The other lines live on `mc/1.21.1` and `mc/26.3`.
-- Optional official KubeJS 26.1.2 integration for configuration and material events. Native configuration files and the Mods menu editor work without scripting mods. The editor provides category tabs, contextual help and validated drafts, with local-world saving and read-only script values.
-- `runClient` uses `run/`, including the user's 26.1.2 mods. Automated tests and verification worlds use isolated subfolders in `run/mc-26.1.2/`.
+- Minecraft 1.21.1 uses Java 21 / NeoForge 21.1.264; 26.1.2 uses Java 25 / NeoForge 26.1.2.126; 26.3 uses Java 25 / NeoForge 26.3.0.99. Use the artifact matching your Minecraft version.
+- All targets share the `production` branch with Stonecutter. Stable releases come from `master`. JEI is supported on all targets, REI on 1.21.1 and 26.1.2, EMI and OpenComputers on 1.21.1.
+- Optional KubeJS integration (official APIs on 1.21.1/26.1.2; pinned community port on 26.3) for configuration and material events. Native configuration files and the Mods menu editor work without scripting mods. The editor provides category tabs, contextual help and validated drafts, with local-world saving and read-only script values.
+- Run a specific target with `.\gradlew.bat :1.21.1:runClient`, `.\gradlew.bat :26.1.2:runClient`, or `.\gradlew.bat :26.3:runClient`. Each client uses `run/<minecraft>/` for its own `mods/`, settings and saves. GameTests use `run/mc-<minecraft>/gametest/`.
+- Gradle runs on Java 25 and selects Java 21 for the 1.21.1 target. Build a target with `.\gradlew.bat :<minecraft>:build`; shared changes must pass all three builds and GameTests. The Stonecutter active/VCS version remains 26.1.2.
+- [Customization](docs/CUSTOMIZATION.md) describes native datapack formats. [Releasing](docs/RELEASING.md) explains batch tags and publishing.
 
 ## Origin and credits
 

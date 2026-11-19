@@ -1,3 +1,4 @@
+//? if =26.1.2 || =26.3 {
 package biggerreactorsrework.core.registry;
 
 import java.util.ArrayDeque;
@@ -34,3 +35,5 @@ public final class RegistryIds {
         return properties.setId(ResourceKey.create(Registries.ITEM, CURRENT.get().element()));
     }
 }
+//?} else if =1.21.1 {
+//?}

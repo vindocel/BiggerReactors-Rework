@@ -1,0 +1,10 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    "biggerreactorsrework:uranium_block"
+  ],
+  "result": {
+    "id": "biggerreactorsrework:uranium_ingot",
+    "count": 9
+  }
+}

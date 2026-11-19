@@ -1,6 +1,14 @@
+//? if =26.1.2 || =26.3 {
 package biggerreactorsrework.multiblocks.turbine.tiles;
 
 import net.minecraft.core.BlockPos;
+//?} else if =1.21.1 {
+/*package biggerreactorsrework.multiblocks.turbine.tiles;
+
+import net.minecraft.MethodsReturnNonnullByDefault;
+import net.minecraft.core.BlockPos;
+*/
+//?}
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
@@ -22,8 +30,15 @@ import static biggerreactorsrework.core.multiblock.IAssemblyStateBlock.ASSEMBLED
  * Bearing of an assembled turbine. On the client it holds the rotor layout and speed the rotor renderer draws;
  * see {@code TurbineRotorRenderer}.
  */
+//? if =26.1.2 || =26.3 {
 @ParametersAreNonnullByDefault
 public class TurbineRotorBearingTile extends TurbineBaseTile implements IEventMultiblock.AssemblyStateTransition {
+//?} else if =1.21.1 {
+/*@ParametersAreNonnullByDefault
+@MethodsReturnNonnullByDefault
+public class TurbineRotorBearingTile extends TurbineBaseTile implements IEventMultiblock.AssemblyStateTransition {
+*/
+//?}
 
     public static boolean APRIL_FOOLS_JOKE = false;
 
@@ -38,8 +53,15 @@ public class TurbineRotorBearingTile extends TurbineBaseTile implements IEventMu
     public double speed = 0;
     // Modified 2026-10-31: transient atmosphere snapshot; never persisted as simulation contents.
     public float steamDensity = 0;
+//? if =26.1.2 || =26.3 {
     public float visibleSteam = 0;
     public boolean condensationReady;
+//?} else if =1.21.1 {
+/*    public float visibleSteam = 0;
+    public long lastSteamNanos = 0;
+    public boolean condensationReady;
+*/
+//?}
     public int rotorRevision;
     public java.util.List<biggerreactorsrework.core.util.FluidSurfaceMesh.Face> steamWindows = java.util.List.of();
     public Vector3i rotationAxis = null;
@@ -74,6 +96,7 @@ public class TurbineRotorBearingTile extends TurbineBaseTile implements IEventMu
     }
 
     @Override
+//? if =26.1.2 || =26.3 {
     public void handleUpdateNBT(CompoundTag nbt) {
         if (!nbt.getBooleanOr("disassembled", false) && nbt.contains("speed")) {
             speed = nbt.getDoubleOr("speed", 0D);
@@ -82,6 +105,17 @@ public class TurbineRotorBearingTile extends TurbineBaseTile implements IEventMu
             if (nbt.contains("config")) {
                 applyUpdateTag(nbt.getCompoundOrEmpty("config"));
             }
+//?} else if =1.21.1 {
+/*    public void handleUpdateNBT(CompoundTag nbt) {
+        if (!nbt.getBoolean("disassembled") && nbt.contains("speed")) {
+            speed = nbt.getDouble("speed");
+            steamDensity = Math.clamp(nbt.getFloat("steamDensity"), 0, 1);
+            condensationReady = nbt.getBoolean("condensationReady");
+            if (nbt.contains("config")) {
+                handleUpdateTag(nbt.getCompound("config"), registries());
+            }
+*/
+//?}
         } else {
             isRenderBearing = false;
             steamDensity = 0;
@@ -93,18 +127,34 @@ public class TurbineRotorBearingTile extends TurbineBaseTile implements IEventMu
     @Override
     public void handleDataNBT(CompoundTag nbt) {
         rotorRevision++;
+//? if =26.1.2 || =26.3 {
         steamWindows = java.util.List.of();
         steamDensity = Math.clamp(nbt.getFloatOr("steamDensity", 0F), 0, 1);
         condensationReady = nbt.getBooleanOr("condensationReady", false);
         if (nbt.contains("rotx")) {
+//?} else if =1.21.1 {
+/*        steamWindows = java.util.List.of();
+        steamDensity = Math.clamp(nbt.getFloat("steamDensity"), 0, 1);
+        condensationReady = nbt.getBoolean("condensationReady");
+        if (nbt.contains("rotx")) {
+*/
+//?}
             isRenderBearing = true;
             if (rotationAxis == null) {
                 rotationAxis = new Vector3i();
+//? if =26.1.2 || =26.3 {
             }
             rotationAxis.set(nbt.getIntOr("rotx", 0), nbt.getIntOr("roty", 0), nbt.getIntOr("rotz", 0));
             if (rotorConfiguration == null) {
+//?} else if =1.21.1 {
+/*            }
+            rotationAxis.set(nbt.getInt("rotx"), nbt.getInt("roty"), nbt.getInt("rotz"));
+            if (rotorConfiguration == null) {
+*/
+//?}
                 rotorConfiguration = new ArrayList<>();
             }
+//? if =26.1.2 || =26.3 {
             rotorConfiguration.clear();
             int rotorShafts = nbt.getIntOr("shafts", 0);
             for (int i = 0; i < rotorShafts; i++) {
@@ -117,12 +167,34 @@ public class TurbineRotorBearingTile extends TurbineBaseTile implements IEventMu
             }
             AABB = new AABB(nbt.getIntOr("minx", 0), nbt.getIntOr("miny", 0), nbt.getIntOr("minz", 0), nbt.getIntOr("maxx", 0), nbt.getIntOr("maxy", 0), nbt.getIntOr("maxz", 0));
             var p = getBlockPos();
+//?} else if =1.21.1 {
+/*            rotorConfiguration.clear();
+            int rotorShafts = nbt.getInt("shafts");
+            for (int i = 0; i < rotorShafts; i++) {
+                Vector4i vec = new Vector4i();
+                vec.x = nbt.getInt("shaft" + i + "0");
+                vec.y = nbt.getInt("shaft" + i + "1");
+                vec.z = nbt.getInt("shaft" + i + "2");
+                vec.w = nbt.getInt("shaft" + i + "3");
+                rotorConfiguration.add(vec);
+            }
+            AABB = new AABB(nbt.getInt("minx"), nbt.getInt("miny"), nbt.getInt("minz"), nbt.getInt("maxx"), nbt.getInt("maxy"), nbt.getInt("maxz"));
+            var p = getBlockPos();
+*/
+//?}
             steamWindows = biggerreactorsrework.core.util.SteamWindowMesh.faces(
                     new biggerreactorsrework.core.util.FluidSurfaceMesh.Box((float) (AABB.minX + 1 - p.getX()),
                             (float) (AABB.minY + 1 - p.getY()), (float) (AABB.minZ + 1 - p.getZ()),
+//? if =26.1.2 || =26.3 {
                             (float) (AABB.maxX - p.getX()), (float) (AABB.maxY - p.getY()), (float) (AABB.maxZ - p.getZ())),
                     nbt.getIntArray("steamGlass").orElseGet(() -> new int[0]));
         } else {
+//?} else if =1.21.1 {
+/*                            (float) (AABB.maxX - p.getX()), (float) (AABB.maxY - p.getY()), (float) (AABB.maxZ - p.getZ())),
+                    nbt.getIntArray("steamGlass"));
+        } else {
+*/
+//?}
             isRenderBearing = false;
         }
     }

@@ -4,9 +4,16 @@ import biggerreactorsrework.BiggerReactors;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
+//? if =26.1.2 || =26.3 {
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
+//?} else if =1.21.1 {
+/*import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
+*/
+//?}
 import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.neoforge.network.PacketDistributor;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
@@ -19,9 +26,16 @@ public final class CalculatorNetwork {
     public static final String CATALOG = "catalog", START = "start", CANCEL = "cancel", PROGRESS = "progress", RESULT = "result";
     private static final String PROTOCOL = "1";
 
+//? if =26.1.2 || =26.3 {
     public record Payload(CompoundTag tag) implements CustomPacketPayload {
         public static final Type<Payload> TYPE = new Type<>(Identifier.fromNamespaceAndPath(BiggerReactors.modid, "calculator"));
         public static final StreamCodec<FriendlyByteBuf, Payload> CODEC = StreamCodec.of(
+//?} else if =1.21.1 {
+/*    public record Payload(CompoundTag tag) implements CustomPacketPayload {
+        public static final Type<Payload> TYPE = new Type<>(ResourceLocation.fromNamespaceAndPath(BiggerReactors.modid, "calculator"));
+        public static final StreamCodec<FriendlyByteBuf, Payload> CODEC = StreamCodec.of(
+*/
+//?}
                 (buf, payload) -> buf.writeNbt(payload.tag),
                 buf -> {
                     var tag = buf.readNbt();
@@ -36,22 +50,45 @@ public final class CalculatorNetwork {
 
     private CalculatorNetwork() { }
 
+//? if =26.1.2 || =26.3 {
     public static void register(RegisterPayloadHandlersEvent event) {
         net.neoforged.neoforge.network.handling.IPayloadHandler<Payload> handler = (payload, context) -> context.enqueueWork(() -> {
             if (context.flow().isClientbound()) {
                 if (FMLEnvironment.getDist().isClient()) biggerreactorsrework.client.calculator.CalculatorClient.receive(payload.tag());
             } else if (context.player() instanceof ServerPlayer player) {
+//?} else if =1.21.1 {
+/*    public static void register(RegisterPayloadHandlersEvent event) {
+        event.registrar(PROTOCOL).playBidirectional(Payload.TYPE, Payload.CODEC, (payload, context) -> context.enqueueWork(() -> {
+            if (context.flow().isClientbound()) {
+                if (FMLEnvironment.dist.isClient()) biggerreactorsrework.client.calculator.CalculatorClient.receive(payload.tag());
+            } else if (context.player() instanceof ServerPlayer player) {
+*/
+//?}
                 CalculatorService.receive(player, payload.tag());
+//? if =26.1.2 || =26.3 {
             }
         });
         event.registrar(PROTOCOL).playBidirectional(Payload.TYPE, Payload.CODEC, handler, handler);
     }
+//?} else if =1.21.1 {
+/*            }
+        }));
+    }
+*/
+//?}
 
     public static void toPlayer(ServerPlayer player, CompoundTag tag) {
         PacketDistributor.sendToPlayer(player, new Payload(tag));
     }
 
+//? if =26.1.2 || =26.3 {
     public static void toServer(CompoundTag tag) {
         net.neoforged.neoforge.client.network.ClientPacketDistributor.sendToServer(new Payload(tag));
     }
+//?} else if =1.21.1 {
+/*    public static void toServer(CompoundTag tag) {
+        PacketDistributor.sendToServer(new Payload(tag));
+    }
+*/
+//?}
 }

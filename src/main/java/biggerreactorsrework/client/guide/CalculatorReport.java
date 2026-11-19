@@ -9,10 +9,18 @@ import biggerreactorsrework.client.calculator.CalculatorClient;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
+//? if =26.1.2 || =26.3 {
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 
 import javax.annotation.Nullable;
+//?} else if =1.21.1 {
+/*import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+
+import javax.annotation.Nullable;
+*/
+//?}
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
@@ -58,22 +66,46 @@ final class CalculatorReport {
                 .format(java.time.Instant.ofEpochMilli(millis).atZone(java.time.ZoneId.systemDefault()));
     }
 
+//? if =26.1.2 || =26.3 {
     static Component blockName(String id) {
         var key = Identifier.tryParse(id);
         if (key != null && BuiltInRegistries.BLOCK.containsKey(key)) return BuiltInRegistries.BLOCK.getValue(key).getName();
         return Component.literal(id);
+//?} else if =1.21.1 {
+/*    static Component blockName(String id) {
+        var key = ResourceLocation.tryParse(id);
+        if (key != null && BuiltInRegistries.BLOCK.containsKey(key)) return BuiltInRegistries.BLOCK.get(key).getName();
+        return Component.literal(id);
+*/
+//?}
     }
 
+//? if =26.1.2 || =26.3 {
     static Component fluidName(String id) {
         var key = Identifier.tryParse(id);
         if (key != null && BuiltInRegistries.FLUID.containsKey(key)) return BuiltInRegistries.FLUID.getValue(key).getFluidType().getDescription();
         return Component.literal(id);
+//?} else if =1.21.1 {
+/*    static Component fluidName(String id) {
+        var key = ResourceLocation.tryParse(id);
+        if (key != null && BuiltInRegistries.FLUID.containsKey(key)) return BuiltInRegistries.FLUID.get(key).getFluidType().getDescription();
+        return Component.literal(id);
+*/
+//?}
     }
 
+//? if =26.1.2 || =26.3 {
     static Component itemName(String id) {
         var key = Identifier.tryParse(id);
         if (key != null && BuiltInRegistries.ITEM.containsKey(key)) return BuiltInRegistries.ITEM.getValue(key).getDefaultInstance().getHoverName();
         return Component.literal(id);
+//?} else if =1.21.1 {
+/*    static Component itemName(String id) {
+        var key = ResourceLocation.tryParse(id);
+        if (key != null && BuiltInRegistries.ITEM.containsKey(key)) return BuiltInRegistries.ITEM.get(key).getDescription();
+        return Component.literal(id);
+*/
+//?}
     }
 
     static Component material(CalculationResult r) {

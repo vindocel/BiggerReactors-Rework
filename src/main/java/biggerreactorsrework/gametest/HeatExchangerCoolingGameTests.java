@@ -12,24 +12,47 @@ import net.minecraft.core.component.DataComponentPatch;
 import net.minecraft.gametest.framework.*;
 import net.minecraft.world.level.material.Fluids;
 import net.neoforged.neoforge.gametest.*;
+//? if =26.1.2 || =26.3 {
 import static biggerreactorsrework.core.multiblock.IAssemblyStateBlock.ASSEMBLED;
 
 public final class HeatExchangerCoolingGameTests {
+//?} else if =1.21.1 {
+/*import static biggerreactorsrework.core.multiblock.IAssemblyStateBlock.ASSEMBLED;
+
+@GameTestHolder(BiggerReactors.modid)
+@PrefixGameTestTemplate(false)
+public final class HeatExchangerCoolingGameTests {
+*/
+//?}
     /** Added 2026-10-26: sparse stocks and abrupt drains must still cover the full pipe path. */
     @GameTest(template="empty_7x7x7")
     public static void sparseFluidStocksFillTheWholeVisualCircuit(GameTestHelper h) {
         var tank=new FluidTransitionTank(false);tank.perSideCapacity=1000000;
         tank.fill(Fluids.WATER,DataComponentPatch.EMPTY,2,false);tank.absorbRF(-secondaryHeat(1));
         var half=biggerreactorsrework.core.fluids.FluidRenderSnapshot.capture(tank);
+//? if =26.1.2 || =26.3 {
         h.assertTrue(half.inputFill()==.5 && half.outputFill()==.5,"small stocks disappeared during render quantization");
         tank.drain(1,biggerreactorsrework.core.transfer.FluidTanks.FluidAction.EXECUTE);
         var cold=biggerreactorsrework.core.fluids.FluidRenderSnapshot.capture(tank);
+//?} else if =1.21.1 {
+/*        h.assertTrue(half.inputFill()==.5 && half.outputFill()==.5,"small stocks disappeared during render quantization");
+        tank.drain(1,net.neoforged.neoforge.fluids.capability.IFluidHandler.FluidAction.EXECUTE);
+        var cold=biggerreactorsrework.core.fluids.FluidRenderSnapshot.capture(tank);
+*/
+//?}
         h.assertTrue(cold.inputFill()==1 && cold.outputFill()==0,"remaining input did not occupy space freed by output");
         tank.absorbRF(-secondaryHeat(1));
         var hot=biggerreactorsrework.core.fluids.FluidRenderSnapshot.capture(tank);
+//? if =26.1.2 || =26.3 {
         h.assertTrue(hot.inputFill()==0 && hot.outputFill()==1,"remaining output did not fill the circuit");
         tank.drain(1,biggerreactorsrework.core.transfer.FluidTanks.FluidAction.EXECUTE);
         var empty=biggerreactorsrework.core.fluids.FluidRenderSnapshot.capture(tank);
+//?} else if =1.21.1 {
+/*        h.assertTrue(hot.inputFill()==0 && hot.outputFill()==1,"remaining output did not fill the circuit");
+        tank.drain(1,net.neoforged.neoforge.fluids.capability.IFluidHandler.FluidAction.EXECUTE);
+        var empty=biggerreactorsrework.core.fluids.FluidRenderSnapshot.capture(tank);
+*/
+//?}
         h.assertTrue(empty.inputFill()==0 && empty.outputFill()==0,"empty circuit retained phantom fluid");
         for(double[] stocks:new double[][]{{.8,.2},{.08,.2},{0,.2},{.08,0},{.000001,.000002},{1,1}})
             for(int i=0;i<7;i++) {
@@ -79,9 +102,16 @@ public final class HeatExchangerCoolingGameTests {
         GuideStructures.exchanger().parts().forEach(h::setBlock);
         var pos=new BlockPos(1,1,0);
         h.startSequence().thenWaitUntil(()->h.assertTrue(h.getBlockState(pos).getValue(ASSEMBLED),"exchanger not assembled"))
+//? if =26.1.2 || =26.3 {
             .thenExecute(()->{
                 var c=((HeatExchangerBaseTile)GameTestSupport.be(h,pos)).controller();
                 c.condenserHeatBody.setTemperature(900);c.evaporatorHeatBody.setTemperature(450);c.airHeatBody.setTemperature(500);
+//?} else if =1.21.1 {
+/*            .thenExecute(()->{
+                var c=((HeatExchangerBaseTile)h.getBlockEntity(pos)).controller();
+                c.condenserHeatBody.setTemperature(900);c.evaporatorHeatBody.setTemperature(450);c.airHeatBody.setTemperature(500);
+*/
+//?}
                 var saved=c.write();c.read(saved);c.onReassembled();
                 h.assertTrue(c.condenserHeatBody.temperature()==293.15,"legacy primary heat remained productive");
                 h.assertTrue(c.evaporatorHeatBody.temperature()==293.15,"legacy secondary heat remained productive");
@@ -90,9 +120,16 @@ public final class HeatExchangerCoolingGameTests {
                 h.assertTrue(channel.coolantAnchor!=null,"channel has no aggregate render anchor");
                 h.assertTrue(channel.coolantPathLength==c.evaporatorChannels.size(),"render bar does not cover the whole circuit");
                 var indices=new java.util.HashSet<Integer>();for(var part:c.evaporatorChannels)indices.add(part.coolantPathIndex);
+//? if =26.1.2 || =26.3 {
                 h.assertTrue(indices.size()==c.evaporatorChannels.size(),"two channels share the same position in the render bar");
                 var inlet=(biggerreactorsrework.multiblocks.heatexchanger.tiles.HeatExchangerFluidPortTile)GameTestSupport.be(h,new BlockPos(0,1,2));
                 var old=new java.util.HashMap<BlockPos,Integer>();for(var part:c.evaporatorChannels)old.put(part.getBlockPos(),part.coolantPathIndex);
+//?} else if =1.21.1 {
+/*                h.assertTrue(indices.size()==c.evaporatorChannels.size(),"two channels share the same position in the render bar");
+                var inlet=(biggerreactorsrework.multiblocks.heatexchanger.tiles.HeatExchangerFluidPortTile)h.getBlockEntity(new BlockPos(0,1,2));
+                var old=new java.util.HashMap<BlockPos,Integer>();for(var part:c.evaporatorChannels)old.put(part.getBlockPos(),part.coolantPathIndex);
+*/
+//?}
                 boolean wasInlet=inlet.isInlet();
                 c.setInletPort(inlet,!wasInlet);
                 h.assertTrue(inlet.isInlet()!=wasInlet,"selected port direction was not changed");

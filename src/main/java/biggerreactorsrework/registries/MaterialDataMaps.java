@@ -7,9 +7,16 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.registries.BuiltInRegistries;
+//? if =26.1.2 || =26.3 {
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.ExtraCodecs;
+//?} else if =1.21.1 {
+/*import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.ExtraCodecs;
+*/
+//?}
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.material.Fluid;
 import net.neoforged.neoforge.registries.datamaps.DataMapType;
@@ -43,9 +50,16 @@ public final class MaterialDataMaps {
             POSITIVE.fieldOf("boilingPoint").forGetter(Transition::boilingPoint),NONNEGATIVE.fieldOf("liquidThermalConductivity").forGetter(Transition::liquidThermalConductivity),
             NONNEGATIVE.fieldOf("gasThermalConductivity").forGetter(Transition::gasThermalConductivity),NONNEGATIVE.fieldOf("turbineMultiplier").forGetter(Transition::turbineMultiplier),
             POSITIVE.validate(n->n<=1?DataResult.success(n):DataResult.error(()->"Recovery must be in (0,1]")).optionalFieldOf("recovery",1d).forGetter(Transition::recovery),Codec.intRange(1,50).optionalFieldOf("steamPerBatch",10).forGetter(Transition::steamPerBatch)).apply(i,Transition::new));
+//? if =26.1.2 || =26.3 {
     }
     private static Identifier id(String path){return Identifier.fromNamespaceAndPath(BiggerReactors.modid,path);}
     public static final DataMapType<Block,Moderator> MODERATOR=DataMapType.builder(id("reactor_moderator"),Registries.BLOCK,Moderator.CODEC).build();
+//?} else if =1.21.1 {
+/*    }
+    private static ResourceLocation id(String path){return ResourceLocation.fromNamespaceAndPath(BiggerReactors.modid,path);}
+    public static final DataMapType<Block,Moderator> MODERATOR=DataMapType.builder(id("reactor_moderator"),Registries.BLOCK,Moderator.CODEC).build();
+*/
+//?}
     // Modified 2026-11-01: per-item generic fuel yields, zero explicitly disables a matching item/tag.
     public record ReactorFuel(long amount) {
         public static final Codec<ReactorFuel> CODEC = Codec.DOUBLE.validate(n -> Double.isFinite(n) && n == Math.rint(n) && n >= 0 && n <= Long.MAX_VALUE / Integer.MAX_VALUE
@@ -59,6 +73,7 @@ public final class MaterialDataMaps {
     public static final DataMapType<Block,Coil> COIL=DataMapType.builder(id("turbine_coil"),Registries.BLOCK,Coil.CODEC).build();
     public static final DataMapType<Fluid,Transition> TRANSITION=DataMapType.builder(id("fluid_transition"),Registries.FLUID,Transition.CODEC).build();
     public static void register(RegisterDataMapTypesEvent event){event.register(REACTOR_FUEL);event.register(MODERATOR);event.register(FLUID_MODERATOR);event.register(COIL);event.register(TRANSITION);}
+//? if =26.1.2 || =26.3 {
     static void moderators(Map<Block,ReactorModeratorRegistry.ModeratorProperties> target){
         BuiltInRegistries.FLUID.listElements().forEach(holder->{var data=holder.getData(FLUID_MODERATOR);if(data!=null)target.put(holder.value().defaultFluidState().createLegacyBlock().getBlock(),data.properties());});
         BuiltInRegistries.BLOCK.listElements().forEach(holder->{var data=holder.getData(MODERATOR);if(data!=null)target.put(holder.value(),data.properties());});
@@ -73,6 +88,23 @@ public final class MaterialDataMaps {
             if(d.gas.tag()) BuiltInRegistries.FLUID.get(net.minecraft.tags.TagKey.create(Registries.FLUID,d.gas.id())).ifPresent(tag->tag.forEach(h->{if(h.value().isSource(h.value().defaultFluidState()))outputs.add(h.value());}));
             else if(BuiltInRegistries.FLUID.containsKey(d.gas.id())) outputs.add(BuiltInRegistries.FLUID.getValue(d.gas.id()));
             if(outputs.isEmpty()){BiggerReactors.LOGGER.error("Ignoring transition with missing gas: {}",d.gas);return;}
+//?} else if =1.21.1 {
+/*    static void moderators(Map<Block,ReactorModeratorRegistry.ModeratorProperties> target){
+        BuiltInRegistries.FLUID.holders().forEach(holder->{var data=holder.getData(FLUID_MODERATOR);if(data!=null)target.put(holder.value().defaultFluidState().createLegacyBlock().getBlock(),data.properties());});
+        BuiltInRegistries.BLOCK.holders().forEach(holder->{var data=holder.getData(MODERATOR);if(data!=null)target.put(holder.value(),data.properties());});
+    }
+    static void coils(Map<Block,TurbineCoilRegistry.CoilData> target){
+        BuiltInRegistries.BLOCK.holders().forEach(holder->{var d=holder.getData(COIL);if(d!=null)target.put(holder.value(),new TurbineCoilRegistry.CoilData(d.efficiency,d.bonus,d.extractionRate));});
+    }
+    static void transitions(Map<Fluid,FluidTransitionRegistry.FluidTransition> liquids,Map<Fluid,FluidTransitionRegistry.FluidTransition> gases){
+        BuiltInRegistries.FLUID.holders().sorted(java.util.Comparator.comparing(h->h.key().location())).forEach(holder->{
+            var d=holder.getData(TRANSITION);if(d==null)return;
+            var outputs=new java.util.ArrayList<Fluid>();
+            if(d.gas.tag()) BuiltInRegistries.FLUID.getTag(net.minecraft.tags.TagKey.create(Registries.FLUID,d.gas.id())).ifPresent(tag->tag.forEach(h->{if(h.value().isSource(h.value().defaultFluidState()))outputs.add(h.value());}));
+            else if(BuiltInRegistries.FLUID.containsKey(d.gas.id())) outputs.add(BuiltInRegistries.FLUID.get(d.gas.id()));
+            if(outputs.isEmpty()){BiggerReactors.LOGGER.error("Ignoring transition with missing gas: {}",d.gas);return;}
+*/
+//?}
             outputs.sort(java.util.Comparator.comparing(BuiltInRegistries.FLUID::getKey));
             var transition=new FluidTransitionRegistry.FluidTransition(List.of(holder.value()),List.copyOf(outputs),d.latentHeat,d.boilingPoint,d.liquidThermalConductivity,d.gasThermalConductivity,d.turbineMultiplier);
             transition.recovery=d.recovery;transition.steamPerBatch=d.steamPerBatch;

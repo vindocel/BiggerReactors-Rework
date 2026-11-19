@@ -1,3 +1,4 @@
+//? if =26.1.2 || =26.3 {
 package biggerreactorsrework.client.config;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
@@ -5,6 +6,16 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.util.Util;
 
 import java.util.function.BooleanSupplier;
+//?} else if =1.21.1 {
+/*package biggerreactorsrework.client.config;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.network.chat.Component;
+import net.minecraft.Util;
+
+import java.util.function.BooleanSupplier;
+*/
+//?}
 
 public final class ConfigToggle extends Button {
     private final BooleanSupplier value;
@@ -19,9 +30,16 @@ public final class ConfigToggle extends Button {
         from = last ? 1 : 0;
     }
 
+//? if =26.1.2 || =26.3 {
     @Override
     protected void extractContents(GuiGraphicsExtractor g, int mouseX, int mouseY, float partialTick) {
         boolean current = value.getAsBoolean();
+//?} else if =1.21.1 {
+/*    @Override
+    protected void renderWidget(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
+        boolean current = value.getAsBoolean();
+*/
+//?}
         long now = Util.getMillis();
         float progress = Math.min(1, (now - changed) / 140f);
         float position = from + ((last ? 1 : 0) - from) * progress;

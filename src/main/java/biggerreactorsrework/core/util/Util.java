@@ -16,9 +16,16 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.SectionPos;
 import net.minecraft.core.registries.Registries;
+//? if =26.1.2 || =26.3 {
 import net.minecraft.network.protocol.game.ClientboundSectionBlocksUpdatePacket;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerChunkCache;
+//?} else if =1.21.1 {
+/*import net.minecraft.network.protocol.game.ClientboundSectionBlocksUpdatePacket;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerChunkCache;
+*/
+//?}
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.ChunkPos;
@@ -44,29 +51,52 @@ import java.util.Map;
 
 
 public class Util {
-    
+
     public static final Direction[] DIRECTIONS = Direction.values();
-    
+
     private static final Level[] lastLevel = new Level[2];
     private static final ChunkAccess[] lastChunk = new ChunkAccess[2];
     private static final long[] lastChunkPos = new long[2];
-    
+
+//? if =26.1.2 || =26.3 {
     public static void setBlockState(Level level, BlockPos pos, BlockState state) {
         var arrayIndex = level.isClientSide() ? 1 : 0;
         final var chunkPos = ChunkPos.pack(pos.getX() >> 4, pos.getZ() >> 4);
         if (lastLevel[arrayIndex] != level || chunkPos != lastChunkPos[arrayIndex]) {
+//?} else if =1.21.1 {
+/*    public static void setBlockState(Level level, BlockPos pos, BlockState state) {
+        var arrayIndex = level.isClientSide ? 1 : 0;
+        final var chunkPos = ChunkPos.asLong(pos.getX() >> 4, pos.getZ() >> 4);
+        if (lastLevel[arrayIndex] != level || chunkPos != lastChunkPos[arrayIndex]) {
+*/
+//?}
             lastLevel[arrayIndex] = level;
             lastChunkPos[arrayIndex] = chunkPos;
             lastChunk[arrayIndex] = level.getChunk(pos.getX() >> 4, pos.getZ() >> 4);
+//? if =26.1.2 || =26.3 {
         }
         lastChunk[arrayIndex].setBlockState(pos, state, 0);
     }
-    
+//?} else if =1.21.1 {
+/*        }
+        lastChunk[arrayIndex].setBlockState(pos, state, false);
+    }
+*/
+//?}
+
     @Contract(pure = true)
+//? if =26.1.2 || =26.3 {
     public static BlockEntity getTile(Level level, BlockPos pos) {
         var arrayIndex = level.isClientSide() ? 1 : 0;
         final var chunkPos = ChunkPos.pack(pos.getX() >> 4, pos.getZ() >> 4);
         if (lastLevel[arrayIndex] != level || chunkPos != lastChunkPos[arrayIndex] || lastChunk[arrayIndex] == null) {
+//?} else if =1.21.1 {
+/*    public static BlockEntity getTile(Level level, BlockPos pos) {
+        var arrayIndex = level.isClientSide ? 1 : 0;
+        final var chunkPos = ChunkPos.asLong(pos.getX() >> 4, pos.getZ() >> 4);
+        if (lastLevel[arrayIndex] != level || chunkPos != lastChunkPos[arrayIndex] || lastChunk[arrayIndex] == null) {
+*/
+//?}
             lastLevel[arrayIndex] = level;
             lastChunkPos[arrayIndex] = chunkPos;
             lastChunk[arrayIndex] = level.getChunk(pos.getX() >> 4, pos.getZ() >> 4, ChunkStatus.FULL, false);
@@ -75,10 +105,18 @@ public class Util {
             return null;
         }
         return lastChunk[arrayIndex].getBlockEntity(pos);
+//? if =26.1.2 || =26.3 {
     }
-    
+
     public static String readResourceLocation(Identifier location) {
         try (BufferedReader reader = Minecraft.getInstance().getResourceManager().getResource(location).orElseThrow().openAsReader()) {
+//?} else if =1.21.1 {
+/*    }
+
+    public static String readResourceLocation(ResourceLocation location) {
+        try (BufferedReader reader = Minecraft.getInstance().getResourceManager().getResource(location).orElseThrow().openAsReader()) {
+*/
+//?}
             StringBuilder stringBuilder = new StringBuilder();
             String line;
             while ((line = reader.readLine()) != null) {
@@ -89,12 +127,22 @@ public class Util {
         } catch (IOException ignored) {
         }
         return null;
+//? if =26.1.2 || =26.3 {
     }
-    
+
     public static JsonObject readJSONFile(Identifier location) {
         if (location.getPath().lastIndexOf(".json") != location.getPath().length() - 5) {
             location = Identifier.fromNamespaceAndPath(location.getNamespace(), location.getPath() + ".json");
         }
+//?} else if =1.21.1 {
+/*    }
+
+    public static JsonObject readJSONFile(ResourceLocation location) {
+        if (location.getPath().lastIndexOf(".json") != location.getPath().length() - 5) {
+            location = ResourceLocation.fromNamespaceAndPath(location.getNamespace(), location.getPath() + ".json");
+        }
+*/
+//?}
         String jsonString = readResourceLocation(location);
         if (jsonString == null) {
             return null;
@@ -105,11 +153,11 @@ public class Util {
         }
         return null;
     }
-    
+
     public static <T extends Exception> void chunkCachedBlockStateIteration(Vector3ic start, Vector3ic end, Level world, ThrowingFunctions.ThrowingBiConsumer<BlockState, Vector3i, T> func) throws T {
         chunkCachedBlockStateIteration(start, end, world, func, new Vector3i());
     }
-    
+
     public static <T extends Exception> void chunkCachedBlockStateIteration(Vector3ic start, Vector3ic end, Level world, ThrowingFunctions.ThrowingBiConsumer<BlockState, Vector3i, T> func, Vector3i scratchVector) throws T {
         final int minx = start.x();
         final int miny = start.y();
@@ -142,15 +190,22 @@ public class Util {
                     }
                     continue;
                 }
+//? if =26.1.2 || =26.3 {
                 LevelChunkSection[] chunkSections = chunk.getSections();
                 int chunkMinSection = chunk.getMinSectionY();
                 for (int Y = miny; Y < maxY; Y += 16) {
+//?} else if =1.21.1 {
+/*                LevelChunkSection[] chunkSections = chunk.getSections();
+                int chunkMinSection = chunk.getMinSection();
+                for (int Y = miny; Y < maxY; Y += 16) {
+*/
+//?}
                     int sectionMinY = Math.max((Y) & 0xFFFFFFF0, miny);
                     int sectionMaxY = Math.min((Y + 16) & 0xFFFFFFF0, maxy + 1);
-                    
+
                     int chunkSectionIndex = (Y >> 4) - chunkMinSection;
                     LevelChunkSection chunkSection = chunkSections[chunkSectionIndex];
-                    
+
                     if (chunkSection == null) {
                         for (int x = sectionMinX; x < sectionMaxX; x++) {
                             for (int y = sectionMinY; y < sectionMaxY; y++) {
@@ -162,7 +217,7 @@ public class Util {
                         }
                         continue;
                     }
-                    
+
                     // PalettedContainers are indexed [y][z][x]
                     for (int y = sectionMinY; y < sectionMaxY; y++) {
                         for (int z = sectionMinZ; z < sectionMaxZ; z++) {
@@ -177,11 +232,11 @@ public class Util {
             }
         }
     }
-    
+
     public static void markRangeDirty(Level world, Vector2i start, Vector2i end) {
         markLoadedChunksDirty(world, start.x, start.y, end.x, end.y);
     }
-    
+
     public static void markRangeDirty(Level world, Vector3ic start, Vector3ic end) {
         markLoadedChunksDirty(world, start.x(), start.z(), end.x(), end.z());
     }
@@ -191,26 +246,33 @@ public class Util {
         if (!(world.getChunkSource() instanceof ServerChunkCache chunks)) return;
         for (int x = minX >> 4; x <= (maxX >> 4); x++) {
             for (int z = minZ >> 4; z <= (maxZ >> 4); z++) {
+//? if =26.1.2 || =26.3 {
                 LevelChunk chunk = chunks.getChunkNow(x, z);
                 if (chunk != null) chunk.markUnsaved();
             }
+//?} else if =1.21.1 {
+/*                LevelChunk chunk = chunks.getChunkNow(x, z);
+                if (chunk != null) chunk.setUnsaved(true);
+            }
+*/
+//?}
         }
     }
-    
+
     private static final Long2ObjectOpenHashMap<BlockState> endOfTickStates = new Long2ObjectOpenHashMap<>(4096, Hash.DEFAULT_LOAD_FACTOR);
-    
+
     public static void setBlockStateWithoutUpdate(BlockPos pos, BlockState state) {
         setBlockStateWithoutUpdate(pos.asLong(), state);
     }
-    
+
     public static void setBlockStateWithoutUpdate(long pos, BlockState state) {
         endOfTickStates.put(pos, state);
     }
-    
+
     public static void setBlockStateWithoutUpdate(Long2ObjectOpenHashMap<BlockState> map) {
         endOfTickStates.putAll(map);
     }
-    
+
     public static void setBlockStates(Map<BlockPos, BlockState> newStates, Level world) {
         HashMap<BlockPos, HashMap<BlockPos, BlockState>> stateChunks = new HashMap<>();
         BlockPos.MutableBlockPos chunkPos = new BlockPos.MutableBlockPos();
@@ -226,21 +288,35 @@ public class Util {
         stateChunks.forEach((cPos, states) -> {
             LevelChunk chunk = world.getChunk(cPos.getX(), cPos.getZ());
             LevelChunkSection[] chunkSections = chunk.getSections();
+//? if =26.1.2 || =26.3 {
             states.forEach((bPos, state) -> {
                 LevelChunkSection section = chunkSections[(bPos.getY() >> 4) - chunk.getMinSectionY()];
                 if (section != null) {
+//?} else if =1.21.1 {
+/*            states.forEach((bPos, state) -> {
+                LevelChunkSection section = chunkSections[(bPos.getY() >> 4) - chunk.getMinSection()];
+                if (section != null) {
+*/
+//?}
                     var oldState=section.setBlockState(bPos.getX() & 15, bPos.getY() & 15, bPos.getZ() & 15, state);
                     // Modified 2026-10-27: batched assembly updates must invalidate changed emitters.
                     if(oldState.getLightEmission(world,bPos)!=state.getLightEmission(world,bPos)) world.getLightEngine().checkBlock(bPos);
                     markForUpdatePacket(bPos);
                 }
+//? if =26.1.2 || =26.3 {
             });
             chunk.markUnsaved();
         });
+//?} else if =1.21.1 {
+/*            });
+            chunk.setUnsaved(true);
+        });
+*/
+//?}
     }
-    
+
     private static final BlockPos.MutableBlockPos chunkPos = new BlockPos.MutableBlockPos();
-    
+
     public static void setBlockStatesAndUpdateLight(Long2ObjectMap<BlockState> newStates, Level world) {
         stateChunks.clear();
         ((Long2ObjectMap.FastEntrySet<BlockState>) newStates.long2ObjectEntrySet()).fastIterator().forEachRemaining((entry) -> {
@@ -268,23 +344,37 @@ public class Util {
             LevelChunkSection[] chunkSections = chunk.getSections();
             ((Long2ObjectMap.FastEntrySet<BlockState>) states.long2ObjectEntrySet()).fastIterator().forEachRemaining((entry1) -> {
                 final var bPosLong = entry1.getLongKey();
+//? if =26.1.2 || =26.3 {
                 final var state = entry1.getValue();
                 final var sectionIndex = (BlockPos.getY(bPosLong) >> 4) - chunk.getMinSectionY();
                 LevelChunkSection section = chunkSections[sectionIndex];
+//?} else if =1.21.1 {
+/*                final var state = entry1.getValue();
+                final var sectionIndex = (BlockPos.getY(bPosLong) >> 4) - chunk.getMinSection();
+                LevelChunkSection section = chunkSections[sectionIndex];
+*/
+//?}
                 if (section != null) {
                     section.getStates().set(BlockPos.getX(bPosLong) & 15, BlockPos.getY(bPosLong) & 15, BlockPos.getZ(bPosLong) & 15, state);
                     world.getLightEngine().checkBlock(chunkPos.set(bPosLong));
                     chunkSource.blockChanged(chunkPos.set(bPosLong));
                 }
             });
+//? if =26.1.2 || =26.3 {
             existingMaps.add(states);
             chunk.markUnsaved();
         });
+//?} else if =1.21.1 {
+/*            existingMaps.add(states);
+            chunk.setUnsaved(true);
+        });
+*/
+//?}
     }
-    
+
     private static final ObjectArrayList<Long2ObjectLinkedOpenHashMap<BlockState>> existingMaps = new ObjectArrayList<>();
     private static final Long2ObjectLinkedOpenHashMap<Long2ObjectLinkedOpenHashMap<BlockState>> stateChunks = new Long2ObjectLinkedOpenHashMap<>();
-    
+
     public static void setBlockStates(Long2ObjectMap<BlockState> newStates, Level world) {
         stateChunks.clear();
         ((Long2ObjectMap.FastEntrySet<BlockState>) newStates.long2ObjectEntrySet()).fastIterator().forEachRemaining((entry) -> {
@@ -310,9 +400,16 @@ public class Util {
             LevelChunkSection[] chunkSections = chunk.getSections();
             ((Long2ObjectMap.FastEntrySet<BlockState>) states.long2ObjectEntrySet()).fastIterator().forEachRemaining((entry1) -> {
                 final var bPosLong = entry1.getLongKey();
+//? if =26.1.2 || =26.3 {
                 final var state = entry1.getValue();
                 LevelChunkSection section = chunkSections[(BlockPos.getY(bPosLong) >> 4) - chunk.getMinSectionY()];
                 if (section != null) {
+//?} else if =1.21.1 {
+/*                final var state = entry1.getValue();
+                LevelChunkSection section = chunkSections[(BlockPos.getY(bPosLong) >> 4) - chunk.getMinSection()];
+                if (section != null) {
+*/
+//?}
                     final var oldState = section.getStates().getAndSet(BlockPos.getX(bPosLong) & 15, BlockPos.getY(bPosLong) & 15, BlockPos.getZ(bPosLong) & 15, state);
                     markForUpdatePacket(bPosLong);
                     // this does add some overhead, but in many cases both the new and old state are repeated  for a *lot* of blocks, so this shouldn't cause a bunch of cache misses
@@ -328,14 +425,21 @@ public class Util {
                     }
                 }
             });
+//? if =26.1.2 || =26.3 {
             existingMaps.add(states);
             chunk.markUnsaved();
         });
+//?} else if =1.21.1 {
+/*            existingMaps.add(states);
+            chunk.setUnsaved(true);
+        });
+*/
+//?}
     }
-    
+
     private static final ObjectArrayList<boolean[]> existingArrays = new ObjectArrayList<>();
     private static final Long2ObjectLinkedOpenHashMap<boolean[]> updateArrays = new Long2ObjectLinkedOpenHashMap<>();
-    
+
     private static void markForUpdatePacket(BlockPos pos) {
         var chunkPos = SectionPos.asLong(pos);
         var updateArray = updateArrays.get(chunkPos);
@@ -352,7 +456,7 @@ public class Util {
         assert sectionPos >= 0 && sectionPos < 4096;
         updateArray[sectionPos] = true;
     }
-    
+
     private static void markForUpdatePacket(long blockPosLong) {
         long sectionPosLong = SectionPos.blockToSection(blockPosLong);
         var updateArray = updateArrays.get(sectionPosLong);
@@ -372,60 +476,60 @@ public class Util {
         assert sectionPos >= 0 && sectionPos < 4096;
         updateArray[sectionPos] = true;
     }
-    
+
     private static class SpecialShortArraySet extends ShortArraySet {
         private int size = 0;
         private final short[] elements = new short[4096];
-        
+
         public SpecialShortArraySet() {
         }
-        
+
         @Override
         public int size() {
             return size;
         }
-        
+
         @Override
         public ShortIterator iterator() {
             return new ShortIterator() {
                 int index = 0;
-                
+
                 @Override
                 public boolean hasNext() {
                     return index < size;
                 }
-                
+
                 @Override
                 public short nextShort() {
                     return elements[index++];
                 }
             };
         }
-        
+
         public void clear() {
             size = 0;
         }
-        
+
         public void fadd(short val) {
             elements[size++] = val;
         }
     }
-    
+
     public static void updateBlockStates(Level level) {
         if (!endOfTickStates.isEmpty()) {
             setBlockStates(endOfTickStates, level);
             endOfTickStates.clear();
         }
     }
-    
+
     public static void clientTick() {
         lastLevel[1] = null;
     }
-    
+
     public static void serverTick() {
         lastLevel[0] = null;
     }
-    
+
     public static void worldTickEndEvent(Level level) {
         if (!endOfTickStates.isEmpty()) {
             setBlockStates(endOfTickStates, level);
@@ -438,9 +542,16 @@ public class Util {
         updateArrays.long2ObjectEntrySet().fastIterator().forEachRemaining(entry -> {
             long entryKey = entry.getLongKey();
             var entryArray = entry.getValue();
+//? if =26.1.2 || =26.3 {
             var sectionPos = SectionPos.of(entryKey);
             var levelSection = level.getChunk(sectionPos.x(), sectionPos.z()).getSections()[sectionPos.y() - level.getMinSectionY()];
             if (levelSection != null) {
+//?} else if =1.21.1 {
+/*            var sectionPos = SectionPos.of(entryKey);
+            var levelSection = level.getChunk(sectionPos.x(), sectionPos.z()).getSections()[sectionPos.y() - level.getMinSection()];
+            if (levelSection != null) {
+*/
+//?}
                 shortSet.clear();
                 for (int i = 0; i < 4096; i++) {
                     if (entryArray[i]) {
@@ -456,7 +567,7 @@ public class Util {
         });
         updateArrays.clear();
     }
-    
+
     public static Direction directionFromPositions(BlockPos reference, BlockPos neighbor) {
         int xDifference = neighbor.getX() - reference.getX();
         int yDifference = neighbor.getY() - reference.getY();
@@ -478,21 +589,32 @@ public class Util {
             return Direction.SOUTH;
         }
         throw new IllegalArgumentException("identical positions gives");
+//? if =26.1.2 || =26.3 {
     }
-    
-    
+
+
     private static final TagKey<Item> WRENCH_TAG_0 = TagKey.create(Registries.ITEM, Identifier.parse("c:tools/wrench"));
     private static final TagKey<Item> WRENCH_TAG_1 = TagKey.create(Registries.ITEM, Identifier.parse("c:wrenches"));
-    
+
     public static boolean isWrench(Item item) {
+//?} else if =1.21.1 {
+/*    }
+
+
+    private static final TagKey<Item> WRENCH_TAG_0 = TagKey.create(Registries.ITEM, ResourceLocation.parse("c:tools/wrench"));
+    private static final TagKey<Item> WRENCH_TAG_1 = TagKey.create(Registries.ITEM, ResourceLocation.parse("c:wrenches"));
+
+    public static boolean isWrench(Item item) {
+*/
+//?}
         return item.builtInRegistryHolder().is(WRENCH_TAG_0) || item.builtInRegistryHolder().is(WRENCH_TAG_1);
     }
-    
+
     @Deprecated(forRemoval = true)
     public static boolean isEntireAreaLoaded(Level level, Vector3ic min, Vector3ic max) {
         return isEntireAreaLoaded(level, SectionPos.blockToSectionCoord(min.x()), SectionPos.blockToSectionCoord(min.z()), SectionPos.blockToSectionCoord(max.x()), SectionPos.blockToSectionCoord(max.z()));
     }
-    
+
     @Deprecated(forRemoval = true)
     public static boolean isEntireAreaLoaded(Level level, int minCX, int minCZ, int maxCX, int maxCZ) {
         for (int i = minCX; i <= maxCX; i++) {
@@ -504,8 +626,8 @@ public class Util {
         }
         return true;
     }
-    
-    
+
+
     public static int clampToInt(long val) {
         return (int) Math.min(Integer.MAX_VALUE, Math.max(Integer.MIN_VALUE, val));
     }

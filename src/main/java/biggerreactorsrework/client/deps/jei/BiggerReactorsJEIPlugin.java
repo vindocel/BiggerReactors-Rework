@@ -6,9 +6,16 @@ import mezz.jei.api.helpers.IGuiHelper;
 import mezz.jei.api.registration.IRecipeCatalystRegistration;
 import mezz.jei.api.registration.IRecipeCategoryRegistration;
 import mezz.jei.api.registration.IRecipeRegistration;
+//? if =26.1.2 || =26.3 {
 import mezz.jei.api.runtime.IJeiRuntime;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
+//?} else if =1.21.1 {
+/*import mezz.jei.api.runtime.IJeiRuntime;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.ItemStack;
+*/
+//?}
 import net.neoforged.neoforge.fluids.FluidStack;
 import biggerreactorsrework.BiggerReactors;
 import biggerreactorsrework.Config;
@@ -27,10 +34,18 @@ import java.util.List;
 @JeiPlugin
 public class BiggerReactorsJEIPlugin implements IModPlugin {
 
+//? if =26.1.2 || =26.3 {
     @Nonnull
     public Identifier getPluginUid() {
         return Identifier.fromNamespaceAndPath(BiggerReactors.modid, "jei_plugin");
     }
+//?} else if =1.21.1 {
+/*    @Nonnull
+    public ResourceLocation getPluginUid() {
+        return ResourceLocation.fromNamespaceAndPath(BiggerReactors.modid, "jei_plugin");
+    }
+*/
+//?}
 
     /** Modified 2026-10-27: viewers with native plugins do not need JEI compatibility categories. */
     private static boolean enabled() {

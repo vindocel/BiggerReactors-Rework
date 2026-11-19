@@ -7,11 +7,25 @@ import biggerreactorsrework.multiblocks.reactor.simulation.SimulationConfigurati
 import biggerreactorsrework.multiblocks.reactor.simulation.SimulationDescription;
 import biggerreactorsrework.multiblocks.reactor.simulation.cpu.FullPassReactorSimulation;
 import biggerreactorsrework.registries.ReactorModeratorRegistry;
+//? if =26.1.2 || =26.3 {
 import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.GameTestHelper;
 
 /** Operational regressions. */
 public final class OperationGameTests {
+//?} else if =1.21.1 {
+/*import net.minecraft.core.BlockPos;
+import net.minecraft.gametest.framework.GameTest;
+import net.minecraft.gametest.framework.GameTestHelper;
+import net.neoforged.neoforge.gametest.GameTestHolder;
+import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
+
+/^* Operational regressions. ^/
+@GameTestHolder(BiggerReactors.modid)
+@PrefixGameTestTemplate(false)
+public final class OperationGameTests {
+*/
+//?}
     public static SimulationDescription description(int height) {
         var description = new SimulationDescription();
         description.setSize(3, height, 3);
@@ -36,9 +50,16 @@ public final class OperationGameTests {
     @GameTest(template = "empty_7x7x7")
     public static void redstoneRejectsMalformedRequests(GameTestHelper helper) {
         BlockPos pos = new BlockPos(2, 2, 2);
+//? if =26.1.2 || =26.3 {
         helper.setBlock(pos, ReactorRedstonePort.INSTANCE);
         var tile = (ReactorRedstonePortTile) GameTestSupport.be(helper,pos);
         tile.runRequest("setSelectedTab", "invalid");
+//?} else if =1.21.1 {
+/*        helper.setBlock(pos, ReactorRedstonePort.INSTANCE);
+        var tile = (ReactorRedstonePortTile) helper.getBlockEntity(pos);
+        tile.runRequest("setSelectedTab", "invalid");
+*/
+//?}
         tile.runRequest("setSelectedTab", -1);
         tile.runRequest("setTriggerPS", null);
         tile.runRequest("setTextBufferA", "NaN");

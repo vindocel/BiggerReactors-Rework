@@ -6,6 +6,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.neoforged.neoforge.capabilities.BlockCapability;
+//? if =26.1.2 || =26.3 {
 import net.neoforged.neoforge.capabilities.BlockCapabilityCache;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import biggerreactorsrework.core.transfer.FluidTanks;
@@ -34,13 +35,36 @@ public final class NeighborCapability<T, H> {
     public static NeighborCapability<FluidTanks, ?> fluids(BlockEntity owner) {
         return new NeighborCapability<>(owner, Capabilities.Fluid.BLOCK, Transfer::fluids);
     }
+//?} else if =1.21.1 {
+/*import net.neoforged.neoforge.capabilities.BlockCapabilityCache;
+import org.jetbrains.annotations.Nullable;
+import java.util.EnumMap;
+
+public final class NeighborCapability<T> {
+    private final BlockEntity owner;
+    private final BlockCapability<T, Direction> capability;
+    private final EnumMap<Direction, BlockCapabilityCache<T, Direction>> caches = new EnumMap<>(Direction.class);
+
+    public NeighborCapability(BlockEntity owner, BlockCapability<T, Direction> capability) {
+        this.owner = owner;
+        this.capability = capability;
+    }
+*/
+//?}
 
     @Nullable
     public T get(@Nullable Direction direction) {
         if (direction == null || owner.isRemoved() || !(owner.getLevel() instanceof ServerLevel level)) return null;
         var cache = caches.computeIfAbsent(direction, side -> BlockCapabilityCache.create(capability, level,
+//? if =26.1.2 || =26.3 {
                 owner.getBlockPos().relative(side).immutable(), side.getOpposite(), () -> !owner.isRemoved(), () -> { }));
         H handler = cache.getCapability();
         return handler == null ? null : view.apply(handler);
     }
+//?} else if =1.21.1 {
+/*                owner.getBlockPos().relative(side).immutable(), side.getOpposite(), () -> !owner.isRemoved(), () -> { }));
+        return cache.getCapability();
+    }
+*/
+//?}
 }

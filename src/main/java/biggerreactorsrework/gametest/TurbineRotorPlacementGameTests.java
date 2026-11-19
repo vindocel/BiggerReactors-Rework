@@ -1,13 +1,30 @@
+//? if =26.1.2 {
 package biggerreactorsrework.gametest;
 
 // Modified 2026-11-01: native Minecraft 26.1.2 API.
 import biggerreactorsrework.multiblocks.turbine.blocks.*;
+//?} else if =1.21.1 || =26.3 {
+/*package biggerreactorsrework.gametest;
+
+import biggerreactorsrework.multiblocks.turbine.blocks.*;
+*/
+//?}
 import biggerreactorsrework.multiblocks.turbine.tiles.TurbineBaseTile;
 import biggerreactorsrework.multiblocks.turbine.TurbineRotorLayout;
 import net.minecraft.core.BlockPos;
+//? if =26.1.2 || =26.3 {
 import net.minecraft.core.Direction;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.world.InteractionHand;
+//?} else if =1.21.1 {
+/*import net.minecraft.core.Direction;
+import net.minecraft.gametest.framework.GameTest;
+import net.minecraft.gametest.framework.GameTestHelper;
+import net.neoforged.neoforge.gametest.GameTestHolder;
+import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
+import net.minecraft.world.InteractionHand;
+*/
+//?}
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.GameType;
@@ -15,11 +32,22 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.common.util.FakePlayer;
+//? if =26.1.2 || =26.3 {
 import java.util.UUID;
 
 /** Added 2026-10-31: actual block interactions, native placement rollback, protected removal and rotor assembly. */
 // Modified 2026-11-01: cover construction-time placement with open walls/roof and the minimum vertical base/rotor.
 public final class TurbineRotorPlacementGameTests {
+//?} else if =1.21.1 {
+/*import java.util.UUID;
+
+/^* Added 2026-10-31: actual block interactions, native placement rollback, protected removal and rotor assembly. ^/
+// Modified 2026-11-01: cover construction-time placement with open walls/roof and the minimum vertical base/rotor.
+@GameTestHolder(biggerreactorsrework.BiggerReactors.modid)
+@PrefixGameTestTemplate(false)
+public final class TurbineRotorPlacementGameTests {
+*/
+//?}
     private record Fixture(GameTestHelper h, Direction.Axis axis, int size, int center) {
         BlockPos pos(int x,int y,int z) { return h.absolutePos(switch(axis){case X->new BlockPos(y,x,z);case Y->new BlockPos(x,y,z);case Z->new BlockPos(x,z,y);}); }
         void set(int x,int y,int z,net.minecraft.world.level.block.Block block){h.getLevel().setBlockAndUpdate(pos(x,y,z),block.defaultBlockState());}
@@ -186,9 +214,16 @@ public final class TurbineRotorPlacementGameTests {
             p.setItemInHand(InteractionHand.MAIN_HAND,ItemStack.EMPTY);p.setShiftKeyDown(true);
             f.set(1,4,3,Blocks.AIR);
             f.click(p,f.shaft(2),InteractionHand.MAIN_HAND);
+//? if =26.1.2 || =26.3 {
             h.assertTrue(f.count(3)==7&&f.count(2)==8,"sneaking did not reverse placement order");
             p.setShiftKeyDown(false);p.getInventory().setSelectedSlot(1);p.setItemInHand(InteractionHand.MAIN_HAND,new ItemStack(Items.DIAMOND_PICKAXE));
             TurbineRotorLayout.breakShaft(h.getLevel(),f.shaft(2),p);
+//?} else if =1.21.1 {
+/*            h.assertTrue(f.count(3)==7&&f.count(2)==8,"sneaking did not reverse placement order");
+            p.setShiftKeyDown(false);p.getInventory().selected=1;p.setItemInHand(InteractionHand.MAIN_HAND,new ItemStack(Items.DIAMOND_PICKAXE));
+            TurbineRotorLayout.breakShaft(h.getLevel(),f.shaft(2),p);
+*/
+//?}
             h.assertTrue(f.count(2)==0&&f.count(3)==7,"shaft cleanup crossed to another segment");
             h.assertTrue(p.getInventory().countItem(TurbineRotorBlade.INSTANCE.asItem())==9,"removed blade drops were lost or duplicated");
             h.assertTrue(p.getMainHandItem().getDamageValue()==0,"cleanup damaged the tool per blade");
@@ -223,9 +258,16 @@ public final class TurbineRotorPlacementGameTests {
             p.setGameMode(GameType.SURVIVAL);
             for(int i=0;i<p.getInventory().getContainerSize();i++)p.getInventory().setItem(i,new ItemStack(Items.COBBLESTONE,64));
             p.setItemInHand(InteractionHand.MAIN_HAND,new ItemStack(Items.DIAMOND_PICKAXE));
+//? if =26.1.2 || =26.3 {
             BlockPos protectedBlade=f.shaft(2).north(2);
             java.util.function.Consumer<net.neoforged.neoforge.event.level.block.BreakBlockEvent> cancel=e->{if(e.getPlayer()==p&&e.getPos().equals(protectedBlade))e.setCanceled(true);};
             net.neoforged.neoforge.common.NeoForge.EVENT_BUS.addListener(cancel);
+//?} else if =1.21.1 {
+/*            BlockPos protectedBlade=f.shaft(2).north(2);
+            java.util.function.Consumer<net.neoforged.neoforge.event.level.BlockEvent.BreakEvent> cancel=e->{if(e.getPlayer()==p&&e.getPos().equals(protectedBlade))e.setCanceled(true);};
+            net.neoforged.neoforge.common.NeoForge.EVENT_BUS.addListener(cancel);
+*/
+//?}
             try{TurbineRotorLayout.breakShaft(h.getLevel(),f.shaft(2),p);}
             finally{net.neoforged.neoforge.common.NeoForge.EVENT_BUS.unregister(cancel);}
             h.assertTrue(f.count(2)==2,"cancelled arm removal was bypassed");
@@ -239,6 +281,7 @@ public final class TurbineRotorPlacementGameTests {
         var f=fixture(h,Direction.Axis.Y,7,4,true);
         h.startSequence().thenWaitUntil(f::ready).thenExecute(()->{
             var p=f.player(false);
+//? if =26.1.2 {
             var target=f.shaft(2).north();
             var cow=h.spawn(net.minecraft.world.entity.EntityType.COW,h.relativePos(target));
             // Modified 2026-11-01: 26.1.2 relativePos applies an extra half-turn; place the obstruction at its exact absolute target.
@@ -248,6 +291,21 @@ public final class TurbineRotorPlacementGameTests {
             f.click(p,f.shaft(2),InteractionHand.MAIN_HAND);
             h.assertTrue(f.count(2)==0&&p.getMainHandItem().getCount()==64,"entity collision was ignored: blades="+f.count(2)+" items="+p.getMainHandItem().getCount());
         }).thenSucceed();
+//?} else if =1.21.1 {
+/*            var target=f.shaft(2).north();
+            var cow=net.minecraft.world.entity.EntityType.COW.create(h.getLevel());cow.moveTo(Vec3.atBottomCenterOf(target));h.getLevel().addFreshEntity(cow);
+            f.click(p,f.shaft(2),InteractionHand.MAIN_HAND);
+            h.assertTrue(f.count(2)==0&&p.getMainHandItem().getCount()==64,"entity collision was ignored: blades="+f.count(2)+" stock="+p.getMainHandItem().getCount());
+        }).thenSucceed();
+*/
+//?} else if =26.3 {
+/*            var target=f.shaft(2).north();
+            h.spawn(net.minecraft.world.entity.EntityTypes.COW,h.relativePos(target));
+            f.click(p,f.shaft(2),InteractionHand.MAIN_HAND);
+            h.assertTrue(f.count(2)==0&&p.getMainHandItem().getCount()==64,"entity collision was ignored");
+        }).thenSucceed();
+*/
+//?}
     }
     @GameTest(template="empty_17x17x17",timeoutTicks=100)
     public static void sneakingWithBladesKeepsNativeManualPlacement(GameTestHelper h){
@@ -281,9 +339,15 @@ public final class TurbineRotorPlacementGameTests {
             var tank=tile.controller().simulation().fluidTank();
             h.assertTrue(tank.vaporAmount()+tank.liquidAmount()==total[0],"closed steam/water stock changed during normal revalidation");
         }).thenSucceed();
+//? if =26.1.2 || =26.3 {
     }
     // Modified 2026-11-01: exercise native outline ray casts and unchanged collision.
     private static net.minecraft.world.phys.BlockHitResult aim(GameTestHelper h,Vec3 from,Vec3 to){
+//?} else if =1.21.1 {
+/*    }
+    private static net.minecraft.world.phys.BlockHitResult aim(GameTestHelper h,Vec3 from,Vec3 to){
+*/
+//?}
         return h.getLevel().clip(new net.minecraft.world.level.ClipContext(h.absoluteVec(from),h.absoluteVec(to),net.minecraft.world.level.ClipContext.Block.OUTLINE,net.minecraft.world.level.ClipContext.Fluid.NONE,net.minecraft.world.phys.shapes.CollisionContext.empty()));
     }
     @GameTest(template="empty_7x7x7")

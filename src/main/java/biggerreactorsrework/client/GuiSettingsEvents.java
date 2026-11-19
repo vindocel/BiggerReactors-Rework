@@ -1,7 +1,14 @@
+//? if =26.1.2 {
 package biggerreactorsrework.client;
 
 // Modified 2026-11-01: native Minecraft 26.1.2 API.
 import biggerreactorsrework.core.client.gui.screens.ModScreen;
+//?} else if =1.21.1 || =26.3 {
+/*package biggerreactorsrework.client;
+
+import biggerreactorsrework.core.client.gui.screens.ModScreen;
+*/
+//?}
 import net.minecraft.client.Minecraft;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.neoforge.client.event.RenderTooltipEvent;
@@ -38,11 +45,22 @@ public final class GuiSettingsEvents {
             var g = event.getGuiGraphics();
             boolean statisticsFront = screen.statisticsInFront();
             for (int layer = 0; layer < 2; layer++) {
+//? if =26.1.2 || =26.3 {
                 boolean statistics = (layer == 1) == statisticsFront;
                 g.nextStratum();
                 if (statistics) screen.statisticsWindow().render(g, event.getMouseX(), event.getMouseY());
                 else screen.settingsWindow().render(g, event.getMouseX(), event.getMouseY());
             }
+//?} else if =1.21.1 {
+/*                boolean statistics = (layer == 1) == statisticsFront;
+                g.pose().pushPose();
+                g.pose().translate(0, 0, layer * 100);
+                if (statistics) screen.statisticsWindow().render(g, event.getMouseX(), event.getMouseY());
+                else screen.settingsWindow().render(g, event.getMouseX(), event.getMouseY());
+                g.pose().popPose();
+            }
+*/
+//?}
         }
     }
 
@@ -92,10 +110,18 @@ public final class GuiSettingsEvents {
         if (!(event.getScreen() instanceof ModScreen<?> screen)) return;
         boolean statisticsFront = screen.statisticsInFront();
         for (int i = 0; i < 2; i++) {
+//? if =26.1.2 || =26.3 {
             boolean statistics = (i == 0) == statisticsFront;
             boolean handled = statistics ? screen.statisticsWindow().key(event.getKeyEvent().key())
                     : screen.settingsWindow().keyPressed(event.getKeyEvent().key(), event.getKeyEvent().modifiers());
             if (handled) {
+//?} else if =1.21.1 {
+/*            boolean statistics = (i == 0) == statisticsFront;
+            boolean handled = statistics ? screen.statisticsWindow().key(event.getKeyCode())
+                    : screen.settingsWindow().keyPressed(event.getKeyCode(), event.getModifiers());
+            if (handled) {
+*/
+//?}
                 event.setCanceled(true);
                 return;
             }
@@ -111,9 +137,16 @@ public final class GuiSettingsEvents {
     }
 
     /** Tooltips of the screen under a popup are hidden only where the popup covers it. */
+//? if =26.1.2 || =1.21.1 {
     private static void tooltip(RenderTooltipEvent.Pre event) {
         if (!(Minecraft.getInstance().screen instanceof ModScreen<?> screen)) return;
         if (screen.statisticsWindow().rendering() || screen.settingsWindow().rendering()) return;
+//?} else if =26.3 {
+/*    private static void tooltip(RenderTooltipEvent.Pre event) {
+        if (!(Minecraft.getInstance().gui.screen() instanceof ModScreen<?> screen)) return;
+        if (screen.statisticsWindow().rendering() || screen.settingsWindow().rendering()) return;
+*/
+//?}
         if (screen.statisticsWindow().covers(event.getX(), event.getY()) || screen.settingsWindow().covers(event.getX(), event.getY())) {
             event.setCanceled(true);
         }

@@ -10,11 +10,19 @@ public final class HeatExchangerComponent extends PortComponent {
     public HeatExchangerComponent(HeatExchangerComputerPortTile tile) {
         super(tile, "biggerreactorsrework_heat_exchanger");
         access = HeatExchangerAccess.create(tile::nullableController);
+//? if =26.1.2 || =26.3 {
     }
     @Callback(doc = "function():table -- Thermal recipe snapshot: kJ/t heat, weighted channel links and actual mB/t flows.")
     public Object[] thermal(Context context, Arguments args) { checkAvailable(); return result(access.thermal()); }
 
     @Callback(doc = "function():boolean -- Whether the port belongs to an assembled machine.")
+//?} else if =1.21.1 {
+/*    }
+    @Callback(doc="function():table -- Thermal recipe snapshot: kJ/t heat, weighted channel links and actual mB/t flows.")
+    public Object[] thermal(Context context,Arguments args) { checkAvailable();return result(access.thermal()); }
+    @Callback(doc = "function():boolean -- Whether the port belongs to an assembled machine.")
+*/
+//?}
     public Object[] connected(Context context, Arguments args) {
         checkThread(); return result(available() && access.connected());
     }

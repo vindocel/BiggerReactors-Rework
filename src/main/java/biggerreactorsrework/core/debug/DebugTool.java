@@ -8,14 +8,24 @@ import net.minecraft.world.item.context.UseOnContext;
 import biggerreactorsrework.core.registry.RegisterItem;
 
 public class DebugTool extends Item {
-    
+
+//? if =26.1.2 || =26.3 {
     @RegisterItem(name = "debug_tool")
     public static final DebugTool INSTANCE = biggerreactorsrework.core.registry.RegistryIds.named("debug_tool", () -> new DebugTool());
-    
+
     public DebugTool() {
         super(biggerreactorsrework.core.registry.RegistryIds.item(new Item.Properties().stacksTo(1)));
     }
-    
+//?} else if =1.21.1 {
+/*    @RegisterItem(name = "debug_tool")
+    public static final DebugTool INSTANCE = new DebugTool();
+
+    public DebugTool() {
+        super(new Item.Properties().stacksTo(1));
+    }
+*/
+//?}
+
     @Override
     public InteractionResult onItemUseFirst(ItemStack stack, UseOnContext context) {
         var player = context.getPlayer();

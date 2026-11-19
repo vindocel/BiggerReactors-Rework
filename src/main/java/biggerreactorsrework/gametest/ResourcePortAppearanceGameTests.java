@@ -21,9 +21,18 @@ import net.minecraft.world.MenuProvider;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.neoforged.neoforge.gametest.*;
+//? if =26.1.2 || =26.3 {
 import java.util.List;
 
 public final class ResourcePortAppearanceGameTests {
+//?} else if =1.21.1 {
+/*import java.util.List;
+
+@GameTestHolder(BiggerReactors.modid)
+@PrefixGameTestTemplate(false)
+public final class ResourcePortAppearanceGameTests {
+*/
+//?}
     private static GuiSync.IGUIPacket packet(BlockEntity tile) {
         if (tile instanceof BatteryBaseTile && !(tile instanceof BatteryEnergyPortTile))
             return ((BatteryBaseTile)tile).batteryState();
@@ -37,9 +46,16 @@ public final class ResourcePortAppearanceGameTests {
     }
     private static void check(GameTestHelper h,BlockPos expected,List<BlockPos> positions) {
         var player=net.neoforged.neoforge.common.util.FakePlayerFactory.getMinecraft(h.getLevel());
+//? if =26.1.2 || =26.3 {
         for (var relative:positions) {
             var tile=GameTestSupport.be(h,relative);
             var menu=tile instanceof BatteryTerminalTile
+//?} else if =1.21.1 {
+/*        for (var relative:positions) {
+            var tile=h.getBlockEntity(relative);
+            var menu=tile instanceof BatteryTerminalTile
+*/
+//?}
                     ? new BatteryTerminalContainer(42,tile.getBlockPos(),player)
                     : ((MenuProvider)tile).createMenu(42,player.getInventory(),player);
             var provider=(GuiSync.IGUIPacketProvider)menu;

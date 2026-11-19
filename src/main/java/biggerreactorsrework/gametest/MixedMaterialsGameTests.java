@@ -7,6 +7,7 @@ import biggerreactorsrework.multiblocks.reactor.tiles.ReactorTerminalTile;
 import biggerreactorsrework.multiblocks.turbine.blocks.*;
 import biggerreactorsrework.multiblocks.turbine.tiles.TurbineTerminalTile;
 import net.minecraft.core.BlockPos;
+//? if =26.1.2 || =26.3 {
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.resources.Identifier;
@@ -17,6 +18,24 @@ public final class MixedMaterialsGameTests {
     private static Block ludicrite() {
         return BuiltInRegistries.BLOCK.getValue(Identifier.fromNamespaceAndPath(BiggerReactors.modid, "ludicrite_block"));
     }
+//?} else if =1.21.1 {
+/*import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.gametest.framework.GameTest;
+import net.minecraft.gametest.framework.GameTestHelper;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.neoforged.neoforge.gametest.GameTestHolder;
+import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
+
+@GameTestHolder(BiggerReactors.modid)
+@PrefixGameTestTemplate(false)
+public final class MixedMaterialsGameTests {
+    private static Block ludicrite() {
+        return BuiltInRegistries.BLOCK.get(ResourceLocation.fromNamespaceAndPath(BiggerReactors.modid, "ludicrite_block"));
+    }
+*/
+//?}
 
     @GameTest(template = "empty_7x7x7", timeoutTicks = 120)
     public static void reactorAssemblesWithMixedModerators(GameTestHelper h) {
@@ -28,9 +47,16 @@ public final class MixedMaterialsGameTests {
         }
         h.setBlock(3, 5, 3, ReactorControlRod.INSTANCE);
         h.setBlock(1, 3, 3, ReactorTerminal.INSTANCE);
+//? if =26.1.2 || =26.3 {
         h.succeedWhen(() -> {
             ReactorTerminalTile terminal = GameTestSupport.be(h, new BlockPos(1, 3, 3));
             h.assertTrue(terminal.nullableController() != null
+//?} else if =1.21.1 {
+/*        h.succeedWhen(() -> {
+            var terminal = (ReactorTerminalTile) h.getBlockEntity(new BlockPos(1, 3, 3));
+            h.assertTrue(terminal.nullableController() != null
+*/
+//?}
                     && terminal.controller().assemblyState() == IValidatedMultiblock.AssemblyState.ASSEMBLED,
                     "reactor with mixed moderators did not assemble: " + (terminal.nullableController() == null ? "no controller" : terminal.controller().getDebugInfo()));
         });
@@ -57,13 +83,26 @@ public final class MixedMaterialsGameTests {
             if (x == 3 && z == 3) continue;
             h.setBlock(x, 4, z, switch (i++ % 4) { case 0 -> Blocks.IRON_BLOCK; case 1 -> Blocks.GOLD_BLOCK; case 2 -> Blocks.DIAMOND_BLOCK; default -> ludicrite(); });
         }
+//? if =26.1.2 || =26.3 {
         h.succeedWhen(() -> {
             TurbineTerminalTile terminal = GameTestSupport.be(h, new BlockPos(1, 3, 3));
             h.assertTrue(terminal.nullableController() != null
+//?} else if =1.21.1 {
+/*        h.succeedWhen(() -> {
+            var terminal = (TurbineTerminalTile) h.getBlockEntity(new BlockPos(1, 3, 3));
+            h.assertTrue(terminal.nullableController() != null
+*/
+//?}
                     && terminal.controller().assemblyState() == IValidatedMultiblock.AssemblyState.ASSEMBLED,
                     "turbine with mixed coils did not assemble: " + (terminal.nullableController() == null ? "no controller" : terminal.controller().getDebugInfo()));
         });
+//? if =26.1.2 || =26.3 {
     }
 
     private MixedMaterialsGameTests() { }
 }
+//?} else if =1.21.1 {
+/*    }
+}
+*/
+//?}

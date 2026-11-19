@@ -21,9 +21,16 @@ public final class ComputerPortState {
     private boolean loaded;
 
     public ComputerPortState(BlockEntity tile) { this.tile = tile; }
+//? if =26.1.2 || =26.3 {
     public Component component() {
         if (component == null && tile.getLevel() != null && !tile.getLevel().isClientSide()) {
             component = factory.apply(tile);
+//?} else if =1.21.1 {
+/*    public Component component() {
+        if (component == null && tile.getLevel() != null && !tile.getLevel().isClientSide) {
+            component = factory.apply(tile);
+*/
+//?}
             if (component != null) component.load(saved, tile.getLevel().registryAccess());
         }
         return component;
@@ -38,9 +45,16 @@ public final class ComputerPortState {
         loaded = false;
         if (component != null) component.remove();
     }
+//? if =26.1.2 || =26.3 {
     public void load(CompoundTag tag, HolderLookup.Provider registries) {
         saved = tag.getCompoundOrEmpty("computerComponent").copy();
         if (component != null) component.load(saved, registries);
+//?} else if =1.21.1 {
+/*    public void load(CompoundTag tag, HolderLookup.Provider registries) {
+        saved = tag.getCompound("computerComponent").copy();
+        if (component != null) component.load(saved, registries);
+*/
+//?}
     }
     public void save(CompoundTag tag, HolderLookup.Provider registries) {
         if (component != null) component.save(saved, registries);

@@ -2,23 +2,54 @@ package biggerreactorsrework.multiblocks.reactor.client;
 
 import biggerreactorsrework.client.GuiTheme;
 
+//? if =26.1.2 || =26.3 {
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Inventory;
 import biggerreactorsrework.BiggerReactors;
+//?} else if =1.21.1 {
+/*import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.world.entity.player.Inventory;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import biggerreactorsrework.BiggerReactors;
+*/
+//?}
 import biggerreactorsrework.client.Biselector;
 import biggerreactorsrework.client.SelectorColors;
 import biggerreactorsrework.client.GuiArt;
+//? if =26.1.2 || =26.3 {
 import biggerreactorsrework.client.GuiFrame;
 import biggerreactorsrework.multiblocks.reactor.containers.ReactorAccessPortContainer;
+//?} else if =1.21.1 {
+/*import biggerreactorsrework.client.GuiFrame;
+import biggerreactorsrework.client.GuiIcon;
+import biggerreactorsrework.multiblocks.reactor.containers.ReactorAccessPortContainer;
+*/
+//?}
 import biggerreactorsrework.multiblocks.reactor.state.ReactorAccessPortState;
+//? if =26.1.2 || =26.3 {
 import biggerreactorsrework.core.client.gui.screens.ModScreen;
 
 import javax.annotation.Nonnull;
 
 public class ReactorAccessPortScreen extends ModScreen<ReactorAccessPortContainer> {
+//?} else if =1.21.1 {
+/*import biggerreactorsrework.core.client.gui.screens.ModScreen;
+import biggerreactorsrework.core.client.gui.elements.InteractiveElement;
+
+import javax.annotation.Nonnull;
+
+@OnlyIn(Dist.CLIENT)
+public class ReactorAccessPortScreen extends ModScreen<ReactorAccessPortContainer> {
+*/
+//?}
 
 
     private ReactorAccessPortState reactorAccessPortState;
@@ -53,9 +84,17 @@ public class ReactorAccessPortScreen extends ModScreen<ReactorAccessPortContaine
     /**
      * Initialize controls.
      */
+//? if =26.1.2 || =26.3 {
     private Biselector<ReactorAccessPortContainer> recoveryToggle;
 
     public void initControls() {
+//?} else if =1.21.1 {
+/*    private Biselector<ReactorAccessPortContainer> recoveryToggle;
+
+    // Modified 2026-11-04: outlets always send cyanite; inlets can recover stored fuel.
+    public void initControls() {
+*/
+//?}
         // (Left) Direction toggle:
         Biselector<ReactorAccessPortContainer> directionToggle = new Biselector<>(this, 8, 18, Component.translatable("screen.biggerreactorsrework.reactor_access_port.direction_toggle.tooltip"),
                 () -> reactorAccessPortState.direction ? 0 : 1, SelectorColors.GREEN, SelectorColors.BLUE);
@@ -86,6 +125,7 @@ public class ReactorAccessPortScreen extends ModScreen<ReactorAccessPortContaine
      * @param mouseY       The y position of the mouse.
      * @param partialTicks Partial ticks.
      */
+//? if =26.1.2 || =26.3 {
     @Override
     public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTicks) {
         if (reactorAccessPortState.direction) recoveryToggle.enable();
@@ -101,12 +141,37 @@ public class ReactorAccessPortScreen extends ModScreen<ReactorAccessPortContaine
             // Text for an outlet:
             graphics.text(this.getFont(), Component.translatable("screen.biggerreactorsrework.reactor_access_port.direction_toggle.output").getString(), this.getLeftPos() + 42, this.getTopPos() + 22, GuiTheme.textColor(), false);
         }
+//?} else if =1.21.1 {
+/*    @Override
+    public void render(@Nonnull GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
+        if (reactorAccessPortState.direction) recoveryToggle.enable();
+        else recoveryToggle.disable();
+        super.render(graphics, mouseX, mouseY, partialTicks);
+
+        // Render text for input/output direction:
+        if (reactorAccessPortState.direction) {
+            // Text for an inlet:
+            graphics.drawString(this.getFont(), Component.translatable("screen.biggerreactorsrework.reactor_access_port.direction_toggle.input").getString(), this.getGuiLeft() + 42, this.getGuiTop() + 22, GuiTheme.textColor(), false);
+
+        } else {
+            // Text for an outlet:
+            graphics.drawString(this.getFont(), Component.translatable("screen.biggerreactorsrework.reactor_access_port.direction_toggle.output").getString(), this.getGuiLeft() + 42, this.getGuiTop() + 22, GuiTheme.textColor(), false);
+        }
+*/
+//?}
 
         if (reactorAccessPortState.direction) {
             GuiArt.scrollingText(graphics, getFont(),
+//? if =26.1.2 || =26.3 {
                     Component.translatable("screen.biggerreactorsrework.reactor_access_port.recover_fuel"),
                     getLeftPos() + 42, getTopPos() + 38, imageWidth - 50, GuiTheme.textColor());
         }
+//?} else if =1.21.1 {
+/*                    Component.translatable("screen.biggerreactorsrework.reactor_access_port.recover_fuel"),
+                    getGuiLeft() + 42, getGuiTop() + 38, imageWidth - 50, GuiTheme.textColor());
+        }
+*/
+//?}
     }
 
     @Override

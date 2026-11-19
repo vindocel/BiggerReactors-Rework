@@ -1,6 +1,14 @@
+//? if =26.1.2 || =26.3 {
 package biggerreactorsrework.multiblocks.reactor.tiles;
 
 import net.minecraft.core.BlockPos;
+//?} else if =1.21.1 {
+/*package biggerreactorsrework.multiblocks.reactor.tiles;
+
+import net.minecraft.MethodsReturnNonnullByDefault;
+import net.minecraft.core.BlockPos;
+*/
+//?}
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Inventory;
@@ -15,18 +23,26 @@ import biggerreactorsrework.core.client.gui.api.IHasUpdatableState;
 import biggerreactorsrework.core.registry.RegisterTile;
 
 import javax.annotation.Nullable;
+//? if =26.1.2 || =26.3 {
 import javax.annotation.ParametersAreNonnullByDefault;
 
 @ParametersAreNonnullByDefault
+//?} else if =1.21.1 {
+/*import javax.annotation.ParametersAreNonnullByDefault;
+
+@MethodsReturnNonnullByDefault
+@ParametersAreNonnullByDefault
+*/
+//?}
 public class ReactorTerminalTile extends ReactorBaseTile implements MenuProvider, IHasUpdatableState<ReactorState> {
-    
+
     @RegisterTile("reactor_terminal")
     public static final BlockEntityType.BlockEntitySupplier<ReactorTerminalTile> SUPPLIER = new RegisterTile.Producer<>(ReactorTerminalTile::new);
-    
+
     public ReactorTerminalTile(BlockEntityType<?> TYPE, BlockPos pos, BlockState state) {
         super(TYPE, pos, state);
     }
-    
+
     public final ReactorState reactorState = new ReactorState(this);
     public String renderCold="minecraft:empty",renderHot="minecraft:empty",renderOrigin="";
     public double renderColdFill,renderHotFill;
@@ -34,31 +50,39 @@ public class ReactorTerminalTile extends ReactorBaseTile implements MenuProvider
         var tag=super.writeNBT();tag.putString("renderCold",renderCold);tag.putString("renderHot",renderHot);tag.putString("renderOrigin",renderOrigin);
         tag.putDouble("renderColdFill",renderColdFill);tag.putDouble("renderHotFill",renderHotFill);return tag;
     }
+//? if =26.1.2 || =26.3 {
     @Override protected void readNBT(net.minecraft.nbt.CompoundTag tag){
         super.readNBT(tag);renderCold=tag.getStringOr("renderCold", "");renderHot=tag.getStringOr("renderHot", "");renderOrigin=tag.getStringOr("renderOrigin", "");
         renderColdFill=tag.getDoubleOr("renderColdFill", 0D);renderHotFill=tag.getDoubleOr("renderHotFill", 0D);
     }
+//?} else if =1.21.1 {
+/*    @Override protected void readNBT(net.minecraft.nbt.CompoundTag tag){
+        super.readNBT(tag);renderCold=tag.getString("renderCold");renderHot=tag.getString("renderHot");renderOrigin=tag.getString("renderOrigin");
+        renderColdFill=tag.getDouble("renderColdFill");renderHotFill=tag.getDouble("renderHotFill");
+    }
+*/
+//?}
     @Override protected net.minecraft.nbt.CompoundTag getUpdateNBT(){return writeNBT();}
     @Override protected void handleUpdateNBT(net.minecraft.nbt.CompoundTag tag){readNBT(tag);}
-    
+
     @Override
     public ReactorState getState() {
         this.updateState();
         return this.reactorState;
     }
-    
+
     @Override
     public void updateState() {
         if (nullableController() != null) {
             controller().updateReactorState(reactorState);
         }
     }
-    
+
     @Override
     public Component getDisplayName() {
         return Component.translatable(ReactorTerminal.INSTANCE.getDescriptionId());
     }
-    
+
     @Nullable
     @Override
     public AbstractContainerMenu createMenu(int windowId, Inventory playerInventory, Player player) {

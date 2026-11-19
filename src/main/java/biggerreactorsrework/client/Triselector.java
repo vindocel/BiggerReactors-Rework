@@ -1,20 +1,44 @@
+//? if =26.1.2 || =26.3 {
 package biggerreactorsrework.client;
 
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.network.chat.Component;
+//?} else if =1.21.1 {
+/*package biggerreactorsrework.client;
+
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.network.chat.Component;
+*/
+//?}
 import net.minecraft.sounds.SoundEvents;
+//? if =26.1.2 || =26.3 {
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import biggerreactorsrework.core.client.gui.elements.InteractiveElement;
+//?} else if =1.21.1 {
+/*import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import biggerreactorsrework.core.client.gui.elements.InteractiveElement;
+*/
+//?}
 import biggerreactorsrework.core.client.gui.screens.ModScreen;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+//? if =26.1.2 || =26.3 {
 import java.util.function.IntSupplier;
 
 public class Triselector<T extends AbstractContainerMenu> extends InteractiveElement<T> {
-    
+//?} else if =1.21.1 {
+/*import java.util.function.IntSupplier;
+
+@OnlyIn(Dist.CLIENT)
+public class Triselector<T extends AbstractContainerMenu> extends InteractiveElement<T> {
+*/
+//?}
+
     private final IntSupplier renderState;
-    
+
     /**
      * Selector state for the switch.
      */
@@ -82,10 +106,18 @@ public class Triselector<T extends AbstractContainerMenu> extends InteractiveEle
      * @param mouseX The x position of the mouse.
      * @param mouseY The y position of the mouse.
      */
+//? if =26.1.2 || =26.3 {
     @Override
     public void render(@Nonnull GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
         // Check conditions.
         if (this.renderEnable) {
+//?} else if =1.21.1 {
+/*    @Override
+    public void render(@Nonnull GuiGraphics graphics, int mouseX, int mouseY) {
+        // Check conditions.
+        if (this.renderEnable) {
+*/
+//?}
             GuiArt.toggleCells(graphics, this.x, this.y, this.cellOf(this.renderState.getAsInt()), this.actionEnable && this.isMouseOver(mouseX, mouseY), !this.actionEnable, this.parent.getFrame(), this.colors);
             // Trigger user-defined render logic.
             if (this.onRender != null) {
@@ -105,11 +137,20 @@ public class Triselector<T extends AbstractContainerMenu> extends InteractiveEle
     @Override
     public boolean mouseReleased(double mouseX, double mouseY, int button) {
         // Check conditions.
+//? if =26.1.2 || =26.3 {
         if (this.isMouseOver(mouseX, mouseY)) {
             // Get actual x position.
             int relativeX = this.parent.getLeftPos() + this.x;
             // Check if the selector is enabled.
             if (this.actionEnable) {
+//?} else if =1.21.1 {
+/*        if (this.isMouseOver(mouseX, mouseY)) {
+            // Get actual x position.
+            int relativeX = this.parent.getGuiLeft() + this.x;
+            // Check if the selector is enabled.
+            if (this.actionEnable) {
+*/
+//?}
                 // Set side depending on position of click.
                 if (mouseX > relativeX) {
                     if ((mouseX < relativeX + (int) (this.width / 3))) {

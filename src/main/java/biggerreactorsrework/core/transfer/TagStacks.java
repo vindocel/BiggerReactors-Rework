@@ -1,3 +1,4 @@
+//? if =26.1.2 || =26.3 {
 package biggerreactorsrework.core.transfer;
 
 import net.minecraft.core.HolderLookup;
@@ -45,3 +46,5 @@ public final class TagStacks {
         return FluidStack.CODEC.parse(registries.createSerializationContext(NbtOps.INSTANCE), tag).result().orElse(FluidStack.EMPTY);
     }
 }
+//?} else if =1.21.1 {
+//?}

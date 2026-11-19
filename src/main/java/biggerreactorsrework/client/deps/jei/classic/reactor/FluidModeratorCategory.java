@@ -12,16 +12,32 @@ import mezz.jei.api.helpers.IGuiHelper;
 import mezz.jei.api.recipe.IFocusGroup;
 import mezz.jei.api.recipe.RecipeIngredientRole;
 import mezz.jei.api.recipe.RecipeType;
+//? if =26.1.2 || =26.3 {
 import mezz.jei.api.recipe.category.IRecipeCategory;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
+//?} else if =1.21.1 {
+/*import mezz.jei.api.recipe.category.IRecipeCategory;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.ItemStack;
+*/
+//?}
 
 /** Reworked 2026-10-25: selected coolant conversions replace world-fluid moderation. Modified 2026-10-26: drawn like the moderator pages. */
+//? if =26.1.2 || =26.3 {
 public class FluidModeratorCategory implements IRecipeCategory<FluidModeratorCategory.Recipe> {
     public static final Identifier UID = Identifier.fromNamespaceAndPath(BiggerReactors.modid, "classic/reactor_coolant");
     public static final RecipeType<Recipe> RECIPE_TYPE = new RecipeType<>(UID, Recipe.class);
+//?} else if =1.21.1 {
+/*public class FluidModeratorCategory implements IRecipeCategory<FluidModeratorCategory.Recipe> {
+    public static final ResourceLocation UID = ResourceLocation.fromNamespaceAndPath(BiggerReactors.modid, "classic/reactor_coolant");
+    public static final RecipeType<Recipe> RECIPE_TYPE = new RecipeType<>(UID, Recipe.class);
+*/
+//?}
     private final IDrawable icon;
 
     public FluidModeratorCategory(IGuiHelper helper) {
@@ -56,15 +72,31 @@ public class FluidModeratorCategory implements IRecipeCategory<FluidModeratorCat
     @Override
     public void setRecipe(IRecipeLayoutBuilder builder, Recipe recipe, IFocusGroup focuses) {
         var card = recipe.card();
+//? if =26.1.2 || =26.3 {
         builder.addSlot(RecipeIngredientRole.INPUT, 1, FluidCard.inputY() + 1)
                 .addFluidStack(card.input().getFluid(), 1000, card.input().getComponentsPatch()).setCustomRenderer(mezz.jei.api.neoforge.NeoForgeTypes.FLUID_STACK, biggerreactorsrework.client.deps.jei.CoolantIngredientRenderer.INSTANCE);
         builder.addSlot(RecipeIngredientRole.OUTPUT, 1, card.outputY() + 1)
                 .addFluidStack(card.output().getFluid(), 1000, card.output().getComponentsPatch()).setCustomRenderer(mezz.jei.api.neoforge.NeoForgeTypes.FLUID_STACK, biggerreactorsrework.client.deps.jei.CoolantIngredientRenderer.INSTANCE);
     }
+//?} else if =1.21.1 {
+/*        builder.addSlot(RecipeIngredientRole.INPUT, 1, FluidCard.inputY() + 1)
+                .addFluidStack(card.input().getFluid(), 1000, card.input().getComponentsPatch()).setFluidRenderer(1000, false, 16, 16);
+        builder.addSlot(RecipeIngredientRole.OUTPUT, 1, card.outputY() + 1)
+                .addFluidStack(card.output().getFluid(), 1000, card.output().getComponentsPatch()).setFluidRenderer(1000, false, 16, 16);
+    }
+*/
+//?}
 
+//? if =26.1.2 || =26.3 {
     @Override
     public void draw(Recipe recipe, IRecipeSlotsView slots, GuiGraphicsExtractor g, double mouseX, double mouseY) {
         recipe.card().draw(g);
+//?} else if =1.21.1 {
+/*    @Override
+    public void draw(Recipe recipe, IRecipeSlotsView slots, GuiGraphics g, double mouseX, double mouseY) {
+        recipe.card().draw(g);
+*/
+//?}
     }
 
     @Override

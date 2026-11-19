@@ -1,9 +1,17 @@
 package biggerreactorsrework.calculator;
 
+//? if =26.1.2 || =26.3 {
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.Identifier;
 
 import javax.annotation.Nullable;
+//?} else if =1.21.1 {
+/*import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceLocation;
+
+import javax.annotation.Nullable;
+*/
+//?}
 
 /**
  * Target in FE/t (shown as RF/t, the same unit in this mod) and the player's material choices: a moderator for a
@@ -26,6 +34,7 @@ public record CalculatorRequest(long target, String fuel, boolean liquid, String
 
     /** Null when the tag is malformed or out of range. */
     @Nullable
+//? if =26.1.2 || =26.3 {
     public static CalculatorRequest fromTag(CompoundTag tag) {
         long target = tag.getLongOr("target", 0L);
         String material = tag.getStringOr("material", ""), coil = tag.getStringOr("coil", ""), fingerprint = tag.getStringOr("fingerprint", "");
@@ -35,5 +44,17 @@ public record CalculatorRequest(long target, String fuel, boolean liquid, String
         boolean liquid = tag.getBooleanOr("liquid", false);
         if (liquid && Identifier.tryParse(coil) == null) return null;
         return new CalculatorRequest(target, fuel, liquid, material, liquid ? coil : "", fingerprint);
+//?} else if =1.21.1 {
+/*    public static CalculatorRequest fromTag(CompoundTag tag) {
+        long target = tag.getLong("target");
+        String material = tag.getString("material"), coil = tag.getString("coil"), fingerprint = tag.getString("fingerprint");
+        String fuel = tag.getString("fuel");
+        if (target <= 0 || target > MAX_TARGET || material.length() > MAX_ID || coil.length() > MAX_ID || fuel.length() > MAX_ID || fingerprint.length() > 64) return null;
+        if (ResourceLocation.tryParse(material) == null || ResourceLocation.tryParse(fuel) == null) return null;
+        boolean liquid = tag.getBoolean("liquid");
+        if (liquid && ResourceLocation.tryParse(coil) == null) return null;
+        return new CalculatorRequest(target, fuel, liquid, material, liquid ? coil : "", fingerprint);
+*/
+//?}
     }
 }

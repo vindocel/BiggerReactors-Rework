@@ -16,10 +16,18 @@ import net.minecraft.world.level.block.state.properties.BooleanProperty;
 /** Added 2026-10-30: outward-facing, configurable battery charge sensor. */
 public final class BatteryRedstonePort extends BatteryBaseBlock implements IAssemblyStateBlock, IFaceDirectionBlock {
     public static final BooleanProperty IS_LIT = BooleanProperty.create("is_lit");
+//? if =26.1.2 || =26.3 {
     @RegisterBlock(name = "battery_redstone_port", tileEntityClass = BatteryRedstonePortTile.class)
     public static final BatteryRedstonePort INSTANCE = biggerreactorsrework.core.registry.RegistryIds.named("battery_redstone_port", () -> new BatteryRedstonePort());
 
     public BatteryRedstonePort() { registerDefaultState(defaultBlockState().setValue(IS_LIT, false)); }
+//?} else if =1.21.1 {
+/*    @RegisterBlock(name = "battery_redstone_port", tileEntityClass = BatteryRedstonePortTile.class)
+    public static final BatteryRedstonePort INSTANCE = new BatteryRedstonePort();
+
+    public BatteryRedstonePort() { registerDefaultState(defaultBlockState().setValue(IS_LIT, false)); }
+*/
+//?}
     @Override protected void buildStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
         super.buildStateDefinition(builder);
         builder.add(IS_LIT);

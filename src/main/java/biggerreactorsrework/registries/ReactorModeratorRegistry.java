@@ -6,9 +6,16 @@ import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.registries.BuiltInRegistries;
+//? if =26.1.2 || =26.3 {
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
+//?} else if =1.21.1 {
+/*import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.TagKey;
+*/
+//?}
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.BucketItem;
 import net.minecraft.world.level.block.Block;
@@ -35,18 +42,18 @@ import java.util.function.BiConsumer;
 
 // Modified 2026-11-02: explicit passive classes travel with authoritative material properties.
 public class ReactorModeratorRegistry {
-    
+
     public interface IModeratorProperties extends ROBNObject {
         default biggerreactorsrework.thermal.ThermalModel.PassiveClass passiveClass() { return biggerreactorsrework.thermal.ThermalModel.PassiveClass.NONE; }
 
         double absorption();
-        
+
         double heatEfficiency();
-        
+
         double moderation();
-        
+
         double heatConductivity();
-        
+
         @Override
         default Map<String, Object> toROBNMap() {
             final Map<String, Object> map = new HashMap<>();
@@ -57,24 +64,24 @@ public class ReactorModeratorRegistry {
             map.put("heatConductivity", heatConductivity());
             return map;
         }
-        
+
         @Override
         default void fromROBNMap(Map<String, Object> map) {
             throw new IllegalArgumentException("");
         }
     }
-    
+
     public static class ModeratorProperties implements IModeratorProperties, ROBNObject {
-        
+
         public static final ModeratorProperties EMPTY_MODERATOR = new ModeratorProperties(0, 0, 1, 0);
-        
+
         public final biggerreactorsrework.thermal.ThermalModel.PassiveClass passiveClass;
         @Override public biggerreactorsrework.thermal.ThermalModel.PassiveClass passiveClass() { return passiveClass; }
         public final double absorption;
         public final double heatEfficiency;
         public final double moderation;
         public final double heatConductivity;
-        
+
         public ModeratorProperties(double absorption, double heatEfficiency, double moderation, double heatConductivity) {
             this(absorption, heatEfficiency, moderation, heatConductivity, biggerreactorsrework.thermal.ThermalModel.PassiveClass.NONE);
         }
@@ -86,45 +93,45 @@ public class ReactorModeratorRegistry {
             this.moderation = moderation;
             this.heatConductivity = heatConductivity;
         }
-        
+
         public ModeratorProperties(IModeratorProperties properties) {
             this(properties.absorption(), properties.heatEfficiency(), properties.moderation(), properties.heatConductivity(), properties.passiveClass());
         }
-        
+
         @Override
         public double absorption() {
             return absorption;
         }
-        
+
         @Override
         public double heatEfficiency() {
             return heatEfficiency;
         }
-        
+
         @Override
         public double moderation() {
             return moderation;
         }
-        
+
         @Override
         public double heatConductivity() {
             return heatConductivity;
         }
-        
-        
+
+
     }
-    
+
     private final static HashMap<Block, ModeratorProperties> registry = new HashMap<>();
-    
+
     public static boolean isBlockAllowed(Block block) {
         return registry.containsKey(block);
     }
-    
+
     public static ModeratorProperties blockModeratorProperties(Block block) {
         return registry.get(block);
     }
     public static Map<Block,ModeratorProperties> snapshot(){return Map.copyOf(registry);}
-    
+
     // TODO: unify these names across all registries
     private enum RegistryType {
         tag,
@@ -132,47 +139,70 @@ public class ReactorModeratorRegistry {
         fluidtag,
         fluid
     }
-    
+
     private static class ReactorModeratorJsonData {
-    
+
         @ConfigValue
         RegistryType type = RegistryType.tag;
-    
+
+//? if =26.1.2 || =26.3 {
         @ConfigValue
         Identifier location = Identifier.parse("dirt");
-    
+
         @ConfigValue(range = "[0, 1]")
+//?} else if =1.21.1 {
+/*        @ConfigValue
+        ResourceLocation location = ResourceLocation.parse("dirt");
+
+        @ConfigValue(range = "[0, 1]")
+*/
+//?}
         double absorption;
-    
+
         @ConfigValue(range = "[0, 1]")
         double efficiency;
-    
+
         @ConfigValue(range = "[1,)")
         double moderation;
-    
+
         @ConfigValue(range = "[0,)")
         double conductivity;
         @ConfigValue
         biggerreactorsrework.thermal.ThermalModel.PassiveClass passiveClass = biggerreactorsrework.thermal.ThermalModel.PassiveClass.NONE;
     }
-    
+
     private static final DatapackLoader<ReactorModeratorJsonData> dataLoader = new DatapackLoader<>(ReactorModeratorJsonData::new);
-    
+
     public static void loadRegistry() {
         BiggerReactors.LOGGER.info("Loading reactor moderators");
+//? if =26.1.2 || =26.3 {
         registry.clear();
-        
+
         List<ReactorModeratorJsonData> data = dataLoader.loadAll(Identifier.parse("biggerreactorsrework:ebcr/moderators"));
         BiggerReactors.LOGGER.info("Loaded " + data.size() + " moderator data entries");
-        
+//?} else if =1.21.1 {
+/*        registry.clear();
+
+        List<ReactorModeratorJsonData> data = dataLoader.loadAll(ResourceLocation.parse("biggerreactorsrework:ebcr/moderators"));
+        BiggerReactors.LOGGER.info("Loaded " + data.size() + " moderator data entries");
+*/
+//?}
+
         for (ReactorModeratorJsonData moderatorData : data) {
-            
+
             ModeratorProperties properties = new ModeratorProperties(moderatorData.absorption, moderatorData.efficiency, moderatorData.moderation, moderatorData.conductivity, moderatorData.passiveClass);
-    
+
             switch (moderatorData.type) {
+//? if =26.1.2 || =26.3 {
                 case tag -> {
                     var blockTagOptional = BuiltInRegistries.BLOCK.get(TagKey.create(BuiltInRegistries.BLOCK.key(), moderatorData.location));
                     blockTagOptional.ifPresent(holders -> holders.forEach(blockHolder -> {
+//?} else if =1.21.1 {
+/*                case tag -> {
+                    var blockTagOptional = BuiltInRegistries.BLOCK.getTag(TagKey.create(BuiltInRegistries.BLOCK.key(), moderatorData.location));
+                    blockTagOptional.ifPresent(holders -> holders.forEach(blockHolder -> {
+*/
+//?}
                         var element = blockHolder.value();
                         registry.put(element, properties);
                         BiggerReactors.LOGGER.debug("Loaded moderator " + BuiltInRegistries.BLOCK.getKey(element));
@@ -180,14 +210,28 @@ public class ReactorModeratorRegistry {
                 }
                 case registry -> {
                     // cant check against air, because air is a valid thing to load
+//? if =26.1.2 || =26.3 {
                     if (BuiltInRegistries.BLOCK.containsKey(moderatorData.location)) {
                         registry.put(BuiltInRegistries.BLOCK.getValue(moderatorData.location), properties);
                         BiggerReactors.LOGGER.debug("Loaded moderator " + moderatorData.location);
+//?} else if =1.21.1 {
+/*                    if (BuiltInRegistries.BLOCK.containsKey(moderatorData.location)) {
+                        registry.put(BuiltInRegistries.BLOCK.get(moderatorData.location), properties);
+                        BiggerReactors.LOGGER.debug("Loaded moderator " + moderatorData.location);
+*/
+//?}
                     }
                 }
+//? if =26.1.2 || =26.3 {
                 case fluidtag -> {
                     var fluidTagOptional = BuiltInRegistries.FLUID.get(TagKey.create(BuiltInRegistries.FLUID.key(), moderatorData.location));
                     fluidTagOptional.ifPresent(holders -> holders.forEach(fluidHolder -> {
+//?} else if =1.21.1 {
+/*                case fluidtag -> {
+                    var fluidTagOptional = BuiltInRegistries.FLUID.getTag(TagKey.create(BuiltInRegistries.FLUID.key(), moderatorData.location));
+                    fluidTagOptional.ifPresent(holders -> holders.forEach(fluidHolder -> {
+*/
+//?}
                         var element = fluidHolder.value();
                         Block elementBlock = element.defaultFluidState().createLegacyBlock().getBlock();
                         registry.put(elementBlock, properties);
@@ -196,9 +240,16 @@ public class ReactorModeratorRegistry {
                 }
                 case fluid -> {
                     // cant check against air, because air is a valid thing to load
+//? if =26.1.2 || =26.3 {
                     if (BuiltInRegistries.FLUID.containsKey(moderatorData.location)) {
                         Fluid fluid = BuiltInRegistries.FLUID.getValue(moderatorData.location);
                         assert fluid != null;
+//?} else if =1.21.1 {
+/*                    if (BuiltInRegistries.FLUID.containsKey(moderatorData.location)) {
+                        Fluid fluid = BuiltInRegistries.FLUID.get(moderatorData.location);
+                        assert fluid != null;
+*/
+//?}
                         Block block = fluid.defaultFluidState().createLegacyBlock().getBlock();
                         registry.put(block, properties);
                         BiggerReactors.LOGGER.debug("Loaded moderator " + moderatorData.location);
@@ -212,33 +263,48 @@ public class ReactorModeratorRegistry {
                 !block.defaultBlockState().getFluidState().isEmpty());
         BiggerReactors.LOGGER.info("Loaded " + registry.size() + " moderator entries");
     }
-    
+
+//? if =26.1.2 || =26.3 {
     public static class Client {
-        
+
         private static final SimpleChannel CHANNEL = new SimpleChannel(Identifier.fromNamespaceAndPath(BiggerReactors.modid, "moderator_sync_channel"), Client::readSync, null);
         private static final ObjectOpenHashSet<Block> moderatorBlocks = new ObjectOpenHashSet<>();
+//?} else if =1.21.1 {
+/*    public static class Client {
+
+        private static final SimpleChannel CHANNEL = new SimpleChannel(ResourceLocation.fromNamespaceAndPath(BiggerReactors.modid, "moderator_sync_channel"), Client::readSync, null);
+        private static final ObjectOpenHashSet<Block> moderatorBlocks = new ObjectOpenHashSet<>();
+*/
+//?}
         private static final Object2ObjectOpenHashMap<Block, ModeratorProperties> moderatorProperties = new Object2ObjectOpenHashMap<>();
-        
+
         @OnModLoad
         private static void onModLoad() {
+//? if =26.1.2 || =26.3 {
             NeoForge.EVENT_BUS.addListener(Client::datapackEvent);
             if (FMLEnvironment.getDist().isClient()) {
                 NeoForge.EVENT_BUS.addListener(Client::toolTipEvent);
+//?} else if =1.21.1 {
+/*            NeoForge.EVENT_BUS.addListener(Client::datapackEvent);
+            if (FMLEnvironment.dist.isClient()) {
+                NeoForge.EVENT_BUS.addListener(Client::toolTipEvent);
+*/
+//?}
             }
         }
-        
+
         public static void datapackEvent(OnDatapackSyncEvent e) {
             final var player = e.getPlayer();
             if (player == null) {
                 return;
             }
-            
+
             if (BiggerReactors.LOG_DEBUG) {
                 BiggerReactors.LOGGER.debug("Sending moderator list to player: " + player);
             }
             CHANNEL.sendToPlayer(player, writeSync());
         }
-        
+
         private static DataCompound writeSync() {
             final var list = new ObjectArrayList<String>();
             final var propertiesList = new ObjectArrayList<DoubleArrayList>();
@@ -248,7 +314,7 @@ public class ReactorModeratorRegistry {
                     continue;
                 }
                 list.add(location.toString());
-                
+
                 var properties = new DoubleArrayList();
                 properties.add(value.getValue().absorption);
                 properties.add(value.getValue().heatEfficiency);
@@ -262,7 +328,7 @@ public class ReactorModeratorRegistry {
             compound.put("propertiesList", propertiesList);
             return compound;
         }
-        
+
         private static void readSync(DataCompound compound, IPayloadContext context) {
             moderatorBlocks.clear();
             moderatorProperties.clear();
@@ -276,11 +342,20 @@ public class ReactorModeratorRegistry {
             for (int i = 0; i < list.size(); i++) {
                 var blockLocation = list.get(i);
                 var properties = propertiesList.get(i);
+//? if =26.1.2 || =26.3 {
                 if(properties.size()!=5 || !Double.isFinite(properties.getDouble(4)) || properties.getDouble(4)!=Math.rint(properties.getDouble(4)) || properties.getDouble(4)<0 || properties.getDouble(4)>=biggerreactorsrework.thermal.ThermalModel.PassiveClass.values().length)continue;
                 var id=Identifier.tryParse(blockLocation);
                 if(id==null||!BuiltInRegistries.BLOCK.containsKey(id))continue;
                 final var block = BuiltInRegistries.BLOCK.getValue(id);
                 if (block == null) {
+//?} else if =1.21.1 {
+/*                if(properties.size()!=5 || !Double.isFinite(properties.getDouble(4)) || properties.getDouble(4)!=Math.rint(properties.getDouble(4)) || properties.getDouble(4)<0 || properties.getDouble(4)>=biggerreactorsrework.thermal.ThermalModel.PassiveClass.values().length)continue;
+                var id=ResourceLocation.tryParse(blockLocation);
+                if(id==null||!BuiltInRegistries.BLOCK.containsKey(id))continue;
+                final var block = BuiltInRegistries.BLOCK.get(id);
+                if (block == null) {
+*/
+//?}
                     return;
                 }
                 if (BiggerReactors.LOG_DEBUG) {
@@ -290,7 +365,7 @@ public class ReactorModeratorRegistry {
                 moderatorProperties.put(block, new ModeratorProperties(properties.getDouble(0), properties.getDouble(1), properties.getDouble(2), properties.getDouble(3), biggerreactorsrework.thermal.ThermalModel.PassiveClass.values()[(int)properties.getDouble(4)]));
             }
         }
-        
+
         public static void toolTipEvent(ItemTooltipEvent event) {
             final var item = event.getItemStack().getItem();
             if (item instanceof BlockItem blockItem) {
@@ -306,10 +381,28 @@ public class ReactorModeratorRegistry {
                 return;
             }
             if (Minecraft.getInstance().options.advancedItemTooltips || Config.CONFIG.AlwaysShowTooltips) {
-                event.getToolTip().add(Component.translatable("tooltip.biggerreactorsrework.is_a_moderator"));
+                var properties = moderatorProperties.get(item instanceof BlockItem blockItem ? blockItem.getBlock()
+                        : ((BucketItem) item).content.defaultFluidState().createLegacyBlock().getBlock());
+                if (properties == null) return;
+                int percent = relativeEfficiency(properties);
+                if (percent > 0) event.getToolTip().add(Component.translatable("tooltip.biggerreactorsrework.reactor_efficiency", percent)
+                        .withStyle(net.minecraft.ChatFormatting.YELLOW));
             }
         }
-        
+
+        // Modified 2026-11-18: approximate share of the best registered moderator's RF per fuel mB, in steps of 5%.
+        private static int relativeEfficiency(ModeratorProperties properties) {
+            double best = 0;
+            for (var other : moderatorProperties.values()) best = Math.max(best, passiveYield(other));
+            double value = passiveYield(properties);
+            if (best <= 0 || value <= 0) return 0;
+            return (int) Math.max(5, Math.round(value / best * 20) * 5);
+        }
+
+        private static double passiveYield(ModeratorProperties properties) {
+            return biggerreactorsrework.thermal.ThermalModel.passiveYield(properties.passiveClass(), properties.heatConductivity());
+        }
+
         public static void forEach(BiConsumer<Block, IModeratorProperties> consumer) {
             moderatorProperties.forEach(consumer);
         }

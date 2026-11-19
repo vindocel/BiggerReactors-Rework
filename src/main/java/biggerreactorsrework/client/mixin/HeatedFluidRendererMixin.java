@@ -1,3 +1,4 @@
+//? if =26.1.2 || =26.3 {
 package biggerreactorsrework.client.mixin;
 
 import biggerreactorsrework.client.FluidSprites;
@@ -31,3 +32,5 @@ abstract class HeatedFluidRendererMixin {
                 model.overlayMaterial(), model.fluidTintSource());
     }
 }
+//?} else if =1.21.1 {
+//?}

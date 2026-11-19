@@ -1,0 +1,10 @@
+{
+  "type": "minecraft:smelting",
+  "ingredient": [
+    {
+      "item": "biggerreactorsrework:ludicrite_dust"
+    }
+  ],
+  "result": {"id": "biggerreactorsrework:ludicrite_ingot"},
+  "cookingtime": 200
+}

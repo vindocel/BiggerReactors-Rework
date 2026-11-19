@@ -13,19 +13,36 @@ import net.minecraft.gametest.framework.*;
 import net.minecraft.world.level.block.Blocks;
 import net.neoforged.neoforge.gametest.*;
 import java.util.Map;
+//? if =26.1.2 || =26.3 {
 import static biggerreactorsrework.core.multiblock.IAssemblyStateBlock.ASSEMBLED;
 
 public final class LifecycleGameTests {
+//?} else if =1.21.1 {
+/*import static biggerreactorsrework.core.multiblock.IAssemblyStateBlock.ASSEMBLED;
+
+@GameTestHolder(BiggerReactors.modid)
+@PrefixGameTestTemplate(false)
+public final class LifecycleGameTests {
+*/
+//?}
     @GameTest(template="empty_7x7x7",timeoutTicks=200)
     public static void stoppedRotorAcceptsGeometryBeforeAssembledStateArrives(GameTestHelper h){
         GuideStructures.turbine().parts().forEach(h::setBlock);
         h.setBlock(new BlockPos(0,2,2),biggerreactorsrework.multiblocks.turbine.blocks.TurbineGlass.INSTANCE);
         var pos=new BlockPos(2,0,2);
         h.startSequence().thenWaitUntil(()->h.assertTrue(h.getBlockState(pos).getValue(ASSEMBLED),"turbine not assembled"))
+//? if =26.1.2 || =26.3 {
             .thenExecute(()->{
                 var server=(biggerreactorsrework.multiblocks.turbine.tiles.TurbineRotorBearingTile)GameTestSupport.be(h,pos);
                 if(!server.isRenderBearing)server=(biggerreactorsrework.multiblocks.turbine.tiles.TurbineRotorBearingTile)GameTestSupport.be(h,new BlockPos(2,6,2));
                 var client=new biggerreactorsrework.multiblocks.turbine.tiles.TurbineRotorBearingTile(server.getType(),server.getBlockPos(),server.getBlockState().setValue(ASSEMBLED,false));
+//?} else if =1.21.1 {
+/*            .thenExecute(()->{
+                var server=(biggerreactorsrework.multiblocks.turbine.tiles.TurbineRotorBearingTile)h.getBlockEntity(pos);
+                if(!server.isRenderBearing)server=(biggerreactorsrework.multiblocks.turbine.tiles.TurbineRotorBearingTile)h.getBlockEntity(new BlockPos(2,6,2));
+                var client=new biggerreactorsrework.multiblocks.turbine.tiles.TurbineRotorBearingTile(server.getType(),server.getBlockPos(),server.getBlockState().setValue(ASSEMBLED,false));
+*/
+//?}
                 client.setLevel(h.getLevel());
                 var update=new net.minecraft.nbt.CompoundTag();update.putDouble("speed",0);
                 update.put("config",server.getUpdateTag(h.getLevel().registryAccess()));
@@ -42,9 +59,16 @@ public final class LifecycleGameTests {
         var part=new ReactorBaseTile[1];
         h.startSequence()
             .thenWaitUntil(()->h.assertTrue(h.getBlockState(terminal).getValue(ASSEMBLED),"reactor not assembled"))
+//? if =26.1.2 || =26.3 {
             .thenExecute(()->{
                 part[0]=(ReactorBaseTile)GameTestSupport.be(h,corner);original[0]=part[0].controller();
                 original[0].setActive(ReactorActivity.ACTIVE);part[0].multiblockModule().stopTicking();
+//?} else if =1.21.1 {
+/*            .thenExecute(()->{
+                part[0]=(ReactorBaseTile)h.getBlockEntity(corner);original[0]=part[0].controller();
+                original[0].setActive(ReactorActivity.ACTIVE);part[0].multiblockModule().stopTicking();
+*/
+//?}
             })
             .thenIdle(4)
             .thenExecute(()->{
@@ -55,16 +79,30 @@ public final class LifecycleGameTests {
             })
             .thenWaitUntil(()->h.assertTrue(h.getBlockState(terminal).getValue(ASSEMBLED),"reactor did not reassemble"))
             .thenExecute(()->h.setBlock(corner,Blocks.AIR))
+//? if =26.1.2 || =26.3 {
             .thenIdle(4)
             .thenExecute(()->h.assertFalse(((ReactorBaseTile)GameTestSupport.be(h,terminal)).controller().isActive(),"manual break kept active intent"))
             .thenSucceed();
+//?} else if =1.21.1 {
+/*            .thenIdle(4)
+            .thenExecute(()->h.assertFalse(((ReactorBaseTile)h.getBlockEntity(terminal)).controller().isActive(),"manual break kept active intent"))
+            .thenSucceed();
+*/
+//?}
     }
     @GameTest(template="empty_7x7x7",timeoutTicks=200)
     public static void turbineRedstoneCommandsAndSensors(GameTestHelper h){
         GuideStructures.turbine().parts().forEach(h::setBlock);
+//? if =26.1.2 || =26.3 {
         BlockPos port=new BlockPos(4,2,2),signal=port.east();h.setBlock(port,TurbineRedstonePort.INSTANCE);
         var tile=(TurbineRedstonePortTile)GameTestSupport.be(h,port);
         h.startSequence()
+//?} else if =1.21.1 {
+/*        BlockPos port=new BlockPos(4,2,2),signal=port.east();h.setBlock(port,TurbineRedstonePort.INSTANCE);
+        var tile=(TurbineRedstonePortTile)h.getBlockEntity(port);
+        h.startSequence()
+*/
+//?}
             .thenWaitUntil(()->h.assertTrue(h.getBlockState(port).getValue(ASSEMBLED),"port not assembled"))
             .thenExecute(()->{
                 h.assertTrue(tile.configure(Map.of("mode",1,"behavior",0,"low",0d,"high",0d)),"valid level config rejected");h.setBlock(signal,Blocks.REDSTONE_BLOCK);

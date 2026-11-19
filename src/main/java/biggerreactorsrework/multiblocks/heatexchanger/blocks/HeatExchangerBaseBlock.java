@@ -1,8 +1,16 @@
+//? if =26.1.2 || =26.3 {
 package biggerreactorsrework.multiblocks.heatexchanger.blocks;
 
 import net.minecraft.world.level.material.MapColor;
 
 import net.minecraft.core.BlockPos;
+//?} else if =1.21.1 {
+/*package biggerreactorsrework.multiblocks.heatexchanger.blocks;
+
+import net.minecraft.MethodsReturnNonnullByDefault;
+import net.minecraft.core.BlockPos;
+*/
+//?}
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -18,52 +26,85 @@ import biggerreactorsrework.core.multiblock.rectangular.IRectangularMultiblockBl
 
 import javax.annotation.ParametersAreNonnullByDefault;
 
+//? if =26.1.2 || =26.3 {
 import static biggerreactorsrework.core.multiblock.IAssemblyStateBlock.ASSEMBLED;
 
 @ParametersAreNonnullByDefault
 public abstract class HeatExchangerBaseBlock extends ModularBlock implements IRectangularMultiblockBlock, EntityBlock, biggerreactorsrework.core.modular.block.BlockTooltip {
     // Modified 2026-10-27: assembled terminal and hot-channel light.
-    
+
     // Modified 2026-11-01: declare the machine palette color for map renderers.
     public static final Properties PROPERTIES_SOLID = Properties.of().mapColor(MapColor.TERRACOTTA_BROWN).lightLevel(biggerreactorsrework.multiblocks.MachineLighting::emission).sound(SoundType.METAL).destroyTime(2).explosionResistance(10).isValidSpawn((a, b, c, d) -> false);
     public static final Properties PROPERTIES_GLASS = Properties.of().mapColor(MapColor.TERRACOTTA_BROWN).lightLevel(biggerreactorsrework.multiblocks.MachineLighting::emission).sound(SoundType.GLASS).noOcclusion().destroyTime(2).explosionResistance(2).isValidSpawn((a, b, c, d) -> false);
-    
+
     public HeatExchangerBaseBlock() {
+//?} else if =1.21.1 {
+/*import static biggerreactorsrework.core.multiblock.IAssemblyStateBlock.ASSEMBLED;
+
+@MethodsReturnNonnullByDefault
+@ParametersAreNonnullByDefault
+public abstract class HeatExchangerBaseBlock extends ModularBlock implements IRectangularMultiblockBlock, EntityBlock {
+    // Modified 2026-10-27: assembled terminal and hot-channel light.
+
+    public static final Properties PROPERTIES_SOLID = Properties.of().mapColor(net.minecraft.world.level.material.MapColor.TERRACOTTA_BROWN).lightLevel(biggerreactorsrework.multiblocks.MachineLighting::emission).sound(SoundType.METAL).destroyTime(2).explosionResistance(10).isValidSpawn((a, b, c, d) -> false);
+    public static final Properties PROPERTIES_GLASS = Properties.of().mapColor(net.minecraft.world.level.material.MapColor.TERRACOTTA_BROWN).lightLevel(biggerreactorsrework.multiblocks.MachineLighting::emission).sound(SoundType.GLASS).noOcclusion().destroyTime(2).explosionResistance(2).isValidSpawn((a, b, c, d) -> false);
+
+    public HeatExchangerBaseBlock() {
+*/
+//?}
         super(PROPERTIES_SOLID);
     }
-    
+
     public HeatExchangerBaseBlock(Properties properties) {
         super(properties.requiresCorrectToolForDrops());
     }
 
     // Modified 2026-10-25: explain useful placement before the player builds the circuits.
+//? if =26.1.2 || =26.3 {
     @Override
     public void appendTooltip(net.minecraft.world.item.ItemStack stack,java.util.function.Consumer<net.minecraft.network.chat.Component> tooltip) {
         if(this instanceof HeatExchangerCondenserChannelBlock || this instanceof HeatExchangerEvaporatorChannelBlock)
             for(int i=1;i<=3;i++)tooltip.accept(net.minecraft.network.chat.Component.translatable("tooltip.biggerreactorsrework.channel_contact."+i).withStyle(net.minecraft.ChatFormatting.GRAY));
     }
-    
+//?} else if =1.21.1 {
+/*    @Override
+    public void appendHoverText(net.minecraft.world.item.ItemStack stack,net.minecraft.world.item.Item.TooltipContext context,
+                                java.util.List<net.minecraft.network.chat.Component> tooltip,net.minecraft.world.item.TooltipFlag flag) {
+        super.appendHoverText(stack,context,tooltip,flag);
+        if(this instanceof HeatExchangerCondenserChannelBlock || this instanceof HeatExchangerEvaporatorChannelBlock)
+            for(int i=1;i<=3;i++)tooltip.add(net.minecraft.network.chat.Component.translatable("tooltip.biggerreactorsrework.channel_contact."+i).withStyle(net.minecraft.ChatFormatting.GRAY));
+    }
+*/
+//?}
+
     @Override
     public boolean isGoodForInterior() {
         return false;
     }
-    
+
     @Override
     public boolean isGoodForExterior() {
         return true;
     }
-    
+
     @Override
     public boolean isGoodForFrame() {
         return false;
     }
-    
+
     @Override
     public InteractionResult onUse(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult) {
         if (hand == InteractionHand.MAIN_HAND && state.hasProperty(ASSEMBLED) && state.getValue(ASSEMBLED)) {
+//? if =26.1.2 || =26.3 {
             if (level.getBlockEntity(pos) instanceof MenuProvider menuProvider) {
                 if (!level.isClientSide()) {
                     player.openMenu(menuProvider, pos);
+//?} else if =1.21.1 {
+/*            if (level.getBlockEntity(pos) instanceof MenuProvider menuProvider) {
+                if (!level.isClientSide) {
+                    player.openMenu(menuProvider, pos);
+*/
+//?}
                 }
                 return InteractionResult.SUCCESS;
             }

@@ -4,8 +4,15 @@ import biggerreactorsrework.core.event.ReloadDataEvent;
 import biggerreactorsrework.core.multiblock.MultiblockRegistry;
 import biggerreactorsrework.core.threading.Queues;
 import biggerreactorsrework.core.util.Util;
+//? if =26.1.2 || =26.3 {
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.server.MinecraftServer;
+//?} else if =1.21.1 {
+/*import com.mojang.blaze3d.systems.RenderSystem;
+import net.minecraft.MethodsReturnNonnullByDefault;
+import net.minecraft.server.MinecraftServer;
+*/
+//?}
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -20,6 +27,7 @@ import net.neoforged.neoforge.event.tick.ServerTickEvent;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+//? if =26.1.2 || =26.3 {
 import javax.annotation.ParametersAreNonnullByDefault;
 
 /**
@@ -27,6 +35,17 @@ import javax.annotation.ParametersAreNonnullByDefault;
  * main-thread work queues and deferred block state updates.
  */
 @ParametersAreNonnullByDefault
+//?} else if =1.21.1 {
+/*import javax.annotation.ParametersAreNonnullByDefault;
+
+/^*
+ * Game-bus hooks shared by the internal framework: data reload notification, the server tick counter,
+ * main-thread work queues and deferred block state updates.
+ ^/
+@MethodsReturnNonnullByDefault
+@ParametersAreNonnullByDefault
+*/
+//?}
 public final class CoreEvents {
 
     public static final Logger LOGGER = LogManager.getLogger("BiggerReactors-Rework/Core");
@@ -40,9 +59,16 @@ public final class CoreEvents {
     }
 
     public static void init() {
+//? if =26.1.2 || =26.3 {
         NeoForge.EVENT_BUS.register(CoreEvents.class);
         if (FMLLoader.getCurrent().getDist().isClient()) {
             NeoForge.EVENT_BUS.addListener(CoreEvents::onClientTick);
+//?} else if =1.21.1 {
+/*        NeoForge.EVENT_BUS.register(CoreEvents.class);
+        if (FMLLoader.getDist().isClient()) {
+            NeoForge.EVENT_BUS.addListener(CoreEvents::onClientTick);
+*/
+//?}
         }
     }
 
@@ -66,11 +92,20 @@ public final class CoreEvents {
     private static void updateRegistries() {
         if (server == null) {
             return;
+//? if =26.1.2 || =26.3 {
         }
         if (FMLLoader.getCurrent().getDist().isClient()) {
             // ignore client thread
             // prevents double reloads, and reaching across sides
             if (RenderSystem.isOnRenderThread()) {
+//?} else if =1.21.1 {
+/*        }
+        if (FMLLoader.getDist().isClient()) {
+            // ignore client thread
+            // prevents double reloads, and reaching across sides
+            if (RenderSystem.isOnRenderThread()) {
+*/
+//?}
                 return;
             }
         }

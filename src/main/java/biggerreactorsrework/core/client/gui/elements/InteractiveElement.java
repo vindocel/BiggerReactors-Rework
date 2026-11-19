@@ -1,14 +1,31 @@
+//? if =26.1.2 || =26.3 {
 package biggerreactorsrework.core.client.gui.elements;
 
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
+//?} else if =1.21.1 {
+/*package biggerreactorsrework.core.client.gui.elements;
+
+import net.minecraft.client.gui.components.events.GuiEventListener;
+import net.minecraft.client.resources.sounds.SimpleSoundInstance;
+*/
+//?}
 import net.minecraft.core.Holder;
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvent;
+//? if =26.1.2 || =26.3 {
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import biggerreactorsrework.core.client.gui.screens.ModScreen;
+//?} else if =1.21.1 {
+/*import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import biggerreactorsrework.core.client.gui.screens.ModScreen;
+*/
+//?}
 import biggerreactorsrework.core.client.gui.ScreenCallbacks;
 
 import javax.annotation.Nonnull;
+//? if =26.1.2 || =26.3 {
 import javax.annotation.Nullable;
 
 /**
@@ -23,6 +40,24 @@ public class InteractiveElement<T extends AbstractContainerMenu> extends Rendere
      * Used to enable or disable interactions.
      */
     public boolean actionEnable;
+//?} else if =1.21.1 {
+/*import javax.annotation.Nullable;
+
+/^*
+ * An interactive screen element, used for controlling logic. Useful if you have something that needs control, such as a
+ * button or switch.
+ *
+ * @param <T> Elements must be parented to a screen implementing {@link net.minecraft.world.inventory.AbstractContainerMenu AbstractContainerMenu}.
+ ^/
+@OnlyIn(Dist.CLIENT)
+public class InteractiveElement<T extends AbstractContainerMenu> extends RenderedElement<T> implements GuiEventListener {
+
+    /^*
+     * Used to enable or disable interactions.
+     ^/
+    public boolean actionEnable;
+*/
+//?}
 
     /**
      * Callback for mouse movement.
@@ -80,7 +115,7 @@ public class InteractiveElement<T extends AbstractContainerMenu> extends Rendere
         super(parent, x, y, width, height, u, v, tooltip);
         this.actionEnable = true;
     }
-    
+
     /**
      * Play a sound.
      *
@@ -89,7 +124,7 @@ public class InteractiveElement<T extends AbstractContainerMenu> extends Rendere
     public void playSound(Holder.Reference<SoundEvent> sound) {
         playSound(sound.value());
     }
-    
+
     /**
      * Play a sound.
      *

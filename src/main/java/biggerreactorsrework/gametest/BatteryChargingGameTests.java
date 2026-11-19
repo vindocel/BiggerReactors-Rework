@@ -13,16 +13,28 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.*;
 import net.minecraft.world.item.component.CustomData;
 import net.neoforged.neoforge.gametest.*;
+//? if =26.1.2 || =26.3 {
 import net.neoforged.neoforge.capabilities.*;
 import biggerreactorsrework.core.transfer.EnergyStore;
 
 /** Modified 2026-10-27: native item capabilities, real menus and the shared battery budget. Test-only registration. */
 public final class BatteryChargingGameTests {
+//?} else if =1.21.1 {
+/*import net.neoforged.neoforge.capabilities.*;
+import net.neoforged.neoforge.energy.IEnergyStorage;
+
+/^* Modified 2026-10-27: native item capabilities, real menus and the shared battery budget. Test-only registration. ^/
+@GameTestHolder(BiggerReactors.modid)
+@PrefixGameTestTemplate(false)
+public final class BatteryChargingGameTests {
+*/
+//?}
     @OnModLoad
     private static void register() {
         if(Boolean.getBoolean("biggerreactorsrework.testEnergyItems"))
             net.neoforged.fml.ModLoadingContext.get().getActiveContainer().getEventBus().addListener(BatteryChargingGameTests::capabilities);
     }
+//? if =26.1.2 || =26.3 {
     private static void capabilities(RegisterCapabilitiesEvent event) {
         event.registerItem(Capabilities.Energy.ITEM,(stack,access)->new net.neoforged.neoforge.transfer.energy.EnergyHandler() {
             private int stored(){return access.getResource().getOrDefault(DataComponents.CUSTOM_DATA,CustomData.EMPTY).copyTag().getIntOr("testFE",0);}
@@ -35,6 +47,19 @@ public final class BatteryChargingGameTests {
             public int insert(int max,net.neoforged.neoforge.transfer.transaction.TransactionContext transaction){int n=Math.min(max,10000-stored());return n>0&&set(stored()+n,transaction)?n:0;}
             public int extract(int max,net.neoforged.neoforge.transfer.transaction.TransactionContext transaction){int n=Math.min(max,stored());return n>0&&set(stored()-n,transaction)?n:0;}
         },Items.DIAMOND_HELMET,Items.SHIELD);
+//?} else if =1.21.1 {
+/*    private static void capabilities(RegisterCapabilitiesEvent event) {
+        event.registerItem(Capabilities.EnergyStorage.ITEM,(stack,context)->new IEnergyStorage() {
+            public int getEnergyStored(){return stack.getOrDefault(DataComponents.CUSTOM_DATA,CustomData.EMPTY).copyTag().getInt("testFE");}
+            public int getMaxEnergyStored(){return 10000;}
+            public boolean canReceive(){return true;}
+            public boolean canExtract(){return true;}
+            private void set(int value){var tag=stack.getOrDefault(DataComponents.CUSTOM_DATA,CustomData.EMPTY).copyTag();tag.putInt("testFE",value);stack.set(DataComponents.CUSTOM_DATA,CustomData.of(tag));}
+            public int receiveEnergy(int max,boolean simulate){int n=Math.min(max,10000-getEnergyStored());if(!simulate)set(getEnergyStored()+n);return n;}
+            public int extractEnergy(int max,boolean simulate){int n=Math.min(max,getEnergyStored());if(!simulate)set(getEnergyStored()-n);return n;}
+        },Items.DIAMOND_HELMET,Items.SHIELD);
+*/
+//?}
     }
     private static void set(Object target,String name,long value) {
         try {var f=target.getClass().getDeclaredField(name);f.setAccessible(true);f.setLong(target,value);}
@@ -45,11 +70,20 @@ public final class BatteryChargingGameTests {
         for(int x=1;x<=3;x++)for(int y=1;y<=3;y++)for(int z=1;z<=3;z++)
             h.setBlock(x,y,z,x==2&&y==2&&z==2?BatteryCell.INSTANCE:BatteryCasing.INSTANCE);
         h.setBlock(1,2,2,BatteryTerminal.INSTANCE);
+//? if =26.1.2 || =26.3 {
         h.setBlock(2,2,1,BatteryEnergyPort.INSTANCE);h.setBlock(2,2,3,BatteryEnergyPort.INSTANCE);
         h.startSequence().thenWaitUntil(()->h.assertTrue(((BatteryTerminalTile)GameTestSupport.be(h,new BlockPos(1,2,2))).isBatteryAssembled(),"battery not ready"))
           .thenExecute(()->{
             var tile=(BatteryTerminalTile)GameTestSupport.be(h,new BlockPos(1,2,2));var c=tile.controller();
             var player=net.neoforged.neoforge.common.util.FakePlayerFactory.getMinecraft(h.getLevel());
+//?} else if =1.21.1 {
+/*        h.setBlock(2,2,1,BatteryEnergyPort.INSTANCE);h.setBlock(2,2,3,BatteryEnergyPort.INSTANCE);
+        h.startSequence().thenWaitUntil(()->h.assertTrue(((BatteryTerminalTile)h.getBlockEntity(new BlockPos(1,2,2))).isBatteryAssembled(),"battery not ready"))
+          .thenExecute(()->{
+            var tile=(BatteryTerminalTile)h.getBlockEntity(new BlockPos(1,2,2));var c=tile.controller();
+            var player=net.neoforged.neoforge.common.util.FakePlayerFactory.getMinecraft(h.getLevel());
+*/
+//?}
             var pos=h.absolutePos(new BlockPos(2,2,2));player.setPos(pos.getX(),pos.getY(),pos.getZ());
             var helmet=new ItemStack(Items.DIAMOND_HELMET);var shield=new ItemStack(Items.SHIELD);
             player.setItemSlot(EquipmentSlot.HEAD,helmet);player.setItemSlot(EquipmentSlot.OFFHAND,shield);
@@ -96,9 +130,16 @@ public final class BatteryChargingGameTests {
                     "statistics did not include the input from the cell");
             c.tick();
             h.assertTrue(c.stored() == 1500 && BatteryCell.storedEnergy(minus.getItem()) == 0 && minus.getItem().is(BatteryCell.INSTANCE.asItem()),
+//? if =26.1.2 || =26.3 {
                     "cell did not finish discharging or was consumed");
             h.assertTrue(minus.getItem().get(DataComponents.CUSTOM_DATA).copyTag().getStringOr("testMarker", "").equals("keep"),
                     "cell discharge erased unrelated data");
+//?} else if =1.21.1 {
+/*                    "cell did not finish discharging or was consumed");
+            h.assertTrue(minus.getItem().get(DataComponents.CUSTOM_DATA).copyTag().getString("testMarker").equals("keep"),
+                    "cell discharge erased unrelated data");
+*/
+//?}
           }).thenSucceed();
     }
 }

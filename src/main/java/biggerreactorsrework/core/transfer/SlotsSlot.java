@@ -1,3 +1,4 @@
+//? if =26.1.2 || =26.3 {
 package biggerreactorsrework.core.transfer;
 
 import net.minecraft.world.Container;
@@ -67,3 +68,5 @@ public class SlotsSlot extends Slot {
         return other instanceof SlotsSlot slot && slot.slots == slots;
     }
 }
+//?} else if =1.21.1 {
+//?}

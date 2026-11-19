@@ -7,14 +7,28 @@ import biggerreactorsrework.core.multiblock.MultiblockRegistry;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionResult;
+//? if =26.1.2 || =26.3 {
 import net.minecraft.world.InteractionHand;
 
 import net.minecraft.world.entity.player.Player;
+//?} else if =1.21.1 {
+/*import net.minecraft.world.InteractionHand;
+import net.minecraft.world.ItemInteractionResult;
+import net.minecraft.world.entity.player.Player;
+*/
+//?}
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.neoforged.bus.api.EventPriority;
+//? if =26.1.2 || =26.3 {
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
+//?} else if =1.21.1 {
+/*import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.common.util.TriState;
+import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
+*/
+//?}
 
 import java.lang.reflect.Method;
 
@@ -54,6 +68,7 @@ public final class CarryOnCompat {
         } catch (ReflectiveOperationException e) {
             if (!warned) { BiggerReactors.LOGGER.warn("Could not read Carry On state; using the default pickup gesture", e); warned = true; }
             if (!player.isShiftKeyDown()) return;
+//? if =26.1.2 || =26.3 {
         }
         // Consume the event before pickup, but execute the block's normal interaction once so menus still open.
         InteractionResult result = InteractionResult.PASS;
@@ -63,6 +78,18 @@ public final class CarryOnCompat {
             result = itemResult == InteractionResult.TRY_WITH_EMPTY_HAND && event.getHand() == InteractionHand.MAIN_HAND
                     ? state.useWithoutItem(event.getLevel(), player, event.getHitVec()) : itemResult;
         }
+//?} else if =1.21.1 {
+/*        }
+        // Consume the event before pickup, but execute the block's normal interaction once so menus still open.
+        var result = InteractionResult.PASS;
+        if (event.getUseBlock() != TriState.FALSE) {
+            var state = event.getLevel().getBlockState(event.getPos());
+            var itemResult = state.useItemOn(ItemStack.EMPTY, event.getLevel(), player, event.getHand(), event.getHitVec());
+            result = itemResult == ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION && event.getHand() == InteractionHand.MAIN_HAND
+                    ? state.useWithoutItem(event.getLevel(), player, event.getHitVec()) : itemResult.result();
+        }
+*/
+//?}
         event.setCancellationResult(result.consumesAction() ? result : InteractionResult.SUCCESS);
         event.setCanceled(true);
     }

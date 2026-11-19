@@ -2,12 +2,24 @@ package biggerreactorsrework.multiblocks.turbine.client;
 
 import biggerreactorsrework.client.GuiTheme;
 
+//? if =26.1.2 || =26.3 {
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Inventory;
 import biggerreactorsrework.BiggerReactors;
+//?} else if =1.21.1 {
+/*import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.player.Inventory;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import biggerreactorsrework.BiggerReactors;
+*/
+//?}
 import biggerreactorsrework.client.Biselector;
 import biggerreactorsrework.client.SelectorColors;
 import biggerreactorsrework.multiblocks.turbine.containers.TurbineFluidPortContainer;
@@ -15,9 +27,17 @@ import biggerreactorsrework.multiblocks.turbine.state.TurbineFluidPortState;
 import biggerreactorsrework.core.client.gui.screens.ModScreen;
 import biggerreactorsrework.client.GuiFrame;
 
+//? if =26.1.2 || =26.3 {
 import javax.annotation.Nonnull;
 
 public class TurbineFluidPortScreen extends ModScreen<TurbineFluidPortContainer> {
+//?} else if =1.21.1 {
+/*import javax.annotation.Nonnull;
+
+@OnlyIn(Dist.CLIENT)
+public class TurbineFluidPortScreen extends ModScreen<TurbineFluidPortContainer> {
+*/
+//?}
 
 
     private TurbineFluidPortState turbineFluidPortState;
@@ -72,6 +92,7 @@ public class TurbineFluidPortScreen extends ModScreen<TurbineFluidPortContainer>
      * @param mouseY       The y position of the mouse.
      * @param partialTicks Partial ticks.
      */
+//? if =26.1.2 || =26.3 {
     @Override
     public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTicks) {
         super.extractRenderState(graphics, mouseX, mouseY, partialTicks);
@@ -85,6 +106,22 @@ public class TurbineFluidPortScreen extends ModScreen<TurbineFluidPortContainer>
             // Text for an outlet:
             graphics.text(this.getFont(), Component.translatable("screen.biggerreactorsrework.turbine_fluid_port.direction_toggle.output").getString(), this.getLeftPos() + 42, this.getTopPos() + 22, GuiTheme.textColor(), false);
         }
+//?} else if =1.21.1 {
+/*    @Override
+    public void render(@Nonnull GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
+        super.render(graphics, mouseX, mouseY, partialTicks);
+
+        // Render text for input/output direction:
+        if (turbineFluidPortState.direction) {
+            // Text for an inlet:
+            graphics.drawString(this.getFont(), Component.translatable("screen.biggerreactorsrework.turbine_fluid_port.direction_toggle.input").getString(), this.getGuiLeft() + 42, this.getGuiTop() + 22, GuiTheme.textColor(), false);
+
+        } else {
+            // Text for an outlet:
+            graphics.drawString(this.getFont(), Component.translatable("screen.biggerreactorsrework.turbine_fluid_port.direction_toggle.output").getString(), this.getGuiLeft() + 42, this.getGuiTop() + 22, GuiTheme.textColor(), false);
+        }
+*/
+//?}
     }
 
     @Override

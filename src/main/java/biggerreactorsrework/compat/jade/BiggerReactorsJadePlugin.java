@@ -10,10 +10,18 @@ import biggerreactorsrework.multiblocks.reactor.blocks.ReactorPowerTap;
 import biggerreactorsrework.multiblocks.reactor.tiles.ReactorPowerTapTile;
 import biggerreactorsrework.multiblocks.turbine.blocks.TurbinePowerTap;
 import biggerreactorsrework.multiblocks.turbine.tiles.TurbinePowerTapTile;
+//? if =26.1.2 || =26.3 {
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.Identifier;
 import biggerreactorsrework.core.transfer.EnergyStore;
 import snownee.jade.api.BlockAccessor;
+//?} else if =1.21.1 {
+/*import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceLocation;
+import net.neoforged.neoforge.energy.IEnergyStorage;
+import snownee.jade.api.BlockAccessor;
+*/
+//?}
 import snownee.jade.api.IServerDataProvider;
 import snownee.jade.api.IWailaClientRegistration;
 import snownee.jade.api.IWailaCommonRegistration;
@@ -26,9 +34,16 @@ import snownee.jade.api.view.HideThingsExtensionProvider;
  * Industrial Processor, the reactor and turbine power taps and every block of an assembled battery.
  */
 @WailaPlugin
+//? if =26.1.2 || =26.3 {
 public class BiggerReactorsJadePlugin implements IWailaPlugin {
     static final Identifier UID = Identifier.fromNamespaceAndPath(BiggerReactors.modid, "energy_bar");
     static final String ENERGY = "energy";
+//?} else if =1.21.1 {
+/*public class BiggerReactorsJadePlugin implements IWailaPlugin {
+    static final ResourceLocation UID = ResourceLocation.fromNamespaceAndPath(BiggerReactors.modid, "energy_bar");
+    static final String ENERGY = "energy";
+*/
+//?}
     static final String CAPACITY = "capacity";
 
     @Override
@@ -57,9 +72,16 @@ public class BiggerReactorsJadePlugin implements IWailaPlugin {
 
         @Override
         public void appendServerData(CompoundTag data, BlockAccessor accessor) {
+//? if =26.1.2 || =26.3 {
             if (accessor.getBlockEntity() instanceof IndustrialProcessorTile tile) {
                 EnergyStore storage = tile.energyBuffer();
                 data.putLong(ENERGY, storage.getEnergyStored());
+//?} else if =1.21.1 {
+/*            if (accessor.getBlockEntity() instanceof IndustrialProcessorTile tile) {
+                IEnergyStorage storage = tile.energyBuffer();
+                data.putLong(ENERGY, storage.getEnergyStored());
+*/
+//?}
                 data.putLong(CAPACITY, storage.getMaxEnergyStored());
             } else if (accessor.getBlockEntity() instanceof BatteryBaseTile tile) {
                 // Any block of a battery shows the whole battery's charge, but only while it is assembled.
@@ -74,9 +96,16 @@ public class BiggerReactorsJadePlugin implements IWailaPlugin {
             }
         }
 
+//? if =26.1.2 || =26.3 {
         @Override
         public Identifier getUid() {
             return UID;
+//?} else if =1.21.1 {
+/*        @Override
+        public ResourceLocation getUid() {
+            return UID;
+*/
+//?}
         }
     }
 }

@@ -1,0 +1,8 @@
+{
+  "type": "minecraft:smelting",
+  "ingredient": "biggerreactorsrework:graphite_dust",
+  "result": {
+    "id": "biggerreactorsrework:graphite_ingot"
+  },
+  "cookingtime": 200
+}

@@ -1,3 +1,4 @@
+//? if =26.1.2 || =26.3 {
 package biggerreactorsrework.core.transfer;
 
 import net.minecraft.core.HolderLookup;
@@ -152,3 +153,5 @@ public class SlotStorage implements ItemSlots.Modifiable {
         }
     }
 }
+//?} else if =1.21.1 {
+//?}

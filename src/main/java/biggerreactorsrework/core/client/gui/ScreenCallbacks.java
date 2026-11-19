@@ -1,5 +1,6 @@
 package biggerreactorsrework.core.client.gui;
 
+//? if =26.1.2 || =26.3 {
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 
@@ -9,13 +10,35 @@ import javax.annotation.Nonnull;
  * Screen callbacks used for hooking functions to screens.
  */
 public interface ScreenCallbacks {
+//?} else if =1.21.1 {
+/*import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.gui.GuiGraphics;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+
+import javax.annotation.Nonnull;
+
+/^*
+ * Screen callbacks used for hooking functions to screens.
+ ^/
+@OnlyIn(Dist.CLIENT)
+public interface ScreenCallbacks {
+*/
+//?}
 
     /**
      * Callback for custom rendering.
      */
+//? if =26.1.2 || =26.3 {
     interface OnRender {
         void trigger(@Nonnull GuiGraphicsExtractor graphics, int mouseX, int mouseY);
     }
+//?} else if =1.21.1 {
+/*    interface OnRender {
+        void trigger(@Nonnull GuiGraphics graphics, int mouseX, int mouseY);
+    }
+*/
+//?}
 
     /**
      * Callback for ticks/updates.
